@@ -13,6 +13,7 @@
         "axios": "^0.17",
         "cross-env": "^5.1",
         "laravel-mix": "^1.0",
+        "tailwindcss": "^0.4.1",
         "turbolinks": "^5.0.3",
         "vue": "^2.5.7",
         "vue-turbolinks": "^2.0.0"
