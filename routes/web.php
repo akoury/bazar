@@ -15,6 +15,8 @@ Route::get('/', function () {
     return view('home');
 })->name('home');
 
-Route::get('/about', function () {
+Route::get('about', function () {
     return view('about');
 })->name('about');
+
+Route::get('products/{product}', 'ProductsController@show')->name('products.show');
