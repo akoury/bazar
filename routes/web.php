@@ -19,4 +19,4 @@ Route::get('about', function () {
     return view('about');
 })->name('about');
 
-Route::get('products/{product}', 'ProductsController@show')->name('products.show');
+Route::get('products/{id}', 'ProductsController@show')->name('products.show');
