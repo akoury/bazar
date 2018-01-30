@@ -8,6 +8,25 @@ class Order extends Model
 {
     protected $guarded = [];
 
+    public static function forItems($email, $items, $amount)
+    {
+        $order = self::create([
+            'email'  => $email,
+            'amount' => $amount
+        ]);
+
+        foreach ($items as $item) {
+            $order->items()->save($item);
+        }
+
+        return $order;
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
     public function items()
     {
         return $this->hasMany(Item::class);
@@ -25,5 +44,14 @@ class Order extends Model
     public function itemQuantity()
     {
         return $this->items()->count();
+    }
+
+    public function toArray()
+    {
+        return [
+            'email'    => $this->email,
+            'quantity' => $this->itemQuantity(),
+            'amount'   => $this->amount,
+        ];
     }
 }

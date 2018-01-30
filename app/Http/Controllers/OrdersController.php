@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
+use App\Classes\Reservation;
 use App\Classes\PaymentGateway;
 use App\Exceptions\PaymentFailedException;
 use App\Exceptions\NotEnoughItemsException;
@@ -27,11 +29,15 @@ class OrdersController extends Controller
         ]);
 
         try {
-            $order = $product->orderItems(request('email'), request('quantity'));
-            $this->paymentGateway->charge(request('quantity') * $product->price, request('payment_token'));
-            return response()->json([], 201);
+            $items = $product->findItems(request('quantity'));
+            $reservation = new Reservation($items);
+
+            $this->paymentGateway->charge($reservation->totalCost(), request('payment_token'));
+
+            $order = Order::forItems(request('email'), $items, $reservation->totalCost());
+
+            return response()->json($order, 201);
         } catch (PaymentFailedException $e) {
-            $order->cancel();
             return response()->json([], 422);
         } catch (NotEnoughItemsException $e) {
             return response()->json([], 422);

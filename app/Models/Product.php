@@ -16,7 +16,7 @@ class Product extends Model
 
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsToMany(Order::class, 'items');
     }
 
     public function items()
@@ -26,19 +26,25 @@ class Product extends Model
 
     public function orderItems($email, $quantity)
     {
+        $items = $this->findItems($quantity);
+
+        return $this->createOrder($email, $items);
+    }
+
+    public function findItems($quantity)
+    {
         $items = $this->items()->available()->take($quantity)->get();
 
         if ($items->count() < $quantity) {
             throw new NotEnoughItemsException;
         }
 
-        $order = $this->orders()->create(['email' => $email]);
+        return $items;
+    }
 
-        foreach ($items as $item) {
-            $order->items()->save($item);
-        }
-
-        return $order;
+    public function createOrder($email, $items)
+    {
+        return Order::forItems($email, $items, $items->sum('price'));
     }
 
     public function addItems($quantity)

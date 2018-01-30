@@ -25,8 +25,9 @@ class PurchaseItemsTest extends TestCase
     }
 
     /** @test */
-    public function a_customer_can_purchase_items_from_a_published_product()
+    public function a_customer_can_purchase_items_of_a_published_product()
     {
+        $this->withoutExceptionHandling();
         $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
 
         $response = $this->orderItems($product, [
@@ -35,7 +36,12 @@ class PurchaseItemsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $response->assertStatus(201);
+        $response->assertStatus(201)
+            ->assertJson([
+                'email'    => 'customer@example.com',
+                'quantity' => 3,
+                'amount'   => 9750
+            ]);
 
         $this->assertEquals(9750, $this->paymentGateway->totalCharges());
 
