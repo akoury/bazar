@@ -20,3 +20,5 @@ Route::get('about', function () {
 })->name('about');
 
 Route::get('products/{id}', 'ProductsController@show')->name('products.show');
+
+Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
