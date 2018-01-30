@@ -15,4 +15,9 @@ class Reservation
     {
         return $this->items->sum('price');
     }
+
+    public function cancel()
+    {
+        $this->items->each->release();
+    }
 }

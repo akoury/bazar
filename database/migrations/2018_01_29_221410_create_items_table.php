@@ -17,6 +17,7 @@ class CreateItemsTable extends Migration
             $table->increments('id');
             $table->unsignedInteger('product_id');
             $table->unsignedInteger('order_id')->nullable();
+            $table->datetime('reserved_at')->nullable();
             $table->timestamps();
         });
     }

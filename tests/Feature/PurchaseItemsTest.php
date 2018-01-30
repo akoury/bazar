@@ -21,7 +21,10 @@ class PurchaseItemsTest extends TestCase
 
     private function orderItems($product, $params)
     {
-        return $this->json('POST', "products/{$product->id}/orders", $params);
+        $savedRequest = $this->app['request'];
+        $response = $this->json('POST', "products/{$product->id}/orders", $params);
+        $this->app['request'] = $savedRequest;
+        return $response;
     }
 
     /** @test */
@@ -80,6 +83,7 @@ class PurchaseItemsTest extends TestCase
         $response->assertStatus(422);
         $order = $product->orders()->where('email', 'customer@example.com')->first();
         $this->assertNull($order);
+        $this->assertEquals(3, $product->itemsRemaining());
     }
 
     /** @test */
@@ -98,6 +102,36 @@ class PurchaseItemsTest extends TestCase
         $this->assertNull($order);
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
         $this->assertEquals(20, $product->itemsRemaining());
+    }
+
+    /** @test */
+    public function a_customer_cannot_purchase_items_another_customer_is_already_purchasing()
+    {
+        $product = factory(Product::class)->create(['price' => 1200])->addItems(3);
+
+        $this->paymentGateway->beforeFirstCharge(function ($paymentGateway) use ($product) {
+            $response = $this->orderItems($product, [
+                'email'         => 'personB@example.com',
+                'quantity'      => 1,
+                'payment_token' => $this->paymentGateway->getValidTestToken(),
+            ]);
+
+            $response->assertStatus(422);
+            $order = $product->orders()->where('email', 'personB@example.com')->first();
+            $this->assertNull($order);
+            $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        });
+
+        $response = $this->orderItems($product, [
+            'email'         => 'personA@example.com',
+            'quantity'      => 3,
+            'payment_token' => $this->paymentGateway->getValidTestToken(),
+        ]);
+
+        $this->assertEquals(3600, $this->paymentGateway->totalCharges());
+        $order = $product->orders()->where('email', 'personA@example.com')->first();
+        $this->assertNotNull($order);
+        $this->assertEquals(3, $order->itemQuantity());
     }
 
     private function assertValidationError($response, $field)

@@ -31,6 +31,11 @@ class Product extends Model
         return $this->createOrder($email, $items);
     }
 
+    public function reserveItems($quantity)
+    {
+        return $this->findItems($quantity)->each->reserve();
+    }
+
     public function findItems($quantity)
     {
         $items = $this->items()->available()->take($quantity)->get();

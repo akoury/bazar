@@ -83,4 +83,48 @@ class ProductTest extends TestCase
 
         $this->fail('Order succeeded even though there were not enough items remaining.');
     }
+
+    /** @test */
+    public function a_customer_can_reserve_available_items()
+    {
+        $product = factory(Product::class)->create()->addItems(3);
+        $this->assertEquals(3, $product->itemsRemaining());
+
+        $reservedItems = $product->reserveItems(2);
+
+        $this->assertCount(2, $reservedItems);
+        $this->assertEquals(1, $product->itemsRemaining());
+    }
+
+    /** @test */
+    public function a_customer_cannot_reserve_items_that_have_already_been_purchased()
+    {
+        $product = factory(Product::class)->create()->addItems(3);
+        $product->orderItems('customer@example.com', 2);
+
+        try {
+            $product->reserveItems(2);
+        } catch (NotEnoughItemsException $e) {
+            $this->assertEquals(1, $product->itemsRemaining());
+            return;
+        }
+
+        $this->fail('Reserving items succeeded even though the items were already sold');
+    }
+
+    /** @test */
+    public function a_customer_cannot_reserve_items_that_have_already_been_reserved()
+    {
+        $product = factory(Product::class)->create()->addItems(3);
+        $product->reserveItems(2);
+
+        try {
+            $product->reserveItems(2);
+        } catch (NotEnoughItemsException $e) {
+            $this->assertEquals(1, $product->itemsRemaining());
+            return;
+        }
+
+        $this->fail('Reserving items succeeded even though the items were already reserved');
+    }
 }

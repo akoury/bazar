@@ -29,7 +29,7 @@ class OrdersController extends Controller
         ]);
 
         try {
-            $items = $product->findItems(request('quantity'));
+            $items = $product->reserveItems(request('quantity'));
             $reservation = new Reservation($items);
 
             $this->paymentGateway->charge($reservation->totalCost(), request('payment_token'));
@@ -38,6 +38,7 @@ class OrdersController extends Controller
 
             return response()->json($order, 201);
         } catch (PaymentFailedException $e) {
+            $reservation->cancel();
             return response()->json([], 422);
         } catch (NotEnoughItemsException $e) {
             return response()->json([], 422);

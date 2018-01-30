@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use App\Models\Product;
+use App\Models\Item;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ItemTest extends TestCase
@@ -11,15 +11,24 @@ class ItemTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
+    public function an_item_can_be_reserved()
+    {
+        $item = factory(Item::class)->create();
+        $this->assertNull($item->fresh()->reserved_at);
+
+        $item->reserve();
+
+        $this->assertNotNull($item->fresh()->reserved_at);
+    }
+
+    /** @test */
     public function an_item_can_be_released()
     {
-        $product = factory(Product::class)->create()->addItems(1);
-        $order = $product->orderItems('customer@example.com', 1);
-        $item = $order->items()->first();
-        $this->assertEquals($order->id, $item->order_id);
+        $item = factory(Item::class)->states('reserved')->create();
+        $this->assertNotNull($item->reserved_at);
 
         $item->release();
 
-        $this->assertNull($item->fresh()->order_id);
+        $this->assertNull($item->fresh()->reserved_at);
     }
 }
