@@ -3,7 +3,7 @@
 namespace Tests\Fakes;
 
 use App\Classes\PaymentGateway;
-use App\Classes\PaymentFailedException;
+use App\Exceptions\PaymentFailedException;
 
 class FakePaymentGateway implements PaymentGateway
 {

@@ -12,4 +12,18 @@ class Order extends Model
     {
         return $this->hasMany(Item::class);
     }
+
+    public function cancel()
+    {
+        foreach ($this->items as $item) {
+            $item->release();
+        }
+
+        $this->delete();
+    }
+
+    public function itemQuantity()
+    {
+        return $this->items()->count();
+    }
 }

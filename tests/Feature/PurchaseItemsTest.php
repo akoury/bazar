@@ -8,7 +8,7 @@ use App\Classes\PaymentGateway;
 use Tests\Fakes\FakePaymentGateway;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class PurchaseProductsTest extends TestCase
+class PurchaseItemsTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -19,17 +19,17 @@ class PurchaseProductsTest extends TestCase
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
     }
 
-    private function orderProducts($product, $params)
+    private function orderItems($product, $params)
     {
         return $this->json('POST', "products/{$product->id}/orders", $params);
     }
 
     /** @test */
-    public function a_customer_can_purchase_a_published_product()
+    public function a_customer_can_purchase_items_from_a_published_product()
     {
-        $product = factory(Product::class)->create(['price' => 3250]);
+        $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
             'quantity'      => 3,
             'payment_token' => $this->paymentGateway->getValidTestToken()
@@ -41,15 +41,31 @@ class PurchaseProductsTest extends TestCase
 
         $order = $product->orders()->where('email', 'customer@example.com')->first();
         $this->assertNotNull($order);
-        $this->assertEquals(3, $order->items->count());
+        $this->assertEquals(3, $order->itemQuantity());
+    }
+
+    /** @test */
+    public function a_customer_cannot_purchase_items_from_an_unpublished_product()
+    {
+        $product = factory(Product::class)->states('unpublished')->create()->addItems(3);
+
+        $response = $this->orderItems($product, [
+            'email'         => 'customer@example.com',
+            'quantity'      => 3,
+            'payment_token' => $this->paymentGateway->getValidTestToken()
+        ]);
+
+        $response->assertStatus(404);
+        $this->assertEquals(0, $product->orders->count());
+        $this->assertEquals(0, $this->paymentGateway->totalCharges());
     }
 
     /** @test */
     public function an_order_is_not_created_if_payment_fails(Type $var = null)
     {
-        $product = factory(Product::class)->create(['price' => 3250]);
+        $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
             'quantity'      => 3,
             'payment_token' => 'invalid-payment-token',
@@ -61,19 +77,21 @@ class PurchaseProductsTest extends TestCase
     }
 
     /** @test */
-    public function a_customer_cannot_purchase_an_unpublished_product()
+    public function a_customer_cannot_purchase_more_items_than_remain()
     {
-        $product = factory(Product::class)->states('unpublished')->create();
+        $product = factory(Product::class)->create()->addItems(20);
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
-            'quantity'      => 3,
-            'payment_token' => $this->paymentGateway->getValidTestToken()
+            'quantity'      => 21,
+            'payment_token' => $this->paymentGateway->getValidTestToken(),
         ]);
 
-        $response->assertStatus(404);
-        $this->assertEquals(0, $product->orders->count());
+        $response->assertStatus(422);
+        $order = $product->orders()->where('email', 'customer@example.com')->first();
+        $this->assertNull($order);
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        $this->assertEquals(20, $product->itemsRemaining());
     }
 
     private function assertValidationError($response, $field)
@@ -83,11 +101,11 @@ class PurchaseProductsTest extends TestCase
     }
 
     /** @test */
-    public function email_is_required_to_purchase_products()
+    public function email_is_required_to_purchase_items()
     {
         $product = factory(Product::class)->create();
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'quantity'      => 3,
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -96,11 +114,11 @@ class PurchaseProductsTest extends TestCase
     }
 
     /** @test */
-    public function email_must_be_valid_to_purchase_tickets()
+    public function email_must_be_valid_to_purchase_items()
     {
         $product = factory(Product::class)->create();
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'not-an-email',
             'quantity'      => 3,
             'payment_token' => $this->paymentGateway->getValidTestToken()
@@ -110,11 +128,11 @@ class PurchaseProductsTest extends TestCase
     }
 
     /** @test */
-    public function product_quantity_is_required_to_purchase_products()
+    public function item_quantity_is_required_to_purchase_items()
     {
         $product = factory(Product::class)->create();
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken(),
         ]);
@@ -123,11 +141,11 @@ class PurchaseProductsTest extends TestCase
     }
 
     /** @test */
-    public function product_quantity_must_be_at_least_1_to_purchase_products()
+    public function item_quantity_must_be_at_least_1_to_purchase_items()
     {
         $product = factory(Product::class)->create();
 
-        $response = $this->orderProducts($product, [
+        $response = $this->orderItems($product, [
             'email'         => 'john@example.com',
             'quantity'      => 0,
             'payment_token' => $this->paymentGateway->getValidTestToken(),
@@ -141,9 +159,9 @@ class PurchaseProductsTest extends TestCase
     {
         $product = factory(Product::class)->create();
 
-        $response = $this->orderProducts($product, [
-            'email'           => 'john@example.com',
-            'ticket_quantity' => 3,
+        $response = $this->orderItems($product, [
+            'email'    => 'john@example.com',
+            'quantity' => 3,
         ]);
         $this->assertValidationError($response, 'payment_token');
     }

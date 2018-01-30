@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use Tests\TestCase;
 use Tests\Fakes\FakePaymentGateway;
-use App\Classes\PaymentFailedException;
+use App\Exceptions\PaymentFailedException;
 
 class FakePaymentGatewayTest extends Testcase
 {
