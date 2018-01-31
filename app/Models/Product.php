@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Classes\Reservation;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
 
@@ -31,9 +32,9 @@ class Product extends Model
         return $this->createOrder($email, $items);
     }
 
-    public function reserveItems($quantity)
+    public function reserveItems($quantity, $email)
     {
-        return $this->findItems($quantity)->each->reserve();
+        return new Reservation($this->findItems($quantity)->each->reserve(), $email);
     }
 
     public function findItems($quantity)

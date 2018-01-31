@@ -15,9 +15,7 @@ class Order extends Model
             'amount' => $amount
         ]);
 
-        foreach ($items as $item) {
-            $order->items()->save($item);
-        }
+        $order->items()->saveMany($items);
 
         return $order;
     }

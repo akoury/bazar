@@ -70,13 +70,13 @@ class ProductTest extends TestCase
     public function cannot_order_items_that_have_already_been_purchased()
     {
         $product = factory(Product::class)->create()->addItems(10);
-        $product->orderItems('customer@example.com', 8);
+        $product->orderItems('personA@example.com', 8);
 
         try {
-            $product->orderItems('client@example.com', 3);
+            $product->orderItems('personB@example.com', 3);
         } catch (NotEnoughItemsException $e) {
-            $clientsOrder = $product->orders()->where('email', 'client@example.com')->first();
-            $this->assertNull($clientsOrder);
+            $personBsOrder = $product->orders()->where('email', 'personB@example.com')->first();
+            $this->assertNull($personBsOrder);
             $this->assertEquals(2, $product->itemsRemaining());
             return;
         }
@@ -90,9 +90,10 @@ class ProductTest extends TestCase
         $product = factory(Product::class)->create()->addItems(3);
         $this->assertEquals(3, $product->itemsRemaining());
 
-        $reservedItems = $product->reserveItems(2);
+        $reservation = $product->reserveItems(2, 'customer@example.com');
 
-        $this->assertCount(2, $reservedItems);
+        $this->assertCount(2, $reservation->items());
+        $this->assertEquals('customer@example.com', $reservation->email());
         $this->assertEquals(1, $product->itemsRemaining());
     }
 
@@ -100,10 +101,10 @@ class ProductTest extends TestCase
     public function a_customer_cannot_reserve_items_that_have_already_been_purchased()
     {
         $product = factory(Product::class)->create()->addItems(3);
-        $product->orderItems('customer@example.com', 2);
+        $product->orderItems('personA@example.com', 2);
 
         try {
-            $product->reserveItems(2);
+            $product->reserveItems(2, 'personB@example.com');
         } catch (NotEnoughItemsException $e) {
             $this->assertEquals(1, $product->itemsRemaining());
             return;
@@ -116,10 +117,10 @@ class ProductTest extends TestCase
     public function a_customer_cannot_reserve_items_that_have_already_been_reserved()
     {
         $product = factory(Product::class)->create()->addItems(3);
-        $product->reserveItems(2);
+        $product->reserveItems(2, 'personA@example.com');
 
         try {
-            $product->reserveItems(2);
+            $product->reserveItems(2, 'personB@example.com');
         } catch (NotEnoughItemsException $e) {
             $this->assertEquals(1, $product->itemsRemaining());
             return;

@@ -30,7 +30,6 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_can_purchase_items_of_a_published_product()
     {
-        $this->withoutExceptionHandling();
         $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
 
         $response = $this->orderItems($product, [
