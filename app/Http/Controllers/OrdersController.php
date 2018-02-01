@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
 use App\Classes\PaymentGateway;
 use App\Exceptions\PaymentFailedException;
@@ -36,5 +37,12 @@ class OrdersController extends Controller
         } catch (NotEnoughItemsException $e) {
             return response()->json([], 422);
         }
+    }
+
+    public function show($confirmationNumber)
+    {
+        $order = Order::findByConfirmationNumber($confirmationNumber);
+
+        return view('orders.show', compact('order'));
     }
 }

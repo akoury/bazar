@@ -22,3 +22,5 @@ Route::get('about', function () {
 Route::get('products/{id}', 'ProductsController@show')->name('products.show');
 
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
+
+Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');

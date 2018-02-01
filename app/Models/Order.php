@@ -20,6 +20,11 @@ class Order extends Model
         return $order;
     }
 
+    public static function findByConfirmationNumber($confirmationNumber)
+    {
+        return self::where('confirmation_number', $confirmationNumber)->firstOrFail();
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);

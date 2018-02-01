@@ -26,6 +26,18 @@ class OrderTest extends TestCase
     }
 
     /** @test */
+    public function retrieving_an_order_by_confirmation_number()
+    {
+        $order = factory(Order::class)->create([
+            'confirmation_number' => '123456789'
+        ]);
+
+        $foundOrder = Order::findByConfirmationNumber($order->confirmation_number);
+
+        $this->assertEquals($order->fresh(), $foundOrder);
+    }
+
+    /** @test */
     public function convert_order_to_an_array()
     {
         $product = factory(Product::class)->create(['price' => 1200])->addItems(5);
