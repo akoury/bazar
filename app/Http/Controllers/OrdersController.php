@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\Product;
 use App\Classes\PaymentGateway;
+use App\Notifications\OrderConfirmation;
 use App\Exceptions\PaymentFailedException;
 use App\Exceptions\NotEnoughItemsException;
+use Illuminate\Support\Facades\Notification;
 
 class OrdersController extends Controller
 {
@@ -30,6 +32,9 @@ class OrdersController extends Controller
         try {
             $reservation = $product->reserveItems(request('quantity'), request('email'));
             $order = $reservation->complete($this->paymentGateway, request('payment_token'));
+
+            Notification::route('mail', $order->email)->notify(new OrderConfirmation($order));
+
             return response()->json($order, 201);
         } catch (PaymentFailedException $e) {
             $reservation->cancel();

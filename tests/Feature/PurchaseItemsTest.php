@@ -7,6 +7,9 @@ use App\Models\Order;
 use App\Models\Product;
 use App\Classes\PaymentGateway;
 use Tests\Fakes\FakePaymentGateway;
+use App\Notifications\OrderConfirmation;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class PurchaseItemsTest extends TestCase
@@ -18,6 +21,7 @@ class PurchaseItemsTest extends TestCase
         parent::setUp();
         $this->paymentGateway = new FakePaymentGateway;
         $this->app->instance(PaymentGateway::class, $this->paymentGateway);
+        Notification::fake();
     }
 
     private function orderItems($product, $params)
@@ -54,6 +58,11 @@ class PurchaseItemsTest extends TestCase
         $order = $product->orders()->where('email', 'customer@example.com')->first();
         $this->assertNotNull($order);
         $this->assertEquals(3, $order->itemQuantity());
+
+        Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
+            return $notifiable->routes['mail'] == 'customer@example.com'
+                && $notification->order->id == $order->id;
+        });
     }
 
     /** @test */
