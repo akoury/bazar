@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
+use App\Models\Item;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,15 +41,54 @@ class OrderTest extends TestCase
     /** @test */
     public function convert_order_to_an_array()
     {
-        $product = factory(Product::class)->create(['price' => 1200])->addItems(5);
-        $order = $product->orderItems('customer@example.com', 5);
+        $order = factory(Order::class)->create([
+            'confirmation_number' => 'CONFIRMATIONNUMBER123',
+            'email'               => 'customer@example.com',
+            'amount'              => 6000
+        ]);
+        $order->items()->saveMany(factory(Item::class, 5)->create());
 
         $result = $order->toArray();
 
         $this->assertEquals([
-            'email'    => $order->email,
-            'quantity' => $order->itemQuantity(),
-            'amount'   => 6000
+            'confirmation_number' => 'CONFIRMATIONNUMBER123',
+            'email'               => 'customer@example.com',
+            'quantity'            => 5,
+            'amount'              => 6000
         ], $result);
+    }
+
+    /** @test */
+    public function must_be_24_characters_long()
+    {
+        $confirmationNumber = Order::generateConfirmationNumber();
+        $this->assertEquals(24, strlen($confirmationNumber));
+    }
+
+    /** @test */
+    public function can_only_contain_uppercase_letters_and_numbers()
+    {
+        $confirmationNumber = Order::generateConfirmationNumber();
+        $this->assertRegExp('/^[A-Z0-9]+$/', $confirmationNumber);
+    }
+
+    /** @test */
+    public function cannot_contain_ambiguous_characters()
+    {
+        $confirmationNumber = Order::generateConfirmationNumber();
+        $this->assertFalse(strpos($confirmationNumber, '1'));
+        $this->assertFalse(strpos($confirmationNumber, 'I'));
+        $this->assertFalse(strpos($confirmationNumber, '0'));
+        $this->assertFalse(strpos($confirmationNumber, 'O'));
+    }
+
+    /** @test */
+    public function confirmation_numbers_must_be_unique()
+    {
+        $confirmationNumbers = array_map(function () {
+            return Order::generateConfirmationNumber();
+        }, range(1, 100));
+
+        $this->assertCount(100, array_unique($confirmationNumbers));
     }
 }

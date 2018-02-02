@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
+use App\Models\Order;
 use App\Models\Product;
 use App\Classes\PaymentGateway;
 use Tests\Fakes\FakePaymentGateway;
@@ -38,11 +39,14 @@ class PurchaseItemsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
+        $order = Order::first();
+
         $response->assertStatus(201)
             ->assertJson([
-                'email'    => 'customer@example.com',
-                'quantity' => 3,
-                'amount'   => 9750
+                'confirmation_number' => $order->confirmation_number,
+                'email'               => 'customer@example.com',
+                'quantity'            => 3,
+                'amount'              => 9750
             ]);
 
         $this->assertEquals(9750, $this->paymentGateway->totalCharges());
@@ -69,7 +73,7 @@ class PurchaseItemsTest extends TestCase
     }
 
     /** @test */
-    public function an_order_is_not_created_if_payment_fails(Type $var = null)
+    public function an_order_is_not_created_if_payment_fails()
     {
         $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
 

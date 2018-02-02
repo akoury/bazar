@@ -11,13 +11,20 @@ class Order extends Model
     public static function forItems($email, $items, $amount)
     {
         $order = self::create([
-            'email'  => $email,
-            'amount' => $amount
+            'confirmation_number' => static::generateConfirmationNumber(),
+            'email'               => $email,
+            'amount'              => $amount
         ]);
 
         $order->items()->saveMany($items);
 
         return $order;
+    }
+
+    public static function generateConfirmationNumber()
+    {
+        $pool = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        return substr(str_shuffle(str_repeat($pool, 24)), 0, 24);
     }
 
     public static function findByConfirmationNumber($confirmationNumber)
@@ -43,9 +50,10 @@ class Order extends Model
     public function toArray()
     {
         return [
-            'email'    => $this->email,
-            'quantity' => $this->itemQuantity(),
-            'amount'   => $this->amount,
+            'confirmation_number' => $this->confirmation_number,
+            'email'               => $this->email,
+            'quantity'            => $this->itemQuantity(),
+            'amount'              => $this->amount,
         ];
     }
 }
