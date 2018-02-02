@@ -12,8 +12,10 @@ require('./bootstrap')
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-// Vue.component('example-component', require('./components/ExampleComponent.vue'));
+Vue.component('product-checkout', require('./components/ProductCheckout.vue'))
 
-// const app = new Vue({
-//     el: '#app'
-// });
+document.addEventListener('turbolinks:load', () => {
+    let app = new Vue({
+        el: '#app'
+    })
+})

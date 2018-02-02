@@ -12,4 +12,11 @@ class ProductsController extends Controller
 
         return view('products.show', compact('product'));
     }
+
+    public function index()
+    {
+        $products = Product::wherePublished(true)->get();
+
+        return view('products.index', compact('products'));
+    }
 }

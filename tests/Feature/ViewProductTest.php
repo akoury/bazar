@@ -34,4 +34,32 @@ class ViewProductTest extends TestCase
 
         $response->assertStatus(404);
     }
+
+    /** @test */
+    public function a_user_can_view_published_products()
+    {
+        $product = factory(Product::class)->create([
+            'name'  => 'iPhone X',
+            'price' => 10000
+        ]);
+
+        $product2 = factory(Product::class)->create([
+            'name'  => 'Galaxy S8',
+            'price' => 50000
+        ]);
+
+        $product3 = factory(Product::class)->states('unpublished')->create();
+
+        $products = Product::wherePublished(true)->get();
+
+        $this->get(route('products.index'))
+            ->assertStatus(200)
+            ->assertViewHas('products', function ($viewProducts) use ($products) {
+                return $products->diff($viewProducts)->count() === 0;
+            })
+            ->assertSee('iPhone X')
+            ->assertSee('100.00')
+            ->assertSee('Galaxy S8')
+            ->assertSee('500.00');
+    }
 }

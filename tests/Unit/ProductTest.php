@@ -20,7 +20,7 @@ class ProductTest extends TestCase
             'price' => 6750,
         ]);
 
-        $this->assertEquals('67.50', $product->price_with_decimals);
+        $this->assertEquals('67.50', $product->price());
     }
 
     /** @test */

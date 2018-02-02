@@ -11,16 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return view('home');
-})->name('home');
+Route::view('/', 'home')->name('home');
 
-Route::get('about', function () {
-    return view('about');
-})->name('about');
+Route::view('about', 'about')->name('about');
 
+Route::get('products', 'ProductsController@index')->name('products.index');
 Route::get('products/{id}', 'ProductsController@show')->name('products.show');
 
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
-
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');

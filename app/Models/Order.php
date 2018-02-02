@@ -33,6 +33,11 @@ class Order extends Model
         return self::where('confirmation_number', $confirmationNumber)->firstOrFail();
     }
 
+    public function amount()
+    {
+        return number_format($this->amount / 100, 2);
+    }
+
     public function product()
     {
         return $this->belongsTo(Product::class);
