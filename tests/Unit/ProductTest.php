@@ -3,6 +3,8 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
+use App\Models\Item;
+use App\Models\Order;
 use App\Models\Product;
 use App\Exceptions\NotEnoughItemsException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -22,17 +24,6 @@ class ProductTest extends TestCase
     }
 
     /** @test */
-    public function can_order_items()
-    {
-        $product = factory(Product::class)->create()->addItems(3);
-
-        $order = $product->orderItems('customer@example.com', 3);
-
-        $this->assertEquals('customer@example.com', $order->email);
-        $this->assertEquals(3, $order->itemQuantity());
-    }
-
-    /** @test */
     public function can_add_items()
     {
         $product = factory(Product::class)->create()->addItems(20);
@@ -43,41 +34,22 @@ class ProductTest extends TestCase
     /** @test */
     public function items_remaining_does_not_include_items_associated_with_an_order()
     {
-        $product = factory(Product::class)->create()->addItems(20);
-        $product->orderItems('jane@example.com', 12);
+        $product = factory(Product::class)->create();
+        $product->items()->saveMany(factory(Item::class, 10)->create(['order_id' => 1]));
+        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => null]));
 
-        $this->assertEquals(8, $product->itemsRemaining());
+        $this->assertEquals(2, $product->itemsRemaining());
     }
 
     /** @test */
-    public function trying_to_purchase_more_items_than_remain_throws_an_exception()
+    public function trying_to_reserve_more_items_than_remain_throws_an_exception()
     {
         $product = factory(Product::class)->create()->addItems(10);
 
         try {
-            $product->orderItems('customer@example.com', 11);
+            $reservation = $product->reserveItems(11, 'customer@example.com');
         } catch (NotEnoughItemsException $e) {
-            $order = $product->orders()->where('email', 'customer@example.com')->first();
-            $this->assertNull($order);
             $this->assertEquals(10, $product->itemsRemaining());
-            return;
-        }
-
-        $this->fail('Order succeeded even though there were not enough items remaining.');
-    }
-
-    /** @test */
-    public function cannot_order_items_that_have_already_been_purchased()
-    {
-        $product = factory(Product::class)->create()->addItems(10);
-        $product->orderItems('personA@example.com', 8);
-
-        try {
-            $product->orderItems('personB@example.com', 3);
-        } catch (NotEnoughItemsException $e) {
-            $personBsOrder = $product->orders()->where('email', 'personB@example.com')->first();
-            $this->assertNull($personBsOrder);
-            $this->assertEquals(2, $product->itemsRemaining());
             return;
         }
 
@@ -101,7 +73,8 @@ class ProductTest extends TestCase
     public function a_customer_cannot_reserve_items_that_have_already_been_purchased()
     {
         $product = factory(Product::class)->create()->addItems(3);
-        $product->orderItems('personA@example.com', 2);
+        $order = factory(Order::class)->create();
+        $order->items()->saveMany($product->items->take(2));
 
         try {
             $product->reserveItems(2, 'personB@example.com');

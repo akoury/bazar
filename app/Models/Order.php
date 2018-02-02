@@ -8,12 +8,13 @@ class Order extends Model
 {
     protected $guarded = [];
 
-    public static function forItems($email, $items, $amount)
+    public static function forItems($email, $items, $charge)
     {
         $order = self::create([
             'confirmation_number' => static::generateConfirmationNumber(),
             'email'               => $email,
-            'amount'              => $amount
+            'amount'              => $charge->amount(),
+            'card_last_four'      => $charge->cardLastFour()
         ]);
 
         $order->items()->saveMany($items);

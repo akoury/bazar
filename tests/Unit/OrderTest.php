@@ -5,7 +5,7 @@ namespace Tests\Unit;
 use Tests\TestCase;
 use App\Models\Item;
 use App\Models\Order;
-use App\Models\Product;
+use App\Classes\Charge;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class OrderTest extends TestCase
@@ -13,17 +13,17 @@ class OrderTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function creating_an_order_from_email_items_and_amount()
+    public function creating_an_order_from_email_items_and_charge()
     {
-        $product = factory(Product::class)->create()->addItems(5);
-        $this->assertEquals(5, $product->itemsRemaining());
+        $items = factory(Item::class, 3)->create();
+        $charge = new Charge(['amount' => 3600, 'card_last_four' => '1234']);
 
-        $order = Order::forItems('customer@example.com', $product->findItems(3), 3600);
+        $order = Order::forItems('customer@example.com', $items, $charge);
 
         $this->assertEquals('customer@example.com', $order->email);
         $this->assertEquals(3, $order->itemQuantity());
         $this->assertEquals(3600, $order->amount);
-        $this->assertEquals(2, $product->itemsRemaining());
+        $this->assertEquals('1234', $order->card_last_four);
     }
 
     /** @test */

@@ -33,9 +33,9 @@ class Reservation
 
     public function complete($paymentGateway, $paymentToken)
     {
-        $paymentGateway->charge($this->totalCost(), $paymentToken);
+        $charge = $paymentGateway->charge($this->totalCost(), $paymentToken);
 
-        return Order::forItems($this->email, $this->items, $this->totalCost());
+        return Order::forItems($this->email, $this->items, $charge);
     }
 
     public function cancel()

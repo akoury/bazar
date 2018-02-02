@@ -25,13 +25,6 @@ class Product extends Model
         return $this->hasMany(Item::class);
     }
 
-    public function orderItems($email, $quantity)
-    {
-        $items = $this->findItems($quantity);
-
-        return $this->createOrder($email, $items);
-    }
-
     public function reserveItems($quantity, $email)
     {
         return new Reservation($this->findItems($quantity)->each->reserve(), $email);
@@ -46,11 +39,6 @@ class Product extends Model
         }
 
         return $items;
-    }
-
-    public function createOrder($email, $items)
-    {
-        return Order::forItems($email, $items, $items->sum('price'));
     }
 
     public function addItems($quantity)

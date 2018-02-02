@@ -2,6 +2,7 @@
 
 namespace Tests\Unit;
 
+use App\Classes\Charge;
 use App\Classes\StripePaymentGateway;
 
 /**
@@ -23,7 +24,12 @@ class StripePaymentGatewayTest extends PaymentGatewayContractTest
     {
         $latestCharge = $this->lastCharge();
         $chargeCallback();
-        return $this->newChargesSince($latestCharge)->pluck('amount');
+        return $this->newChargesSince($latestCharge)->map(function ($stripeCharge) {
+            return new Charge([
+                'amount'         => $stripeCharge['amount'],
+                'card_last_four' => $stripeCharge['source']['last4'],
+            ]);
+        });
     }
 
     private function lastCharge()
