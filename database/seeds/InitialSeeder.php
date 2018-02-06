@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Item;
+use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
 use Illuminate\Database\Seeder;
@@ -14,6 +15,11 @@ class InitialSeeder extends Seeder
      */
     public function run()
     {
+        $user = factory(User::class)->create([
+            'email'    => 'user@gmail.com',
+            'password' => bcrypt('123123123')
+        ]);
+
         $product = factory(Product::class)->create([
             'name' => 'iPhone X'
         ]);
