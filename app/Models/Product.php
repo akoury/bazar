@@ -10,6 +10,10 @@ class Product extends Model
 {
     protected $guarded = [];
 
+    protected $casts = [
+        'published' => 'boolean',
+    ];
+
     public function price()
     {
         return number_format($this->price / 100, 2);

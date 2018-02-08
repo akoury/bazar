@@ -10,7 +10,7 @@
     <h1>Items</h1>
     @foreach ($order->items as $item)
         <h1>
-            <a href="{{ route('products.show', ['id' => $item->product->id]) }}">{{ $item->product->name }}</a> ${{ $item->product->price() }}
+            <a href="{{ route('products.show', $item->product) }}">{{ $item->product->name }}</a> ${{ $item->product->price() }}
         </h1>
     @endforeach
 @endsection

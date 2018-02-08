@@ -19,7 +19,7 @@ class ViewProductTest extends TestCase
             'price'       => 10000
         ]);
 
-        $this->get(route('products.show', ['id' => $product->id]))
+        $this->get(route('products.show', $product))
             ->assertSee('iPhone X')
             ->assertSee('Coming in 2017')
             ->assertSee('100.00');
@@ -30,7 +30,7 @@ class ViewProductTest extends TestCase
     {
         $product = factory(Product::class)->states('unpublished')->create();
 
-        $response = $this->get(route('products.show', $product->id));
+        $response = $this->get(route('products.show', $product));
 
         $response->assertStatus(404);
     }

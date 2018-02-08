@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Product')
+@section('title', $product->name)
 
 @section('content')
     <h1>{{ $product->name }}</h1>
