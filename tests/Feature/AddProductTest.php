@@ -153,18 +153,20 @@ class AddProductTest extends TestCase
     }
 
     /** @test */
-    public function published_is_required_to_create_a_product()
+    public function published_is_optional_to_create_a_product()
     {
         $user = factory(User::class)->create();
 
         $response = $this->actingAs($user)->from(route('products.create'))->post(route('products.store', $this->validParams([
-            'published' => ''
+            'published' => null
         ])));
 
+        $product = Product::first();
+
         $response->assertStatus(302)
-            ->assertRedirect(route('products.create'))
-            ->assertSessionHasErrors('published');
-        $this->assertEquals(0, Product::count());
+            ->assertRedirect(route('products.show', $product));
+
+        $this->assertFalse($product->published);
     }
 
     /** @test */

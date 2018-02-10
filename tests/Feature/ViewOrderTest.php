@@ -15,7 +15,6 @@ class ViewOrderTest extends TestCase
     /** @test */
     public function a_user_can_view_their_order_confirmation()
     {
-        $this->withoutExceptionHandling();
         $product = factory(Product::class)->create([
             'name' => 'iPhone X'
         ]);
@@ -34,7 +33,7 @@ class ViewOrderTest extends TestCase
         $this->get(route('orders.show', ['confirmation_number' => 123456789]))
             ->assertStatus(200)
             ->assertViewHas('order', function ($viewOrder) use ($order) {
-                return $order->id === $viewOrder->id;
+                return $viewOrder->is($order);
             })
             ->assertSee('123456789')
             ->assertSee('85.00')

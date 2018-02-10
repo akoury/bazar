@@ -31,7 +31,7 @@ class ProductsController extends Controller
             'name'          => 'required',
             'description'   => 'required',
             'price'         => 'required|numeric|min:0',
-            'published'     => 'required|boolean',
+            'published'     => 'boolean',
             'item_quantity' => 'required|integer|min:0'
         ]);
 
@@ -39,7 +39,7 @@ class ProductsController extends Controller
             'name'        => request('name'),
             'description' => request('description'),
             'price'       => request('price') * 100,
-            'published'   => request('published'),
+            'published'   => request('published') ?? false,
         ])->addItems(request('item_quantity'));
 
         return redirect()->route('products.show', $product);

@@ -48,7 +48,9 @@ class ViewProductTest extends TestCase
             'price' => 50000
         ]);
 
-        $product3 = factory(Product::class)->states('unpublished')->create();
+        $product3 = factory(Product::class)->states('unpublished')->create([
+            'name' => 'Google Pixel'
+        ]);
 
         $products = Product::wherePublished(true)->get();
 
@@ -60,6 +62,7 @@ class ViewProductTest extends TestCase
             ->assertSee('iPhone X')
             ->assertSee('100.00')
             ->assertSee('Galaxy S8')
-            ->assertSee('500.00');
+            ->assertSee('500.00')
+            ->assertDontSee('Google Pixel');
     }
 }
