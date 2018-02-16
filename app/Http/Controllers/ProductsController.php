@@ -31,7 +31,7 @@ class ProductsController extends Controller
             'name'          => 'required',
             'description'   => 'required',
             'price'         => 'required|numeric|min:0',
-            'published'     => 'boolean',
+            'published'     => 'sometimes|accepted',
             'item_quantity' => 'required|integer|min:0'
         ]);
 
@@ -39,8 +39,36 @@ class ProductsController extends Controller
             'name'        => request('name'),
             'description' => request('description'),
             'price'       => request('price') * 100,
-            'published'   => request('published') ?? false,
+            'published'   => request()->filled('published'),
         ])->addItems(request('item_quantity'));
+
+        return redirect()->route('products.show', $product);
+    }
+
+    public function edit($id)
+    {
+        $product = Product::findOrFail($id);
+
+        return view('products.edit', compact('product'));
+    }
+
+    public function update($id)
+    {
+        $product = Product::findOrFail($id);
+
+        request()->validate([
+            'name'        => 'required',
+            'description' => 'required',
+            'price'       => 'required|numeric|min:0',
+            'published'   => 'sometimes|accepted',
+        ]);
+
+        $product->update([
+            'name'        => request('name'),
+            'description' => request('description'),
+            'price'       => request('price') * 100,
+            'published'   => request()->filled('published'),
+        ]);
 
         return redirect()->route('products.show', $product);
     }

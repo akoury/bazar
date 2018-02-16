@@ -17,6 +17,8 @@ Route::get('products', 'ProductsController@index')->name('products.index');
 Route::get('products/create', 'ProductsController@create')->name('products.create')->middleware('auth');
 Route::post('products', 'ProductsController@store')->name('products.store')->middleware('auth');
 Route::get('products/{id}', 'ProductsController@show')->name('products.show');
+Route::get('products/{id}/edit', 'ProductsController@edit')->name('products.edit')->middleware('auth');
+Route::patch('products/{id}', 'ProductsController@update')->name('products.update')->middleware('auth');
 
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');

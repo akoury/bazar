@@ -123,12 +123,12 @@ class AddProductTest extends TestCase
     }
 
     /** @test */
-    public function price_must_be_an_integer_to_create_a_product()
+    public function price_must_be_numeric_to_create_a_product()
     {
         $user = factory(User::class)->create();
 
         $response = $this->actingAs($user)->from(route('products.create'))->post(route('products.store', $this->validParams([
-            'price' => 'not-an-integer'
+            'price' => 'not-numeric'
         ])));
 
         $response->assertStatus(302)
