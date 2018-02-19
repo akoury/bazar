@@ -22,11 +22,11 @@ class InitialSeeder extends Seeder
 
         $product = factory(Product::class)->create([
             'name' => 'iPhone X'
-        ]);
+        ])->addItems(5);
 
         $product2 = factory(Product::class)->create([
             'name' => 'iPhone 8',
-        ]);
+        ])->addItems(2);
 
         $order = factory(Order::class)->create([
             'confirmation_number' => '123'

@@ -11,6 +11,16 @@ class EditProductTest extends TestCase
 {
     use RefreshDatabase;
 
+    private function oldAttributes($overrides = [])
+    {
+        return array_merge([
+            'name'        => 'Old name',
+            'description' => 'Old description',
+            'price'       => 2000,
+            'published'   => true
+        ], $overrides);
+    }
+
     private function validParams($overrides = [])
     {
         return array_merge([
@@ -65,12 +75,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'name' => ''
@@ -80,11 +85,7 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('name');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */
@@ -92,12 +93,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'description' => ''
@@ -107,11 +103,7 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('description');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */
@@ -119,12 +111,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => ''
@@ -134,11 +121,7 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('price');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */
@@ -146,12 +129,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => 'not-numeric'
@@ -161,11 +139,7 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('price');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */
@@ -173,12 +147,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => '-1'
@@ -188,23 +157,15 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('price');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */
     public function published_is_optional_to_edit_a_product()
     {
         $user = factory(User::class)->create();
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), [
             'name'        => 'New name',
@@ -228,12 +189,7 @@ class EditProductTest extends TestCase
     {
         $user = factory(User::class)->create();
 
-        $product = factory(Product::class)->create([
-            'name'        => 'Old name',
-            'description' => 'Old description',
-            'price'       => 2000,
-            'published'   => true
-        ]);
+        $product = factory(Product::class)->create($this->oldAttributes());
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'published' => 'not-a-boolean'
@@ -243,10 +199,6 @@ class EditProductTest extends TestCase
             ->assertRedirect(route('products.edit', $product))
             ->assertSessionHasErrors('published');
 
-        $product = $product->fresh();
-        $this->assertEquals('Old name', $product->name);
-        $this->assertEquals('Old description', $product->description);
-        $this->assertEquals(2000, $product->price);
-        $this->assertTrue($product->published);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 }

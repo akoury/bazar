@@ -77,7 +77,7 @@ class PurchaseItemsTest extends TestCase
         ]);
 
         $response->assertStatus(404);
-        $this->assertEquals(0, $product->orders->count());
+        $this->assertEquals(0, $product->orders()->count());
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
     }
 

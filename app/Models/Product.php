@@ -21,7 +21,7 @@ class Product extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class, 'items');
+        return Order::whereIn('id', $this->items()->pluck('order_id'));
     }
 
     public function items()
@@ -57,5 +57,15 @@ class Product extends Model
     public function itemsRemaining()
     {
         return $this->items()->available()->count();
+    }
+
+    public function itemsSold()
+    {
+        return $this->items()->sold()->count();
+    }
+
+    public function revenue()
+    {
+        return $this->orders()->sum('amount') / 100;
     }
 }

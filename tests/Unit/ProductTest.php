@@ -35,10 +35,32 @@ class ProductTest extends TestCase
     public function items_remaining_does_not_include_items_associated_with_an_order()
     {
         $product = factory(Product::class)->create();
-        $product->items()->saveMany(factory(Item::class, 10)->create(['order_id' => 1]));
+        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => 1]));
         $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => null]));
 
         $this->assertEquals(2, $product->itemsRemaining());
+    }
+
+    /** @test */
+    public function items_sold_only_includes_items_associated_with_an_order()
+    {
+        $product = factory(Product::class)->create();
+        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => 1]));
+        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => null]));
+
+        $this->assertEquals(4, $product->itemsSold());
+    }
+
+    /** @test */
+    public function can_calculate_a_products_revenue()
+    {
+        $product = factory(Product::class)->create();
+        $orderA = factory(Order::class)->create(['amount' => 3850]);
+        $orderB = factory(Order::class)->create(['amount' => 9625]);
+        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => $orderA->id]));
+        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => $orderB->id]));
+
+        $this->assertEquals(134.75, $product->revenue());
     }
 
     /** @test */

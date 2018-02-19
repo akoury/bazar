@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\Order;
 use App\Classes\Charge;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class OrderTest extends TestCase
 {
@@ -36,6 +37,14 @@ class OrderTest extends TestCase
         $foundOrder = Order::findByConfirmationNumber($order->confirmation_number);
 
         $this->assertEquals($order->fresh(), $foundOrder);
+    }
+
+    /** @test */
+    public function retrieving_a_nonexistent_order_by_confirmation_number_throws_an_exception()
+    {
+        $this->expectException(ModelNotFoundException::class);
+
+        Order::findByConfirmationNumber('NONEXISTENTCONFIRMATIONNUMBER');
     }
 
     /** @test */
