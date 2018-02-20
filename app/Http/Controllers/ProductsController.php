@@ -31,8 +31,9 @@ class ProductsController extends Controller
             'name'          => 'required',
             'description'   => 'required',
             'price'         => 'required|numeric|min:0',
-            'published'     => 'sometimes|accepted',
-            'item_quantity' => 'required|integer|min:0'
+            'published'     => 'nullable|boolean',
+            'item_quantity' => 'required|integer|min:0',
+            'product_image' => 'required|image'
         ]);
 
         $product = Product::create([
@@ -40,6 +41,7 @@ class ProductsController extends Controller
             'description' => request('description'),
             'price'       => request('price') * 100,
             'published'   => request()->filled('published'),
+            'image_path'  => request('product_image')->store('products', 'public'),
         ])->addItems(request('item_quantity'));
 
         return redirect()->route('products.show', $product);

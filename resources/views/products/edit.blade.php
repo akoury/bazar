@@ -33,7 +33,7 @@
         @endif
 
         <label>
-            <input type="checkbox" name="published" {{ old('published', $product->published) ? 'checked' : '' }}>Publish
+            <input type="checkbox" name="published" value="1" {{ old('published', $product->published) ? 'checked' : '' }}>Publish
         </label>
         @if ($errors->has('published'))
             {{ $errors->first('published') }}

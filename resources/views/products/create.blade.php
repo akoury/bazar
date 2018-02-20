@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Create a Product</h1>
-    <form method="POST" action="{{ route('products.store') }}">
+    <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
         {{ csrf_field() }}
 
         <label for="name">Name</label>
@@ -32,10 +32,16 @@
         @endif
 
         <label>
-            <input type="checkbox" name="published" {{ old('published') ? 'checked' : '' }}>Publish
+            <input type="checkbox" name="published" value="1" {{ old('published') ? 'checked' : '' }}>Publish
         </label>
         @if ($errors->has('published'))
             {{ $errors->first('published') }}
+        @endif
+
+        <label for="product_image">Product Image</label>
+        <input id="product_image" type="file" name="product_image" value="{{ old('product_image') }}">
+        @if ($errors->has('product_image'))
+            {{ $errors->first('product_image') }}
         @endif
         
         <button type="submit">Create</button>
