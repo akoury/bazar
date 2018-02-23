@@ -14,11 +14,6 @@ class Product extends Model
         'published' => 'boolean',
     ];
 
-    public function price()
-    {
-        return number_format($this->price / 100, 2);
-    }
-
     public function orders()
     {
         return Order::whereIn('id', $this->items()->pluck('order_id'));
@@ -27,6 +22,11 @@ class Product extends Model
     public function items()
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function price()
+    {
+        return number_format($this->price / 100, 2);
     }
 
     public function reserveItems($quantity, $email)

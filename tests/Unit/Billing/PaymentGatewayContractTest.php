@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Billing;
 
 use Tests\TestCase;
 use App\Exceptions\PaymentFailedException;

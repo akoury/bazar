@@ -12,14 +12,7 @@ use Illuminate\Support\Facades\Notification;
 
 class OrdersController extends Controller
 {
-    private $paymentGateway;
-
-    public function __construct(PaymentGateway $paymentGateway)
-    {
-        $this->paymentGateway = $paymentGateway;
-    }
-
-    public function store($productId)
+    public function store($productId, PaymentGateway $paymentGateway)
     {
         $product = Product::wherePublished(true)->findOrFail($productId);
 
@@ -31,7 +24,7 @@ class OrdersController extends Controller
 
         try {
             $reservation = $product->reserveItems(request('quantity'), request('email'));
-            $order = $reservation->complete($this->paymentGateway, request('payment_token'));
+            $order = $reservation->complete($paymentGateway, request('payment_token'));
 
             Notification::route('mail', $order->email)->notify(new OrderConfirmation($order));
 

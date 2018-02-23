@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Jobs\ProcessProductImage;
 
 class ProductsController extends Controller
 {
@@ -43,6 +44,8 @@ class ProductsController extends Controller
             'published'   => request()->filled('published'),
             'image_path'  => request('product_image')->store('products', 'public'),
         ])->addItems(request('item_quantity'));
+
+        ProcessProductImage::dispatch($product);
 
         return redirect()->route('products.show', $product);
     }

@@ -8,6 +8,16 @@ class Order extends Model
 {
     protected $guarded = [];
 
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
+
     public static function forItems($email, $items, $charge)
     {
         $order = self::create([
@@ -36,16 +46,6 @@ class Order extends Model
     public function amount()
     {
         return number_format($this->amount / 100, 2);
-    }
-
-    public function product()
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function items()
-    {
-        return $this->hasMany(Item::class);
     }
 
     public function itemQuantity()

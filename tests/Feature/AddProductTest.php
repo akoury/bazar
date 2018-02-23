@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\User;
 use App\Models\Product;
+use App\Jobs\ProcessProductImage;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -88,6 +90,8 @@ class AddProductTest extends TestCase
     public function product_image_is_uploaded()
     {
         Storage::fake('public');
+        Queue::fake();
+
         $user = factory(User::class)->create();
         $file = UploadedFile::fake()->image('product-image.png');
 
@@ -100,6 +104,22 @@ class AddProductTest extends TestCase
         $this->assertNotNull($product->image_path);
         Storage::disk('public')->assertExists($product->image_path);
         $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->image_path));
+    }
+
+    /** @test */
+    public function an_image_optimizer_job_is_queued_when_a_product_is_created()
+    {
+        Queue::fake();
+
+        $user = factory(User::class)->create();
+
+        $response = $this->actingAs($user)->post(route('products.store'), $this->validParams());
+
+        $product = Product::first();
+
+        Queue::assertPushed(ProcessProductImage::class, function ($job) use ($product) {
+            return $job->product->is($product);
+        });
     }
 
     /** @test */

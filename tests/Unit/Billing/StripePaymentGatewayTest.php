@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Unit;
+namespace Tests\Unit\Billing;
 
 use App\Classes\Charge;
 use App\Classes\StripePaymentGateway;
