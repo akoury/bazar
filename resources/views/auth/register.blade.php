@@ -4,7 +4,7 @@
 
 @section('content')
     <form method="POST" action="{{ route('register') }}">
-        {{ csrf_field() }}
+        @csrf
 
         <label for="email">Email</label>
         <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus>

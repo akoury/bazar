@@ -10,7 +10,7 @@
             class="text-teal-lighter hover:text-white mr-4 no-underline"
             onclick="event.preventDefault(); document.getElementById('logout-form').submit();">Logout</a>
         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-            {{ csrf_field() }}
+            @csrf
         </form>
     @endguest
 </div>

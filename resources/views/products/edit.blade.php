@@ -5,8 +5,8 @@
 @section('content')
     <h1>Edit Product</h1>
     <form method="POST" action="{{ route('products.update', $product) }}">
-        {{ csrf_field() }}
-        {{ method_field('PATCH') }}
+        @csrf
+        @method('patch')
 
         <label for="name">Name</label>
         <input id="name" type="text" name="name" value="{{ old('name', $product->name) }}" required autofocus>

@@ -5,7 +5,7 @@
 @section('content')
     <h1>Create a Product</h1>
     <form method="POST" action="{{ route('products.store') }}" enctype="multipart/form-data">
-        {{ csrf_field() }}
+        @csrf
 
         <label for="name">Name</label>
         <input id="name" type="text" name="name" value="{{ old('name') }}" required autofocus>
