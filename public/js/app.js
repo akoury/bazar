@@ -13229,10 +13229,64 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    mounted: function mounted() {
-        console.log('Component mounted.');
+    props: ['productId', 'productPrice'],
+    data: function data() {
+        return {
+            quantity: 1,
+            processing: false,
+            stripeHandler: null
+        };
+    },
+    created: function created() {
+        this.stripeHandler = this.initStripe();
+    },
+
+    methods: {
+        initStripe: function initStripe() {
+            var handler = StripeCheckout.configure({
+                key: App.stripeKey
+            });
+
+            window.addEventListener('popstate', function () {
+                handler.close();
+            });
+
+            return handler;
+        },
+        order: function order(callback) {
+            this.stripeHandler.open({
+                name: 'Bazar',
+                description: 'Your order',
+                currency: 'usd',
+                allowRememberMe: false,
+                panelLabel: 'Pay {{amount}}',
+                amount: this.totalPrice,
+                token: this.purchaseItems
+            });
+        },
+        purchaseItems: function purchaseItems(token) {
+            var _this = this;
+
+            this.processing = true;
+            axios.post('/products/' + this.productId + '/orders', { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
+                Turbolinks.visit('/orders/' + response.data.confirmation_number);
+            }).catch(function (error) {
+                alert(error.response.data);
+                _this.processing = false;
+            });
+        }
+    },
+    computed: {
+        totalPrice: function totalPrice() {
+            return this.quantity * this.productPrice;
+        },
+        totalPriceInDollars: function totalPriceInDollars() {
+            return (this.totalPrice / 100).toFixed(2);
+        }
     }
 });
 
@@ -13244,7 +13298,50 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("button", [_vm._v("\n    Order\n")])
+  return _c(
+    "form",
+    {
+      on: {
+        submit: function($event) {
+          $event.preventDefault()
+          _vm.order($event)
+        }
+      }
+    },
+    [
+      _c("label", { attrs: { for: "quantity" } }, [_vm._v("Quantity")]),
+      _vm._v(" "),
+      _c("input", {
+        directives: [
+          {
+            name: "model",
+            rawName: "v-model",
+            value: _vm.quantity,
+            expression: "quantity"
+          }
+        ],
+        attrs: {
+          id: "quantity",
+          type: "number",
+          name: "quantity",
+          required: ""
+        },
+        domProps: { value: _vm.quantity },
+        on: {
+          input: function($event) {
+            if ($event.target.composing) {
+              return
+            }
+            _vm.quantity = $event.target.value
+          }
+        }
+      }),
+      _vm._v(" "),
+      _c("button", { attrs: { type: "submit", disabled: _vm.processing } }, [
+        _vm._v("Order for " + _vm._s(_vm.totalPriceInDollars) + " $")
+      ])
+    ]
+  )
 }
 var staticRenderFns = []
 render._withStripped = true

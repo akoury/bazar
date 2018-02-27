@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'order')
+@section('title', 'Your Order')
 
 @section('content')
     <h1>Order #{{ $order->confirmation_number }}</h1>

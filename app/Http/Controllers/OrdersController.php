@@ -31,9 +31,9 @@ class OrdersController extends Controller
             return response()->json($order, 201);
         } catch (PaymentFailedException $e) {
             $reservation->cancel();
-            return response()->json([], 422);
+            return response()->json(['Your payment could not be processed'], 422);
         } catch (NotEnoughItemsException $e) {
-            return response()->json([], 422);
+            return response()->json(['The number of items you requested is not available'], 422);
         }
     }
 

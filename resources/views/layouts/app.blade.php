@@ -8,9 +8,9 @@
 
         <title>@yield('title', 'Bazar')</title>
 
-        <link rel="stylesheet" href="{{ mix('/css/app.css') }}">
-
-        <script src="{{ mix('/js/app.js') }}" defer></script>
+        <link rel="stylesheet" href="{{ mix('/css/app.css') }}" data-turbolinks-track="reload">
+        <script src="{{ mix('/js/app.js') }}" data-turbolinks-track="reload" defer></script>
+        @stack('scripts')
     </head>
     <body>
         <div id="app">
@@ -20,7 +20,5 @@
 
             @include('layouts.footer')
         </div>
-
-        @stack('scripts')
     </body>
 </html>
