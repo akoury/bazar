@@ -4,20 +4,24 @@ namespace App\Classes;
 
 class Charge
 {
-    private $data;
+    private $amount;
 
-    public function __construct($data)
+    private $cardLastFour;
+
+    public function __construct($amount, $cardLastFour)
     {
-        $this->data = $data;
+        $this->amount = $amount;
+
+        $this->cardLastFour = $cardLastFour;
     }
 
     public function amount()
     {
-        return $this->data['amount'];
+        return $this->amount;
     }
 
     public function cardLastFour()
     {
-        return $this->data['card_last_four'];
+        return $this->cardLastFour;
     }
 }

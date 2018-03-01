@@ -35,10 +35,7 @@ class FakePaymentGateway implements PaymentGateway
             throw new PaymentFailedException;
         }
 
-        return $this->charges[] = new Charge([
-            'amount'         => $amount,
-            'card_last_four' => substr(self::TEST_CARD_NUMBER, -4),
-        ]);
+        return $this->charges[] = new Charge($amount, substr(self::TEST_CARD_NUMBER, -4));
     }
 
     public function totalCharges()

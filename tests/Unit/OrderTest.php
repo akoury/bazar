@@ -17,7 +17,7 @@ class OrderTest extends TestCase
     public function creating_an_order_from_email_items_and_charge()
     {
         $items = factory(Item::class, 3)->create();
-        $charge = new Charge(['amount' => 3600, 'card_last_four' => '1234']);
+        $charge = new Charge(3600, '1234');
 
         $order = Order::forItems('customer@example.com', $items, $charge);
 
