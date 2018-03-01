@@ -23,10 +23,7 @@ class StripePaymentGateway implements PaymentGateway
                 'source'   => $token
             ], ['api_key' => $this->apiKey]);
 
-            return new Charge([
-                'amount'         => $charge['amount'],
-                'card_last_four' => $charge['source']['last4']
-            ]);
+            return new Charge($charge['amount'], $charge['source']['last4']);
         } catch (InvalidRequest $e) {
             throw new PaymentFailedException;
         }

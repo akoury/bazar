@@ -25,10 +25,7 @@ class StripePaymentGatewayTest extends PaymentGatewayContractTest
         $latestCharge = $this->lastCharge();
         $chargeCallback();
         return $this->newChargesSince($latestCharge)->map(function ($stripeCharge) {
-            return new Charge([
-                'amount'         => $stripeCharge['amount'],
-                'card_last_four' => $stripeCharge['source']['last4'],
-            ]);
+            return new Charge($stripeCharge['amount'], $stripeCharge['source']['last4']);
         });
     }
 
