@@ -68,21 +68,21 @@ class OrderTest extends TestCase
     }
 
     /** @test */
-    public function must_be_24_characters_long()
+    public function confirmation_number_must_be_24_characters_long()
     {
         $confirmationNumber = Order::generateConfirmationNumber();
         $this->assertEquals(24, strlen($confirmationNumber));
     }
 
     /** @test */
-    public function can_only_contain_uppercase_letters_and_numbers()
+    public function confirmation_number_can_only_contain_uppercase_letters_and_numbers()
     {
         $confirmationNumber = Order::generateConfirmationNumber();
         $this->assertRegExp('/^[A-Z0-9]+$/', $confirmationNumber);
     }
 
     /** @test */
-    public function cannot_contain_ambiguous_characters()
+    public function confirmation_number_cannot_contain_ambiguous_characters()
     {
         $confirmationNumber = Order::generateConfirmationNumber();
         $this->assertFalse(strpos($confirmationNumber, '1'));

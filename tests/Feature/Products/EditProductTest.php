@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature;
+namespace Tests\Feature\Products;
 
 use Tests\TestCase;
 use App\Models\User;
@@ -44,6 +44,17 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
+    public function guests_cannot_view_the_edit_product_page()
+    {
+        $product = factory(Product::class)->create();
+
+        $response = $this->get(route('products.edit', $product));
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('login'));
+    }
+
+    /** @test */
     public function a_seller_can_edit_his_product()
     {
         $user = factory(User::class)->create();
@@ -68,6 +79,19 @@ class EditProductTest extends TestCase
         $this->assertEquals('New description', $product->description);
         $this->assertEquals(5000, $product->price);
         $this->assertFalse($product->published);
+    }
+
+    /** @test */
+    public function a_guest_cannot_update_a_product()
+    {
+        $product = factory(Product::class)->create($this->oldAttributes());
+
+        $response = $this->patch(route('products.update', $product), $this->validParams());
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('login'));
+
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
     /** @test */

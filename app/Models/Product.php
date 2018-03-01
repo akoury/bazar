@@ -48,7 +48,7 @@ class Product extends Model
     public function addItems($quantity)
     {
         foreach (range(1, $quantity) as $i) {
-            $this->items()->create([]);
+            $this->items()->create();
         }
 
         return $this;
