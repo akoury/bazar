@@ -20,7 +20,7 @@ class StripePaymentGatewayTest extends PaymentGatewayContractTest
         return 'tok_visa';
     }
 
-    public function newChargesDuring($chargeCallback)
+    public function newCharges($chargeCallback)
     {
         $latestCharge = $this->lastCharge();
         $chargeCallback();

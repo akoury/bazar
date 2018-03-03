@@ -16,6 +16,8 @@ class PurchaseItemsTest extends TestCase
 {
     use RefreshDatabase;
 
+    private $paymentGateway;
+
     protected function setUp()
     {
         parent::setUp();
@@ -26,10 +28,7 @@ class PurchaseItemsTest extends TestCase
 
     private function orderItems($product, $params)
     {
-        $savedRequest = $this->app['request'];
-        $response = $this->json('POST', "products/{$product->id}/orders", $params);
-        $this->app['request'] = $savedRequest;
-        return $response;
+        return $this->json('POST', "products/{$product->id}/orders", $params);
     }
 
     /** @test */
@@ -121,7 +120,7 @@ class PurchaseItemsTest extends TestCase
     {
         $product = factory(Product::class)->create(['price' => 1200])->addItems(3);
 
-        $this->paymentGateway->beforeFirstCharge(function ($paymentGateway) use ($product) {
+        $this->paymentGateway->beforeFirstCharge(function () use ($product) {
             $response = $this->orderItems($product, [
                 'email'         => 'personB@example.com',
                 'quantity'      => 1,
@@ -215,6 +214,7 @@ class PurchaseItemsTest extends TestCase
             'email'    => 'john@example.com',
             'quantity' => 3,
         ]);
+
         $this->assertValidationError($response, 'payment_token');
     }
 }

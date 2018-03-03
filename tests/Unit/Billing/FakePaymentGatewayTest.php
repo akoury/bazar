@@ -6,6 +6,8 @@ use Tests\Fakes\FakePaymentGateway;
 
 class FakePaymentGatewayTest extends PaymentGatewayContractTest
 {
+    private $paymentGateway;
+
     protected function setUp()
     {
         parent::setUp();
@@ -22,7 +24,7 @@ class FakePaymentGatewayTest extends PaymentGatewayContractTest
         return $this->paymentGateway->getValidTestToken();
     }
 
-    protected function newChargesDuring($callback)
+    protected function newCharges($callback)
     {
         $chargesFrom = $this->paymentGateway->charges->count();
         $callback();

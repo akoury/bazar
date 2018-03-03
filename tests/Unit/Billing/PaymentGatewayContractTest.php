@@ -11,7 +11,7 @@ abstract class PaymentGatewayContractTest extends TestCase
 
     abstract protected function getValidTestToken();
 
-    abstract protected function newChargesDuring($callback);
+    abstract protected function newCharges($callback);
 
     const TEST_CARD_NUMBER = '4242424242424242';
 
@@ -20,7 +20,7 @@ abstract class PaymentGatewayContractTest extends TestCase
     {
         $paymentGateway = $this->getPaymentGateway();
 
-        $newCharges = $this->newChargesDuring(function () use ($paymentGateway) {
+        $newCharges = $this->newCharges(function () use ($paymentGateway) {
             $paymentGateway->charge(2500, $this->getValidTestToken());
         });
 
@@ -45,7 +45,7 @@ abstract class PaymentGatewayContractTest extends TestCase
     {
         $paymentGateway = $this->getPaymentGateway();
 
-        $newCharges = $this->newChargesDuring(function () use ($paymentGateway) {
+        $newCharges = $this->newCharges(function () use ($paymentGateway) {
             try {
                 $paymentGateway->charge(2500, 'invalid-payment-token');
             } catch (PaymentFailedException $e) {
@@ -65,7 +65,7 @@ abstract class PaymentGatewayContractTest extends TestCase
         $paymentGateway->charge(2000, $this->getValidTestToken());
         $paymentGateway->charge(3000, $this->getValidTestToken());
 
-        $newCharges = $this->newChargesDuring(function () use ($paymentGateway) {
+        $newCharges = $this->newCharges(function () use ($paymentGateway) {
             $paymentGateway->charge(4000, $this->getValidTestToken());
             $paymentGateway->charge(5000, $this->getValidTestToken());
         });
