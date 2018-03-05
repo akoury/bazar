@@ -12,6 +12,11 @@
 */
 
 Route::view('/', 'home')->name('home');
+Route::view('/dashboard', 'dashboard')->name('dashboard')->middleware('auth');
+
+Route::get('brands/create', 'BrandsController@create')->name('brands.create')->middleware('auth');
+Route::get('brands/{id}', 'BrandsController@show')->name('brands.show');
+Route::post('brands', 'BrandsController@store')->name('brands.store')->middleware('auth');
 
 Route::get('products', 'ProductsController@index')->name('products.index');
 Route::get('products/create', 'ProductsController@create')->name('products.create')->middleware('auth');

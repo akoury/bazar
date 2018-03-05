@@ -36,12 +36,12 @@ class ResetPasswordTest extends TestCase
 
     protected function successfulPasswordResetRoute()
     {
-        return route('home');
+        return route('dashboard');
     }
 
     protected function guestMiddlewareRoute()
     {
-        return route('home');
+        return route('dashboard');
     }
 
     public function testUserCanViewAPasswordResetForm()
