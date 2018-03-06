@@ -2,23 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Brand;
 use App\Models\Product;
 use App\Jobs\ProcessProductImage;
 
 class ProductsController extends Controller
 {
-    public function show($id)
+    public function show($brandId, $id)
     {
         $product = Product::wherePublished(true)->findOrFail($id);
 
         return view('products.show', compact('product'));
     }
 
-    public function index()
+    public function index($brandId)
     {
-        $products = Product::wherePublished(true)->get();
+        $brand = Brand::findOrFail($brandId);
+        $products = $brand->products()->wherePublished(true)->get();
 
-        return view('products.index', compact('products'));
+        return view('products.index', compact('brand', 'products'));
     }
 
     public function create($brandId)
@@ -52,7 +54,7 @@ class ProductsController extends Controller
 
         ProcessProductImage::dispatch($product);
 
-        return redirect()->route('products.show', $product);
+        return redirect()->route('products.show', [$product->brand_id, $product]);
     }
 
     public function edit($id)
@@ -80,6 +82,6 @@ class ProductsController extends Controller
             'published'   => request()->filled('published'),
         ]);
 
-        return redirect()->route('products.show', $product);
+        return redirect()->route('products.show', [$product->brand_id, $product]);
     }
 }

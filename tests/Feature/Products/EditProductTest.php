@@ -71,7 +71,7 @@ class EditProductTest extends TestCase
             'price'       => '50.00',
         ]);
 
-        $response->assertRedirect(route('products.show', $product));
+        $response->assertRedirect(route('products.show', [$product->brand_id, $product]));
 
         $product = $product->fresh();
 
@@ -198,7 +198,7 @@ class EditProductTest extends TestCase
         ]);
 
         $response->assertStatus(302)
-            ->assertRedirect(route('products.show', $product));
+            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
 
         $product = $product->fresh();
 

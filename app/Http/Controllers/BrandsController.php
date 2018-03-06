@@ -6,6 +6,13 @@ use App\Models\Brand;
 
 class BrandsController extends Controller
 {
+    public function index()
+    {
+        $brands = Brand::all();
+
+        return view('brands.index', compact('brands'));
+    }
+
     public function show($id)
     {
         $brand = Brand::findOrFail($id);

@@ -85,7 +85,7 @@ class AddProductTest extends TestCase
         $product = Product::first();
 
         $response->assertStatus(302)
-            ->assertRedirect(route('products.show', $product));
+            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
 
         $this->assertEquals('iPhone 8', $product->name);
         $this->assertEquals('The new iPhone', $product->description);
@@ -256,7 +256,7 @@ class AddProductTest extends TestCase
         $product = Product::first();
 
         $response->assertStatus(302)
-            ->assertRedirect(route('products.show', $product));
+            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
 
         $this->assertFalse($product->published);
     }
