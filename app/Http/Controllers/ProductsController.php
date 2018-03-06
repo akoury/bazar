@@ -61,12 +61,16 @@ class ProductsController extends Controller
     {
         $product = Product::findOrFail($id);
 
+        auth()->user()->brands()->findOrFail($product->brand_id);
+
         return view('products.edit', compact('product'));
     }
 
     public function update($id)
     {
         $product = Product::findOrFail($id);
+
+        auth()->user()->brands()->findOrFail($product->brand_id);
 
         request()->validate([
             'name'        => 'required',

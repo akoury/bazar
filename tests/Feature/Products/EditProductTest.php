@@ -4,6 +4,7 @@ namespace Tests\Feature\Products;
 
 use Tests\TestCase;
 use App\Models\User;
+use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -32,11 +33,15 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
-    public function a_seller_can_view_the_edit_product_page()
+    public function a_user_can_view_the_edit_product_form_for_his_brand()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create();
+        $product = factory(Product::class)->create([
+            'brand_id' => $brand
+        ]);
 
         $response = $this->actingAs($user)->get(route('products.edit', $product));
 
@@ -44,7 +49,18 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
-    public function guests_cannot_view_the_edit_product_page()
+    public function a_user_cannot_view_the_edit_product_form_of_a_brand_he_does_not_own()
+    {
+        $user = factory(User::class)->create();
+        $product = factory(Product::class)->create();
+
+        $response = $this->actingAs($user)->get(route('products.edit', $product));
+
+        $response->assertStatus(404);
+    }
+
+    /** @test */
+    public function guests_cannot_view_the_edit_product_form()
     {
         $product = factory(Product::class)->create();
 
@@ -55,14 +71,18 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
-    public function a_seller_can_edit_his_product()
+    public function a_user_can_edit_his_brands_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
+
         $product = factory(Product::class)->create([
             'name'        => 'Old name',
             'description' => 'Old description',
             'price'       => 2000,
-            'published'   => true
+            'published'   => true,
+            'brand_id'    => $brand->id
         ]);
 
         $response = $this->actingAs($user)->patch(route('products.update', $product), [
@@ -82,6 +102,18 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
+    public function a_user_cannot_update_a_product_from_a_brand_he_does_not_own()
+    {
+        $user = factory(User::class)->create();
+        $product = factory(Product::class)->create($this->oldAttributes());
+
+        $response = $this->actingAs($user)->patch(route('products.update', $product), $this->validParams());
+
+        $response->assertStatus(404);
+        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+    }
+
+    /** @test */
     public function a_guest_cannot_update_a_product()
     {
         $product = factory(Product::class)->create($this->oldAttributes());
@@ -98,8 +130,12 @@ class EditProductTest extends TestCase
     public function name_is_required_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'name' => ''
@@ -116,8 +152,12 @@ class EditProductTest extends TestCase
     public function description_is_required_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'description' => ''
@@ -134,8 +174,12 @@ class EditProductTest extends TestCase
     public function price_is_required_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => ''
@@ -152,8 +196,12 @@ class EditProductTest extends TestCase
     public function price_must_be_numeric_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => 'not-numeric'
@@ -170,8 +218,12 @@ class EditProductTest extends TestCase
     public function price_must_be_0_or_more_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'price' => '-1'
@@ -188,8 +240,12 @@ class EditProductTest extends TestCase
     public function published_is_optional_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), [
             'name'        => 'New name',
@@ -212,8 +268,12 @@ class EditProductTest extends TestCase
     public function published_must_be_boolean_to_edit_a_product()
     {
         $user = factory(User::class)->create();
+        $brand = factory(Brand::class)->create();
+        $user->brands()->attach($brand);
 
-        $product = factory(Product::class)->create($this->oldAttributes());
+        $product = factory(Product::class)->create($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
 
         $response = $this->actingAs($user)->from(route('products.edit', $product))->patch(route('products.update', $product), $this->validParams([
             'published' => 'not-a-boolean'

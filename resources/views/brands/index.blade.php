@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Brands')
+@section('title', 'All Brands')
 
 @section('content')
     @foreach ($brands as $brand)
