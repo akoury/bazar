@@ -21,13 +21,17 @@ class ProductsController extends Controller
         return view('products.index', compact('products'));
     }
 
-    public function create()
+    public function create($brandId)
     {
-        return view('products.create');
+        $brand = auth()->user()->brands()->findOrFail($brandId);
+
+        return view('products.create', compact('brand'));
     }
 
-    public function store()
+    public function store($brandId)
     {
+        $brand = auth()->user()->brands()->findOrFail($brandId);
+
         request()->validate([
             'name'          => 'required',
             'description'   => 'required',
@@ -42,6 +46,7 @@ class ProductsController extends Controller
             'description' => request('description'),
             'price'       => request('price') * 100,
             'published'   => request()->filled('published'),
+            'brand_id'    => $brand->id,
             'image_path'  => request('product_image')->store('products', 'public'),
         ])->addItems(request('item_quantity'));
 

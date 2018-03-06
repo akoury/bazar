@@ -8,7 +8,10 @@ $factory->define(App\Models\Product::class, function (Faker $faker) {
         'description' => $faker->sentence(6),
         'price'       => $faker->numberBetween(100, 10000),
         'published'   => true,
-        'image_path'  => 'product-image.png'
+        'image_path'  => 'product-image.png',
+        'brand_id'    => function () {
+            return factory(App\Models\Brand::class)->create()->id;
+        }
     ];
 });
 

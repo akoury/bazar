@@ -24,6 +24,11 @@ class Product extends Model
         return $this->hasMany(Item::class);
     }
 
+    public function brand()
+    {
+        return $this->belongsTo(Brand::class);
+    }
+
     public function price()
     {
         return number_format($this->price / 100, 2);

@@ -20,12 +20,19 @@ class InitialSeeder extends Seeder
             'password' => bcrypt('123123123')
         ]);
 
+        $brand = $user->brands()->create([
+            'name'   => 'Apple',
+            'slogan' => 'Think different',
+        ]);
+
         $product = factory(Product::class)->create([
-            'name' => 'iPhone X'
+            'name'     => 'iPhone X',
+            'brand_id' => $brand->id
         ])->addItems(5);
 
         $product2 = factory(Product::class)->create([
-            'name' => 'iPhone 8',
+            'name'     => 'iPhone 8',
+            'brand_id' => $brand->id
         ])->addItems(2);
 
         $order = factory(Order::class)->create([

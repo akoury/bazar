@@ -25,12 +25,10 @@ class BrandsController extends Controller
             'slogan' => 'nullable',
         ]);
 
-        $brand = Brand::create([
+        $brand = auth()->user()->brands()->create([
             'name'   => request('name'),
             'slogan' => request('slogan'),
         ]);
-
-        $brand->users()->attach(auth()->id());
 
         return redirect()->route('brands.show', $brand);
     }
