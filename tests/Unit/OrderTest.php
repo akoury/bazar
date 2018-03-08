@@ -14,9 +14,9 @@ class OrderTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function creating_an_order_from_email_items_and_charge()
+    public function can_create_an_order_from_an_email_items_and_charge()
     {
-        $items = factory(Item::class, 3)->create();
+        $items = $this->create('Item', 3);
         $charge = new Charge(3600, '1234');
 
         $order = Order::forItems('customer@example.com', $items, $charge);
@@ -30,7 +30,7 @@ class OrderTest extends TestCase
     /** @test */
     public function retrieving_an_order_by_confirmation_number()
     {
-        $order = factory(Order::class)->create([
+        $order = $this->create('Order', 1, [
             'confirmation_number' => '123456789'
         ]);
 
@@ -50,12 +50,12 @@ class OrderTest extends TestCase
     /** @test */
     public function convert_order_to_an_array()
     {
-        $order = factory(Order::class)->create([
+        $order = $this->create('Order', 1, [
             'confirmation_number' => 'CONFIRMATIONNUMBER123',
             'email'               => 'customer@example.com',
             'amount'              => 6000
         ]);
-        $order->items()->saveMany(factory(Item::class, 5)->create());
+        $order->items()->saveMany($this->create('Item', 5));
 
         $result = $order->toArray();
 

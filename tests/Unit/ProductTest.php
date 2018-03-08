@@ -16,7 +16,7 @@ class ProductTest extends TestCase
     /** @test */
     public function can_get_a_products_price_with_decimals()
     {
-        $product = factory(Product::class)->make([
+        $product = $this->make('Product', 1, [
             'price' => 6750,
         ]);
 
@@ -26,7 +26,7 @@ class ProductTest extends TestCase
     /** @test */
     public function can_add_items()
     {
-        $product = factory(Product::class)->create()->addItems(20);
+        $product = $this->create('Product')->addItems(20);
 
         $this->assertEquals(20, $product->itemsRemaining());
     }
@@ -34,9 +34,9 @@ class ProductTest extends TestCase
     /** @test */
     public function items_remaining_does_not_include_items_associated_with_an_order()
     {
-        $product = factory(Product::class)->create();
-        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => 1]));
-        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => null]));
+        $product = $this->create('Product');
+        $product->items()->saveMany($this->create('Item', 4, ['order_id' => 1]));
+        $product->items()->saveMany($this->create('Item', 2, ['order_id' => null]));
 
         $this->assertEquals(2, $product->itemsRemaining());
     }
@@ -44,9 +44,9 @@ class ProductTest extends TestCase
     /** @test */
     public function items_sold_only_includes_items_associated_with_an_order()
     {
-        $product = factory(Product::class)->create();
-        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => 1]));
-        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => null]));
+        $product = $this->create('Product');
+        $product->items()->saveMany($this->create('Item', 4, ['order_id' => 1]));
+        $product->items()->saveMany($this->create('Item', 2, ['order_id' => null]));
 
         $this->assertEquals(4, $product->itemsSold());
     }
@@ -54,11 +54,11 @@ class ProductTest extends TestCase
     /** @test */
     public function can_calculate_a_products_revenue()
     {
-        $product = factory(Product::class)->create();
-        $orderA = factory(Order::class)->create(['amount' => 3850]);
-        $orderB = factory(Order::class)->create(['amount' => 9625]);
-        $product->items()->saveMany(factory(Item::class, 4)->create(['order_id' => $orderA->id]));
-        $product->items()->saveMany(factory(Item::class, 2)->create(['order_id' => $orderB->id]));
+        $product = $this->create('Product');
+        $orderA = $this->create('Order', 1, ['amount' => 3850]);
+        $orderB = $this->create('Order', 1, ['amount' => 9625]);
+        $product->items()->saveMany($this->create('Item', 4, ['order_id' => $orderA->id]));
+        $product->items()->saveMany($this->create('Item', 2, ['order_id' => $orderB->id]));
 
         $this->assertEquals(134.75, $product->revenue());
     }
@@ -66,7 +66,7 @@ class ProductTest extends TestCase
     /** @test */
     public function trying_to_reserve_more_items_than_remain_throws_an_exception()
     {
-        $product = factory(Product::class)->create()->addItems(10);
+        $product = $this->create('Product')->addItems(10);
 
         try {
             $reservation = $product->reserveItems(11, 'customer@example.com');
@@ -81,7 +81,7 @@ class ProductTest extends TestCase
     /** @test */
     public function a_customer_can_reserve_available_items()
     {
-        $product = factory(Product::class)->create()->addItems(3);
+        $product = $this->create('Product')->addItems(3);
         $this->assertEquals(3, $product->itemsRemaining());
 
         $reservation = $product->reserveItems(2, 'customer@example.com');
@@ -94,8 +94,8 @@ class ProductTest extends TestCase
     /** @test */
     public function a_customer_cannot_reserve_items_that_have_already_been_purchased()
     {
-        $product = factory(Product::class)->create()->addItems(3);
-        $order = factory(Order::class)->create();
+        $product = $this->create('Product')->addItems(3);
+        $order = $this->create('Order');
         $order->items()->saveMany($product->items->take(2));
 
         try {
@@ -111,7 +111,7 @@ class ProductTest extends TestCase
     /** @test */
     public function a_customer_cannot_reserve_items_that_have_already_been_reserved()
     {
-        $product = factory(Product::class)->create()->addItems(3);
+        $product = $this->create('Product')->addItems(3);
         $product->reserveItems(2, 'personA@example.com');
 
         try {

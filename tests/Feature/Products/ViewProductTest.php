@@ -14,7 +14,7 @@ class ViewProductTest extends TestCase
     /** @test */
     public function a_user_can_view_a_published_product()
     {
-        $product = factory(Product::class)->create([
+        $product = $this->create('Product', 1, [
             'name'        => 'iPhone X',
             'description' => 'Coming in 2017',
             'price'       => 10000
@@ -29,7 +29,7 @@ class ViewProductTest extends TestCase
     /** @test */
     public function a_user_cannot_view_an_unpublished_product()
     {
-        $product = factory(Product::class)->states('unpublished')->create();
+        $product = $this->create('Product', 1, [], 'unpublished');
 
         $response = $this->get(route('products.show', [$product->brand_id, $product]));
 
@@ -39,24 +39,24 @@ class ViewProductTest extends TestCase
     /** @test */
     public function a_user_can_view_a_brands_published_products()
     {
-        $brand = factory(Brand::class)->create();
+        $brand = $this->create('Brand');
 
-        $product = factory(Product::class)->create([
+        $product = $this->create('Product', 1, [
             'name'     => 'iPhone X',
             'price'    => 10000,
             'brand_id' => $brand
         ]);
 
-        $product2 = factory(Product::class)->create([
+        $product2 = $this->create('Product', 1, [
             'name'     => 'Galaxy S8',
             'price'    => 50000,
             'brand_id' => $brand
         ]);
 
-        $product3 = factory(Product::class)->states('unpublished')->create([
+        $product3 = $this->create('Product', 1, [
             'name'     => 'Google Pixel',
             'brand_id' => $brand
-        ]);
+        ], 'unpublished');
 
         $products = $brand->products()->wherePublished(true)->get();
 

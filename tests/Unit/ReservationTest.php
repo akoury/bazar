@@ -69,8 +69,8 @@ class ReservationTest extends TestCase
     /** @test */
     public function can_complete_a_reservation()
     {
-        $product = factory(Product::class)->create(['price' => 1200]);
-        $items = factory(Item::class, 3)->create(['product_id' => $product->id]);
+        $product = $this->create('Product', 1, ['price' => 1200]);
+        $items = $this->create('Item', 3, ['product_id' => $product->id]);
         $reservation = new Reservation($items, 'customer@example.com');
         $paymentGateway = new FakePaymentGateway;
 

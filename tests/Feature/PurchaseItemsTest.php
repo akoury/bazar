@@ -34,7 +34,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_can_purchase_items_of_a_published_product()
     {
-        $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
+        $product = $this->create('Product', 1, ['price' => 3250])->addItems(3);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
@@ -67,7 +67,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_cannot_purchase_items_from_an_unpublished_product()
     {
-        $product = factory(Product::class)->states('unpublished')->create()->addItems(3);
+        $product = $this->create('Product', 1, [], 'unpublished')->addItems(3);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
@@ -83,7 +83,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function an_order_is_not_created_if_payment_fails()
     {
-        $product = factory(Product::class)->create(['price' => 3250])->addItems(3);
+        $product = $this->create('Product', 1, ['price' => 3250])->addItems(3);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
@@ -100,7 +100,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_cannot_purchase_more_items_than_remain()
     {
-        $product = factory(Product::class)->create()->addItems(20);
+        $product = $this->create('Product')->addItems(20);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
@@ -118,7 +118,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_cannot_purchase_items_another_customer_is_already_purchasing()
     {
-        $product = factory(Product::class)->create(['price' => 1200])->addItems(3);
+        $product = $this->create('Product', 1, ['price' => 1200])->addItems(3);
 
         $this->paymentGateway->beforeFirstCharge(function () use ($product) {
             $response = $this->orderItems($product, [
@@ -145,76 +145,72 @@ class PurchaseItemsTest extends TestCase
         $this->assertEquals(3, $order->itemQuantity());
     }
 
-    private function assertValidationError($response, $field)
+    private function validParams($overrides = [])
     {
-        $response->assertStatus(422);
-        $this->assertArrayHasKey($field, $response->decodeResponseJson()['errors']);
+        return array_merge([
+            'email'         => 'customer@example.com',
+            'quantity'      => 3,
+            'payment_token' => $this->paymentGateway->getValidTestToken()
+        ], $overrides);
     }
 
     /** @test */
     public function email_is_required_to_purchase_items()
     {
-        $product = factory(Product::class)->create();
+        $product = $this->create('Product');
 
-        $response = $this->orderItems($product, [
-            'quantity'      => 3,
-            'payment_token' => $this->paymentGateway->getValidTestToken()
-        ]);
+        $response = $this->orderItems($product, $this->validParams([
+            'email' => '',
+        ]));
 
-        $this->assertValidationError($response, 'email');
+        $this->assertJsonValidationError($response, 'email');
     }
 
     /** @test */
     public function email_must_be_valid_to_purchase_items()
     {
-        $product = factory(Product::class)->create();
+        $product = $this->create('Product');
 
-        $response = $this->orderItems($product, [
-            'email'         => 'not-an-email',
-            'quantity'      => 3,
-            'payment_token' => $this->paymentGateway->getValidTestToken()
-        ]);
+        $response = $this->orderItems($product, $this->validParams([
+            'email' => 'not-an-email',
+        ]));
 
-        $this->assertValidationError($response, 'email');
+        $this->assertJsonValidationError($response, 'email');
     }
 
     /** @test */
     public function item_quantity_is_required_to_purchase_items()
     {
-        $product = factory(Product::class)->create();
+        $product = $this->create('Product');
 
-        $response = $this->orderItems($product, [
-            'email'         => 'customer@example.com',
-            'payment_token' => $this->paymentGateway->getValidTestToken(),
-        ]);
+        $response = $this->orderItems($product, $this->validParams([
+            'quantity' => '',
+        ]));
 
-        $this->assertValidationError($response, 'quantity');
+        $this->assertJsonValidationError($response, 'quantity');
     }
 
     /** @test */
     public function item_quantity_must_be_at_least_1_to_purchase_items()
     {
-        $product = factory(Product::class)->create();
+        $product = $this->create('Product');
 
-        $response = $this->orderItems($product, [
-            'email'         => 'john@example.com',
-            'quantity'      => 0,
-            'payment_token' => $this->paymentGateway->getValidTestToken(),
-        ]);
+        $response = $this->orderItems($product, $this->validParams([
+            'quantity' => 0,
+        ]));
 
-        $this->assertValidationError($response, 'quantity');
+        $this->assertJsonValidationError($response, 'quantity');
     }
 
     /** @test */
     public function payment_token_is_required()
     {
-        $product = factory(Product::class)->create();
+        $product = $this->create('Product');
 
-        $response = $this->orderItems($product, [
-            'email'    => 'john@example.com',
-            'quantity' => 3,
-        ]);
+        $response = $this->orderItems($product, $this->validParams([
+            'payment_token' => '',
+        ]));
 
-        $this->assertValidationError($response, 'payment_token');
+        $this->assertJsonValidationError($response, 'payment_token');
     }
 }

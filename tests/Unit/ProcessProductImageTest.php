@@ -21,7 +21,7 @@ class ProcessProductImageTest extends TestCase
         $image = UploadedFile::fake()->image('example-image.png', 1000, 1000);
         Storage::disk('public')->putFileAs('products', $image, 'example-image.png');
 
-        $product = factory(Product::class)->create([
+        $product = $this->create('Product', 1, [
             'image_path' => 'products/example-image.png',
         ]);
 

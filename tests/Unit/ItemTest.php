@@ -13,7 +13,7 @@ class ItemTest extends TestCase
     /** @test */
     public function an_item_can_be_reserved()
     {
-        $item = factory(Item::class)->create();
+        $item = $this->create('Item');
         $this->assertNull($item->fresh()->reserved_at);
 
         $item->reserve();
@@ -24,7 +24,7 @@ class ItemTest extends TestCase
     /** @test */
     public function an_item_can_be_released()
     {
-        $item = factory(Item::class)->states('reserved')->create();
+        $item = $this->create('Item', 1, [], 'reserved');
         $this->assertNotNull($item->reserved_at);
 
         $item->release();

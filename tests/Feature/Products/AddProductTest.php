@@ -3,7 +3,6 @@
 namespace Tests\Feature\Products;
 
 use Tests\TestCase;
-use App\Models\User;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Jobs\ProcessProductImage;
@@ -16,29 +15,12 @@ class AddProductTest extends TestCase
 {
     use RefreshDatabase;
 
-    private function validParams($overrides = [])
-    {
-        Storage::fake('public');
-
-        return array_merge([
-            'name'          => 'iPhone 8',
-            'description'   => 'The new iPhone',
-            'price'         => '700.50',
-            'published'     => true,
-            'item_quantity' => 20,
-            'product_image' => UploadedFile::fake()->image('product-image.png')
-        ], $overrides);
-    }
-
     /** @test */
     public function a_user_can_view_the_add_product_form_for_his_brand()
     {
-        $this->withoutExceptionHandling();
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->get(route('products.create', $brand));
+        $response = $this->get(route('products.create', $brand));
 
         $response->assertStatus(200);
     }
@@ -46,10 +28,10 @@ class AddProductTest extends TestCase
     /** @test */
     public function a_user_cannot_view_the_add_product_form_for_a_brand_he_does_not_own()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
+        $this->signIn();
+        $brand = $this->create('Brand');
 
-        $response = $this->actingAs($user)->get(route('products.create', $brand));
+        $response = $this->get(route('products.create', $brand));
 
         $response->assertStatus(404);
     }
@@ -57,7 +39,7 @@ class AddProductTest extends TestCase
     /** @test */
     public function guests_cannot_view_the_add_product_form_for_a_brand()
     {
-        $brand = factory(Brand::class)->create();
+        $brand = $this->create('Brand');
 
         $response = $this->get(route('products.create', $brand));
 
@@ -69,11 +51,9 @@ class AddProductTest extends TestCase
     public function a_user_can_add_a_product_to_his_brand()
     {
         Storage::fake('public');
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->post(route('products.store', $brand), [
+        $response = $this->post(route('products.store', $brand), [
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'price'         => '700.50',
@@ -95,13 +75,27 @@ class AddProductTest extends TestCase
         $this->assertEquals(20, $product->itemsRemaining());
     }
 
+    private function validParams($overrides = [])
+    {
+        Storage::fake('public');
+
+        return array_merge([
+            'name'          => 'iPhone 8',
+            'description'   => 'The new iPhone',
+            'price'         => '700.50',
+            'published'     => true,
+            'item_quantity' => 20,
+            'product_image' => UploadedFile::fake()->image('product-image.png')
+        ], $overrides);
+    }
+
     /** @test */
     public function a_user_cannot_add_a_product_to_a_brand_he_does_not_own()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
+        $this->signIn();
+        $brand = $this->create('Brand');
 
-        $response = $this->actingAs($user)->post(route('products.store', $brand), $this->validParams());
+        $response = $this->post(route('products.store', $brand), $this->validParams());
 
         $response->assertStatus(404);
         $this->assertEquals(0, Product::count());
@@ -110,7 +104,7 @@ class AddProductTest extends TestCase
     /** @test */
     public function a_guest_cannot_add_a_product()
     {
-        $brand = factory(Brand::class)->create();
+        $brand = $this->create('Brand');
 
         $response = $this->post(route('products.store', $brand), $this->validParams());
 
@@ -125,12 +119,10 @@ class AddProductTest extends TestCase
     {
         Storage::fake('public');
         Queue::fake();
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
 
-        $response = $this->actingAs($user)->post(route('products.store', $brand), $this->validParams([
+        $response = $this->post(route('products.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
         $product = Product::first();
@@ -144,11 +136,9 @@ class AddProductTest extends TestCase
     public function an_image_optimizer_job_is_queued_when_a_product_is_created()
     {
         Queue::fake();
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->post(route('products.store', $brand), $this->validParams());
+        $response = $this->post(route('products.store', $brand), $this->validParams());
 
         $product = Product::first();
 
@@ -160,96 +150,74 @@ class AddProductTest extends TestCase
     /** @test */
     public function name_is_required_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'name' => ''
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('name');
+        $this->assertValidationError($response, route('products.create', $brand), 'name');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function description_is_required_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'description' => ''
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('description');
+        $this->assertValidationError($response, route('products.create', $brand), 'description');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function price_is_required_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'price' => ''
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('price');
+        $this->assertValidationError($response, route('products.create', $brand), 'price');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function price_must_be_numeric_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'price' => 'not-numeric'
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('price');
+        $this->assertValidationError($response, route('products.create', $brand), 'price');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function price_must_be_0_or_more_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'price' => '-1'
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('price');
+        $this->assertValidationError($response, route('products.create', $brand), 'price');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function published_is_optional_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'published' => null,
         ]));
 
@@ -264,68 +232,52 @@ class AddProductTest extends TestCase
     /** @test */
     public function published_must_be_boolean_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'published' => 'not-a-boolean'
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('published');
+        $this->assertValidationError($response, route('products.create', $brand), 'published');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function item_quantity_is_required_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'item_quantity' => ''
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('item_quantity');
+        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function item_quantity_must_be_an_integer_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'item_quantity' => '1.3'
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('item_quantity');
+        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function item_quantity_must_be_0_or_more_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'item_quantity' => '-1'
         ]));
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('item_quantity');
+        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
@@ -333,33 +285,27 @@ class AddProductTest extends TestCase
     public function product_image_must_be_an_image()
     {
         Storage::fake('public');
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->create('not-an-image.pdf');
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
 
-        $response->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('product_image');
+        $this->assertValidationError($response, route('products.create', $brand), 'product_image');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
     public function product_image_is_required_to_create_a_product()
     {
-        $user = factory(User::class)->create();
-        $brand = factory(Brand::class)->create();
-        $user->brands()->attach($brand);
+        $brand = $this->brandForSignedInUser();
 
-        $response = $this->actingAs($user)->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'product_image' => null
         ]));
 
-        $response->assertRedirect(route('products.create', $brand))
-            ->assertSessionHasErrors('product_image');
+        $this->assertValidationError($response, route('products.create', $brand), 'product_image');
         $this->assertEquals(0, Product::count());
     }
 }

@@ -13,7 +13,7 @@ class ViewBrandTest extends TestCase
     /** @test */
     public function a_guest_can_view_a_brand()
     {
-        $brand = factory(Brand::class)->create([
+        $brand = $this->create('Brand', 1, [
             'name'   => 'Apple',
             'slogan' => 'Think different',
         ]);
@@ -29,7 +29,7 @@ class ViewBrandTest extends TestCase
     /** @test */
     public function a_guest_can_view_all_brands()
     {
-        $brands = factory(Brand::class, 3)->create();
+        $brands = $this->create('Brand', 3);
 
         $this->get(route('brands.index'))
             ->assertStatus(200)

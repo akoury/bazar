@@ -14,9 +14,9 @@ class CreateBrandTest extends TestCase
     /** @test */
     public function a_user_can_view_the_brand_creation_form()
     {
-        $user = factory(User::class)->create();
+        $this->signIn();
 
-        $response = $this->actingAs($user)->get(route('brands.create'));
+        $response = $this->get(route('brands.create'));
 
         $response->assertStatus(200);
     }
@@ -33,9 +33,10 @@ class CreateBrandTest extends TestCase
     /** @test */
     public function a_user_can_create_a_brand()
     {
-        $user = factory(User::class)->create();
+        $user = $this->create('User');
+        $this->signIn($user);
 
-        $response = $this->actingAs($user)->post(route('brands.store'), [
+        $response = $this->post(route('brands.store'), [
             'name'   => 'Apple',
             'slogan' => 'Think different',
         ]);
@@ -62,5 +63,41 @@ class CreateBrandTest extends TestCase
             ->assertRedirect(route('login'));
 
         $this->assertEquals(0, Brand::count());
+    }
+
+    private function validParams($overrides = [])
+    {
+        return array_merge([
+            'name'   => 'Apple',
+            'slogan' => 'Think different',
+        ], $overrides);
+    }
+
+    /** @test */
+    public function name_is_required_to_create_a_brand()
+    {
+        $this->signIn();
+
+        $response = $this->from(route('brands.create'))->post(route('brands.store'), $this->validParams([
+            'name' => '',
+        ]));
+
+        $this->assertValidationError($response, route('brands.create'), 'name');
+        $this->assertEquals(0, Brand::count());
+    }
+
+    /** @test */
+    public function slogan_is_optional_to_create_a_brand()
+    {
+        $this->signIn();
+
+        $response = $this->from(route('brands.create'))->post(route('brands.store'), $this->validParams([
+            'slogan' => '',
+        ]));
+
+        $brand = Brand::first();
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('brands.show', $brand));
     }
 }

@@ -12,7 +12,7 @@ class OrderConfirmationTest extends TestCase
     /** @test */
     public function email_contains_a_link_to_the_order_confirmation_page()
     {
-        $order = factory(Order::class)->make([
+        $order = $this->make('Order', 1, [
            'confirmation_number' => 'CONFIRMATIONNUMBER123'
         ]);
 

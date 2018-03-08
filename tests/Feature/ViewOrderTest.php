@@ -13,19 +13,19 @@ class ViewOrderTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_user_can_view_their_order_confirmation()
+    public function a_customer_can_view_their_order_confirmation()
     {
-        $product = factory(Product::class)->create([
+        $product = $this->create('Product', 1, [
             'name' => 'iPhone X'
         ]);
 
-        $order = factory(Order::class)->create([
+        $order = $this->create('Order', 1, [
             'amount'              => 8500,
             'confirmation_number' => '123456789',
             'card_last_four'      => 4242
         ]);
 
-        $item = factory(Item::class)->create([
+        $item = $this->create('Item', 1, [
             'product_id' => $product->id,
             'order_id'   => $order->id
         ]);
