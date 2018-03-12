@@ -4,7 +4,7 @@
 
 @section('content')
     @foreach ($products as $product)
-        <h1><a href="{{ route('products.show', [$brand, $product]) }}">{{ $product->name }}</a></h1>
+        <h1><a href="{{ route('products.show', [$brand->link(), $product]) }}">{{ $product->name }}</a></h1>
         <h1>{{ $product->description }}</h1>
         <h1>{{ $product->price() }}</h1>
     @endforeach

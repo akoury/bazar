@@ -4,7 +4,7 @@
 
 @section('content')
     <h1>Create a Product</h1>
-    <form method="POST" action="{{ route('products.store', $brand) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route('products.store', $brand->name) }}" enctype="multipart/form-data">
         @csrf
 
         <label for="name">Name</label>

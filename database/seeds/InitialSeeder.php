@@ -21,8 +21,9 @@ class InitialSeeder extends Seeder
         ]);
 
         $brand = $user->brands()->create([
-            'name'   => 'Apple',
+            'name'   => 'epa.bazar.test',
             'slogan' => 'Think different',
+            'custom' => true
         ]);
 
         $product = factory(Product::class)->create([

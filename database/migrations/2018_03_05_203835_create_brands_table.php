@@ -17,6 +17,7 @@ class CreateBrandsTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->string('slogan')->nullable();
+            $table->boolean('custom')->default(0);
             $table->timestamps();
         });
 

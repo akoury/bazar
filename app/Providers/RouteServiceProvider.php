@@ -23,7 +23,11 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Route::pattern('domain', '[a-z0-9.\-]+');
+
+        Route::bind('domain', function ($value) {
+            return \App\Models\Brand::whereName($value)->firstOrFail();
+        });
 
         parent::boot();
     }

@@ -8,31 +8,31 @@ use App\Jobs\ProcessProductImage;
 
 class ProductsController extends Controller
 {
-    public function show($brandId, $id)
+    public function show($brandName, $id)
     {
         $product = Product::wherePublished(true)->findOrFail($id);
 
         return view('products.show', compact('product'));
     }
 
-    public function index($brandId)
+    public function index($brandName)
     {
-        $brand = Brand::findOrFail($brandId);
+        $brand = Brand::whereName($brandName)->firstOrFail();
         $products = $brand->products()->wherePublished(true)->get();
 
         return view('products.index', compact('brand', 'products'));
     }
 
-    public function create($brandId)
+    public function create($brandName)
     {
-        $brand = auth()->user()->brands()->findOrFail($brandId);
+        $brand = auth()->user()->brands()->whereName($brandName)->firstOrFail();
 
         return view('products.create', compact('brand'));
     }
 
-    public function store($brandId)
+    public function store($brandName)
     {
-        $brand = auth()->user()->brands()->findOrFail($brandId);
+        $brand = auth()->user()->brands()->whereName($brandName)->firstOrFail();
 
         request()->validate([
             'name'          => 'required',
@@ -54,7 +54,7 @@ class ProductsController extends Controller
 
         ProcessProductImage::dispatch($product);
 
-        return redirect()->route('products.show', [$product->brand_id, $product]);
+        return redirect()->route('products.show', [$product->brand->name, $product]);
     }
 
     public function edit($id)
@@ -86,6 +86,6 @@ class ProductsController extends Controller
             'published'   => request()->filled('published'),
         ]);
 
-        return redirect()->route('products.show', [$product->brand_id, $product]);
+        return redirect()->route('products.show', [$product->brand->name, $product]);
     }
 }

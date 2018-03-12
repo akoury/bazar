@@ -18,4 +18,13 @@ class Brand extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function link()
+    {
+        if ($this->custom) {
+            return $this->name;
+        }
+
+        return $this->name . '.' . parse_url(config('app.url'), PHP_URL_HOST);
+    }
 }
