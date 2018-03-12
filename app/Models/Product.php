@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Classes\Reservation;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
 
@@ -36,18 +37,19 @@ class Product extends Model
 
     public function reserveItems($quantity, $email)
     {
-        return new Reservation($this->findItems($quantity)->each->reserve(), $email);
-    }
+        $items = DB::transaction(function () use ($quantity) {
+            // Finds items and locks them to avoid race conditions
+            $items = $this->items()->available()->take($quantity)->lockForUpdate()->get();
 
-    public function findItems($quantity)
-    {
-        $items = $this->items()->available()->take($quantity)->get();
+            if ($items->count() < $quantity) {
+                throw new NotEnoughItemsException;
+            }
 
-        if ($items->count() < $quantity) {
-            throw new NotEnoughItemsException;
-        }
+            $items->each->reserve();
+            return $items;
+        });
 
-        return $items;
+        return new Reservation($items, $email);
     }
 
     public function addItems($quantity)
