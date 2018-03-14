@@ -3,7 +3,6 @@
 namespace Tests\Feature;
 
 use Tests\TestCase;
-use App\Models\Order;
 use App\Models\Product;
 use App\Classes\PaymentGateway;
 use Tests\Fakes\FakePaymentGateway;
@@ -32,7 +31,7 @@ class PurchaseItemsTest extends TestCase
     }
 
     /** @test */
-    public function a_customer_can_purchase_items_of_a_published_product()
+    public function a_guest_can_purchase_items_of_a_published_product()
     {
         $product = $this->create('Product', 1, ['price' => 3250])->addItems(3);
 
@@ -42,7 +41,7 @@ class PurchaseItemsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $order = Order::first();
+        $order = $response->original;
 
         $response->assertStatus(201)
             ->assertJson([
@@ -56,12 +55,26 @@ class PurchaseItemsTest extends TestCase
 
         $order = $product->orders()->where('email', 'customer@example.com')->first();
         $this->assertNotNull($order);
+        $this->assertNull($order->user);
         $this->assertEquals(3, $order->itemQuantity());
 
         Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
             return $notifiable->routes['mail'] == 'customer@example.com'
                 && $notification->order->id == $order->id;
         });
+    }
+
+    /** @test */
+    public function a_user_can_purchase_items_of_a_published_product_and_have_the_order_belong_to_him()
+    {
+        $user = $this->create('User');
+        $this->signIn($user);
+        $product = $this->create('Product', 1)->addItems(3);
+
+        $response = $this->orderItems($product, $this->validParams());
+        $order = $response->original;
+
+        $this->assertTrue($order->user->is($user));
     }
 
     /** @test */

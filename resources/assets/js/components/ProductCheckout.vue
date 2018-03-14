@@ -8,7 +8,7 @@
 
 <script>
 export default {
-    props: ['productId', 'productPrice'],
+    props: ['productId', 'productPrice', 'userEmail'],
     data() {
         return {
             quantity: 1,
@@ -36,6 +36,7 @@ export default {
                 name: 'Bazar',
                 description: 'Your order',
                 currency: 'usd',
+                email: this.userEmail,
                 allowRememberMe: false,
                 panelLabel: 'Pay {{amount}}',
                 amount: this.totalPrice,

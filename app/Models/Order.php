@@ -18,11 +18,17 @@ class Order extends Model
         return $this->hasMany(Item::class);
     }
 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public static function forItems($email, $items, $charge)
     {
         $order = self::create([
             'confirmation_number' => static::generateConfirmationNumber(),
             'email'               => $email,
+            'user_id'             => auth()->id(),
             'amount'              => $charge->amount(),
             'card_last_four'      => $charge->cardLastFour()
         ]);

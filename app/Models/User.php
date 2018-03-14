@@ -30,6 +30,10 @@ class User extends Authenticatable
     public function brands()
     {
         return $this->belongsToMany(Brand::class)->withTimestamps();
-        ;
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
     }
 }

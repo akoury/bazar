@@ -13233,7 +13233,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['productId', 'productPrice'],
+    props: ['productId', 'productPrice', 'userEmail'],
     data: function data() {
         return {
             quantity: 1,
@@ -13262,6 +13262,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 name: 'Bazar',
                 description: 'Your order',
                 currency: 'usd',
+                email: this.userEmail,
                 allowRememberMe: false,
                 panelLabel: 'Pay {{amount}}',
                 amount: this.totalPrice,

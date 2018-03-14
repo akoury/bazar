@@ -43,4 +43,11 @@ class OrdersController extends Controller
 
         return view('orders.show', compact('order'));
     }
+
+    public function index()
+    {
+        $orders = auth()->user()->orders;
+
+        return view('orders.index', compact('orders'));
+    }
 }

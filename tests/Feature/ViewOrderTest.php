@@ -13,7 +13,7 @@ class ViewOrderTest extends TestCase
     use RefreshDatabase;
 
     /** @test */
-    public function a_customer_can_view_their_order_confirmation()
+    public function a_customer_can_view_his_order_confirmation()
     {
         $product = $this->create('Product', 1, [
             'name' => 'iPhone X'
@@ -39,5 +39,47 @@ class ViewOrderTest extends TestCase
             ->assertSee('85.00')
             ->assertSee('**** **** **** 4242')
             ->assertSee('iPhone X');
+    }
+
+    /** @test */
+    public function a_user_can_view_his_orders()
+    {
+        $user = $this->create('User');
+        $this->signIn($user);
+        $orders = $this->create('Order', 3, [
+            'user_id' => $user->id
+        ]);
+
+        $this->get(route('orders.index'))
+            ->assertStatus(200)
+            ->assertViewHas('orders', function ($viewOrders) use ($orders) {
+                return $viewOrders->diff($orders)->count() === 0;
+            });
+    }
+
+    /** @test */
+    public function a_user_cannot_view_another_users_orders()
+    {
+        $otherOrders = $this->create('Order', 2);
+        $user = $this->create('User');
+        $this->signIn($user);
+        $userOrders = $this->create('Order', 2, [
+            'user_id' => $user->id
+        ]);
+
+        $this->get(route('orders.index'))
+            ->assertStatus(200)
+            ->assertViewHas('orders', function ($viewOrders) use ($otherOrders, $userOrders) {
+                return $viewOrders->diff($userOrders)->count() === 0 && $viewOrders->diff($otherOrders)->count() === 2;
+            });
+    }
+
+    /** @test */
+    public function a_guest_cannot_view_his_orders()
+    {
+        $response = $this->get(route('orders.index'));
+
+        $response->assertStatus(302)
+            ->assertRedirect(route('login'));
     }
 }

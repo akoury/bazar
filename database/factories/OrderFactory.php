@@ -8,5 +8,6 @@ $factory->define(App\Models\Order::class, function (Faker $faker) {
         'email'               => 'customer@example.com',
         'confirmation_number' => $faker->bankAccountNumber(),
         'card_last_four'      => '1234',
+        'user_id'             => null,
     ];
 });

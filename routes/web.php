@@ -16,6 +16,7 @@ Route::get('products/{id}/edit', 'ProductsController@edit')->name('products.edit
 Route::patch('products/{id}', 'ProductsController@update')->name('products.update')->middleware('auth');
 
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
+Route::get('orders', 'OrdersController@index')->name('orders.index')->middleware('auth');
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');
 
 Auth::routes();

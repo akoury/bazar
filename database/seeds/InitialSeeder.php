@@ -36,7 +36,13 @@ class InitialSeeder extends Seeder
         ])->addItems(2);
 
         $order = factory(Order::class)->create([
-            'confirmation_number' => '123'
+            'confirmation_number' => '123',
+            'user_id'             => $user
+        ]);
+
+        $order2 = factory(Order::class)->create([
+            'confirmation_number' => '1234',
+            'user_id'             => $user
         ]);
 
         $item = factory(Item::class, 3)->create([
