@@ -15,6 +15,9 @@ Route::get('brands/{brandId}/products/{id}', 'ProductsController@show')->name('p
 Route::get('products/{id}/edit', 'ProductsController@edit')->name('products.edit')->middleware('auth');
 Route::patch('products/{id}', 'ProductsController@update')->name('products.update')->middleware('auth');
 
+Route::get('cart', 'CartsController@show')->name('carts.show');
+Route::post('products/{id}/add', 'CartsController@store')->name('carts.store');
+
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
 Route::get('orders', 'OrdersController@index')->name('orders.index')->middleware('auth');
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');

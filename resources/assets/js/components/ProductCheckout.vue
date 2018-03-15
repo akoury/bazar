@@ -1,9 +1,12 @@
 <template>
-    <form @submit.prevent="order">
-        <label for="quantity">Quantity</label>
-        <input id="quantity" type="number" name="quantity" v-model="quantity" required>
-        <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
-    </form>
+    <div>
+        <form @submit.prevent="order">
+            <label for="quantity">Quantity</label>
+            <input id="quantity" type="number" name="quantity" v-model="quantity" required>
+            <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
+        </form>
+        <button v-on:click="addToCart" :disabled="processing">Add to Cart</button>
+    </div>
 </template>
 
 <script>
@@ -54,6 +57,18 @@ export default {
                     alert(error.response.data)
                     this.processing = false
                 })
+        },
+        addToCart() {
+            this.processing = true
+            axios
+                .post('/products/' + this.productId + '/add', { quantity: this.quantity })
+                .then(response => {
+                    alert(response.data)
+                })
+                .catch(error => {
+                    console.log(error.response.data)
+                })
+            this.processing = false
         }
     },
     computed: {

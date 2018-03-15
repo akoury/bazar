@@ -19,6 +19,7 @@ class ViewBrandTest extends TestCase
         ]);
 
         $this->get(route('brands.show', $brand))
+            ->assertStatus(200)
             ->assertSee('Apple')
             ->assertSee('Think different')
             ->assertViewHas('brand', function ($viewBrand) use ($brand) {

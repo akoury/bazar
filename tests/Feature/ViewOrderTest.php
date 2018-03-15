@@ -54,6 +54,7 @@ class ViewOrderTest extends TestCase
             ->assertStatus(200)
             ->assertViewHas('orders', function ($viewOrders) use ($orders) {
                 return $viewOrders->diff($orders)->count() === 0;
+                return $viewOrders->equals($orders);
             });
     }
 
