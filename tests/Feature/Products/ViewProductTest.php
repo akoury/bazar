@@ -63,7 +63,7 @@ class ViewProductTest extends TestCase
         $this->get(route('products.index', $brand))
             ->assertStatus(200)
             ->assertViewHas('products', function ($viewProducts) use ($products) {
-                return $products->diff($viewProducts)->count() === 0;
+                return $this->assertCollectionsAreEqual($viewProducts, $products);
             })
             ->assertSee('iPhone X')
             ->assertSee('100.00')

@@ -66,4 +66,16 @@ abstract class TestCase extends BaseTestCase
             ->assertRedirect($from)
             ->assertSessionHasErrors($field);
     }
+
+    protected function assertCollectionsAreEqual($collectionA, $collectionB)
+    {
+        $intersectionACount = $collectionA->intersect($collectionB)->count();
+        $intersectionBCount = $collectionB->intersect($collectionA)->count();
+
+        if ($intersectionACount === $intersectionBCount && $intersectionACount === $collectionA->count() && $collectionA->count() === $collectionB->count()) {
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -53,8 +53,7 @@ class ViewOrderTest extends TestCase
         $this->get(route('orders.index'))
             ->assertStatus(200)
             ->assertViewHas('orders', function ($viewOrders) use ($orders) {
-                return $viewOrders->diff($orders)->count() === 0;
-                return $viewOrders->equals($orders);
+                return $this->assertCollectionsAreEqual($orders, $viewOrders);
             });
     }
 
@@ -71,7 +70,7 @@ class ViewOrderTest extends TestCase
         $this->get(route('orders.index'))
             ->assertStatus(200)
             ->assertViewHas('orders', function ($viewOrders) use ($otherOrders, $userOrders) {
-                return $viewOrders->diff($userOrders)->count() === 0 && $viewOrders->diff($otherOrders)->count() === 2;
+                return $this->assertCollectionsAreEqual($viewOrders, $userOrders) && ! $this->assertCollectionsAreEqual($viewOrders, $otherOrders);
             });
     }
 

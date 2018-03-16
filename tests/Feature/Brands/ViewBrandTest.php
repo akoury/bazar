@@ -35,7 +35,7 @@ class ViewBrandTest extends TestCase
         $this->get(route('brands.index'))
             ->assertStatus(200)
             ->assertViewHas('brands', function ($viewBrands) use ($brands) {
-                return $brands->diff($viewBrands)->count() === 0;
+                return $this->assertCollectionsAreEqual($viewBrands, $brands);
             });
     }
 }
