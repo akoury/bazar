@@ -195,6 +195,39 @@ class AddProductsToCartTest extends TestCase
     }
 
     /** @test */
+    public function a_guest_that_logs_in_with_products_in_his_cart_has_the_products_added_to_his_accounts_cart()
+    {
+        $product = $this->create('Product')->addItems(2);
+
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+        $user = $this->create('User', 1, ['password' => bcrypt($password = 'my-password')]);
+        $this->assertNull($user->cart);
+        $this->post(route('login'), [
+            'email'    => $user->email,
+            'password' => $password,
+        ]);
+
+        $this->assertEquals(2, $user->fresh()->cart->products()->first()->quantity);
+        $this->assertTrue($user->fresh()->cart->products()->first()->is($product));
+    }
+
+    /** @test */
+    public function a_guest_that_registers_with_products_in_his_cart_has_the_products_added_to_his_accounts_cart()
+    {
+        $product = $this->create('Product')->addItems(2);
+
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+        $this->post(route('register'), [
+            'email'    => 'user@example.com',
+            'password' => 'my-password',
+        ]);
+
+        $user = auth()->user()->fresh();
+        $this->assertEquals(2, $user->cart->products()->first()->quantity);
+        $this->assertTrue($user->cart->products()->first()->is($product));
+    }
+
+    /** @test */
     public function quantity_is_required_to_add_a_product_to_the_cart()
     {
         $product = $this->create('Product')->addItems(1);

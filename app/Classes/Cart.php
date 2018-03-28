@@ -3,7 +3,6 @@
 namespace App\Classes;
 
 use App\Models\UserCart;
-use App\Exceptions\NotEnoughItemsException;
 
 class Cart
 {
@@ -24,10 +23,10 @@ class Cart
         $itemsRemaining = $product->itemsRemaining();
 
         if ($itemsRemaining == 0 || $itemsRemaining == $itemsAlreadyInCart) {
-            throw new NotEnoughItemsException();
+            return 0;
         } elseif ($itemsRemaining >= $itemsAlreadyInCart + $requestedQuantity) {
-            $requestedQuantity += $itemsAlreadyInCart;
             $addedItems = $requestedQuantity;
+            $requestedQuantity += $itemsAlreadyInCart;
         } else {
             $requestedQuantity = $itemsRemaining;
             $addedItems = 'Not enought items, ' . ($itemsRemaining - $itemsAlreadyInCart);
@@ -35,13 +34,11 @@ class Cart
 
         if ($productAlreadyInCart) {
             $productAlreadyInCart->quantity = $requestedQuantity;
-
             return $addedItems;
         }
 
         $product->quantity = $requestedQuantity;
         $this->products->push($product);
-
         return $addedItems;
     }
 
