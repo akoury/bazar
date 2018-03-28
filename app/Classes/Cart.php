@@ -2,6 +2,7 @@
 
 namespace App\Classes;
 
+use App\Models\UserCart;
 use App\Exceptions\NotEnoughItemsException;
 
 class Cart
@@ -19,13 +20,24 @@ class Cart
             return $i->is($product);
         });
 
-        if ($productInCart && $product->itemsRemaining() >= $productInCart->quantity + $quantity) {
+        $itemsRemaining = $product->itemsRemaining();
+
+        if ($productInCart && $itemsRemaining >= $productInCart->quantity + $quantity) {
             $productInCart->quantity += $quantity;
-        } elseif (! $productInCart && $product->itemsRemaining() >= $quantity) {
+        } elseif (! $productInCart && $itemsRemaining >= $quantity) {
             $product->quantity = $quantity;
             $this->products->push($product);
         } else {
             throw new NotEnoughItemsException();
+        }
+    }
+
+    public function save()
+    {
+        if (auth()->check()) {
+            UserCart::updateOrCreate(['user_id' => auth()->id()], ['cart' => $this]);
+        } else {
+            session(['cart' => $this]);
         }
     }
 }

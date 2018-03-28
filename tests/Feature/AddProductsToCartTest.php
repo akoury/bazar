@@ -19,8 +19,8 @@ class AddProductsToCartTest extends TestCase
 
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $this->assertEquals(3, $user->products->first()->cart->quantity);
-        $this->assertTrue($user->products->first()->is($product));
+        $this->assertEquals(3, $user->fresh()->cart->products()->first()->quantity);
+        $this->assertTrue($user->fresh()->cart->products()->first()->is($product));
     }
 
     /** @test */
@@ -32,7 +32,7 @@ class AddProductsToCartTest extends TestCase
 
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $this->assertCount(0, $user->products);
+        $this->assertNull($user->fresh()->cart);
     }
 
     /** @test */
@@ -43,10 +43,10 @@ class AddProductsToCartTest extends TestCase
         $product = $this->create('Product')->addItems(2);
 
         $this->post(route('carts.store', $product), ['quantity' => 2]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
 
-        $this->assertEquals(2, $user->products->first()->cart->quantity);
-        $this->assertTrue($user->products->first()->is($product));
+        $this->assertEquals(2, $user->fresh()->cart->products()->first()->quantity);
+        $this->assertTrue($user->fresh()->cart->products()->first()->is($product));
     }
 
     /** @test */
@@ -57,14 +57,15 @@ class AddProductsToCartTest extends TestCase
         $productA = $this->create('Product')->addItems(3);
         $productB = $this->create('Product')->addItems(1);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 3]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->actingAs($user)->post(route('carts.store', $productA), ['quantity' => 3]);
+        $this->actingAs($user->fresh())->post(route('carts.store', $productB), ['quantity' => 1]);
 
-        $this->assertCount(2, $user->products);
-        $this->assertTrue($user->products->first()->is($productA));
-        $this->assertEquals(3, $user->products->first()->cart->quantity);
-        $this->assertTrue($user->products->last()->is($productB));
-        $this->assertEquals(1, $user->products->last()->cart->quantity);
+        $user = $user->fresh();
+        $this->assertCount(2, $user->cart->products());
+        $this->assertTrue($user->cart->products()->first()->is($productA));
+        $this->assertEquals(3, $user->cart->products()->first()->quantity);
+        $this->assertTrue($user->cart->products()->last()->is($productB));
+        $this->assertEquals(1, $user->cart->products()->last()->quantity);
     }
 
     /** @test */
@@ -75,11 +76,11 @@ class AddProductsToCartTest extends TestCase
         $product = $this->create('Product')->addItems(3);
 
         $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
 
-        $this->assertEquals(3, $user->products->first()->cart->quantity);
-        $this->assertTrue($user->products->first()->is($product));
+        $this->assertEquals(3, $user->fresh()->cart->products()->first()->quantity);
+        $this->assertTrue($user->fresh()->cart->products()->first()->is($product));
     }
 
     /** @test */
