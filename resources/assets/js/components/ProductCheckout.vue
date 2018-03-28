@@ -66,7 +66,7 @@ export default {
                     alert(response.data)
                 })
                 .catch(error => {
-                    console.log(error.response.data)
+                    alert(error.response.data)
                 })
             this.processing = false
         }

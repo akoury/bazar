@@ -14,22 +14,35 @@ class Cart
         $this->products = collect();
     }
 
-    public function add($product, $quantity)
+    public function add($product, $requestedQuantity)
     {
-        $productInCart = $this->products->first(function ($i) use ($product) {
+        $productAlreadyInCart = $this->products->first(function ($i) use ($product) {
             return $i->is($product);
         });
 
+        $itemsAlreadyInCart = optional($productAlreadyInCart)->quantity ?? 0;
         $itemsRemaining = $product->itemsRemaining();
 
-        if ($productInCart && $itemsRemaining >= $productInCart->quantity + $quantity) {
-            $productInCart->quantity += $quantity;
-        } elseif (! $productInCart && $itemsRemaining >= $quantity) {
-            $product->quantity = $quantity;
-            $this->products->push($product);
-        } else {
+        if ($itemsRemaining == 0 || $itemsRemaining == $itemsAlreadyInCart) {
             throw new NotEnoughItemsException();
+        } elseif ($itemsRemaining >= $itemsAlreadyInCart + $requestedQuantity) {
+            $requestedQuantity += $itemsAlreadyInCart;
+            $addedItems = $requestedQuantity;
+        } else {
+            $requestedQuantity = $itemsRemaining;
+            $addedItems = 'Not enought items, ' . ($itemsRemaining - $itemsAlreadyInCart);
         }
+
+        if ($productAlreadyInCart) {
+            $productAlreadyInCart->quantity = $requestedQuantity;
+
+            return $addedItems;
+        }
+
+        $product->quantity = $requestedQuantity;
+        $this->products->push($product);
+
+        return $addedItems;
     }
 
     public function save()

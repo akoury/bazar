@@ -22,12 +22,12 @@ class CartsController extends Controller
             } else {
                 $cart = session('cart') ?? new Cart();
             }
-            $cart->add($product, request('quantity'));
+            $itemsAdded = $cart->add($product, request('quantity'));
             $cart->save();
 
-            return response()->json(['Product added to cart'], 201);
+            return response()->json([ $itemsAdded . ' ' . $product->name . ' added to your cart'], 201);
         } catch (NotEnoughItemsException $e) {
-            return response()->json(['The number of items you requested is not available'], 422);
+            return response()->json(['There are not enough available items of this product'], 422);
         }
     }
 

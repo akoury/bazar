@@ -13288,7 +13288,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.post('/products/' + this.productId + '/add', { quantity: this.quantity }).then(function (response) {
                 alert(response.data);
             }).catch(function (error) {
-                console.log(error.response.data);
+                alert(error.response.data);
             });
             this.processing = false;
         }
