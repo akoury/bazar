@@ -117,8 +117,8 @@ class AddProductsToCartTest extends TestCase
 
         $this->post(route('carts.store', $product), ['quantity' => 1]);
 
-        $this->assertTrue(session('cart')->products->first()->is($product));
-        $this->assertEquals(1, session('cart')->products->first()->quantity);
+        $this->assertTrue(cart()->products->first()->is($product));
+        $this->assertEquals(1, cart()->products->first()->quantity);
     }
 
     /** @test */
@@ -130,10 +130,10 @@ class AddProductsToCartTest extends TestCase
         $this->post(route('carts.store', $productA), ['quantity' => 2]);
         $this->post(route('carts.store', $productB), ['quantity' => 1]);
 
-        $this->assertTrue(session('cart')->products->first()->is($productA));
-        $this->assertEquals(2, session('cart')->products->first()->quantity);
-        $this->assertTrue(session('cart')->products->last()->is($productB));
-        $this->assertEquals(1, session('cart')->products->last()->quantity);
+        $this->assertTrue(cart()->products->first()->is($productA));
+        $this->assertEquals(2, cart()->products->first()->quantity);
+        $this->assertTrue(cart()->products->last()->is($productB));
+        $this->assertEquals(1, cart()->products->last()->quantity);
     }
 
     /** @test */
@@ -145,8 +145,8 @@ class AddProductsToCartTest extends TestCase
         $this->post(route('carts.store', $product), ['quantity' => 1]);
         $this->post(route('carts.store', $product), ['quantity' => 1]);
 
-        $this->assertTrue(session('cart')->products->first()->is($product));
-        $this->assertEquals(3, session('cart')->products->first()->quantity);
+        $this->assertTrue(cart()->products->first()->is($product));
+        $this->assertEquals(3, cart()->products->first()->quantity);
     }
 
     /** @test */
@@ -167,8 +167,8 @@ class AddProductsToCartTest extends TestCase
         $this->post(route('carts.store', $product), ['quantity' => 2]);
         $this->post(route('carts.store', $product), ['quantity' => 1]);
 
-        $this->assertTrue(session('cart')->products->last()->is($product));
-        $this->assertEquals(2, session('cart')->products->last()->quantity);
+        $this->assertTrue(cart()->products->last()->is($product));
+        $this->assertEquals(2, cart()->products->last()->quantity);
     }
 
     /** @test */
@@ -178,8 +178,8 @@ class AddProductsToCartTest extends TestCase
 
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $this->assertTrue(session('cart')->products->first()->is($product));
-        $this->assertEquals(2, session('cart')->products->first()->quantity);
+        $this->assertTrue(cart()->products->first()->is($product));
+        $this->assertEquals(2, cart()->products->first()->quantity);
     }
 
     /** @test */
@@ -190,8 +190,8 @@ class AddProductsToCartTest extends TestCase
         $this->post(route('carts.store', $product), ['quantity' => 1]);
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $this->assertTrue(session('cart')->products->first()->is($product));
-        $this->assertEquals(2, session('cart')->products->first()->quantity);
+        $this->assertTrue(cart()->products->first()->is($product));
+        $this->assertEquals(2, cart()->products->first()->quantity);
     }
 
     /** @test */

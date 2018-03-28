@@ -17,11 +17,7 @@ class CartsController extends Controller
         ]);
 
         try {
-            if (auth()->check()) {
-                $cart = auth()->user()->cart->cart ?? new Cart();
-            } else {
-                $cart = session('cart') ?? new Cart();
-            }
+            $cart = cart();
             $itemsAdded = $cart->add($product, request('quantity'));
             $cart->save();
 
@@ -33,13 +29,7 @@ class CartsController extends Controller
 
     public function show()
     {
-        $products = collect();
-
-        if (auth()->check() && auth()->user()->cart) {
-            $products = auth()->user()->cart->products();
-        } elseif (auth()->guest() && session()->has('cart')) {
-            $products = session('cart')->products;
-        }
+        $products = cart()->products;
 
         return view('cart', compact('products'));
     }

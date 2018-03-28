@@ -33,4 +33,32 @@ class CartTest extends TestCase
 
         $this->assertEquals(3, $cart->products->first()->quantity);
     }
+
+    /** @test */
+    public function a_user_cart_can_be_saved_to_the_database()
+    {
+        $user = $this->create('User');
+        $this->signIn($user);
+        $cart = new Cart();
+        $product = $this->create('Product')->addItems(2);
+
+        $cart->add($product, 2);
+        $cart->save();
+
+        $this->assertNotNull($user->cart);
+        $this->assertEquals(2, cart()->products->first()->quantity);
+    }
+
+    /** @test */
+    public function a_guest_cart_can_be_saved_to_the_session()
+    {
+        $cart = new Cart();
+        $product = $this->create('Product')->addItems(2);
+
+        $cart->add($product, 2);
+        $cart->save();
+
+        $this->assertTrue(session()->has('cart'));
+        $this->assertEquals(2, cart()->products->first()->quantity);
+    }
 }
