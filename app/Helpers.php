@@ -5,8 +5,8 @@ use App\Classes\Cart;
 function cart()
 {
     if (auth()->check()) {
-        return auth()->user()->cart->cart ?? new Cart();
+        return new Cart(auth()->user()->cart->contents ?? null);
     }
 
-    return $cart = session('cart') ?? new Cart();
+    return session('cart') ?? new Cart();
 }

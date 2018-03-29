@@ -8,18 +8,19 @@ class Cart
 {
     public $products;
 
-    public function __construct()
+    public function __construct($cart = null)
     {
-        $this->products = collect();
+        $this->products = collect($cart['products'] ?? null);
     }
 
     public function add($product, $requestedQuantity)
     {
         $productAlreadyInCart = $this->products->first(function ($i) use ($product) {
-            return $i->is($product);
+            return $i['id'] === $product->id;
         });
 
-        $itemsAlreadyInCart = optional($productAlreadyInCart)->quantity ?? 0;
+        $itemsAlreadyInCart = $productAlreadyInCart['quantity'] ?? 0;
+
         $itemsRemaining = $product->itemsRemaining();
 
         if ($itemsRemaining == 0 || $itemsRemaining == $itemsAlreadyInCart) {
@@ -33,19 +34,27 @@ class Cart
         }
 
         if ($productAlreadyInCart) {
-            $productAlreadyInCart->quantity = $requestedQuantity;
+            $this->products->transform(function ($product) use ($productAlreadyInCart, $requestedQuantity) {
+                if ($product['id'] === $productAlreadyInCart['id']) {
+                    $product['quantity'] = $requestedQuantity;
+                }
+                return $product;
+            });
             return $addedItems;
         }
 
-        $product->quantity = $requestedQuantity;
-        $this->products->push($product);
+        $this->products->push([
+            'id'       => $product->id,
+            'quantity' => $requestedQuantity
+        ]);
+
         return $addedItems;
     }
 
     public function save()
     {
         if (auth()->check()) {
-            UserCart::updateOrCreate(['user_id' => auth()->id()], ['cart' => $this]);
+            UserCart::updateOrCreate(['user_id' => auth()->id()], ['contents' => $this]);
         } else {
             session(['cart' => $this]);
         }

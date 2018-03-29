@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -41,13 +42,19 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         if (session()->has('cart')) {
-            $sessionCart = session('cart');
+            $guestCart = session('cart');
             $userCart = cart();
-            foreach ($sessionCart->products as $product) {
-                $userCart->add($product, $product->quantity);
-            }
-            session()->forget('cart');
+
+            $products = Product::find($guestCart->products->pluck('id'));
+            $guestCart->products->each(function ($product) use ($products, $userCart) {
+                $existingProduct = $products->firstWhere('id', $product['id']);
+                if ($existingProduct) {
+                    $userCart->add($existingProduct, $product['quantity']);
+                }
+            });
+
             $userCart->save();
+            session()->forget('cart');
         }
 
         return redirect()->intended($this->redirectPath());

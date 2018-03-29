@@ -12,18 +12,7 @@ class UserCart extends Model
 
     protected $guarded = [];
 
-    public function getCartAttribute($cart)
-    {
-        return unserialize($cart);
-    }
-
-    public function setCartAttribute($cart)
-    {
-        $this->attributes['cart'] = serialize($cart);
-    }
-
-    public function products()
-    {
-        return $this->cart->products;
-    }
+    protected $casts = [
+        'contents' => 'array',
+    ];
 }

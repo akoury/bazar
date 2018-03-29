@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Models\User;
+use App\Classes\Cart;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
@@ -72,13 +73,8 @@ class RegisterController extends Controller
     protected function registered(Request $request, $user)
     {
         if (session()->has('cart')) {
-            $sessionCart = session('cart');
-            $userCart = cart();
-            foreach ($sessionCart->products as $product) {
-                $userCart->add($product, $product->quantity);
-            }
+            session('cart')->save();
             session()->forget('cart');
-            $userCart->save();
         }
 
         return redirect($this->redirectPath());

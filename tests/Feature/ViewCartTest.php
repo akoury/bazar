@@ -32,7 +32,6 @@ class ViewCartTest extends TestCase
     /** @test */
     public function a_user_can_view_his_empty_cart()
     {
-        $this->withoutExceptionHandling();
         $user = $this->create('User');
         $this->signIn($user);
 

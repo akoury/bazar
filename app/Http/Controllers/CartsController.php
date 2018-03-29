@@ -28,8 +28,9 @@ class CartsController extends Controller
 
     public function show()
     {
-        $products = cart()->products;
+        $cartProducts = cart()->products;
+        $products = Product::find($cartProducts->pluck('id'));
 
-        return view('cart', compact('products'));
+        return view('cart', compact('cartProducts', 'products'));
     }
 }
