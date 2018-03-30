@@ -45,12 +45,9 @@ class LoginController extends Controller
             $guestCart = session('cart');
             $userCart = cart();
 
-            $products = Product::find($guestCart->products->pluck('id'));
+            $products = Product::fromCart($guestCart);
             $guestCart->products->each(function ($product) use ($products, $userCart) {
-                $existingProduct = $products->firstWhere('id', $product['id']);
-                if ($existingProduct) {
-                    $userCart->add($existingProduct, $product['quantity']);
-                }
+                $userCart->add($products->firstWhere('id', $product['id']), $product['quantity']);
             });
 
             $userCart->save();

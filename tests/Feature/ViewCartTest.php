@@ -24,8 +24,8 @@ class ViewCartTest extends TestCase
         $this->actingAs($user->fresh())
             ->get(route('carts.show'))
             ->assertStatus(200)
-            ->assertViewHas('products', function ($viewProducts) use ($productA, $productB) {
-                return $viewProducts->first()->is($productA) && $viewProducts->last()->is($productB);
+            ->assertViewHas('products', function ($viewProducts) use ($products) {
+                return $this->assertCollectionsAreEqual($viewProducts, $products);
             });
     }
 
@@ -46,11 +46,12 @@ class ViewCartTest extends TestCase
         $productB = $this->create('Product')->addItems(1);
         $this->post(route('carts.store', $productA), ['quantity' => 2]);
         $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $products = Product::all();
 
         $this->get(route('carts.show'))
             ->assertStatus(200)
-            ->assertViewHas('products', function ($viewProducts) use ($productA, $productB) {
-                return $viewProducts->first()->is($productA) && $viewProducts->last()->is($productB);
+            ->assertViewHas('products', function ($viewProducts) use ($products) {
+                return $this->assertCollectionsAreEqual($viewProducts, $products);
             });
     }
 

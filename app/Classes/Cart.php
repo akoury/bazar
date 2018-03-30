@@ -13,42 +13,46 @@ class Cart
         $this->products = collect($cart['products'] ?? null);
     }
 
+    public function findProduct($product)
+    {
+        return $this->products->firstWhere('id', $product['id']);
+    }
+
     public function add($product, $requestedQuantity)
     {
-        $productAlreadyInCart = $this->products->first(function ($i) use ($product) {
-            return $i['id'] === $product->id;
-        });
+        $productFromCart = $this->findProduct($product);
 
-        $itemsAlreadyInCart = $productAlreadyInCart['quantity'] ?? 0;
+        $quantity = $this->determineQuantity($product, $productFromCart, $requestedQuantity);
 
-        $itemsRemaining = $product->itemsRemaining();
-
-        if ($itemsRemaining == 0 || $itemsRemaining == $itemsAlreadyInCart) {
+        if ($quantity === 0) {
             return 0;
-        } elseif ($itemsRemaining >= $itemsAlreadyInCart + $requestedQuantity) {
-            $addedItems = $requestedQuantity;
-            $requestedQuantity += $itemsAlreadyInCart;
-        } else {
-            $requestedQuantity = $itemsRemaining;
-            $addedItems = 'Not enought items, ' . ($itemsRemaining - $itemsAlreadyInCart);
         }
 
-        if ($productAlreadyInCart) {
-            $this->products->transform(function ($product) use ($productAlreadyInCart, $requestedQuantity) {
-                if ($product['id'] === $productAlreadyInCart['id']) {
-                    $product['quantity'] = $requestedQuantity;
-                }
-                return $product;
-            });
-            return $addedItems;
+        $this->remove($product);
+        $this->products->prepend(['id' => $product->id, 'quantity' => $quantity]);
+
+        return $quantity;
+    }
+
+    public function remove($product)
+    {
+        $this->products->keyBy('id')->forget($product->id);
+    }
+
+    public function determineQuantity($product, $productFromCart, $requestedQuantity)
+    {
+        $itemsRemaining = $product->itemsRemaining();
+        $itemsInCart = $productFromCart['quantity'] ?? 0;
+
+        if ($itemsRemaining == 0 || $itemsRemaining == $itemsInCart) {
+            return 0;
         }
 
-        $this->products->push([
-            'id'       => $product->id,
-            'quantity' => $requestedQuantity
-        ]);
+        if ($itemsRemaining >= $itemsInCart + $requestedQuantity) {
+            return $itemsInCart + $requestedQuantity;
+        }
 
-        return $addedItems;
+        return $itemsRemaining;
     }
 
     public function save()

@@ -75,4 +75,9 @@ class Product extends Model
     {
         return $this->orders()->sum('amount') / 100;
     }
+
+    public static function fromCart($cart)
+    {
+        return self::find($cart->products->pluck('id'));
+    }
 }

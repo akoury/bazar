@@ -9,7 +9,7 @@ class CartsController extends Controller
 {
     public function store($productId)
     {
-        $product = Product::findOrFail($productId);
+        $product = Product::wherePublished(true)->findOrFail($productId);
 
         request()->validate([
             'quantity' => 'required|integer|min:1',
@@ -23,14 +23,14 @@ class CartsController extends Controller
         }
 
         $cart->save();
-        return response()->json([ $itemsAdded . ' ' . $product->name . ' added to your cart'], 201);
+        return response()->json([ $itemsAdded . ' ' . $product->name . ' are now in your cart'], 201);
     }
 
     public function show()
     {
-        $cartProducts = cart()->products;
-        $products = Product::find($cartProducts->pluck('id'));
+        $cart = cart();
+        $products = Product::fromCart($cart);
 
-        return view('cart', compact('cartProducts', 'products'));
+        return view('cart', compact('cart', 'products'));
     }
 }
