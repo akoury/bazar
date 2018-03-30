@@ -35,6 +35,30 @@ class CartsController extends Controller
         return response()->json([ $itemsAdded . ' ' . $product->name . ' are now in your cart'], 201);
     }
 
+    public function update($productId)
+    {
+        $product = Product::wherePublished(true)->findOrFail($productId);
+
+        request()->validate([
+            'quantity' => 'required|integer|min:0',
+        ]);
+
+        $cart = cart();
+
+        if ($cart->findProduct($product)['quantity'] != request('quantity')) {
+            $cart->remove($product);
+            $itemsAdded = $cart->add($product, request('quantity'));
+
+            if ($itemsAdded === 0) {
+                return redirect()->back();
+            }
+
+            $cart->save();
+        }
+
+        return redirect()->back();
+    }
+
     public function destroy($productId)
     {
         $product = Product::findOrFail($productId);

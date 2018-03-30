@@ -17,6 +17,7 @@ Route::patch('products/{id}', 'ProductsController@update')->name('products.updat
 
 Route::get('cart', 'CartsController@show')->name('carts.show');
 Route::post('products/{id}/add', 'CartsController@store')->name('carts.store');
+Route::post('products/{id}/update', 'CartsController@update')->name('carts.update');
 Route::post('products/{id}/remove', 'CartsController@destroy')->name('carts.destroy');
 
 Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');

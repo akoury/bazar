@@ -14,5 +14,14 @@
             @csrf
             <button type="submit">Remove</button>
         </form>
+        <form method="POST" action="{{ route('carts.update', $product) }}">
+            @csrf
+            <label for="quantity">New Quantity</label>
+            <input id="quantity" type="number" name="quantity" value="{{ old('quantity', $cartProduct['quantity']) }}" required>
+            @if ($errors->has('quantity'))
+                {{ $errors->first('quantity') }}
+            @endif
+            <button type="submit">Edit</button>
+        </form>
     @endforeach
 @endsection

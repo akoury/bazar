@@ -113,4 +113,72 @@ class UpdateCartTest extends TestCase
         $this->signIn($user->fresh());
         $this->assertFalse(cart()->findProduct($product));
     }
+
+    /** @test */
+    public function a_guest_can_edit_an_items_quantity_from_his_cart()
+    {
+        $product = $this->create('Product')->addItems(2);
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+        $this->assertEquals(2, cart()->findProduct($product)['quantity']);
+
+        $this->post(route('carts.update', $product), ['quantity' => 1]);
+
+        $this->assertEquals(1, cart()->findProduct($product)['quantity']);
+
+        $this->post(route('carts.update', $product), ['quantity' => 0]);
+
+        $this->assertFalse(cart()->findProduct($product));
+    }
+
+    /** @test */
+    public function a_user_can_edit_an_items_quantity_from_his_cart()
+    {
+        $user = $this->create('User');
+        $this->signIn($user);
+        $product = $this->create('Product')->addItems(2);
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+        $this->signIn($user->fresh());
+        $this->assertEquals(2, cart()->findProduct($product)['quantity']);
+
+        $this->actingAs($user->fresh())->post(route('carts.update', $product), ['quantity' => 1]);
+
+        $this->signIn($user->fresh());
+        $this->assertEquals(1, cart()->findProduct($product)['quantity']);
+    }
+
+    /** @test */
+    public function quantity_is_required_to_edit_a_product_in_the_cart()
+    {
+        $product = $this->create('Product')->addItems(1);
+        $this->post(route('carts.store', $product), ['quantity' => 1]);
+
+        $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => '']);
+
+        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertEquals(1, cart()->findProduct($product)['quantity']);
+    }
+
+    /** @test */
+    public function quantity_must_be_an_integer_to_edit_a_product_in_the_cart()
+    {
+        $product = $this->create('Product')->addItems(1);
+        $this->post(route('carts.store', $product), ['quantity' => 1]);
+
+        $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => 1.3]);
+
+        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertEquals(1, cart()->findProduct($product)['quantity']);
+    }
+
+    /** @test */
+    public function quantity_must_be_at_least_0_to_edit_a_product_in_the_cart()
+    {
+        $product = $this->create('Product')->addItems(1);
+        $this->post(route('carts.store', $product), ['quantity' => 1]);
+
+        $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => -2]);
+
+        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertEquals(1, cart()->findProduct($product)['quantity']);
+    }
 }

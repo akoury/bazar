@@ -21,8 +21,7 @@ class Cart
 
     public function add($product, $requestedQuantity)
     {
-        if (! $product->published) {
-            $this->remove($product);
+        if ($requestedQuantity < 1) {
             return 0;
         }
 
@@ -49,7 +48,12 @@ class Cart
 
     public function determineQuantity($product, $productFromCart, $requestedQuantity)
     {
-        $itemsRemaining = $product->itemsRemaining();
+        if ($product && ! $product->published) {
+            $this->remove($product);
+            return 0;
+        }
+
+        $itemsRemaining = $product->itemsRemaining() ?? 0;
         $itemsInCart = $productFromCart['quantity'] ?? 0;
 
         if ($itemsRemaining == 0 || $itemsRemaining == $itemsInCart) {
@@ -65,19 +69,20 @@ class Cart
 
     public function update()
     {
-        if ($this->products->count() > 0) {
-            $products = Product::fromCart($this);
+        $cartProducts = $this->products;
+        $products = Product::fromCart($this);
 
-            $this->products->each(function ($product) use ($products) {
-                $this->remove($product);
-                $quantity = $product['quantity'];
-                $product = $products->firstWhere('id', $product['id']);
-                if ($product) {
-                    $this->add($product, $quantity);
-                }
-            });
+        $wasUpdated = ! $this->products->every(function ($product) use ($products) {
+            $this->remove($product);
+            $quantity = $product['quantity'];
+            $addedQuantity = $this->add($products->firstWhere('id', $product['id']), $quantity);
+            return $addedQuantity === $quantity;
+        });
 
+        if ($wasUpdated) {
             $this->save();
+        } else {
+            $this->products = $cartProducts;
         }
 
         return $this;
@@ -88,11 +93,7 @@ class Cart
         $products = Product::fromCart($cart);
 
         $cart->products->each(function ($product) use ($products) {
-            $quantity = $product['quantity'];
-            $product = $products->firstWhere('id', $product['id']);
-            if ($product) {
-                $this->add($product, $quantity);
-            }
+            $this->add($products->firstWhere('id', $product['id']), $product['quantity']);
         });
 
         $this->save();
