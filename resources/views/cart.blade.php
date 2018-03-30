@@ -4,9 +4,10 @@
 
 @section('content')
     <h1>Your Cart</h1>
-    @foreach($products as $product)
+    @foreach($cart->products as $cartProduct)
+        @php($product = $products->firstWhere('id', $cartProduct['id']))
         <h1>
-            {{ $cart->findProduct($product)['quantity'] }} of 
+            {{ $cartProduct['quantity'] }} of 
             <a href="{{ route('products.show', [$product->brand_id, $product]) }}">{{ $product->name }}</a> ${{ $product->price() }}
         </h1> 
     @endforeach

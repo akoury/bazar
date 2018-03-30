@@ -73,7 +73,7 @@ class RegisterController extends Controller
     protected function registered(Request $request, $user)
     {
         if (session()->has('cart')) {
-            session('cart')->save();
+            cart()->addCartContents(session('cart'));
             session()->forget('cart');
         }
 

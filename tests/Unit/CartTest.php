@@ -71,6 +71,6 @@ class CartTest extends TestCase
         $cart->add($productA, 2);
 
         $this->assertTrue($cart->findProduct($productA)['id'] === $productA->id);
-        $this->assertNull($cart->findProduct($productB));
+        $this->assertFalse($cart->findProduct($productB));
     }
 }

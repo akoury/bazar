@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -42,15 +41,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         if (session()->has('cart')) {
-            $guestCart = session('cart');
-            $userCart = cart();
-
-            $products = Product::fromCart($guestCart);
-            $guestCart->products->each(function ($product) use ($products, $userCart) {
-                $userCart->add($products->firstWhere('id', $product['id']), $product['quantity']);
-            });
-
-            $userCart->save();
+            cart()->addCartContents(session('cart'));
             session()->forget('cart');
         }
 

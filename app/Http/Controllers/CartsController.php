@@ -28,7 +28,8 @@ class CartsController extends Controller
 
     public function show()
     {
-        $cart = cart();
+        $cart = cart()->update();
+
         $products = Product::fromCart($cart);
 
         return view('cart', compact('cart', 'products'));
