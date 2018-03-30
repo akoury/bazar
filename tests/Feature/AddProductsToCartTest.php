@@ -55,6 +55,7 @@ class AddProductsToCartTest extends TestCase
         $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
 
         $this->signIn($user->fresh());
+        $this->assertCount(1, cart()->products);
         $this->assertEquals(3, cart()->findProduct($product)['quantity']);
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
     }
@@ -150,6 +151,7 @@ class AddProductsToCartTest extends TestCase
         $this->post(route('carts.store', $product), ['quantity' => 1]);
         $this->post(route('carts.store', $product), ['quantity' => 1]);
 
+        $this->assertCount(1, cart()->products);
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
         $this->assertEquals(3, cart()->findProduct($product)['quantity']);
     }
