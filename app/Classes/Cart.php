@@ -43,6 +43,8 @@ class Cart
     public function remove($product)
     {
         $this->products = $this->products->keyBy('id')->forget($product->id ?? $product['id']);
+
+        return $this;
     }
 
     public function determineQuantity($product, $productFromCart, $requestedQuantity)

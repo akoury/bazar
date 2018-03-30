@@ -7,6 +7,15 @@ use App\Models\Product;
 
 class CartsController extends Controller
 {
+    public function show()
+    {
+        $cart = cart()->update();
+
+        $products = Product::fromCart($cart);
+
+        return view('cart', compact('cart', 'products'));
+    }
+
     public function store($productId)
     {
         $product = Product::wherePublished(true)->findOrFail($productId);
@@ -26,12 +35,12 @@ class CartsController extends Controller
         return response()->json([ $itemsAdded . ' ' . $product->name . ' are now in your cart'], 201);
     }
 
-    public function show()
+    public function destroy($productId)
     {
-        $cart = cart()->update();
+        $product = Product::findOrFail($productId);
 
-        $products = Product::fromCart($cart);
+        cart()->remove($product)->save();
 
-        return view('cart', compact('cart', 'products'));
+        return redirect()->back();
     }
 }

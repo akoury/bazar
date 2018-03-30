@@ -88,4 +88,29 @@ class UpdateCartTest extends TestCase
         $this->signIn($user->fresh());
         $this->assertFalse(cart()->findProduct($product));
     }
+
+    /** @test */
+    public function a_guest_can_remove_an_item_from_his_cart()
+    {
+        $product = $this->create('Product')->addItems(3);
+        $this->post(route('carts.store', $product), ['quantity' => 3]);
+        $this->assertEquals(3, cart()->findProduct($product)['quantity']);
+
+        $this->post(route('carts.destroy', $product));
+
+        $this->assertFalse(cart()->findProduct($product));
+    }
+
+    /** @test */
+    public function a_user_can_remove_an_item_from_his_cart()
+    {
+        $user = $this->create('User');
+        $this->signIn($user);
+        $product = $this->create('Product')->addItems(2);
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+
+        $this->actingAs($user->fresh())->post(route('carts.destroy', $product));
+        $this->signIn($user->fresh());
+        $this->assertFalse(cart()->findProduct($product));
+    }
 }
