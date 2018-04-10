@@ -49,7 +49,24 @@ class Product extends Model
             return $items;
         });
 
-        return new Reservation($items, $email);
+        return new Reservation($email, $items);
+    }
+
+    public function addItemsToReservation($quantity)
+    {
+        $items = DB::transaction(function () use ($quantity) {
+            // Finds items and locks them to avoid race conditions
+            $items = $this->items()->available()->take($quantity)->lockForUpdate()->get();
+
+            if ($items->count() < $quantity) {
+                throw new NotEnoughItemsException;
+            }
+
+            $items->each->reserve();
+            return $items;
+        });
+
+        return $items;
     }
 
     public function addItems($quantity)

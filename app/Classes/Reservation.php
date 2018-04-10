@@ -3,6 +3,7 @@
 namespace App\Classes;
 
 use App\Models\Order;
+use App\Models\Product;
 
 class Reservation
 {
@@ -10,10 +11,18 @@ class Reservation
 
     private $email;
 
-    public function __construct($items, $email)
+    public function __construct($email, $items = null)
     {
-        $this->items = $items;
         $this->email = $email;
+
+        if ($items) {
+            $this->items = $items;
+        } else {
+            $cart = cart();
+            $this->items = Product::fromCart($cart)->flatMap(function ($product) use ($cart) {
+                return $product->addItemsToReservation($cart->findProduct($product)['quantity']);
+            });
+        }
     }
 
     public function totalCost()

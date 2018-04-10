@@ -23,7 +23,7 @@ class ReservationTest extends TestCase
             (object) ['price' => 1200]
         ]);
 
-        $reservation = new Reservation($items, 'customer@example.com');
+        $reservation = new Reservation('customer@example.com', $items);
 
         $this->assertEquals(3600, $reservation->totalCost());
     }
@@ -37,7 +37,7 @@ class ReservationTest extends TestCase
             Mockery::spy(Item::class),
         ]);
 
-        $reservation = new Reservation($items, 'customer@example.com');
+        $reservation = new Reservation('customer@example.com', $items);
 
         $reservation->cancel();
 
@@ -53,7 +53,7 @@ class ReservationTest extends TestCase
             (object) ['price' => 1200]
         ]);
 
-        $reservation = new Reservation($items, 'customer@example.com');
+        $reservation = new Reservation('customer@example.com', $items);
 
         $this->assertEquals($items, $reservation->items());
     }
@@ -61,7 +61,7 @@ class ReservationTest extends TestCase
     /** @test */
     public function can_retrieve_a_customers_email_from_the_reservation()
     {
-        $reservation = new Reservation(collect(), 'customer@example.com');
+        $reservation = new Reservation('customer@example.com', collect());
 
         $this->assertEquals('customer@example.com', $reservation->email());
     }
@@ -71,7 +71,7 @@ class ReservationTest extends TestCase
     {
         $product = $this->create('Product', 1, ['price' => 1200]);
         $items = $this->create('Item', 3, ['product_id' => $product->id]);
-        $reservation = new Reservation($items, 'customer@example.com');
+        $reservation = new Reservation('customer@example.com', $items);
         $paymentGateway = new FakePaymentGateway;
 
         $order = $reservation->complete($paymentGateway, $paymentGateway->getValidTestToken());

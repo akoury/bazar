@@ -99,6 +99,15 @@ class Cart
         $this->save();
     }
 
+    public function total($products = null)
+    {
+        $products = $products ?? Product::fromCart($this);
+
+        return $products->sum(function ($product) {
+            return $product->price * $this->findProduct($product)['quantity'];
+        });
+    }
+
     public function save()
     {
         if (auth()->check()) {

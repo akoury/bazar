@@ -13,7 +13,11 @@ class CartsController extends Controller
 
         $products = Product::fromCart($cart);
 
-        return view('cart', compact('cart', 'products'));
+        // $cart->update($products);
+
+        $total = $cart->total($products) / 100;
+
+        return view('cart', compact('cart', 'products', 'total'));
     }
 
     public function store($productId)
@@ -25,14 +29,14 @@ class CartsController extends Controller
         ]);
 
         $cart = cart();
-        $itemsAdded = $cart->add($product, request('quantity'));
+        $items = $cart->add($product, request('quantity'));
 
-        if ($itemsAdded === 0) {
+        if ($items === 0) {
             return response()->json(['There are not enough available items of this product'], 422);
         }
 
         $cart->save();
-        return response()->json([ $itemsAdded . ' ' . $product->name . ' are now in your cart'], 201);
+        return response()->json([$items . ' ' . $product->name . ' are now in your cart'], 201);
     }
 
     public function update($productId)

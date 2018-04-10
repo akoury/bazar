@@ -73,4 +73,33 @@ class CartTest extends TestCase
         $this->assertTrue($cart->findProduct($productA)['id'] === $productA->id);
         $this->assertFalse($cart->findProduct($productB));
     }
+
+    /** @test */
+    public function a_cart_can_have_a_product_removed_from_it()
+    {
+        $cart = new Cart();
+        $productA = $this->create('Product')->addItems(2);
+        $productB = $this->create('Product')->addItems(1);
+        $cart->add($productA, 2);
+        $cart->add($productB, 1);
+        $this->assertTrue($cart->findProduct($productA)['id'] === $productA->id);
+        $this->assertTrue($cart->findProduct($productB)['id'] === $productB->id);
+
+        $cart->remove($productA);
+
+        $this->assertFalse($cart->findProduct($productA));
+        $this->assertTrue($cart->findProduct($productB)['id'] === $productB->id);
+    }
+
+    /** @test */
+    public function a_cart_can_calculate_its_total()
+    {
+        $cart = new Cart();
+        $productA = $this->create('Product', 1, ['price' => 3250])->addItems(2);
+        $productB = $this->create('Product', 1, ['price' => 2720])->addItems(1);
+        $cart->add($productA, 2);
+        $cart->add($productB, 1);
+
+        $this->assertEquals(9220, $cart->total());
+    }
 }
