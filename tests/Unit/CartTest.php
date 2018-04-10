@@ -102,4 +102,20 @@ class CartTest extends TestCase
 
         $this->assertEquals(9220, $cart->total());
     }
+
+    /** @test */
+    public function a_cart_can_be_cleared()
+    {
+        $cart = new Cart();
+        $productA = $this->create('Product')->addItems(2);
+        $productB = $this->create('Product')->addItems(1);
+        $cart->add($productA, 2);
+        $cart->add($productB, 1);
+        $this->assertTrue($cart->findProduct($productA)['id'] === $productA->id);
+        $this->assertTrue($cart->findProduct($productB)['id'] === $productB->id);
+
+        $cart->clear();
+
+        $this->assertEmpty($cart->products);
+    }
 }

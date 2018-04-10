@@ -61,4 +61,17 @@ class ViewCartTest extends TestCase
         $this->get(route('carts.show'))
             ->assertStatus(200);
     }
+
+    /** @test */
+    public function a_guest_can_view_his_emptied_cart()
+    {
+        $this->withoutExceptionHandling();
+        $product = $this->create('Product')->addItems(2);
+        $this->post(route('carts.store', $product), ['quantity' => 2]);
+
+        cart()->clear();
+
+        $this->get(route('carts.show'))
+            ->assertStatus(200);
+    }
 }

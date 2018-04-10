@@ -53,6 +53,7 @@ class CheckoutTest extends TestCase
         $order = Order::first();
         $this->assertNotNull($order);
         $this->assertNull($order->user);
+        $this->assertEmpty(cart()->products);
 
         Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
             return $notifiable->routes['mail'] == 'customer@example.com'
@@ -90,6 +91,8 @@ class CheckoutTest extends TestCase
         $order = Order::first();
         $this->assertNotNull($order);
         $this->assertTrue($order->user->is($user));
+        $this->signIn($user->fresh());
+        $this->assertEmpty(cart()->products);
 
         Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
             return $notifiable->routes['mail'] == 'user@example.com'

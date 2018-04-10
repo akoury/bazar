@@ -62,6 +62,8 @@ class OrdersController extends Controller
 
             Notification::route('mail', $order->email)->notify(new OrderConfirmation($order));
 
+            cart()->clear();
+
             return response()->json($order, 201);
         } catch (PaymentFailedException $e) {
             $reservation->cancel();

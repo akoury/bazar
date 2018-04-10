@@ -70,19 +70,22 @@ class Cart
     public function update()
     {
         $cartProducts = $this->products;
-        $products = Product::fromCart($this);
 
-        $wasUpdated = ! $this->products->every(function ($product) use ($products) {
-            $this->remove($product);
-            $quantity = $product['quantity'];
-            $addedQuantity = $this->add($products->firstWhere('id', $product['id']), $quantity);
-            return $addedQuantity === $quantity;
-        });
+        if ($cartProducts->isNotEmpty()) {
+            $products = Product::fromCart($this);
 
-        if ($wasUpdated) {
-            $this->save();
-        } else {
-            $this->products = $cartProducts;
+            $wasUpdated = ! $this->products->every(function ($product) use ($products) {
+                $this->remove($product);
+                $quantity = $product['quantity'];
+                $addedQuantity = $this->add($products->firstWhere('id', $product['id']), $quantity);
+                return $addedQuantity === $quantity;
+            });
+
+            if ($wasUpdated) {
+                $this->save();
+            } else {
+                $this->products = $cartProducts;
+            }
         }
 
         return $this;
@@ -115,5 +118,12 @@ class Cart
         } else {
             session(['cart' => $this]);
         }
+    }
+
+    public function clear()
+    {
+        $this->products = collect();
+
+        $this->save();
     }
 }
