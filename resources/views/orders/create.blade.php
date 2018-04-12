@@ -10,7 +10,7 @@
             {{ $product->name }} ${{ $product->price() }}
         </h1>
     @endforeach
-    <checkout total-price="{{ $total }}" email="{{ optional(auth()->user())->email }}"></checkout>
+    <cart-checkout total-price="{{ $total }}" email="{{ optional(auth()->user())->email }}"></cart-checkout>
 @endsection
 
 @push('scripts')

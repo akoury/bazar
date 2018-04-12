@@ -27,7 +27,7 @@ class PurchaseItemsTest extends TestCase
 
     private function orderItems($product, $params)
     {
-        return $this->json('POST', "products/{$product->id}/orders", $params);
+        return $this->json('POST', route('orders.store', $product->id), $params);
     }
 
     /** @test */
@@ -90,7 +90,7 @@ class PurchaseItemsTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $response->assertStatus(404);
+        $response->assertStatus(422);
         $this->assertEquals(0, $product->orders()->count());
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
     }

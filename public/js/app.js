@@ -1093,7 +1093,7 @@ __webpack_require__(12);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('checkout', __webpack_require__(38));
+Vue.component('cart-checkout', __webpack_require__(38));
 Vue.component('product-checkout', __webpack_require__(41));
 
 document.addEventListener('turbolinks:load', function () {
@@ -13197,7 +13197,7 @@ var Component = normalizeComponent(
   __vue_scopeId__,
   __vue_module_identifier__
 )
-Component.options.__file = "resources/assets/js/components/Checkout.vue"
+Component.options.__file = "resources/assets/js/components/CartCheckout.vue"
 
 /* hot reload */
 if (false) {(function () {
@@ -13206,9 +13206,9 @@ if (false) {(function () {
   if (!hotAPI.compatible) return
   module.hot.accept()
   if (!module.hot.data) {
-    hotAPI.createRecord("data-v-40b3b37d", Component.options)
+    hotAPI.createRecord("data-v-569b6b3d", Component.options)
   } else {
-    hotAPI.reload("data-v-40b3b37d", Component.options)
+    hotAPI.reload("data-v-569b6b3d", Component.options)
   }
   module.hot.dispose(function (data) {
     disposed = true
@@ -13321,7 +13321,7 @@ module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {
   module.hot.accept()
   if (module.hot.data) {
-    require("vue-hot-reload-api")      .rerender("data-v-40b3b37d", module.exports)
+    require("vue-hot-reload-api")      .rerender("data-v-569b6b3d", module.exports)
   }
 }
 
@@ -13431,7 +13431,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             var _this = this;
 
             this.processing = true;
-            axios.post('/products/' + this.productId + '/orders', { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
+            axios.post('/orders/store/' + this.productId, { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
                 Turbolinks.visit('/orders/' + response.data.confirmation_number);
             }).catch(function (error) {
                 alert(error.response.data);

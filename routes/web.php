@@ -22,8 +22,7 @@ Route::post('products/{id}/remove', 'CartsController@destroy')->name('carts.dest
 
 Route::get('orders', 'OrdersController@index')->name('orders.index')->middleware('auth');
 Route::get('orders/create', 'OrdersController@create')->name('orders.create');
-Route::post('orders/store', 'OrdersController@storeCart')->name('orders.store.cart');
-Route::post('products/{id}/orders', 'OrdersController@store')->name('orders.store');
+Route::post('orders/store/{id?}', 'OrdersController@store')->name('orders.store');
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');
 
 Auth::routes();

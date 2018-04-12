@@ -49,7 +49,7 @@ export default {
         purchaseItems(token) {
             this.processing = true
             axios
-                .post('/products/' + this.productId + '/orders', { email: token.email, quantity: this.quantity, payment_token: token.id })
+                .post('/orders/store/' + this.productId, { email: token.email, quantity: this.quantity, payment_token: token.id })
                 .then(response => {
                     Turbolinks.visit('/orders/' + response.data.confirmation_number)
                 })

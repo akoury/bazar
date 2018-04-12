@@ -20,7 +20,7 @@ class Reservation
         } else {
             $cart = cart();
             $this->items = Product::fromCart($cart)->flatMap(function ($product) use ($cart) {
-                return $product->addItemsToReservation($cart->findProduct($product)['quantity']);
+                return $product->reserveItems($cart->findProduct($product)['quantity']);
             });
         }
     }

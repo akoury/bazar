@@ -12,7 +12,7 @@ require('./bootstrap')
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('checkout', require('./components/Checkout.vue'))
+Vue.component('cart-checkout', require('./components/CartCheckout.vue'))
 Vue.component('product-checkout', require('./components/ProductCheckout.vue'))
 
 document.addEventListener('turbolinks:load', () => {

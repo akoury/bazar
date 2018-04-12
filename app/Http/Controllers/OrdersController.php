@@ -25,45 +25,29 @@ class OrdersController extends Controller
         return view('orders.create', compact('cart', 'products', 'total'));
     }
 
-    public function store($productId, PaymentGateway $paymentGateway)
+    public function store($productId = null, PaymentGateway $paymentGateway)
     {
-        $product = Product::wherePublished(true)->findOrFail($productId);
-
         request()->validate([
             'email'         => 'required|email',
-            'quantity'      => 'required|integer|min:1',
+            'quantity'      => 'sometimes|required|integer|min:1',
             'payment_token' => 'required'
         ]);
 
         try {
-            $reservation = $product->reserveItems(request('quantity'), request('email'));
+            if ($productId) {
+                $product = Product::findOrFail($productId);
+                $reservation = $product->reserveItems(request('quantity'), request('email'));
+            } else {
+                $reservation = new Reservation(request('email'));
+            }
+
             $order = $reservation->complete($paymentGateway, request('payment_token'));
 
             Notification::route('mail', $order->email)->notify(new OrderConfirmation($order));
 
-            return response()->json($order, 201);
-        } catch (NotEnoughItemsException $e) {
-            return response()->json(['The number of items you requested is not available'], 422);
-        } catch (PaymentFailedException $e) {
-            $reservation->cancel();
-            return response()->json(['Your payment could not be processed'], 422);
-        }
-    }
-
-    public function storeCart(PaymentGateway $paymentGateway)
-    {
-        request()->validate([
-            'email'         => 'required|email',
-            'payment_token' => 'required'
-        ]);
-
-        try {
-            $reservation = new Reservation(request('email'));
-            $order = $reservation->complete($paymentGateway, request('payment_token'));
-
-            Notification::route('mail', $order->email)->notify(new OrderConfirmation($order));
-
-            cart()->clear();
+            if (! $productId) {
+                cart()->clear();
+            }
 
             return response()->json($order, 201);
         } catch (UnpublishedProductException $e) {

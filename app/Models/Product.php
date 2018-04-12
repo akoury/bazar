@@ -36,8 +36,12 @@ class Product extends Model
         return number_format($this->price / 100, 2);
     }
 
-    public function reserveItems($quantity, $email)
+    public function reserveItems($quantity, $email = null)
     {
+        if (! $this->published) {
+            throw new UnpublishedProductException;
+        }
+
         $items = DB::transaction(function () use ($quantity) {
             // Finds items and locks them to avoid race conditions
             $items = $this->items()->available()->take($quantity)->lockForUpdate()->get();
@@ -55,30 +59,9 @@ class Product extends Model
             return $items;
         });
 
-        return new Reservation($email, $items);
-    }
-
-    public function addItemsToReservation($quantity)
-    {
-        if (! $this->published) {
-            throw new UnpublishedProductException;
+        if ($email) {
+            return new Reservation($email, $items);
         }
-
-        $items = DB::transaction(function () use ($quantity) {
-            $items = $this->items()->available()->take($quantity)->lockForUpdate()->get();
-
-            if ($items->count() < $quantity) {
-                throw new NotEnoughItemsException;
-            }
-
-            $items->transform(function ($item) {
-                $item->price = $this->price;
-                $item->reserve();
-                return $item;
-            });
-
-            return $items;
-        });
 
         return $items;
     }
