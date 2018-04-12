@@ -10,6 +10,7 @@ use App\Notifications\OrderConfirmation;
 use App\Exceptions\PaymentFailedException;
 use App\Exceptions\NotEnoughItemsException;
 use Illuminate\Support\Facades\Notification;
+use App\Exceptions\UnpublishedProductException;
 
 class OrdersController extends Controller
 {
@@ -65,6 +66,10 @@ class OrdersController extends Controller
             cart()->clear();
 
             return response()->json($order, 201);
+        } catch (UnpublishedProductException $e) {
+            return response()->json(['A product you requested is not available'], 422);
+        } catch (NotEnoughItemsException $e) {
+            return response()->json(['The number of items you requested is not available'], 422);
         } catch (PaymentFailedException $e) {
             $reservation->cancel();
             return response()->json(['Your payment could not be processed'], 422);

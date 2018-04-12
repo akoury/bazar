@@ -13,8 +13,6 @@ class CartsController extends Controller
 
         $products = Product::fromCart($cart);
 
-        // $cart->update($products);
-
         $total = $cart->total($products) / 100;
 
         return view('cart', compact('cart', 'products', 'total'));

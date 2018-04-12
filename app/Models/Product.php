@@ -6,6 +6,7 @@ use App\Classes\Reservation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
+use App\Exceptions\UnpublishedProductException;
 
 class Product extends Model
 {
@@ -59,8 +60,11 @@ class Product extends Model
 
     public function addItemsToReservation($quantity)
     {
+        if (! $this->published) {
+            throw new UnpublishedProductException;
+        }
+
         $items = DB::transaction(function () use ($quantity) {
-            // Finds items and locks them to avoid race conditions
             $items = $this->items()->available()->take($quantity)->lockForUpdate()->get();
 
             if ($items->count() < $quantity) {

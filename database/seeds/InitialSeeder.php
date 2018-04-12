@@ -47,7 +47,8 @@ class InitialSeeder extends Seeder
 
         $item = factory(Item::class, 3)->create([
             'order_id'   => $order->id,
-            'product_id' => $product->id
+            'product_id' => $product->id,
+            'price'      => $product->price
         ]);
     }
 }

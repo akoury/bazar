@@ -48,7 +48,7 @@ class Cart
 
     public function determineQuantity($product, $productFromCart, $requestedQuantity)
     {
-        if ($product && ! $product->published) {
+        if (! $product || ! $product->published) {
             $this->remove($product);
             return 0;
         }
