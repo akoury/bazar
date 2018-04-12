@@ -12,3 +12,13 @@
     @endforeach
     <checkout total-price="{{ $total }}" email="{{ optional(auth()->user())->email }}"></checkout>
 @endsection
+
+@push('scripts')
+    <meta name="turbolinks-visit-control" content="reload">
+    <script src="https://checkout.stripe.com/checkout.js"></script>
+    <script>
+        var App = {
+            stripeKey: '{{ config('services.stripe.key') }}',
+        }
+    </script>
+@endpush

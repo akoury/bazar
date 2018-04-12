@@ -15,7 +15,7 @@ class OrdersController extends Controller
 {
     public function create()
     {
-        $cart = cart();
+        $cart = cart()->update();
 
         $products = Product::fromCart($cart);
 

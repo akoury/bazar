@@ -21,7 +21,7 @@
         <form method="POST" action="{{ route('carts.update', $product) }}">
             @csrf
             <label for="quantity">New Quantity</label>
-            <input id="quantity" type="number" name="quantity" value="{{ old('quantity', $cartProduct['quantity']) }}" required>
+            <input id="quantity" type="number" name="quantity" value="{{ old('quantity', $cartProduct['quantity']) }}" min="0" required>
             @if ($errors->has('quantity'))
                 {{ $errors->first('quantity') }}
             @endif

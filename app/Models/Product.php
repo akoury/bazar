@@ -45,7 +45,12 @@ class Product extends Model
                 throw new NotEnoughItemsException;
             }
 
-            $items->each->reserve();
+            $items->transform(function ($item) {
+                $item->price = $this->price;
+                $item->reserve();
+                return $item;
+            });
+
             return $items;
         });
 
@@ -62,7 +67,12 @@ class Product extends Model
                 throw new NotEnoughItemsException;
             }
 
-            $items->each->reserve();
+            $items->transform(function ($item) {
+                $item->price = $this->price;
+                $item->reserve();
+                return $item;
+            });
+
             return $items;
         });
 

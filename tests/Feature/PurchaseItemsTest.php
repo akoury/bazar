@@ -34,6 +34,7 @@ class PurchaseItemsTest extends TestCase
     public function a_guest_can_purchase_items_of_a_published_product()
     {
         $product = $this->create('Product', 1, ['price' => 3250])->addItems(3);
+        $this->assertNull($product->items->first()->price);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',
@@ -57,6 +58,7 @@ class PurchaseItemsTest extends TestCase
         $this->assertNotNull($order);
         $this->assertNull($order->user);
         $this->assertEquals(3, $order->itemQuantity());
+        $this->assertEquals(3250, $order->items->first()->price);
 
         Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
             return $notifiable->routes['mail'] == 'customer@example.com'

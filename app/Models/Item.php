@@ -31,11 +31,11 @@ class Item extends Model
 
     public function release()
     {
-        $this->update(['reserved_at' => null]);
+        $this->update(['reserved_at' => null, 'price' => null]);
     }
 
-    public function getPriceAttribute()
+    public function price()
     {
-        return $this->product->price;
+        return number_format($this->price / 100, 2);
     }
 }

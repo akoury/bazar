@@ -21,7 +21,7 @@
         @endif
         
         <label for="price">Price</label>
-        <input id="price" type="number" name="price" step="0.01" value="{{ old('price', $product->price) }}" required>
+        <input id="price" type="number" name="price" step="0.01" value="{{ old('price', $product->price()) }}" required>
         @if ($errors->has('price'))
             {{ $errors->first('price') }}
         @endif

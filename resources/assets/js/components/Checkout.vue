@@ -38,7 +38,7 @@ export default {
                 email: this.email,
                 allowRememberMe: false,
                 panelLabel: 'Pay {{amount}}',
-                amount: this.totalPrice,
+                amount: parseInt(this.totalPrice),
                 token: this.purchaseItems
             })
         },

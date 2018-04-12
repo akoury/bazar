@@ -62,7 +62,7 @@ class CheckoutTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_checkout_his_cart()
+    public function a_user_can_checkout_his_cart_and_have_the_order_belong_to_him()
     {
         $user = $this->create('User', 1, ['email' => 'user@example.com']);
         $this->signIn($user);
@@ -77,26 +77,9 @@ class CheckoutTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $order = $response->original;
-
-        $response->assertStatus(201)
-            ->assertJson([
-                'confirmation_number' => $order->confirmation_number,
-                'email'               => 'user@example.com',
-                'amount'              => 7250
-            ]);
-
-        $this->assertEquals(7250, $this->paymentGateway->totalCharges());
-
         $order = Order::first();
-        $this->assertNotNull($order);
         $this->assertTrue($order->user->is($user));
         $this->signIn($user->fresh());
         $this->assertEmpty(cart()->products);
-
-        Notification::assertSentTo(new AnonymousNotifiable(), OrderConfirmation::class, function ($notification, $channels, $notifiable) use ($order) {
-            return $notifiable->routes['mail'] == 'user@example.com'
-                && $notification->order->id == $order->id;
-        });
     }
 }

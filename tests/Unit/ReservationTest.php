@@ -70,7 +70,7 @@ class ReservationTest extends TestCase
     public function can_complete_a_reservation()
     {
         $product = $this->create('Product', 1, ['price' => 1200]);
-        $items = $this->create('Item', 3, ['product_id' => $product->id]);
+        $items = $this->create('Item', 3, ['product_id' => $product->id, 'price' => 1200]);
         $reservation = new Reservation('customer@example.com', $items);
         $paymentGateway = new FakePaymentGateway;
 

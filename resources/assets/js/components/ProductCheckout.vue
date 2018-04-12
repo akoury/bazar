@@ -2,7 +2,7 @@
     <div>
         <form @submit.prevent="order">
             <label for="quantity">Quantity</label>
-            <input id="quantity" type="number" name="quantity" v-model="quantity" required>
+            <input id="quantity" type="number" name="quantity" v-model="quantity" min="1" required>
             <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
         </form>
         <button v-on:click="addToCart" :disabled="processing">Add to Cart</button>

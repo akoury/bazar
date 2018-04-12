@@ -13265,7 +13265,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 email: this.email,
                 allowRememberMe: false,
                 panelLabel: 'Pay {{amount}}',
-                amount: this.totalPrice,
+                amount: parseInt(this.totalPrice),
                 token: this.purchaseItems
             });
         },
@@ -13493,6 +13493,7 @@ var render = function() {
             id: "quantity",
             type: "number",
             name: "quantity",
+            min: "1",
             required: ""
           },
           domProps: { value: _vm.quantity },
