@@ -14,6 +14,7 @@ require('./bootstrap')
 
 Vue.component('cart-checkout', require('./components/CartCheckout.vue'))
 Vue.component('product-checkout', require('./components/ProductCheckout.vue'))
+Vue.component('braintree-checkout', require('./components/BraintreeCheckout.vue'))
 
 document.addEventListener('turbolinks:load', () => {
     let app = new Vue({

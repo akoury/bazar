@@ -13,7 +13,7 @@
     <h2>Items Remaining: {{ $product->itemsRemaining() }}</h2>
     <h1>{{ $product->description }}</h1>
     <h1>{{ $product->price() }}</h1>
-<product-checkout product-id="{{ $product->id }}" product-price="{{ $product->price }}" user-email="{{ optional(auth()->user())->email }}"></product-checkout>
+    <product-checkout product-id="{{ $product->id }}" product-price="{{ $product->price }}" user-email="{{ optional(auth()->user())->email }}"></product-checkout>
 @endsection
 
 @push('scripts')

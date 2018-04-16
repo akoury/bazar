@@ -11,6 +11,7 @@
     },
     "devDependencies": {
         "axios": "^0.17",
+        "braintree-web-drop-in": "^1.10.0",
         "cross-env": "^5.1",
         "laravel-mix": "^1.0",
         "tailwindcss": "^0.4.1",

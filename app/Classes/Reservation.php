@@ -4,6 +4,7 @@ namespace App\Classes;
 
 use App\Models\Order;
 use App\Models\Product;
+use App\Exceptions\NotEnoughItemsException;
 
 class Reservation
 {
@@ -22,6 +23,10 @@ class Reservation
             $this->items = Product::fromCart($cart)->flatMap(function ($product) use ($cart) {
                 return $product->reserveItems($cart->findProduct($product)['quantity']);
             });
+
+            if ($this->items->isEmpty()) {
+                throw new NotEnoughItemsException;
+            }
         }
     }
 

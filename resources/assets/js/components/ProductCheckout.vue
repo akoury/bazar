@@ -34,7 +34,7 @@ export default {
 
             return handler
         },
-        order(callback) {
+        order() {
             this.stripeHandler.open({
                 name: 'Bazar',
                 description: 'Your order',

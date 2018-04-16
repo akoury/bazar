@@ -213,6 +213,20 @@ class CheckoutTest extends TestCase
     }
 
     /** @test */
+    public function a_customer_cannot_checkout_with_an_empty_cart()
+    {
+        $response = $this->post(route('orders.store'), [
+            'email'         => 'customer@example.com',
+            'payment_token' => $this->paymentGateway->getValidTestToken()
+        ]);
+
+        $response->assertStatus(422);
+        $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        $order = Order::first();
+        $this->assertNull($order);
+    }
+
+    /** @test */
     public function email_is_required_to_checkout()
     {
         $response = $this->json('POST', route('orders.store'), [

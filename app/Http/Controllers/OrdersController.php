@@ -53,7 +53,7 @@ class OrdersController extends Controller
         } catch (UnpublishedProductException $e) {
             return response()->json(['A product you requested is not available'], 422);
         } catch (NotEnoughItemsException $e) {
-            return response()->json(['The number of items you requested is not available'], 422);
+            return response()->json(['The items you requested are not available'], 422);
         } catch (PaymentFailedException $e) {
             $reservation->cancel();
             return response()->json(['Your payment could not be processed'], 422);
