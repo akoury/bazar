@@ -1,7 +1,7 @@
 <template>
     <div>
         <form @submit.prevent="order">
-            <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
+            <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $ with Stripe</button>
         </form>
     </div>
 </template>

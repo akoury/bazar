@@ -12,11 +12,14 @@
     @endforeach
     <h2>Total: $ {{ price($total) }}</h2>
     
+    <mercadopago-checkout link="{{ $link }}"></mercadopago-checkout>
+    <braintree-checkout total-price="{{ $total }}"></braintree-checkout>
     <cart-checkout total-price="{{ $total }}" email="{{ optional(auth()->user())->email }}"></cart-checkout>
 @endsection
 
 @push('scripts')
     <meta name="turbolinks-visit-control" content="reload">
+    <script type="text/javascript" src="https://secure.mlstatic.com/mptools/render.js"></script>
     <script src="https://checkout.stripe.com/checkout.js"></script>
     <script>
         var App = {

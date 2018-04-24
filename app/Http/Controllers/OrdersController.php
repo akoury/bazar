@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Classes\Reservation;
 use App\Classes\PaymentGateway;
 use App\Notifications\OrderConfirmation;
+use App\Classes\MercadoPagoPaymentGateway;
 use App\Exceptions\PaymentFailedException;
 use App\Exceptions\NotEnoughItemsException;
 use Illuminate\Support\Facades\Notification;
@@ -26,7 +27,10 @@ class OrdersController extends Controller
 
         $total = $cart->total($products);
 
-        return view('orders.create', compact('cart', 'products', 'total'));
+        $paymentGateway = new MercadoPagoPaymentGateway;
+        $link = $paymentGateway->generateLink($total);
+
+        return view('orders.create', compact('cart', 'products', 'total', 'link'));
     }
 
     public function store($productId = null, PaymentGateway $paymentGateway)

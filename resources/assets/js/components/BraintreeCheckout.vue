@@ -1,7 +1,7 @@
 <template>
     <div>
         <div id="dropin-container"></div>
-        <button @click="order" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
+        <button @click="order" :disabled="processing">Order for {{ totalPriceInDollars }} $ with BT</button>
     </div>
 </template>
 

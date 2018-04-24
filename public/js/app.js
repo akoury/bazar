@@ -97,7 +97,7 @@ module.exports = g;
 "use strict";
 
 
-var enumerate = __webpack_require__(20);
+var enumerate = __webpack_require__(21);
 
 /**
  * @class
@@ -1089,240 +1089,6 @@ module.exports = function isIos(ua) {
 
 /***/ }),
 /* 20 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function enumerate(values, prefix) {
-  prefix = prefix == null ? '' : prefix;
-
-  return values.reduce(function (enumeration, value) {
-    enumeration[value] = prefix + value;
-
-    return enumeration;
-  }, {});
-}
-
-module.exports = enumerate;
-
-
-/***/ }),
-/* 21 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function isIe9(ua) {
-  ua = ua || navigator.userAgent;
-  return ua.indexOf('MSIE 9') !== -1;
-};
-
-
-/***/ }),
-/* 22 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0;
-    var v = c === 'x' ? r : r & 0x3 | 0x8;
-
-    return v.toString(16);
-  });
-}
-
-module.exports = uuid;
-
-
-/***/ }),
-/* 23 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  HOSTED_FIELDS_TIMEOUT: {
-    type: BraintreeError.types.UNKNOWN,
-    code: 'HOSTED_FIELDS_TIMEOUT',
-    message: 'Hosted Fields timed out when attempting to set up.'
-  },
-  HOSTED_FIELDS_INVALID_FIELD_KEY: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_INVALID_FIELD_KEY'
-  },
-  HOSTED_FIELDS_INVALID_FIELD_SELECTOR: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_INVALID_FIELD_SELECTOR',
-    message: 'Selector does not reference a valid DOM node.'
-  },
-  HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME',
-    message: 'Element already contains a Braintree iframe.'
-  },
-  HOSTED_FIELDS_FIELD_INVALID: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_INVALID'
-  },
-  HOSTED_FIELDS_FIELD_NOT_PRESENT: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_NOT_PRESENT'
-  },
-  HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR: {
-    type: BraintreeError.types.NETWORK,
-    code: 'HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR',
-    message: 'A tokenization network error occurred.'
-  },
-  HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE',
-    message: 'This credit card already exists in the merchant\'s vault.'
-  },
-  HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED',
-    message: 'CVV verification failed during tokenization.'
-  },
-  HOSTED_FIELDS_FAILED_TOKENIZATION: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
-    message: 'The supplied card data failed tokenization.'
-  },
-  HOSTED_FIELDS_FIELDS_EMPTY: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FIELDS_EMPTY',
-    message: 'All fields are empty. Cannot tokenize empty card fields.'
-  },
-  HOSTED_FIELDS_FIELDS_INVALID: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FIELDS_INVALID',
-    message: 'Some payment input fields are invalid. Cannot tokenize invalid card fields.'
-  },
-  HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED'
-  },
-  HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED'
-  },
-  HOSTED_FIELDS_FIELD_PROPERTY_INVALID: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_PROPERTY_INVALID'
-  }
-};
-
-
-/***/ }),
-/* 24 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-var utils = __webpack_require__(6);
-var normalizeHeaderName = __webpack_require__(76);
-
-var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
-
-function setContentTypeIfUnset(headers, value) {
-  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
-    headers['Content-Type'] = value;
-  }
-}
-
-function getDefaultAdapter() {
-  var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
-    // For browsers use XHR adapter
-    adapter = __webpack_require__(32);
-  } else if (typeof process !== 'undefined') {
-    // For node use HTTP adapter
-    adapter = __webpack_require__(32);
-  }
-  return adapter;
-}
-
-var defaults = {
-  adapter: getDefaultAdapter(),
-
-  transformRequest: [function transformRequest(data, headers) {
-    normalizeHeaderName(headers, 'Content-Type');
-    if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
-      return data;
-    }
-    if (utils.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils.isURLSearchParams(data)) {
-      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-      return data.toString();
-    }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
-    }
-    return data;
-  }],
-
-  transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
-    }
-    return data;
-  }],
-
-  timeout: 0,
-
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-
-  maxContentLength: -1,
-
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  }
-};
-
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
-  }
-};
-
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
-  defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-
-module.exports = defaults;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
-
-/***/ }),
-/* 25 */
 /***/ (function(module, exports) {
 
 /* globals __VUE_SSR_CONTEXT__ */
@@ -1429,6 +1195,240 @@ module.exports = function normalizeComponent (
   }
 }
 
+
+/***/ }),
+/* 21 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function enumerate(values, prefix) {
+  prefix = prefix == null ? '' : prefix;
+
+  return values.reduce(function (enumeration, value) {
+    enumeration[value] = prefix + value;
+
+    return enumeration;
+  }, {});
+}
+
+module.exports = enumerate;
+
+
+/***/ }),
+/* 22 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function isIe9(ua) {
+  ua = ua || navigator.userAgent;
+  return ua.indexOf('MSIE 9') !== -1;
+};
+
+
+/***/ }),
+/* 23 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0;
+    var v = c === 'x' ? r : r & 0x3 | 0x8;
+
+    return v.toString(16);
+  });
+}
+
+module.exports = uuid;
+
+
+/***/ }),
+/* 24 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  HOSTED_FIELDS_TIMEOUT: {
+    type: BraintreeError.types.UNKNOWN,
+    code: 'HOSTED_FIELDS_TIMEOUT',
+    message: 'Hosted Fields timed out when attempting to set up.'
+  },
+  HOSTED_FIELDS_INVALID_FIELD_KEY: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_INVALID_FIELD_KEY'
+  },
+  HOSTED_FIELDS_INVALID_FIELD_SELECTOR: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_INVALID_FIELD_SELECTOR',
+    message: 'Selector does not reference a valid DOM node.'
+  },
+  HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME',
+    message: 'Element already contains a Braintree iframe.'
+  },
+  HOSTED_FIELDS_FIELD_INVALID: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_INVALID'
+  },
+  HOSTED_FIELDS_FIELD_NOT_PRESENT: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_NOT_PRESENT'
+  },
+  HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR: {
+    type: BraintreeError.types.NETWORK,
+    code: 'HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR',
+    message: 'A tokenization network error occurred.'
+  },
+  HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE',
+    message: 'This credit card already exists in the merchant\'s vault.'
+  },
+  HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED',
+    message: 'CVV verification failed during tokenization.'
+  },
+  HOSTED_FIELDS_FAILED_TOKENIZATION: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
+    message: 'The supplied card data failed tokenization.'
+  },
+  HOSTED_FIELDS_FIELDS_EMPTY: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FIELDS_EMPTY',
+    message: 'All fields are empty. Cannot tokenize empty card fields.'
+  },
+  HOSTED_FIELDS_FIELDS_INVALID: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FIELDS_INVALID',
+    message: 'Some payment input fields are invalid. Cannot tokenize invalid card fields.'
+  },
+  HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED'
+  },
+  HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED'
+  },
+  HOSTED_FIELDS_FIELD_PROPERTY_INVALID: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_PROPERTY_INVALID'
+  }
+};
+
+
+/***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(6);
+var normalizeHeaderName = __webpack_require__(76);
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(32);
+  } else if (typeof process !== 'undefined') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(32);
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
 
 /***/ }),
 /* 26 */
@@ -1557,8 +1557,8 @@ module.exports = {
 
 /* eslint-disable no-reserved-keys */
 
-var enumerate = __webpack_require__(20);
-var errors = __webpack_require__(23);
+var enumerate = __webpack_require__(21);
+var errors = __webpack_require__(24);
 var VERSION = "3.31.0";
 
 var constants = {
@@ -2352,7 +2352,7 @@ module.exports = {
 
 
 var isIe = __webpack_require__(108);
-var isIe9 = __webpack_require__(21);
+var isIe9 = __webpack_require__(22);
 
 module.exports = {
   isIe: isIe,
@@ -3849,7 +3849,7 @@ module.exports = {
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(70);
-module.exports = __webpack_require__(213);
+module.exports = __webpack_require__(216);
 
 
 /***/ }),
@@ -3873,6 +3873,7 @@ __webpack_require__(71);
 Vue.component('cart-checkout', __webpack_require__(96));
 Vue.component('product-checkout', __webpack_require__(99));
 Vue.component('braintree-checkout', __webpack_require__(102));
+Vue.component('mercadopago-checkout', __webpack_require__(213));
 
 document.addEventListener('turbolinks:load', function () {
   var app = new Vue({
@@ -3941,7 +3942,7 @@ module.exports = __webpack_require__(73);
 var utils = __webpack_require__(6);
 var bind = __webpack_require__(30);
 var Axios = __webpack_require__(75);
-var defaults = __webpack_require__(24);
+var defaults = __webpack_require__(25);
 
 /**
  * Create an instance of Axios
@@ -4024,7 +4025,7 @@ function isSlowBuffer (obj) {
 "use strict";
 
 
-var defaults = __webpack_require__(24);
+var defaults = __webpack_require__(25);
 var utils = __webpack_require__(6);
 var InterceptorManager = __webpack_require__(84);
 var dispatchRequest = __webpack_require__(85);
@@ -4565,7 +4566,7 @@ module.exports = InterceptorManager;
 var utils = __webpack_require__(6);
 var transformData = __webpack_require__(86);
 var isCancel = __webpack_require__(34);
-var defaults = __webpack_require__(24);
+var defaults = __webpack_require__(25);
 var isAbsoluteURL = __webpack_require__(87);
 var combineURLs = __webpack_require__(88);
 
@@ -15891,7 +15892,7 @@ function plugin(Vue, options) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(25)
+var normalizeComponent = __webpack_require__(20)
 /* script */
 var __vue_script__ = __webpack_require__(97)
 /* template */
@@ -16024,7 +16025,9 @@ var render = function() {
       },
       [
         _c("button", { attrs: { type: "submit", disabled: _vm.processing } }, [
-          _vm._v("Order for " + _vm._s(_vm.totalPriceInDollars) + " $")
+          _vm._v(
+            "Order for " + _vm._s(_vm.totalPriceInDollars) + " $ with Stripe"
+          )
         ])
       ]
     )
@@ -16045,7 +16048,7 @@ if (false) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(25)
+var normalizeComponent = __webpack_require__(20)
 /* script */
 var __vue_script__ = __webpack_require__(100)
 /* template */
@@ -16250,7 +16253,7 @@ if (false) {
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
-var normalizeComponent = __webpack_require__(25)
+var normalizeComponent = __webpack_require__(20)
 /* script */
 var __vue_script__ = __webpack_require__(103)
 /* template */
@@ -18201,7 +18204,7 @@ module.exports = function isIe11(ua) {
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var head;
-var uuid = __webpack_require__(22);
+var uuid = __webpack_require__(23);
 var querystring = __webpack_require__(27);
 var timeouts = {};
 
@@ -19110,7 +19113,7 @@ var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 var request = __webpack_require__(40);
-var uuid = __webpack_require__(22);
+var uuid = __webpack_require__(23);
 var constants = __webpack_require__(17);
 var createAuthorizationData = __webpack_require__(44);
 var errors = __webpack_require__(47);
@@ -20635,7 +20638,7 @@ module.exports = CardView;
 
 var HostedFields = __webpack_require__(136);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(23);
+var errors = __webpack_require__(24);
 var supportsInputFormatting = __webpack_require__(154);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
@@ -20880,9 +20883,9 @@ var Bus = __webpack_require__(53);
 var BraintreeError = __webpack_require__(1);
 var composeUrl = __webpack_require__(146);
 var constants = __webpack_require__(28);
-var errors = __webpack_require__(23);
+var errors = __webpack_require__(24);
 var INTEGRATION_TIMEOUT_MS = __webpack_require__(17).INTEGRATION_TIMEOUT_MS;
-var uuid = __webpack_require__(22);
+var uuid = __webpack_require__(23);
 var findParentTags = __webpack_require__(147);
 var browserDetection = __webpack_require__(148);
 var events = constants.events;
@@ -22423,7 +22426,7 @@ module.exports = function assign(target) {
 "use strict";
 
 
-var enumerate = __webpack_require__(20);
+var enumerate = __webpack_require__(21);
 
 module.exports = enumerate([
   'CONFIGURATION_REQUEST'
@@ -22519,7 +22522,7 @@ module.exports = findParentTags;
 
 
 module.exports = {
-  isIe9: __webpack_require__(21),
+  isIe9: __webpack_require__(22),
   isIos: __webpack_require__(19),
   isIosWebview: __webpack_require__(149)
 };
@@ -22857,7 +22860,7 @@ module.exports = creditCardType;
 
 
 var BraintreeError = __webpack_require__(1);
-var errors = __webpack_require__(23);
+var errors = __webpack_require__(24);
 var whitelist = __webpack_require__(28).whitelistedAttributes;
 
 function attributeValidationError(attribute, value) {
@@ -22920,7 +22923,7 @@ var UA = global.navigator && global.navigator.userAgent;
 var isAndroid = __webpack_require__(55);
 var isChrome = __webpack_require__(56);
 var isIos = __webpack_require__(19);
-var isIE9 = __webpack_require__(21);
+var isIE9 = __webpack_require__(22);
 
 // Old Android Webviews used specific versions of Chrome with 0.0.0 as their version suffix
 // https://developer.chrome.com/multidevice/user-agent#webview_user_agent
@@ -22977,7 +22980,7 @@ module.exports = function isEdge(ua) {
 "use strict";
 
 
-var isIe9 = __webpack_require__(21);
+var isIe9 = __webpack_require__(22);
 
 module.exports = {
   isIe9: isIe9
@@ -26853,7 +26856,7 @@ var convertMethodsToError = __webpack_require__(12);
 var constants = __webpack_require__(206);
 var useMin = __webpack_require__(54);
 var Bus = __webpack_require__(53);
-var uuid = __webpack_require__(22);
+var uuid = __webpack_require__(23);
 var deferred = __webpack_require__(46);
 var errors = __webpack_require__(68);
 var events = __webpack_require__(207);
@@ -27208,7 +27211,7 @@ module.exports = {
 "use strict";
 
 
-var enumerate = __webpack_require__(20);
+var enumerate = __webpack_require__(21);
 
 module.exports = enumerate([
   'AUTHENTICATION_COMPLETE'
@@ -27425,7 +27428,7 @@ var render = function() {
     _c(
       "button",
       { attrs: { disabled: _vm.processing }, on: { click: _vm.order } },
-      [_vm._v("Order for " + _vm._s(_vm.totalPriceInDollars) + " $")]
+      [_vm._v("Order for " + _vm._s(_vm.totalPriceInDollars) + " $ with BT")]
     )
   ])
 }
@@ -27441,6 +27444,125 @@ if (false) {
 
 /***/ }),
 /* 213 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var disposed = false
+var normalizeComponent = __webpack_require__(20)
+/* script */
+var __vue_script__ = __webpack_require__(214)
+/* template */
+var __vue_template__ = __webpack_require__(215)
+/* template functional */
+var __vue_template_functional__ = false
+/* styles */
+var __vue_styles__ = null
+/* scopeId */
+var __vue_scopeId__ = null
+/* moduleIdentifier (server only) */
+var __vue_module_identifier__ = null
+var Component = normalizeComponent(
+  __vue_script__,
+  __vue_template__,
+  __vue_template_functional__,
+  __vue_styles__,
+  __vue_scopeId__,
+  __vue_module_identifier__
+)
+Component.options.__file = "resources/assets/js/components/MercadoPagoCheckout.vue"
+
+/* hot reload */
+if (false) {(function () {
+  var hotAPI = require("vue-hot-reload-api")
+  hotAPI.install(require("vue"), false)
+  if (!hotAPI.compatible) return
+  module.hot.accept()
+  if (!module.hot.data) {
+    hotAPI.createRecord("data-v-b806930a", Component.options)
+  } else {
+    hotAPI.reload("data-v-b806930a", Component.options)
+  }
+  module.hot.dispose(function (data) {
+    disposed = true
+  })
+})()}
+
+module.exports = Component.exports
+
+
+/***/ }),
+/* 214 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+//
+//
+//
+//
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+    props: ['link'],
+    methods: {
+        order: function order() {
+            $MPC.openCheckout({
+                url: this.link,
+                mode: 'modal',
+                onreturn: function onreturn(data) {
+                    console.log(data);
+                    if (data.collection_status == 'approved') {
+                        alert('Pago acreditado');
+                        // data.collection_id es el que llega por wekbhook
+
+                        axios.post('/accepted', data).then(function (response) {
+                            console.log(response);
+                        }).catch(function (error) {
+                            alert(error.response.data);
+                        });
+                    } else if (data.collection_status == 'pending') {
+                        alert('El usuario no completó el pago');
+                    } else if (data.collection_status == 'in_process') {
+                        alert('El pago está siendo revisado');
+                    } else if (data.collection_status == 'rejected') {
+                        alert('El pago fué rechazado, el usuario puede intentar nuevamente el pago');
+                    } else if (data.collection_status == null) {
+                        alert('El usuario no completó el proceso de pago, no se ha generado ningún pago');
+                    }
+                }
+            });
+        }
+    }
+});
+
+/***/ }),
+/* 215 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "button",
+    {
+      staticClass:
+        "m-4 bg-blue hover:bg-blue-dark text-white font-bold py-2 px-4 rounded",
+      on: { click: this.order }
+    },
+    [_vm._v("Pay with MP")]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+module.exports = { render: render, staticRenderFns: staticRenderFns }
+if (false) {
+  module.hot.accept()
+  if (module.hot.data) {
+    require("vue-hot-reload-api")      .rerender("data-v-b806930a", module.exports)
+  }
+}
+
+/***/ }),
+/* 216 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

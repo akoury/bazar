@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Brand;
+
 Route::view('/', 'home')->name('home');
 Route::view('/dashboard', 'dashboard')->name('dashboard')->middleware('auth');
 
@@ -26,3 +28,17 @@ Route::post('orders/store/{id?}', 'OrdersController@store')->name('orders.store'
 Route::get('orders/{confirmationNumber}', 'OrdersController@show')->name('orders.show');
 
 Auth::routes();
+
+Route::get('accepted', function () {
+    $query = request()->query();
+    if ($query['collection_status'] == 'approved') {
+        return response('Ok', 200);
+    }
+    return response('Payment Required', 402);
+})->name('accepted');
+
+Route::post('payments', function () {
+    $query = request()->query();
+    Brand::create(['name' => 'mercadopago', 'slogan' => json_encode($query)]);
+    return response('Ok', 200);
+});
