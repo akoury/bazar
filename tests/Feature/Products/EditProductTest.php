@@ -59,9 +59,8 @@ class EditProductTest extends TestCase
     {
         $product = $this->create('Product');
 
-        $response = $this->get(route('products.edit', $product));
-
-        $response->assertStatus(302)
+        $this->get(route('products.edit', $product))
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
@@ -111,9 +110,8 @@ class EditProductTest extends TestCase
     {
         $product = $this->create('Product', 1, $this->oldAttributes());
 
-        $response = $this->patch(route('products.update', $product), $this->validParams());
-
-        $response->assertStatus(302)
+        $this->patch(route('products.update', $product), $this->validParams())
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
 
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
@@ -131,7 +129,7 @@ class EditProductTest extends TestCase
             'name' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'name');
+        $this->assertValidationError($response, 'name', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
@@ -147,7 +145,7 @@ class EditProductTest extends TestCase
             'description' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'description');
+        $this->assertValidationError($response, 'description', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
@@ -163,7 +161,7 @@ class EditProductTest extends TestCase
             'price' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'price');
+        $this->assertValidationError($response, 'price', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
@@ -179,7 +177,7 @@ class EditProductTest extends TestCase
             'price' => 'not-numeric'
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'price');
+        $this->assertValidationError($response, 'price', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
@@ -195,7 +193,7 @@ class EditProductTest extends TestCase
             'price' => '-1'
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'price');
+        $this->assertValidationError($response, 'price', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 
@@ -237,7 +235,7 @@ class EditProductTest extends TestCase
             'published' => 'not-a-boolean'
         ]));
 
-        $this->assertValidationError($response, route('products.edit', $product), 'published');
+        $this->assertValidationError($response, 'published', route('products.edit', $product));
         $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
     }
 }

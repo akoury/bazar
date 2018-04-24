@@ -18,6 +18,10 @@ class OrdersController extends Controller
     {
         $cart = cart()->update();
 
+        if ($cart->isEmpty()) {
+            return redirect()->route('carts.show');
+        }
+
         $products = Product::fromCart($cart);
 
         $total = $cart->total($products);

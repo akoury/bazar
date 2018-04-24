@@ -24,9 +24,8 @@ class AddBrandTest extends TestCase
     /** @test */
     public function guests_cannot_view_the_brand_creation_form()
     {
-        $response = $this->get(route('brands.create'));
-
-        $response->assertStatus(302)
+        $this->get(route('brands.create'))
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
@@ -82,7 +81,7 @@ class AddBrandTest extends TestCase
             'name' => '',
         ]));
 
-        $this->assertValidationError($response, route('brands.create'), 'name');
+        $this->assertValidationError($response, 'name', route('brands.create'));
         $this->assertEquals(0, Brand::count());
     }
 

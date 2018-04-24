@@ -178,7 +178,7 @@ class PurchaseItemsTest extends TestCase
             'email' => '',
         ]));
 
-        $this->assertJsonValidationError($response, 'email');
+        $this->assertValidationError($response, 'email');
     }
 
     /** @test */
@@ -190,7 +190,7 @@ class PurchaseItemsTest extends TestCase
             'email' => 'not-an-email',
         ]));
 
-        $this->assertJsonValidationError($response, 'email');
+        $this->assertValidationError($response, 'email');
     }
 
     /** @test */
@@ -202,7 +202,7 @@ class PurchaseItemsTest extends TestCase
             'quantity' => '',
         ]));
 
-        $this->assertJsonValidationError($response, 'quantity');
+        $this->assertValidationError($response, 'quantity');
     }
 
     /** @test */
@@ -214,7 +214,7 @@ class PurchaseItemsTest extends TestCase
             'quantity' => 0,
         ]));
 
-        $this->assertJsonValidationError($response, 'quantity');
+        $this->assertValidationError($response, 'quantity');
     }
 
     /** @test */
@@ -226,6 +226,6 @@ class PurchaseItemsTest extends TestCase
             'payment_token' => '',
         ]));
 
-        $this->assertJsonValidationError($response, 'payment_token');
+        $this->assertValidationError($response, 'payment_token');
     }
 }

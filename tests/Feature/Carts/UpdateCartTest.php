@@ -154,7 +154,7 @@ class UpdateCartTest extends TestCase
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => '']);
 
-        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('carts.show'));
         $this->assertEquals(1, cart()->findProduct($product)['quantity']);
     }
 
@@ -166,7 +166,7 @@ class UpdateCartTest extends TestCase
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => 1.3]);
 
-        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('carts.show'));
         $this->assertEquals(1, cart()->findProduct($product)['quantity']);
     }
 
@@ -178,7 +178,7 @@ class UpdateCartTest extends TestCase
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => -2]);
 
-        $this->assertValidationError($response, route('carts.show'), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('carts.show'));
         $this->assertEquals(1, cart()->findProduct($product)['quantity']);
     }
 }

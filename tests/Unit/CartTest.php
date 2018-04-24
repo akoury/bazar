@@ -118,4 +118,17 @@ class CartTest extends TestCase
 
         $this->assertEmpty($cart->products);
     }
+
+    /** @test */
+    public function a_cart_can_tell_if_it_is_empty()
+    {
+        $cart = new Cart();
+        $product = $this->create('Product')->addItems(2);
+        $cart->add($product, 2);
+
+        $this->assertFalse($cart->isEmpty());
+        $cart->clear();
+
+        $this->assertTrue($cart->isEmpty());
+    }
 }

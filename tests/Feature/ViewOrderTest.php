@@ -77,9 +77,8 @@ class ViewOrderTest extends TestCase
     /** @test */
     public function a_guest_cannot_view_his_orders()
     {
-        $response = $this->get(route('orders.index'));
-
-        $response->assertStatus(302)
+        $this->get(route('orders.index'))
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 }

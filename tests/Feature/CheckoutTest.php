@@ -213,6 +213,14 @@ class CheckoutTest extends TestCase
     }
 
     /** @test */
+    public function a_customer_cannot_view_the_checkout_page_with_an_empty_cart()
+    {
+        $this->get(route('orders.create'))
+            ->assertStatus(302)
+            ->assertRedirect(route('carts.show'));
+    }
+
+    /** @test */
     public function a_customer_cannot_checkout_with_an_empty_cart()
     {
         $response = $this->post(route('orders.store'), [
@@ -234,7 +242,7 @@ class CheckoutTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $this->assertJsonValidationError($response, 'email');
+        $this->assertValidationError($response, 'email');
     }
 
     /** @test */
@@ -245,7 +253,7 @@ class CheckoutTest extends TestCase
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
 
-        $this->assertJsonValidationError($response, 'email');
+        $this->assertValidationError($response, 'email');
     }
 
     /** @test */
@@ -256,6 +264,6 @@ class CheckoutTest extends TestCase
             'payment_token' => ''
         ]);
 
-        $this->assertJsonValidationError($response, 'payment_token');
+        $this->assertValidationError($response, 'payment_token');
     }
 }

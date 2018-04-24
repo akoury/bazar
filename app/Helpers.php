@@ -10,3 +10,8 @@ function cart()
 
     return session('cart') ?? new Cart();
 }
+
+function price($value)
+{
+    return number_format($value / 100, 2);
+}

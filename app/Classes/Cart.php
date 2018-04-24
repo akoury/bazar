@@ -111,6 +111,11 @@ class Cart
         });
     }
 
+    public function isEmpty()
+    {
+        return $this->products->isEmpty();
+    }
+
     public function save()
     {
         if (auth()->check()) {

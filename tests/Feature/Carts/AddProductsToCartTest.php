@@ -278,7 +278,7 @@ class AddProductsToCartTest extends TestCase
 
         $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => '']);
 
-        $this->assertValidationError($response, route('products.show', [$product->brand_id, $product]), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));
     }
 
@@ -289,7 +289,7 @@ class AddProductsToCartTest extends TestCase
 
         $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => 1.3]);
 
-        $this->assertValidationError($response, route('products.show', [$product->brand_id, $product]), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));
     }
 
@@ -300,7 +300,7 @@ class AddProductsToCartTest extends TestCase
 
         $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => 0]);
 
-        $this->assertValidationError($response, route('products.show', [$product->brand_id, $product]), 'quantity');
+        $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));
     }
 }

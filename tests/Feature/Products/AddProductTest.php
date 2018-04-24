@@ -41,9 +41,8 @@ class AddProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $response = $this->get(route('products.create', $brand));
-
-        $response->assertStatus(302)
+        $this->get(route('products.create', $brand))
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
 
@@ -106,9 +105,8 @@ class AddProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $response = $this->post(route('products.store', $brand), $this->validParams());
-
-        $response->assertStatus(302)
+        $this->post(route('products.store', $brand), $this->validParams())
+            ->assertStatus(302)
             ->assertRedirect(route('login'));
 
         $this->assertEquals(0, Product::count());
@@ -156,7 +154,7 @@ class AddProductTest extends TestCase
             'name' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'name');
+        $this->assertValidationError($response, 'name', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -169,7 +167,7 @@ class AddProductTest extends TestCase
             'description' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'description');
+        $this->assertValidationError($response, 'description', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -182,7 +180,7 @@ class AddProductTest extends TestCase
             'price' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'price');
+        $this->assertValidationError($response, 'price', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -195,7 +193,7 @@ class AddProductTest extends TestCase
             'price' => 'not-numeric'
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'price');
+        $this->assertValidationError($response, 'price', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -208,7 +206,7 @@ class AddProductTest extends TestCase
             'price' => '-1'
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'price');
+        $this->assertValidationError($response, 'price', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -238,7 +236,7 @@ class AddProductTest extends TestCase
             'published' => 'not-a-boolean'
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'published');
+        $this->assertValidationError($response, 'published', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -251,7 +249,7 @@ class AddProductTest extends TestCase
             'item_quantity' => ''
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
+        $this->assertValidationError($response, 'item_quantity', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -264,7 +262,7 @@ class AddProductTest extends TestCase
             'item_quantity' => '1.3'
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
+        $this->assertValidationError($response, 'item_quantity', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -277,7 +275,7 @@ class AddProductTest extends TestCase
             'item_quantity' => '-1'
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'item_quantity');
+        $this->assertValidationError($response, 'item_quantity', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -292,7 +290,7 @@ class AddProductTest extends TestCase
             'product_image' => $file
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'product_image');
+        $this->assertValidationError($response, 'product_image', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 
@@ -305,7 +303,7 @@ class AddProductTest extends TestCase
             'product_image' => null
         ]));
 
-        $this->assertValidationError($response, route('products.create', $brand), 'product_image');
+        $this->assertValidationError($response, 'product_image', route('products.create', $brand));
         $this->assertEquals(0, Product::count());
     }
 }

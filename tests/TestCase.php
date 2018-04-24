@@ -54,17 +54,16 @@ abstract class TestCase extends BaseTestCase
         return $brand;
     }
 
-    protected function assertJsonValidationError($response, $field)
+    protected function assertValidationError($response, $field, $from = null)
     {
-        $response->assertStatus(422);
-        $this->assertArrayHasKey($field, $response->decodeResponseJson()['errors']);
-    }
-
-    protected function assertValidationError($response, $from, $field)
-    {
-        $response->assertStatus(302)
-            ->assertRedirect($from)
-            ->assertSessionHasErrors($field);
+        if (request()->wantsJson()) {
+            $response->assertStatus(422);
+            $this->assertArrayHasKey($field, $response->decodeResponseJson()['errors']);
+        } else {
+            $response->assertStatus(302)
+                ->assertRedirect($from)
+                ->assertSessionHasErrors($field);
+        }
     }
 
     protected function assertCollectionsAreEqual($collectionA, $collectionB)
