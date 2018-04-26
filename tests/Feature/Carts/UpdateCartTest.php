@@ -63,8 +63,8 @@ class UpdateCartTest extends TestCase
         $product = $this->create('Product')->addItems(3);
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $product->published = false;
-        $product->save();
+        $product->model->update(['published' => false]);
+
         $this->get(route('carts.show'));
 
         $this->assertFalse(cart()->findProduct($product));
@@ -76,8 +76,7 @@ class UpdateCartTest extends TestCase
         $product = $this->create('Product')->addItems(3);
         $this->post(route('carts.store', $product), ['quantity' => 3]);
 
-        $product->published = false;
-        $product->save();
+        $product->model->update(['published' => false]);
 
         $user = $this->create('User', 1, ['password' => bcrypt($password = 'my-password')]);
         $this->post(route('login'), [

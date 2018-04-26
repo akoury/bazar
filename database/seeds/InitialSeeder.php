@@ -4,6 +4,7 @@ use App\Models\Item;
 use App\Models\User;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\ProductModel;
 use Illuminate\Database\Seeder;
 
 class InitialSeeder extends Seeder
@@ -25,14 +26,22 @@ class InitialSeeder extends Seeder
             'slogan' => 'Think different',
         ]);
 
-        $product = factory(Product::class)->create([
+        $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone X',
             'brand_id' => $brand->id
+        ]);
+
+        $product = factory(Product::class)->create([
+            'product_model_id' => $model->id
         ])->addItems(5);
 
-        $product2 = factory(Product::class)->create([
+        $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone 8',
             'brand_id' => $brand->id
+        ]);
+
+        $product2 = factory(Product::class)->create([
+            'product_model_id' => $model->id
         ])->addItems(2);
 
         $order = factory(Order::class)->create([

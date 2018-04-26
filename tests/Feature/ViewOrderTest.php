@@ -5,7 +5,6 @@ namespace Tests\Feature;
 use Tests\TestCase;
 use App\Models\Item;
 use App\Models\Order;
-use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ViewOrderTest extends TestCase
@@ -15,7 +14,7 @@ class ViewOrderTest extends TestCase
     /** @test */
     public function a_customer_can_view_his_order_confirmation()
     {
-        $product = $this->create('Product', 1, [
+        $product = $this->createProductsForModel([
             'name' => 'iPhone X'
         ]);
 

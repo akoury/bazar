@@ -14,13 +14,17 @@ class ViewProductTest extends TestCase
     /** @test */
     public function a_user_can_view_a_published_product()
     {
-        $product = $this->create('Product', 1, [
+        $model = $this->create('ProductModel', 1, [
             'name'        => 'iPhone X',
             'description' => 'Coming in 2017',
-            'price'       => 10000
         ]);
 
-        $this->get(route('products.show', [$product->brand_id, $product]))
+        $product = $this->create('Product', 1, [
+            'product_model_id' => $model->id,
+            'price'            => 10000
+        ]);
+
+        $this->get(route('products.show', [$model->brand_id, $product]))
             ->assertSee('iPhone X')
             ->assertSee('Coming in 2017')
             ->assertSee('100.00');
@@ -29,9 +33,13 @@ class ViewProductTest extends TestCase
     /** @test */
     public function a_user_cannot_view_an_unpublished_product()
     {
-        $product = $this->create('Product', 1, [], 'unpublished');
+        $model = $this->create('ProductModel', 1, ['published' => false]);
 
-        $response = $this->get(route('products.show', [$product->brand_id, $product]));
+        $product = $this->create('Product', 1, [
+            'product_model_id' => $model->id,
+        ]);
+
+        $response = $this->get(route('products.show', [$model->brand_id, $product]));
 
         $response->assertStatus(404);
     }
@@ -41,24 +49,25 @@ class ViewProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $product = $this->create('Product', 1, [
-            'name'     => 'iPhone X',
-            'price'    => 10000,
-            'brand_id' => $brand
+        $modelA = $this->create('ProductModel', 1, ['name' => 'iPhone X', 'brand_id' => $brand->id]);
+        $modelB = $this->create('ProductModel', 1, ['name' => 'iPhone 8', 'brand_id' => $brand->id, 'published' => false]);
+
+        $product1 = $this->create('Product', 1, [
+            'price'            => 10000,
+            'product_model_id' => $modelA->id,
         ]);
 
         $product2 = $this->create('Product', 1, [
-            'name'     => 'Galaxy S8',
-            'price'    => 50000,
-            'brand_id' => $brand
+            'price'            => 50000,
+            'product_model_id' => $modelA->id,
         ]);
 
         $product3 = $this->create('Product', 1, [
-            'name'     => 'Google Pixel',
-            'brand_id' => $brand
-        ], 'unpublished');
+            'price'            => 60000,
+            'product_model_id' => $modelB->id
+        ]);
 
-        $products = $brand->products()->wherePublished(true)->get();
+        $products = $brand->products->where('published', true);
 
         $this->get(route('products.index', $brand))
             ->assertStatus(200)
@@ -67,8 +76,8 @@ class ViewProductTest extends TestCase
             })
             ->assertSee('iPhone X')
             ->assertSee('100.00')
-            ->assertSee('Galaxy S8')
             ->assertSee('500.00')
-            ->assertDontSee('Google Pixel');
+            ->assertDontSee('iPhone 8')
+            ->assertDontSee('600.00');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Classes\Reservation;
+use App\Traits\ProductInformation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
@@ -10,11 +11,11 @@ use App\Exceptions\UnpublishedProductException;
 
 class Product extends Model
 {
+    use ProductInformation;
+
     protected $guarded = [];
 
-    protected $casts = [
-        'published' => 'boolean',
-    ];
+    protected $with = ['model'];
 
     public function orders()
     {
@@ -26,9 +27,9 @@ class Product extends Model
         return $this->hasMany(Item::class);
     }
 
-    public function brand()
+    public function model()
     {
-        return $this->belongsTo(Brand::class);
+        return $this->belongsTo(ProductModel::class, 'product_model_id');
     }
 
     public function price()

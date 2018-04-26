@@ -20,7 +20,9 @@ class CartsController extends Controller
 
     public function store($productId)
     {
-        $product = Product::wherePublished(true)->findOrFail($productId);
+        $product = Product::findOrFail($productId);
+
+        abort_if(! $product->published, 404);
 
         request()->validate([
             'quantity' => 'required|integer|min:1',
@@ -39,7 +41,9 @@ class CartsController extends Controller
 
     public function update($productId)
     {
-        $product = Product::wherePublished(true)->findOrFail($productId);
+        $product = Product::findOrFail($productId);
+
+        abort_if(! $product->published, 404);
 
         request()->validate([
             'quantity' => 'required|integer|min:0',

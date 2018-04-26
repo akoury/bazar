@@ -23,10 +23,10 @@ class ProcessProductImage implements ShouldQueue
 
     public function handle()
     {
-        $imageContents = Storage::disk('public')->get($this->product->image_path);
+        $imageContents = Storage::disk('public')->get($this->product->model->image_path);
 
         $image = Image::make($imageContents)->limitColors(255)->encode();
 
-        Storage::disk('public')->put($this->product->image_path, $image);
+        Storage::disk('public')->put($this->product->model->image_path, $image);
     }
 }

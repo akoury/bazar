@@ -65,7 +65,6 @@ class ViewCartTest extends TestCase
     /** @test */
     public function a_guest_can_view_his_emptied_cart()
     {
-        $this->withoutExceptionHandling();
         $product = $this->create('Product')->addItems(2);
         $this->post(route('carts.store', $product), ['quantity' => 2]);
 

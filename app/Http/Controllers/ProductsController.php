@@ -4,13 +4,16 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\ProductModel;
 use App\Jobs\ProcessProductImage;
 
 class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $product = Product::wherePublished(true)->findOrFail($id);
+        $product = Product::findOrFail($id);
+
+        abort_if(! $product->published, 404);
 
         return view('products.show', compact('product'));
     }
@@ -18,7 +21,7 @@ class ProductsController extends Controller
     public function index($brandId)
     {
         $brand = Brand::findOrFail($brandId);
-        $products = $brand->products()->wherePublished(true)->get();
+        $products = $brand->products->where('published', true);
 
         return view('products.index', compact('brand', 'products'));
     }
@@ -43,18 +46,22 @@ class ProductsController extends Controller
             'product_image' => 'required|image'
         ]);
 
-        $product = Product::create([
+        $model = ProductModel::create([
             'name'        => request('name'),
             'description' => request('description'),
-            'price'       => request('price') * 100,
             'published'   => request()->filled('published'),
             'brand_id'    => $brand->id,
             'image_path'  => request('product_image')->store('products', 'public'),
+        ]);
+
+        $product = Product::create([
+            'product_model_id' => $model->id,
+            'price'            => request('price') * 100,
         ])->addItems(request('item_quantity'));
 
         ProcessProductImage::dispatch($product);
 
-        return redirect()->route('products.show', [$product->brand_id, $product]);
+        return redirect()->route('products.show', [$model->brand_id, $product]);
     }
 
     public function edit($id)
@@ -79,11 +86,14 @@ class ProductsController extends Controller
             'published'   => 'sometimes|accepted',
         ]);
 
-        $product->update([
+        $product->model->update([
             'name'        => request('name'),
             'description' => request('description'),
-            'price'       => request('price') * 100,
             'published'   => request()->filled('published'),
+        ]);
+
+        $product->update([
+            'price' => request('price') * 100,
         ]);
 
         return redirect()->route('products.show', [$product->brand_id, $product]);

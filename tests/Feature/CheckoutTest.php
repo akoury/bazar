@@ -92,7 +92,7 @@ class CheckoutTest extends TestCase
         $this->post(route('carts.store', $productA), ['quantity' => 1]);
         $this->post(route('carts.store', $productB), ['quantity' => 2]);
 
-        $productA->update(['published' => false]);
+        $productA->model->update(['published' => false]);
 
         $response = $this->post(route('orders.store'), [
             'email'         => 'customer@example.com',
@@ -132,7 +132,6 @@ class CheckoutTest extends TestCase
     /** @test */
     public function a_customer_cannot_checkout_more_items_than_remain()
     {
-        $this->withoutExceptionHandling();
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 

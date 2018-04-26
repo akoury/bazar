@@ -82,7 +82,7 @@ class PurchaseItemsTest extends TestCase
     /** @test */
     public function a_customer_cannot_purchase_items_from_an_unpublished_product()
     {
-        $product = $this->create('Product', 1, [], 'unpublished')->addItems(3);
+        $product = $this->createProductsForModel(['published' => false])->addItems(3);
 
         $response = $this->orderItems($product, [
             'email'         => 'customer@example.com',

@@ -34,9 +34,7 @@ class EditProductTest extends TestCase
     public function a_user_can_view_the_edit_product_form_for_his_brand()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $this->create('Product', 1, [
-            'brand_id' => $brand
-        ]);
+        $product = $this->createProductsForModel(['brand_id' => $brand]);
 
         $response = $this->get(route('products.edit', $product));
 
@@ -69,7 +67,7 @@ class EditProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $product = $this->create('Product', 1, [
+        $product = $this->createProductsForModel([
             'name'        => 'Old name',
             'description' => 'Old description',
             'price'       => 2000,
@@ -97,31 +95,32 @@ class EditProductTest extends TestCase
     public function a_user_cannot_update_a_product_from_a_brand_he_does_not_own()
     {
         $this->signIn();
-        $product = $this->create('Product', 1, $this->oldAttributes());
+        $product = $this->createProductsForModel($this->oldAttributes());
 
         $response = $this->patch(route('products.update', $product), $this->validParams());
 
         $response->assertStatus(404);
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function a_guest_cannot_update_a_product()
     {
-        $product = $this->create('Product', 1, $this->oldAttributes());
+        $product = $this->createProductsForModel($this->oldAttributes());
 
         $this->patch(route('products.update', $product), $this->validParams())
             ->assertStatus(302)
             ->assertRedirect(route('login'));
 
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function name_is_required_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $product = $this->create('Product', 1, $this->oldAttributes([
+
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -130,14 +129,14 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'name', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function description_is_required_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -146,14 +145,14 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'description', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function price_is_required_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -162,14 +161,14 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'price', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function price_must_be_numeric_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -178,14 +177,14 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'price', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function price_must_be_0_or_more_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -194,14 +193,14 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'price', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
     public function published_is_optional_to_edit_a_product()
     {
         $brand = $this->brandForSignedInUser();
-        $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -227,7 +226,7 @@ class EditProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $product = $product = $this->create('Product', 1, $this->oldAttributes([
+        $product = $this->createProductsForModel($this->oldAttributes([
             'brand_id' => $brand->id
         ]));
 
@@ -236,6 +235,6 @@ class EditProductTest extends TestCase
         ]));
 
         $this->assertValidationError($response, 'published', route('products.edit', $product));
-        $this->assertArraySubset($this->oldAttributes(), $product->fresh()->getAttributes());
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 }

@@ -3,7 +3,6 @@
 namespace Tests\Unit;
 
 use Tests\TestCase;
-use App\Models\Product;
 use App\Jobs\ProcessProductImage;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -21,7 +20,7 @@ class ProcessProductImageTest extends TestCase
         $image = UploadedFile::fake()->image('example-image.png', 1000, 1000);
         Storage::disk('public')->putFileAs('products', $image, 'example-image.png');
 
-        $product = $this->create('Product', 1, [
+        $product = $this->createProductsForModel([
             'image_path' => 'products/example-image.png',
         ]);
 

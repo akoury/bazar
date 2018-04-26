@@ -64,13 +64,13 @@ class AddProductTest extends TestCase
         $product = Product::first();
 
         $response->assertStatus(302)
-            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
+            ->assertRedirect(route('products.show', [$product->model->brand_id, $product]));
 
-        $this->assertEquals('iPhone 8', $product->name);
-        $this->assertEquals('The new iPhone', $product->description);
+        $this->assertEquals('iPhone 8', $product->model->name);
+        $this->assertEquals('The new iPhone', $product->model->description);
+        $this->assertTrue($product->model->published);
+        $this->assertTrue($product->model->brand->is($brand));
         $this->assertEquals(70050, $product->price);
-        $this->assertTrue($product->published);
-        $this->assertTrue($product->brand->is($brand));
         $this->assertEquals(20, $product->itemsRemaining());
     }
 
@@ -125,9 +125,9 @@ class AddProductTest extends TestCase
         ]));
         $product = Product::first();
 
-        $this->assertNotNull($product->image_path);
-        Storage::disk('public')->assertExists($product->image_path);
-        $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->image_path));
+        $this->assertNotNull($product->model->image_path);
+        Storage::disk('public')->assertExists($product->model->image_path);
+        $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->model->image_path));
     }
 
     /** @test */
@@ -222,9 +222,9 @@ class AddProductTest extends TestCase
         $product = Product::first();
 
         $response->assertStatus(302)
-            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
+            ->assertRedirect(route('products.show', [$product->model->brand_id, $product]));
 
-        $this->assertFalse($product->published);
+        $this->assertFalse($product->model->published);
     }
 
     /** @test */
