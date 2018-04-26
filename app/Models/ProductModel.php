@@ -21,4 +21,9 @@ class ProductModel extends Model
     {
         return $this->hasMany(Product::class);
     }
+
+    public function url()
+    {
+        return $this->products->first()->url($this->brand_id);
+    }
 }

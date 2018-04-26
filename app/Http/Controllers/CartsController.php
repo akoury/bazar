@@ -11,7 +11,7 @@ class CartsController extends Controller
     {
         $cart = cart()->update();
 
-        $products = Product::fromCart($cart);
+        $products = Product::fromCart($cart)->load('model');
 
         $total = $cart->total($products) / 100;
 

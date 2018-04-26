@@ -15,8 +15,6 @@ class Product extends Model
 
     protected $guarded = [];
 
-    protected $with = ['model'];
-
     public function orders()
     {
         return Order::whereIn('id', $this->items()->pluck('order_id'));
@@ -94,5 +92,10 @@ class Product extends Model
     public static function fromCart($cart)
     {
         return self::find($cart->products->pluck('id'));
+    }
+
+    public function url($brandId = null)
+    {
+        return route('products.show', [$brandId ?? $this->brand_id, $this->id]);
     }
 }

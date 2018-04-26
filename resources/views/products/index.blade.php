@@ -3,9 +3,8 @@
 @section('title', 'All Products')
 
 @section('content')
-    @foreach ($products as $product)
-        <h1><a href="{{ route('products.show', [$brand, $product]) }}">{{ $product->name }}</a></h1>
-        <h1>{{ $product->description }}</h1>
-        <h1>{{ $product->price() }}</h1>
+    @foreach ($models as $model)
+        <h1><a href="{{ $model->url() }}">{{ $model->name }}</a></h1>
+        <h1>{{ $model->description }}</h1>
     @endforeach
 @endsection

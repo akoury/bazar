@@ -11,7 +11,7 @@ class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('model')->findOrFail($id);
 
         abort_if(! $product->published, 404);
 
@@ -21,9 +21,9 @@ class ProductsController extends Controller
     public function index($brandId)
     {
         $brand = Brand::findOrFail($brandId);
-        $products = $brand->products->where('published', true);
+        $models = $brand->models()->wherePublished(true)->with('products')->get();
 
-        return view('products.index', compact('brand', 'products'));
+        return view('products.index', compact('brand', 'models'));
     }
 
     public function create($brandId)
@@ -61,12 +61,12 @@ class ProductsController extends Controller
 
         ProcessProductImage::dispatch($product);
 
-        return redirect()->route('products.show', [$model->brand_id, $product]);
+        return redirect($model->url());
     }
 
     public function edit($id)
     {
-        $product = Product::findOrFail($id);
+        $product = Product::with('model')->findOrFail($id);
 
         auth()->user()->brands()->findOrFail($product->brand_id);
 
@@ -96,6 +96,6 @@ class ProductsController extends Controller
             'price' => request('price') * 100,
         ]);
 
-        return redirect()->route('products.show', [$product->brand_id, $product]);
+        return redirect($product->url());
     }
 }

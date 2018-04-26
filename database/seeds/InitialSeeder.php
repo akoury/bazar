@@ -35,12 +35,16 @@ class InitialSeeder extends Seeder
             'product_model_id' => $model->id
         ])->addItems(5);
 
+        $product2 = factory(Product::class)->create([
+            'product_model_id' => $model->id
+        ])->addItems(3);
+
         $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone 8',
             'brand_id' => $brand->id
         ]);
 
-        $product2 = factory(Product::class)->create([
+        $product3 = factory(Product::class)->create([
             'product_model_id' => $model->id
         ])->addItems(2);
 

@@ -13,6 +13,11 @@ class Brand extends Model
         return $this->belongsToMany(User::class)->withTimestamps();
     }
 
+    public function models()
+    {
+        return $this->hasMany(ProductModel::class);
+    }
+
     public function products()
     {
         return $this->hasManyThrough(Product::class, ProductModel::class);
