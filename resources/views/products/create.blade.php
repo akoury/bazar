@@ -18,17 +18,29 @@
         @if ($errors->has('description'))
             {{ $errors->first('description') }}
         @endif
-        
-        <label for="price">Price</label>
-        <input id="price" type="number" name="price" step="0.01" value="{{ old('price') }}" required>
-        @if ($errors->has('price'))
-            {{ $errors->first('price') }}
+
+        <label for="price">Price 1:</label>
+        <input id="price" type="number" name="products[0][price]" step="0.01" value="{{ old('products.0.price') }}" required>
+        @if ($errors->has('products.0.price'))
+            {{ $errors->first('products.0.price') }}
         @endif
 
-        <label for="item_quantity">Item Quantity</label>
-        <input id="item_quantity" type="number" name="item_quantity" value="{{ old('item_quantity') }}" required>
-        @if ($errors->has('item_quantity'))
-            {{ $errors->first('item_quantity') }}
+        <label for="item_quantity">Item Quantity 1:</label>
+        <input id="item_quantity" type="number" name="products[0][item_quantity]" value="{{ old('products.0.item_quantity') }}" required>
+        @if ($errors->has('products.0.item_quantity'))
+            {{ $errors->first('products.0.item_quantity') }}
+        @endif
+
+        <label for="price">Price 2:</label>
+        <input id="price" type="number" name="products[1][price]" step="0.01" value="{{ old('products.1.price') }}" required>
+        @if ($errors->has('products.1.price'))
+            {{ $errors->first('products.1.price') }}
+        @endif
+
+        <label for="item_quantity">Item Quantity 2:</label>
+        <input id="item_quantity" type="number" name="products[1][item_quantity]" value="{{ old('products.1.item_quantity') }}" required>
+        @if ($errors->has('products.1.item_quantity'))
+            {{ $errors->first('products.1.item_quantity') }}
         @endif
 
         <label>

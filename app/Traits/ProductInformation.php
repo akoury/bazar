@@ -24,6 +24,11 @@ trait ProductInformation
         return $this->model->image_path;
     }
 
+    public function getBrandAttribute()
+    {
+        return $this->model->brand;
+    }
+
     public function getBrandIdAttribute()
     {
         return $this->model->brand_id;

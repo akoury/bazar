@@ -10,23 +10,23 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 
-class ProcessProductImage implements ShouldQueue
+class ProcessProductModelImage implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $product;
+    public $model;
 
-    public function __construct($product)
+    public function __construct($model)
     {
-        $this->product = $product;
+        $this->model = $model;
     }
 
     public function handle()
     {
-        $imageContents = Storage::disk('public')->get($this->product->model->image_path);
+        $imageContents = Storage::disk('public')->get($this->model->image_path);
 
         $image = Image::make($imageContents)->limitColors(255)->encode();
 
-        Storage::disk('public')->put($this->product->model->image_path, $image);
+        Storage::disk('public')->put($this->model->image_path, $image);
     }
 }

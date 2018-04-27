@@ -100,8 +100,15 @@ return [
     */
 
     'custom' => [
-        'attribute-name' => [
-            'rule-name' => 'custom-message',
+        'products.*.price' => [
+            'required' => 'The price field is required',
+            'numeric'  => 'The price must be a number',
+            'min'      => 'The price must be at least 0',
+        ],
+        'products.*.item_quantity' => [
+            'required' => 'The quantity field is required',
+            'integer'  => 'The quantity must be an integer',
+            'min'      => 'The quantity must be at least 0',
         ],
     ],
 

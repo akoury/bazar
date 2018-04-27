@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Product;
 use App\Models\ProductModel;
-use App\Jobs\ProcessProductImage;
+use App\Jobs\ProcessProductModelImage;
 
 class ProductsController extends Controller
 {
@@ -35,15 +35,17 @@ class ProductsController extends Controller
 
     public function store($brandId)
     {
+        // dd(request()->all());
         $brand = auth()->user()->brands()->findOrFail($brandId);
 
         request()->validate([
-            'name'          => 'required',
-            'description'   => 'required',
-            'price'         => 'required|numeric|min:0',
-            'published'     => 'nullable|boolean',
-            'item_quantity' => 'required|integer|min:0',
-            'product_image' => 'required|image'
+            'name'                     => 'required',
+            'description'              => 'required',
+            'published'                => 'nullable|boolean',
+            'product_image'            => 'required|image',
+            'products'                 => 'required|array',
+            'products.*.price'         => 'required|numeric|min:0',
+            'products.*.item_quantity' => 'required|integer|min:0',
         ]);
 
         $model = ProductModel::create([
@@ -54,12 +56,14 @@ class ProductsController extends Controller
             'image_path'  => request('product_image')->store('products', 'public'),
         ]);
 
-        $product = Product::create([
-            'product_model_id' => $model->id,
-            'price'            => request('price') * 100,
-        ])->addItems(request('item_quantity'));
+        foreach (request('products') as $product) {
+            Product::create([
+                'product_model_id' => $model->id,
+                'price'            => $product['price'] * 100,
+            ])->addItems($product['item_quantity']);
+        }
 
-        ProcessProductImage::dispatch($product);
+        ProcessProductModelImage::dispatch($model);
 
         return redirect($model->url());
     }
