@@ -13,6 +13,11 @@
     <h2>Items Remaining: {{ $product->itemsRemaining() }}</h2>
     <h1>{{ $product->description }}</h1>
     <h1>{{ $product->price() }}</h1>
+
+    @foreach ($product->values as $value)
+        <h3>{{ $value->attribute->name . ': ' . $value->name}}</h3>
+    @endforeach
+
     <product-checkout product-id="{{ $product->id }}" product-price="{{ $product->price }}" user-email="{{ optional(auth()->user())->email }}"></product-checkout>
 @endsection
 

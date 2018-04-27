@@ -26,4 +26,14 @@ class ProductModel extends Model
     {
         return $this->products->first()->url($this->brand_id);
     }
+
+    public function attributes()
+    {
+        return $this->products->load('attributes')->pluck('attributes')->collapse()->pluck('name', 'id')->toArray();
+    }
+
+    public function values($id)
+    {
+        return $this->products->load('values')->pluck('values')->collapse()->where('attribute_id', $id)->pluck('name')->unique();
+    }
 }

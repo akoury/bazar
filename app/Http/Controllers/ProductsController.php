@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Brand;
+use App\Models\Value;
 use App\Models\Product;
 use App\Models\ProductModel;
 use App\Jobs\ProcessProductModelImage;
@@ -11,7 +12,7 @@ class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $product = Product::with('model')->findOrFail($id);
+        $product = Product::with('model', 'values.attribute')->findOrFail($id);
 
         abort_if(! $product->published, 404);
 
@@ -35,7 +36,6 @@ class ProductsController extends Controller
 
     public function store($brandId)
     {
-        // dd(request()->all());
         $brand = auth()->user()->brands()->findOrFail($brandId);
 
         request()->validate([
@@ -45,6 +45,7 @@ class ProductsController extends Controller
             'product_image'            => 'required|image',
             'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
+            'products.*.item_quantity' => 'required|integer|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
         ]);
 
@@ -57,10 +58,22 @@ class ProductsController extends Controller
         ]);
 
         foreach (request('products') as $product) {
-            Product::create([
+            $newProduct = Product::create([
                 'product_model_id' => $model->id,
                 'price'            => $product['price'] * 100,
             ])->addItems($product['item_quantity']);
+
+            if (isset($product['attributes'])) {
+                $values = collect();
+
+                foreach ($product['attributes'] as $id => $attribute) {
+                    $values->push(Value::firstOrCreate(['attribute_id' => $id, 'name' => $attribute]));
+                }
+
+                $values->each(function ($value) use ($newProduct) {
+                    $newProduct->values()->attach($value, ['attribute_id' => $value->attribute_id]);
+                });
+            }
         }
 
         ProcessProductModelImage::dispatch($model);

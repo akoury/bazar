@@ -3,7 +3,9 @@
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Order;
+use App\Models\Value;
 use App\Models\Product;
+use App\Models\Attribute;
 use App\Models\ProductModel;
 use Illuminate\Database\Seeder;
 
@@ -31,13 +33,42 @@ class InitialSeeder extends Seeder
             'brand_id' => $brand->id
         ]);
 
+        $attribute = factory(Attribute::class)->create([
+            'name' => 'Color',
+        ]);
+
+        $valueA = factory(Value::class)->create([
+            'name'         => 'black',
+            'attribute_id' => $attribute->id
+        ]);
+
+        $valueB = factory(Value::class)->create([
+            'name'         => 'gold',
+            'attribute_id' => $attribute->id
+        ]);
+
+        $attributeB = factory(Attribute::class)->create([
+            'name' => 'Capacity',
+        ]);
+
+        $valueC = factory(Value::class)->create([
+            'name'         => '32gb',
+            'attribute_id' => $attributeB->id
+        ]);
+
         $product = factory(Product::class)->create([
             'product_model_id' => $model->id
         ])->addItems(5);
 
+        $product->values()->attach($valueA, ['attribute_id' => $attribute->id]);
+        $product->values()->attach($valueC, ['attribute_id' => $attributeB->id]);
+
         $product2 = factory(Product::class)->create([
             'product_model_id' => $model->id
         ])->addItems(3);
+
+        $product2->values()->attach($valueB, ['attribute_id' => $attribute->id]);
+        $product2->values()->attach($valueC, ['attribute_id' => $attributeB->id]);
 
         $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone 8',

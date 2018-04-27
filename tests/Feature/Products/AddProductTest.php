@@ -16,6 +16,12 @@ class AddProductTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected function setUp()
+    {
+        parent::setUp();
+        Storage::fake('public');
+    }
+
     /** @test */
     public function a_user_can_view_the_add_product_form_for_his_brand()
     {
@@ -50,7 +56,6 @@ class AddProductTest extends TestCase
     /** @test */
     public function a_user_can_add_a_product_to_his_brand()
     {
-        Storage::fake('public');
         $brand = $this->brandForSignedInUser();
 
         $response = $this->post(route('products.store', $brand), [
@@ -61,7 +66,7 @@ class AddProductTest extends TestCase
             'products'      => [
                 [
                     'price'         => '700.50',
-                    'item_quantity' => 20,
+                    'item_quantity' => 2,
                 ]
             ]
         ]);
@@ -76,13 +81,43 @@ class AddProductTest extends TestCase
         $this->assertTrue($product->published);
         $this->assertTrue($product->brand->is($brand));
         $this->assertEquals(70050, $product->price);
-        $this->assertEquals(20, $product->itemsRemaining());
+        $this->assertEquals(2, $product->itemsRemaining());
+    }
+
+    /** @test */
+    public function a_product_can_have_attributes_associated_to_it()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $attributeA = $this->create('Attribute', 1, ['name' => 'Color']);
+        $attributeB = $this->create('Attribute', 1, ['name' => 'Capacity']);
+
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+            'products' => [
+                [
+                    'price'         => '700.50',
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        $attributeA->id => 'black',
+                        $attributeB->id => '32gb'
+                    ]
+                ]
+            ]
+        ]));
+
+        $product = Product::first();
+
+        $this->assertTrue($product->attributes->first()->is($attributeA));
+        $this->assertTrue($product->attributes->last()->is($attributeB));
+        $this->assertEquals('black', $product->values->first()->name);
+        $this->assertEquals('32gb', $product->values->last()->name);
+        $this->assertTrue($product->values->first()->attribute->is($attributeA));
+        $this->assertTrue($product->values->last()->attribute->is($attributeB));
     }
 
     /** @test */
     public function a_user_can_add_multiple_products_from_the_same_model_to_his_brand()
     {
-        Storage::fake('public');
         $brand = $this->brandForSignedInUser();
 
         $response = $this->post(route('products.store', $brand), [
@@ -119,8 +154,6 @@ class AddProductTest extends TestCase
 
     private function validParams($overrides = [])
     {
-        Storage::fake('public');
-
         return array_replace_recursive([
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
@@ -129,7 +162,7 @@ class AddProductTest extends TestCase
             'products'      => [
                 [
                     'price'         => '700.50',
-                    'item_quantity' => 20,
+                    'item_quantity' => 2,
                 ]
             ]
         ], $overrides);
@@ -162,7 +195,6 @@ class AddProductTest extends TestCase
     /** @test */
     public function product_image_is_uploaded()
     {
-        Storage::fake('public');
         Queue::fake();
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
@@ -367,7 +399,6 @@ class AddProductTest extends TestCase
     /** @test */
     public function product_image_must_be_an_image()
     {
-        Storage::fake('public');
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->create('not-an-image.pdf');
 
