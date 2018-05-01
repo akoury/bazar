@@ -27,6 +27,11 @@ class ProductModel extends Model
         return $this->products->first()->url($this->brand_id);
     }
 
+    public function price()
+    {
+        return price($this->products->min('price'));
+    }
+
     public function attributes()
     {
         return $this->products->load('attributes')->pluck('attributes')->collapse()->pluck('name', 'id')->toArray();
