@@ -18,14 +18,6 @@ class CreateAttributesTable extends Migration
             $table->string('name')->unique();
             $table->timestamps();
         });
-
-        Schema::create('attribute_product_value', function (Blueprint $table) {
-            $table->unsignedInteger('attribute_id');
-            $table->unsignedInteger('value_id');
-            $table->unsignedInteger('product_id');
-            $table->primary(['attribute_id', 'product_id']);
-            $table->timestamps();
-        });
     }
 
     /**

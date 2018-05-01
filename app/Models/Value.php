@@ -15,6 +15,6 @@ class Value extends Model
 
     public function products()
     {
-        return $this->belongsToMany(Product::class, 'attribute_product_value')->withPivot('attribute_id')->withTimestamps();
+        return $this->belongsToMany(Product::class)->withTimestamps();
     }
 }

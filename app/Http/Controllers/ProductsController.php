@@ -12,11 +12,12 @@ class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $product = Product::with('model', 'values.attribute')->findOrFail($id);
+        $model = Product::with('model.products.values.attribute')->findOrFail($id)->model;
+        $product = $model->products->firstWhere('id', $id);
 
         abort_if(! $product->published, 404);
 
-        return view('products.show', compact('product'));
+        return view('products.show', compact('model', 'product'));
     }
 
     public function index($brandId)
@@ -70,9 +71,7 @@ class ProductsController extends Controller
                     $values->push(Value::firstOrCreate(['attribute_id' => $id, 'name' => $attribute]));
                 }
 
-                $values->each(function ($value) use ($newProduct) {
-                    $newProduct->values()->attach($value, ['attribute_id' => $value->attribute_id]);
-                });
+                $newProduct->values()->attach($values->pluck('id'));
             }
         }
 

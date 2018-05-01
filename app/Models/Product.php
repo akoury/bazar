@@ -25,14 +25,9 @@ class Product extends Model
         return $this->hasMany(Item::class);
     }
 
-    public function attributes()
-    {
-        return $this->belongsToMany(Attribute::class, 'attribute_product_value')->withPivot('value_id')->withTimestamps();
-    }
-
     public function values()
     {
-        return $this->belongsToMany(Value::class, 'attribute_product_value')->withPivot('attribute_id')->withTimestamps();
+        return $this->belongsToMany(Value::class)->withTimestamps();
     }
 
     public function model()

@@ -60,15 +60,15 @@ class InitialSeeder extends Seeder
             'product_model_id' => $model->id
         ])->addItems(5);
 
-        $product->values()->attach($valueA, ['attribute_id' => $attribute->id]);
-        $product->values()->attach($valueC, ['attribute_id' => $attributeB->id]);
+        $product->values()->attach($valueA);
+        $product->values()->attach($valueC);
 
         $product2 = factory(Product::class)->create([
             'product_model_id' => $model->id
         ])->addItems(3);
 
-        $product2->values()->attach($valueB, ['attribute_id' => $attribute->id]);
-        $product2->values()->attach($valueC, ['attribute_id' => $attributeB->id]);
+        $product2->values()->attach($valueB);
+        $product2->values()->attach($valueC);
 
         $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone 8',

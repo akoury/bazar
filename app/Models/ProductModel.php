@@ -34,11 +34,10 @@ class ProductModel extends Model
 
     public function attributes()
     {
-        return $this->products->load('attributes')->pluck('attributes')->collapse()->pluck('name', 'id')->toArray();
-    }
+        $values = $this->products->pluck('values')->flatten()->unique('id');
 
-    public function values($id)
-    {
-        return $this->products->load('values')->pluck('values')->collapse()->where('attribute_id', $id)->pluck('name')->unique();
+        return $values->pluck('attribute')->unique('id')->map(function ($attribute) use ($values) {
+            return $attribute->setRelation('values', $values->where('attribute_id', $attribute->id));
+        });
     }
 }

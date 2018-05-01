@@ -101,14 +101,14 @@ class AddProductTest extends TestCase
                         $attributeA->id => 'black',
                         $attributeB->id => '32gb'
                     ]
-                ]
+                    ]
             ]
         ]));
 
         $product = Product::first();
 
-        $this->assertTrue($product->attributes->first()->is($attributeA));
-        $this->assertTrue($product->attributes->last()->is($attributeB));
+        $this->assertTrue($product->values->first()->attribute->is($attributeA));
+        $this->assertTrue($product->values->last()->attribute->is($attributeB));
         $this->assertEquals('black', $product->values->first()->name);
         $this->assertEquals('32gb', $product->values->last()->name);
         $this->assertTrue($product->values->first()->attribute->is($attributeA));
