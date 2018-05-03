@@ -1,11 +1,13 @@
 <template>
     <div>
         <form @submit.prevent="order">
-            <label for="quantity">Quantity</label>
-            <input id="quantity" type="number" name="quantity" v-model="quantity" min="1" required>
-            <button type="submit" :disabled="processing">Order for {{ totalPriceInDollars }} $</button>
+            <label for="quantity" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
+                Quantity
+            </label>
+            <input id="quantity" type="number" name="quantity" v-model="quantity" min="1" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
+            <button type="submit" :disabled="processing" class="bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4">Order {{ quantity }} for {{ totalPriceInDollars }} $</button>
         </form>
-        <button v-on:click="addToCart" :disabled="processing">Add to Cart</button>
+        <button v-on:click="addToCart" :disabled="processing" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded">Add {{ quantity }} to Cart</button>
     </div>
 </template>
 

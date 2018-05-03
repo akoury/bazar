@@ -16104,6 +16104,8 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['productId', 'productPrice', 'userEmail'],
@@ -16193,7 +16195,15 @@ var render = function() {
         }
       },
       [
-        _c("label", { attrs: { for: "quantity" } }, [_vm._v("Quantity")]),
+        _c(
+          "label",
+          {
+            staticClass:
+              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
+            attrs: { for: "quantity" }
+          },
+          [_vm._v("\n            Quantity\n        ")]
+        ),
         _vm._v(" "),
         _c("input", {
           directives: [
@@ -16204,6 +16214,8 @@ var render = function() {
               expression: "quantity"
             }
           ],
+          staticClass:
+            "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
           attrs: {
             id: "quantity",
             type: "number",
@@ -16222,16 +16234,35 @@ var render = function() {
           }
         }),
         _vm._v(" "),
-        _c("button", { attrs: { type: "submit", disabled: _vm.processing } }, [
-          _vm._v("Order for " + _vm._s(_vm.totalPriceInDollars) + " $")
-        ])
+        _c(
+          "button",
+          {
+            staticClass:
+              "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
+            attrs: { type: "submit", disabled: _vm.processing }
+          },
+          [
+            _vm._v(
+              "Order " +
+                _vm._s(_vm.quantity) +
+                " for " +
+                _vm._s(_vm.totalPriceInDollars) +
+                " $"
+            )
+          ]
+        )
       ]
     ),
     _vm._v(" "),
     _c(
       "button",
-      { attrs: { disabled: _vm.processing }, on: { click: _vm.addToCart } },
-      [_vm._v("Add to Cart")]
+      {
+        staticClass:
+          "bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded",
+        attrs: { disabled: _vm.processing },
+        on: { click: _vm.addToCart }
+      },
+      [_vm._v("Add " + _vm._s(_vm.quantity) + " to Cart")]
     )
   ])
 }

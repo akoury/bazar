@@ -14,7 +14,7 @@
         "braintree-web-drop-in": "^1.10.0",
         "cross-env": "^5.1",
         "laravel-mix": "^1.0",
-        "tailwindcss": "^0.4.1",
+        "tailwindcss": "^0.5.2",
         "turbolinks": "^5.0.3",
         "vue": "^2.5.7",
         "vue-turbolinks": "^2.0.0"
