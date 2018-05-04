@@ -17,7 +17,9 @@ class ProcessProductImageTest extends TestCase
     {
         Storage::fake('public');
 
-        $image = UploadedFile::fake()->image('example-image.png', 1000, 1000);
+        //The image is 3000x3000 to force PHP's memory limit to be high (512M)
+        $image = UploadedFile::fake()->image('example-image.png', 3000, 3000);
+
         Storage::disk('public')->putFileAs('products', $image, 'example-image.png');
 
         $model = $this->create('ProductModel', 1, [

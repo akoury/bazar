@@ -16093,6 +16093,43 @@ module.exports = Component.exports
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -16108,19 +16145,63 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    props: ['productId', 'productPrice', 'userEmail'],
+    props: ['model', 'attributes', 'productId', 'userEmail'],
     data: function data() {
         return {
+            products: this.model.products,
             quantity: 1,
+            values: {},
             processing: false,
-            stripeHandler: null
+            stripeHandler: null,
+            combinations: {},
+            selectedProduct: {}
         };
     },
     created: function created() {
+        var _this = this;
+
+        this.selectedProduct = this.products.find(function (product) {
+            return product.id == _this.productId;
+        });
+
+        this.values = Object.assign.apply(Object, _toConsumableArray(this.selectedProduct.values.map(function (value) {
+            return _defineProperty({}, value.attribute.id, value.id);
+        })));
+        // this.values = Object.assign(...this.products.find(product => product.id == this.productId).values.map(value => ({ [value.attribute.id]: value.id })))
+
         this.stripeHandler = this.initStripe();
+
+        this.combinations = this.products.map(function (product) {
+            return Object.assign.apply(Object, _toConsumableArray(product.values.map(function (value) {
+                return _defineProperty({}, value.attribute_id, value.id);
+            })));
+        });
     },
 
     methods: {
+        select: function select(sentValue) {
+            var _this2 = this;
+
+            var selected = this.products.find(function (product) {
+                return product.values.map(function (value) {
+                    return value.id;
+                }).sort().every(function (value, index) {
+                    return value == Object.values(_this2.values).sort()[index];
+                });
+            });
+
+            if (selected == null) {
+                selected = this.products.find(function (product) {
+                    return product.values.map(function (value) {
+                        return value.id;
+                    }).includes(sentValue.id);
+                });
+            }
+            this.selectedProduct = selected;
+            this.values = Object.assign.apply(Object, _toConsumableArray(this.selectedProduct.values.map(function (value) {
+                return _defineProperty({}, value.attribute.id, value.id);
+            })));
+        },
         initStripe: function initStripe() {
             var handler = StripeCheckout.configure({
                 key: App.stripeKey
@@ -16145,14 +16226,14 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             });
         },
         purchaseItems: function purchaseItems(token) {
-            var _this = this;
+            var _this3 = this;
 
             this.processing = true;
             axios.post('/orders/store/' + this.productId, { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
                 Turbolinks.visit('/orders/' + response.data.confirmation_number);
             }).catch(function (error) {
                 alert(error.response.data);
-                _this.processing = false;
+                _this3.processing = false;
             });
         },
         addToCart: function addToCart() {
@@ -16163,11 +16244,26 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
                 alert(error.response.data);
             });
             this.processing = false;
+        },
+        selected: function selected(value) {
+            var included = Object.values(this.values).includes(value.id);
+            var vals = Object.assign({}, this.values);
+            vals[value.attribute_id] = value.id;
+
+            return {
+                'bg-teal text-white': included,
+                'border-red': !included && !this.combinations.find(function (combination) {
+                    return JSON.stringify(combination) === JSON.stringify(vals);
+                })
+            };
         }
     },
     computed: {
+        price: function price() {
+            return (this.selectedProduct.price / 100).toFixed(2);
+        },
         totalPrice: function totalPrice() {
-            return this.quantity * this.productPrice;
+            return this.quantity * this.selectedProduct.price;
         },
         totalPriceInDollars: function totalPriceInDollars() {
             return (this.totalPrice / 100).toFixed(2);
@@ -16183,90 +16279,233 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c(
-      "form",
-      {
-        on: {
-          submit: function($event) {
-            $event.preventDefault()
-            _vm.order($event)
-          }
-        }
-      },
-      [
-        _c(
-          "label",
-          {
-            staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
-            attrs: { for: "quantity" }
-          },
-          [_vm._v("\n            Quantity\n        ")]
-        ),
-        _vm._v(" "),
-        _c("input", {
-          directives: [
+  return _c(
+    "div",
+    [
+      _c("h1", { staticClass: "text-black text-3xl font-semibold mb-2" }, [
+        _vm._v(_vm._s(_vm.model.name))
+      ]),
+      _vm._v(" "),
+      _c(
+        "svg",
+        {
+          staticClass: "mb-4 text-yellow fill-current",
+          attrs: { height: "25", width: "23" }
+        },
+        [
+          _c("polygon", {
+            attrs: {
+              points: "9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78"
+            }
+          })
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "svg",
+        {
+          staticClass: "mb-4 text-grey fill-current",
+          attrs: { height: "25", width: "23" }
+        },
+        [
+          _c("polygon", {
+            attrs: {
+              points: "9.9, 1.1, 3.3, 21.78, 19.8, 8.58, 0, 8.58, 16.5, 21.78"
+            }
+          })
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "h2",
+        { staticClass: "text-red-dark text-xl mb-1 font-light line-through" },
+        [_vm._v("$ " + _vm._s(_vm.price))]
+      ),
+      _vm._v(" "),
+      _c("h2", { staticClass: "text-teal text-4xl font-light mb-6" }, [
+        _vm._v("$ " + _vm._s(_vm.price))
+      ]),
+      _vm._v(" "),
+      _c(
+        "h3",
+        {
+          staticClass: "text-grey-dark text-xl font-light leading-normal mb-6"
+        },
+        [_vm._v(_vm._s(_vm.model.description) + "\n        "), _vm._m(0)]
+      ),
+      _vm._v(" "),
+      _vm._l(_vm.attributes, function(attribute) {
+        return _c("div", { key: attribute.id }, [
+          _c(
+            "label",
             {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.quantity,
-              expression: "quantity"
-            }
-          ],
-          staticClass:
-            "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-          attrs: {
-            id: "quantity",
-            type: "number",
-            name: "quantity",
-            min: "1",
-            required: ""
-          },
-          domProps: { value: _vm.quantity },
+              staticClass:
+                "block uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
+            },
+            [_vm._v("\n            " + _vm._s(attribute.name) + "\n        ")]
+          ),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "inline-flex mb-6" },
+            _vm._l(attribute.values, function(value) {
+              return _c(
+                "div",
+                {
+                  key: value.id,
+                  staticClass: "mr-2 flex flex-col items-center"
+                },
+                [
+                  _c(
+                    "label",
+                    {
+                      staticClass:
+                        "bg-grey-lighter text-grey-darker p-3 w-full rounded cursor-pointer border border-dashed border-transparent",
+                      class: _vm.selected(value)
+                    },
+                    [
+                      _c("span", [_vm._v(_vm._s(value.name))]),
+                      _vm._v(" "),
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.values[attribute.id],
+                            expression: "values[attribute.id]"
+                          }
+                        ],
+                        staticClass: "absolute opacity-0",
+                        attrs: { type: "radio", name: attribute.id },
+                        domProps: {
+                          value: value.id,
+                          checked: _vm._q(_vm.values[attribute.id], value.id)
+                        },
+                        on: {
+                          change: [
+                            function($event) {
+                              _vm.$set(_vm.values, attribute.id, value.id)
+                            },
+                            function($event) {
+                              _vm.select(value)
+                            }
+                          ]
+                        }
+                      })
+                    ]
+                  )
+                ]
+              )
+            })
+          )
+        ])
+      }),
+      _vm._v(" "),
+      _c(
+        "form",
+        {
           on: {
-            input: function($event) {
-              if ($event.target.composing) {
-                return
-              }
-              _vm.quantity = $event.target.value
+            submit: function($event) {
+              $event.preventDefault()
+              _vm.order($event)
             }
           }
-        }),
-        _vm._v(" "),
-        _c(
-          "button",
-          {
+        },
+        [
+          _c(
+            "label",
+            {
+              staticClass:
+                "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
+              attrs: { for: "quantity" }
+            },
+            [_vm._v("\n            Quantity\n        ")]
+          ),
+          _vm._v(" "),
+          _c("input", {
+            directives: [
+              {
+                name: "model",
+                rawName: "v-model",
+                value: _vm.quantity,
+                expression: "quantity"
+              }
+            ],
             staticClass:
-              "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
-            attrs: { type: "submit", disabled: _vm.processing }
-          },
-          [
-            _vm._v(
-              "Order " +
-                _vm._s(_vm.quantity) +
-                " for " +
-                _vm._s(_vm.totalPriceInDollars) +
-                " $"
-            )
-          ]
-        )
-      ]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        staticClass:
-          "bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded",
-        attrs: { disabled: _vm.processing },
-        on: { click: _vm.addToCart }
-      },
-      [_vm._v("Add " + _vm._s(_vm.quantity) + " to Cart")]
-    )
-  ])
+              "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+            attrs: {
+              id: "quantity",
+              type: "number",
+              name: "quantity",
+              min: "1",
+              required: ""
+            },
+            domProps: { value: _vm.quantity },
+            on: {
+              input: function($event) {
+                if ($event.target.composing) {
+                  return
+                }
+                _vm.quantity = $event.target.value
+              }
+            }
+          }),
+          _vm._v(" "),
+          _c(
+            "h3",
+            {
+              staticClass:
+                "text-grey-dark text-xl font-light leading-normal mb-6"
+            },
+            [_vm._v("Delivered in 4 days")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass:
+                "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
+              attrs: { type: "submit", disabled: _vm.processing }
+            },
+            [
+              _vm._v(
+                "Order " +
+                  _vm._s(_vm.quantity) +
+                  " for " +
+                  _vm._s(_vm.totalPriceInDollars) +
+                  " $"
+              )
+            ]
+          )
+        ]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        {
+          staticClass:
+            "bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded",
+          attrs: { disabled: _vm.processing },
+          on: { click: _vm.addToCart }
+        },
+        [_vm._v("Add " + _vm._s(_vm.quantity) + " to Cart")]
+      )
+    ],
+    2
+  )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("ul", [
+      _c("li", [_vm._v("The best phone")]),
+      _vm._v(" "),
+      _c("li", [_vm._v("All day battery life")])
+    ])
+  }
+]
 render._withStripped = true
 module.exports = { render: render, staticRenderFns: staticRenderFns }
 if (false) {

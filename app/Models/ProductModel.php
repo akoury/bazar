@@ -37,7 +37,7 @@ class ProductModel extends Model
         $values = $this->products->pluck('values')->flatten()->unique('id');
 
         return $values->pluck('attribute')->unique('id')->map(function ($attribute) use ($values) {
-            return $attribute->setRelation('values', $values->where('attribute_id', $attribute->id));
+            return $attribute->setRelation('values', $values->where('attribute_id', $attribute->id)->each->setRelation('attribute', null));
         });
     }
 }

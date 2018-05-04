@@ -28,5 +28,7 @@ class ProcessProductModelImage implements ShouldQueue
         $image = Image::make($imageContents)->limitColors(255)->encode();
 
         Storage::disk('public')->put($this->model->image_path, $image);
+
+        $image->destroy();
     }
 }

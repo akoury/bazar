@@ -26,8 +26,7 @@ class ViewProductTest extends TestCase
 
         $this->get(route('products.show', [$model->brand_id, $product]))
             ->assertSee('iPhone X')
-            ->assertSee('Coming in 2017')
-            ->assertSee('100.00');
+            ->assertSee('Coming in 2017');
     }
 
     /** @test */
