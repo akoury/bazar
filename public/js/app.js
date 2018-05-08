@@ -16143,6 +16143,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['model', 'attributes', 'productId', 'userEmail'],
@@ -16158,49 +16162,55 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         };
     },
     created: function created() {
-        var _this = this;
+        this.selectedProduct = this.productById(this.productId);
 
-        this.selectedProduct = this.products.find(function (product) {
-            return product.id == _this.productId;
-        });
-
-        this.values = Object.assign.apply(Object, _toConsumableArray(this.selectedProduct.values.map(function (value) {
-            return _defineProperty({}, value.attribute.id, value.id);
-        })));
-        // this.values = Object.assign(...this.products.find(product => product.id == this.productId).values.map(value => ({ [value.attribute.id]: value.id })))
-
-        this.stripeHandler = this.initStripe();
-
-        this.combinations = this.products.map(function (product) {
-            return Object.assign.apply(Object, _toConsumableArray(product.values.map(function (value) {
-                return _defineProperty({}, value.attribute_id, value.id);
-            })));
-        });
-    },
-
-    methods: {
-        select: function select(sentValue) {
-            var _this2 = this;
-
-            var selected = this.products.find(function (product) {
-                return product.values.map(function (value) {
-                    return value.id;
-                }).sort().every(function (value, index) {
-                    return value == Object.values(_this2.values).sort()[index];
-                });
-            });
-
-            if (selected == null) {
-                selected = this.products.find(function (product) {
-                    return product.values.map(function (value) {
-                        return value.id;
-                    }).includes(sentValue.id);
-                });
-            }
-            this.selectedProduct = selected;
+        if (this.selectedProduct.values.length > 0) {
             this.values = Object.assign.apply(Object, _toConsumableArray(this.selectedProduct.values.map(function (value) {
                 return _defineProperty({}, value.attribute.id, value.id);
             })));
+
+            this.combinations = this.products.filter(function (product) {
+                return product.item_count > 0;
+            }).map(function (product) {
+                return { product_id: product.id, values: Object.assign.apply(Object, _toConsumableArray(product.values.map(function (value) {
+                        return _defineProperty({}, value.attribute_id, value.id);
+                    }))) };
+            });
+        }
+
+        this.stripeHandler = this.initStripe();
+    },
+
+    methods: {
+        selectProduct: function selectProduct(selectedValue) {
+            var _this = this;
+
+            var matchingCombination = this.combinations.find(function (combination) {
+                return JSON.stringify(combination.values) === JSON.stringify(_this.values);
+            });
+
+            if (matchingCombination == null) {
+                var similarCombinations = this.combinations.filter(function (combination) {
+                    return Object.values(combination.values).includes(selectedValue.id);
+                });
+
+                matchingCombination = similarCombinations.map(function (combination) {
+                    return {
+                        product_id: combination.product_id,
+                        values: Object.values(combination.values).filter(function (value) {
+                            return Object.values(_this.values).includes(value);
+                        }).length
+                    };
+                }).reduce(function (max, item) {
+                    return item.values > max.values ? item : max;
+                });
+            }
+
+            this.selectedProduct = this.productById(matchingCombination.product_id);
+            this.values = Object.assign.apply(Object, _toConsumableArray(this.selectedProduct.values.map(function (value) {
+                return _defineProperty({}, value.attribute.id, value.id);
+            })));
+            history.replaceState(history.state, '', '/brands/' + this.model.brand_id + '/products/' + this.selectedProduct.id);
         },
         initStripe: function initStripe() {
             var handler = StripeCheckout.configure({
@@ -16226,36 +16236,41 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             });
         },
         purchaseItems: function purchaseItems(token) {
-            var _this3 = this;
+            var _this2 = this;
 
             this.processing = true;
-            axios.post('/orders/store/' + this.productId, { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
+            axios.post('/orders/store/' + this.selectedProduct.id, { email: token.email, quantity: this.quantity, payment_token: token.id }).then(function (response) {
                 Turbolinks.visit('/orders/' + response.data.confirmation_number);
             }).catch(function (error) {
                 alert(error.response.data);
-                _this3.processing = false;
+                _this2.processing = false;
             });
         },
         addToCart: function addToCart() {
             this.processing = true;
-            axios.post('/products/' + this.productId + '/add', { quantity: this.quantity }).then(function (response) {
+            axios.post('/products/' + this.selectedProduct.id + '/add', { quantity: this.quantity }).then(function (response) {
                 alert(response.data);
             }).catch(function (error) {
                 alert(error.response.data);
             });
             this.processing = false;
         },
-        selected: function selected(value) {
-            var included = Object.values(this.values).includes(value.id);
-            var vals = Object.assign({}, this.values);
-            vals[value.attribute_id] = value.id;
+        available: function available(value) {
+            var isAvailable = Object.values(this.values).includes(value.id);
+            var similarValues = Object.assign({}, this.values);
+            similarValues[value.attribute_id] = value.id;
 
             return {
-                'bg-teal text-white': included,
-                'border-red': !included && !this.combinations.find(function (combination) {
-                    return JSON.stringify(combination) === JSON.stringify(vals);
+                'bg-teal text-white': isAvailable,
+                'border-red': !isAvailable && !this.combinations.find(function (combination) {
+                    return JSON.stringify(combination.values) === JSON.stringify(similarValues);
                 })
             };
+        },
+        productById: function productById(id) {
+            return this.products.find(function (product) {
+                return product.id == id;
+            });
         }
     },
     computed: {
@@ -16361,7 +16376,7 @@ var render = function() {
                     {
                       staticClass:
                         "bg-grey-lighter text-grey-darker p-3 w-full rounded cursor-pointer border border-dashed border-transparent",
-                      class: _vm.selected(value)
+                      class: _vm.available(value)
                     },
                     [
                       _c("span", [_vm._v(_vm._s(value.name))]),
@@ -16387,7 +16402,7 @@ var render = function() {
                               _vm.$set(_vm.values, attribute.id, value.id)
                             },
                             function($event) {
-                              _vm.select(value)
+                              _vm.selectProduct(value)
                             }
                           ]
                         }
@@ -16401,95 +16416,107 @@ var render = function() {
         ])
       }),
       _vm._v(" "),
-      _c(
-        "form",
-        {
-          on: {
-            submit: function($event) {
-              $event.preventDefault()
-              _vm.order($event)
-            }
-          }
-        },
-        [
-          _c(
-            "label",
-            {
-              staticClass:
-                "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
-              attrs: { for: "quantity" }
-            },
-            [_vm._v("\n            Quantity\n        ")]
-          ),
-          _vm._v(" "),
-          _c("input", {
-            directives: [
+      _vm.selectedProduct.item_count > 0
+        ? _c("div", [
+            _c(
+              "form",
               {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.quantity,
-                expression: "quantity"
-              }
-            ],
-            staticClass:
-              "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-            attrs: {
-              id: "quantity",
-              type: "number",
-              name: "quantity",
-              min: "1",
-              required: ""
-            },
-            domProps: { value: _vm.quantity },
-            on: {
-              input: function($event) {
-                if ($event.target.composing) {
-                  return
+                on: {
+                  submit: function($event) {
+                    $event.preventDefault()
+                    _vm.order($event)
+                  }
                 }
-                _vm.quantity = $event.target.value
-              }
-            }
-          }),
-          _vm._v(" "),
-          _c(
-            "h3",
-            {
-              staticClass:
-                "text-grey-dark text-xl font-light leading-normal mb-6"
-            },
-            [_vm._v("Delivered in 4 days")]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              staticClass:
-                "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
-              attrs: { type: "submit", disabled: _vm.processing }
-            },
-            [
-              _vm._v(
-                "Order " +
-                  _vm._s(_vm.quantity) +
-                  " for " +
-                  _vm._s(_vm.totalPriceInDollars) +
-                  " $"
-              )
-            ]
-          )
-        ]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass:
-            "bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded",
-          attrs: { disabled: _vm.processing },
-          on: { click: _vm.addToCart }
-        },
-        [_vm._v("Add " + _vm._s(_vm.quantity) + " to Cart")]
-      )
+              },
+              [
+                _c(
+                  "label",
+                  {
+                    staticClass:
+                      "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
+                    attrs: { for: "quantity" }
+                  },
+                  [_vm._v("\n                Quantity\n            ")]
+                ),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.quantity,
+                      expression: "quantity"
+                    }
+                  ],
+                  staticClass:
+                    "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                  attrs: {
+                    id: "quantity",
+                    type: "number",
+                    name: "quantity",
+                    min: "1",
+                    required: ""
+                  },
+                  domProps: { value: _vm.quantity },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.quantity = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c(
+                  "h3",
+                  { staticClass: "text-grey-dark text-xl font-light mb-6" },
+                  [_vm._v("Delivered in 4 days")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass:
+                      "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
+                    class: { "cursor-not-allowed": _vm.processing },
+                    attrs: { type: "submit", disabled: _vm.processing }
+                  },
+                  [
+                    _vm._v(
+                      "Order " +
+                        _vm._s(_vm.quantity) +
+                        " for " +
+                        _vm._s(_vm.totalPriceInDollars) +
+                        " $"
+                    )
+                  ]
+                )
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass:
+                  "bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded",
+                class: { "cursor-not-allowed": _vm.processing },
+                attrs: { disabled: _vm.processing },
+                on: { click: _vm.addToCart }
+              },
+              [_vm._v("Add " + _vm._s(_vm.quantity) + " to Cart")]
+            )
+          ])
+        : _c("div", [
+            _c(
+              "h3",
+              {
+                staticClass:
+                  "text-red text-center font-normal mt-6 p-3 bg-red-lightest rounded"
+              },
+              [_vm._v("Temporarily out of stock")]
+            )
+          ])
     ],
     2
   )

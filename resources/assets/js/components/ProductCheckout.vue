@@ -23,24 +23,28 @@
 
             <div class="inline-flex mb-6">
                 <div v-for="value in attribute.values" :key="value.id" class="mr-2 flex flex-col items-center">
-                    <label class="bg-grey-lighter text-grey-darker p-3 w-full rounded cursor-pointer border border-dashed border-transparent" :class="selected(value)">
+                    <label class="bg-grey-lighter text-grey-darker p-3 w-full rounded cursor-pointer border border-dashed border-transparent" :class="available(value)">
                         <span>{{ value.name }}</span>
-                        <input type="radio" :value="value.id" v-model="values[attribute.id]" :name="attribute.id" class="absolute opacity-0" @change="select(value)">
+                        <input type="radio" :value="value.id" v-model="values[attribute.id]" :name="attribute.id" class="absolute opacity-0" @change="selectProduct(value)">
                     </label>
                 </div>
             </div>
         </div>
 
-
-        <form @submit.prevent="order">
-            <label for="quantity" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
-                Quantity
-            </label>
-            <input id="quantity" type="number" name="quantity" v-model="quantity" min="1" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
-            <h3 class="text-grey-dark text-xl font-light leading-normal mb-6">Delivered in 4 days</h3>
-            <button type="submit" :disabled="processing" class="bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4">Order {{ quantity }} for {{ totalPriceInDollars }} $</button>
-        </form>
-        <button @click="addToCart" :disabled="processing" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded">Add {{ quantity }} to Cart</button>
+        <div v-if="selectedProduct.item_count > 0">
+            <form @submit.prevent="order">
+                <label for="quantity" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
+                    Quantity
+                </label>
+                <input id="quantity" type="number" name="quantity" v-model="quantity" min="1" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
+                <h3 class="text-grey-dark text-xl font-light mb-6">Delivered in 4 days</h3>
+                <button type="submit" :disabled="processing" :class="{'cursor-not-allowed': processing }" class="bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4">Order {{ quantity }} for {{ totalPriceInDollars }} $</button>
+            </form>
+            <button @click="addToCart" :disabled="processing" :class="{'cursor-not-allowed': processing }" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded">Add {{ quantity }} to Cart</button>
+        </div>
+        <div v-else>
+            <h3 class="text-red text-center font-normal mt-6 p-3 bg-red-lightest rounded">Temporarily out of stock</h3>
+        </div>
     </div>
 </template>
 
@@ -59,28 +63,34 @@ export default {
         }
     },
     created() {
-        this.selectedProduct = this.products.find(product => product.id == this.productId)
+        this.selectedProduct = this.productById(this.productId)
 
-        this.values = Object.assign(...this.selectedProduct.values.map(value => ({ [value.attribute.id]: value.id })))
+        if (this.selectedProduct.values.length > 0) {
+            this.values = Object.assign(...this.selectedProduct.values.map(value => ({ [value.attribute.id]: value.id })))
+
+            this.combinations = this.products.filter(product => product.item_count > 0).map(product => ({ product_id: product.id, values: Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))) }))
+        }
 
         this.stripeHandler = this.initStripe()
-
-        this.combinations = this.products.map(product => Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))))
     },
     methods: {
-        select(sentValue) {
-            let selected = this.products.find(product =>
-                product.values
-                    .map(value => value.id)
-                    .sort()
-                    .every((value, index) => value == Object.values(this.values).sort()[index])
-            )
+        selectProduct(selectedValue) {
+            let matchingCombination = this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(this.values))
 
-            if (selected == null) {
-                selected = this.products.find(product => product.values.map(value => value.id).includes(sentValue.id))
+            if (matchingCombination == null) {
+                let similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id))
+
+                matchingCombination = similarCombinations
+                    .map(combination => ({
+                        product_id: combination.product_id,
+                        values: Object.values(combination.values).filter(value => Object.values(this.values).includes(value)).length
+                    }))
+                    .reduce((max, item) => (item.values > max.values ? item : max))
             }
-            this.selectedProduct = selected
+
+            this.selectedProduct = this.productById(matchingCombination.product_id)
             this.values = Object.assign(...this.selectedProduct.values.map(value => ({ [value.attribute.id]: value.id })))
+            history.replaceState(history.state, '', '/brands/' + this.model.brand_id + '/products/' + this.selectedProduct.id)
         },
         initStripe() {
             const handler = StripeCheckout.configure({
@@ -108,7 +118,7 @@ export default {
         purchaseItems(token) {
             this.processing = true
             axios
-                .post('/orders/store/' + this.productId, { email: token.email, quantity: this.quantity, payment_token: token.id })
+                .post('/orders/store/' + this.selectedProduct.id, { email: token.email, quantity: this.quantity, payment_token: token.id })
                 .then(response => {
                     Turbolinks.visit('/orders/' + response.data.confirmation_number)
                 })
@@ -120,7 +130,7 @@ export default {
         addToCart() {
             this.processing = true
             axios
-                .post('/products/' + this.productId + '/add', { quantity: this.quantity })
+                .post('/products/' + this.selectedProduct.id + '/add', { quantity: this.quantity })
                 .then(response => {
                     alert(response.data)
                 })
@@ -129,15 +139,18 @@ export default {
                 })
             this.processing = false
         },
-        selected(value) {
-            let included = Object.values(this.values).includes(value.id)
-            let vals = Object.assign({}, this.values)
-            vals[value.attribute_id] = value.id
+        available(value) {
+            let isAvailable = Object.values(this.values).includes(value.id)
+            let similarValues = Object.assign({}, this.values)
+            similarValues[value.attribute_id] = value.id
 
             return {
-                'bg-teal text-white': included,
-                'border-red': !included && !this.combinations.find(combination => JSON.stringify(combination) === JSON.stringify(vals))
+                'bg-teal text-white': isAvailable,
+                'border-red': !isAvailable && !this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(similarValues))
             }
+        },
+        productById(id) {
+            return this.products.find(product => product.id == id)
         }
     },
     computed: {

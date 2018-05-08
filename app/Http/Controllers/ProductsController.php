@@ -12,10 +12,19 @@ class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $model = Product::with('model.products.values.attribute')->findOrFail($id)->model;
-        $product = $model->products->firstWhere('id', $id);
+        $model = Product::with(['model.products.items' => function ($query) {
+            $query->available();
+        }, 'model.products.values.attribute'])->findOrFail($id)->model;
 
-        abort_if(! $product->published, 404);
+        abort_if(! $model->published, 404);
+
+        $model->products->transform(function ($product) {
+            $product->setAttribute('item_count', $product->items->count());
+            $product->setRelation('items', null);
+            return $product;
+        });
+
+        $product = $model->products->firstWhere('id', $id);
 
         return view('products.show', compact('model', 'product'));
     }
