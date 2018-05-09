@@ -22,7 +22,7 @@ class OrdersController extends Controller
             return redirect()->route('carts.show');
         }
 
-        $products = Product::fromCart($cart)->load('model');
+        $products = Product::fromCart($cart)->load('model', 'values');
 
         $total = $cart->total($products);
 
@@ -66,7 +66,7 @@ class OrdersController extends Controller
 
     public function show($confirmationNumber)
     {
-        $order = Order::findByConfirmationNumber($confirmationNumber)->load('items.product.model');
+        $order = Order::findByConfirmationNumber($confirmationNumber)->load('items.product.values', 'items.product.model');
 
         return view('orders.show', compact('order'));
     }

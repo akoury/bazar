@@ -10,7 +10,7 @@
     <h1>Items</h1>
     @foreach ($order->items as $item)
         <h1>
-            <a href="{{ $item->product->url() }}">{{ $item->product->name }}</a> ${{ $item->price() }}
+            <a href="{{ $item->product->url() }}">{{ $item->product->fullName }}</a> ${{ $item->price() }}
         </h1>
     @endforeach
 @endsection

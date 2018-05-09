@@ -7,7 +7,7 @@
         <a href="{{ route('products.edit', $product) }}">Edit</a>
         <h2>Sold: {{ $product->itemsSold() }}</h2>
         <h2>Revenue: {{ $product->revenue() }}</h2>
-        <h2>Items Remaining: {{ $product->itemsRemaining() }}</h2>
+        <h2>Items Remaining: {{ $product->item_count }}</h2>
     @endauth
 
     <div class="py-4 container mx-auto">

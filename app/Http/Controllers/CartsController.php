@@ -11,7 +11,7 @@ class CartsController extends Controller
     {
         $cart = cart()->update();
 
-        $products = Product::fromCart($cart)->load('model');
+        $products = Product::fromCart($cart)->load('model', 'values');
 
         $total = $cart->total($products) / 100;
 
@@ -20,7 +20,7 @@ class CartsController extends Controller
 
     public function store($productId)
     {
-        $product = Product::findOrFail($productId);
+        $product = Product::with('values', 'model')->findOrFail($productId);
 
         abort_if(! $product->published, 404);
 
@@ -36,7 +36,7 @@ class CartsController extends Controller
         }
 
         $cart->save();
-        return response()->json([$items . ' ' . $product->name . ' are now in your cart'], 201);
+        return response()->json([$items . ' ' . $product->fullName . ' are now in your cart'], 201);
     }
 
     public function update($productId)

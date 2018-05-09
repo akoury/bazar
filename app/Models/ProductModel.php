@@ -24,7 +24,7 @@ class ProductModel extends Model
 
     public function url()
     {
-        return $this->products->first()->url($this->brand_id);
+        return $this->products->firstWhere('price', $this->products->min('price'))->url($this->brand_id);
     }
 
     public function price()

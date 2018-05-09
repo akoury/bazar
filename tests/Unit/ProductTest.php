@@ -24,6 +24,22 @@ class ProductTest extends TestCase
     }
 
     /** @test */
+    public function can_get_a_products_full_name_which_includes_attributes_values()
+    {
+        $product = $this->createProductsForModel([
+            'name' => 'Shirt'
+        ]);
+
+        $valueA = $this->create('Value', 1, ['name' => 'Black']);
+        $valueB = $this->create('Value', 1, ['name' => 'Small']);
+
+        $product->values()->attach($valueA);
+        $product->values()->attach($valueB);
+
+        $this->assertEquals('Shirt (Black, Small)', $product->fullName);
+    }
+
+    /** @test */
     public function can_add_items()
     {
         $product = $this->create('Product')->addItems(20);

@@ -7,7 +7,7 @@
     @foreach($products as $product)
         <h1>
             {{ $cart->findProduct($product)['quantity'] }} of
-            {{ $product->name }} ${{ $product->price() }}
+            {{ $product->fullName }} ${{ $product->price() }}
         </h1>
     @endforeach
     <h2>Total: $ {{ price($total) }}</h2>

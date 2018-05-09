@@ -40,6 +40,11 @@ class Product extends Model
         return number_format($this->price / 100, 2);
     }
 
+    public function getFullNameAttribute()
+    {
+        return $this->model->name . ' (' . $this->values->implode('name', ', ') . ')';
+    }
+
     public function reserveItems($quantity, $email = null)
     {
         if (! $this->published) {
