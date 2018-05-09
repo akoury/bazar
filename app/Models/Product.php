@@ -42,7 +42,13 @@ class Product extends Model
 
     public function getFullNameAttribute()
     {
-        return $this->model->name . ' (' . $this->values->implode('name', ', ') . ')';
+        $values = $this->values;
+
+        if ($values->isEmpty()) {
+            return $this->model->name;
+        }
+
+        return $this->model->name . ' (' . $values->implode('name', ', ') . ')';
     }
 
     public function reserveItems($quantity, $email = null)
