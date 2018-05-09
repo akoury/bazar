@@ -63,18 +63,18 @@ class AddProductTest extends TestCase
             'description'   => 'The new iPhone',
             'published'     => true,
             'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => [
+            'products'      => json_encode([
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
                 ]
-            ]
+            ])
         ]);
 
         $product = Product::first();
 
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
+        $response->assertStatus(201)
+            ->assertJsonFragment([$product->model->url()]);
 
         $this->assertEquals('iPhone 8', $product->name);
         $this->assertEquals('The new iPhone', $product->description);
@@ -93,7 +93,7 @@ class AddProductTest extends TestCase
         $attributeB = $this->create('Attribute', 1, ['name' => 'Capacity']);
 
         $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'products' => [
+            'products' => json_encode([
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
@@ -102,7 +102,7 @@ class AddProductTest extends TestCase
                         $attributeB->id => '32gb'
                     ]
                     ]
-            ]
+            ])
         ]));
 
         $product = Product::first();
@@ -125,7 +125,7 @@ class AddProductTest extends TestCase
             'description'   => 'The new iPhone',
             'published'     => true,
             'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => [
+            'products'      => json_encode([
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2
@@ -134,13 +134,13 @@ class AddProductTest extends TestCase
                     'price'         => '200.50',
                     'item_quantity' => 1
                 ],
-            ],
+            ]),
         ]);
 
         $model = ProductModel::first();
 
-        $response->assertStatus(302)
-            ->assertRedirect($model->url());
+        $response->assertStatus(201)
+            ->assertJsonFragment([$model->url()]);
 
         $this->assertEquals('iPhone 8', $model->name);
         $this->assertEquals('The new iPhone', $model->description);
@@ -159,12 +159,12 @@ class AddProductTest extends TestCase
             'description'   => 'The new iPhone',
             'published'     => true,
             'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => [
+            'products'      => json_encode([
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
                 ]
-            ]
+            ])
         ], $overrides);
     }
 
@@ -251,23 +251,6 @@ class AddProductTest extends TestCase
     }
 
     /** @test */
-    public function published_is_optional_to_create_a_product()
-    {
-        $brand = $this->brandForSignedInUser();
-
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'published' => null,
-        ]));
-
-        $product = Product::first();
-
-        $response->assertStatus(302)
-            ->assertRedirect(route('products.show', [$product->brand_id, $product]));
-
-        $this->assertFalse($product->published);
-    }
-
-    /** @test */
     public function published_must_be_boolean_to_create_a_product()
     {
         $brand = $this->brandForSignedInUser();
@@ -294,12 +277,12 @@ class AddProductTest extends TestCase
     }
 
     /** @test */
-    public function products_must_be_an_array_to_create_a_product()
+    public function products_must_be_json_to_create_a_product()
     {
         $brand = $this->brandForSignedInUser();
 
         $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'products' => 'not-an-array'
+            'products' => 'not-json'
         ]));
 
         $this->assertValidationError($response, 'products', route('products.create', $brand));

@@ -51,11 +51,10 @@ class ProductsController extends Controller
         request()->validate([
             'name'                     => 'required',
             'description'              => 'required',
-            'published'                => 'nullable|boolean',
+            'published'                => 'boolean',
             'product_image'            => 'required|image',
-            'products'                 => 'required|array',
+            'products'                 => 'required|json',
             'products.*.price'         => 'required|numeric|min:0',
-            'products.*.item_quantity' => 'required|integer|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
         ]);
 
@@ -67,7 +66,9 @@ class ProductsController extends Controller
             'image_path'  => request('product_image')->store('products', 'public'),
         ]);
 
-        foreach (request('products') as $product) {
+        $products = json_decode(request('products'), true);
+
+        foreach ($products as $product) {
             $newProduct = Product::create([
                 'product_model_id' => $model->id,
                 'price'            => $product['price'] * 100,
@@ -86,7 +87,7 @@ class ProductsController extends Controller
 
         ProcessProductModelImage::dispatch($model);
 
-        return redirect($model->url());
+        return response()->json($model->url(), 201);
     }
 
     public function edit($id)
