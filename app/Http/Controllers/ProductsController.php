@@ -81,7 +81,7 @@ class ProductsController extends Controller
                 $values = collect();
 
                 foreach ($product['attributes'] as $name => $value) {
-                    $values->push(Value::firstOrCreate(['attribute_id' => Attribute::firstOrCreate(['name' => $name])->id, 'name' => $value]));
+                    $values->push(Value::firstOrCreate(['attribute_id' => Attribute::firstOrCreate(['name' => strtolower($name)])->id, 'name' => strtolower($value)]));
                 }
 
                 $newProduct->values()->attach($values->pluck('id'));

@@ -90,8 +90,8 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $attributeA = $this->create('Attribute', 1, ['name' => 'Color']);
-        $attributeB = $this->create('Attribute', 1, ['name' => 'Capacity']);
+        $attributeA = $this->create('Attribute', 1, ['name' => 'COLOR']);
+        $attributeB = $this->create('Attribute', 1, ['name' => 'capacity']);
 
         $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
             'products' => json_encode([
@@ -99,7 +99,7 @@ class AddProductTest extends TestCase
                     'price'         => '700.50',
                     'item_quantity' => 2,
                     'attributes'    => [
-                        $attributeA->name => 'black',
+                        $attributeA->name => 'BLACK',
                         $attributeB->name => '32gb'
                     ]
                 ]
@@ -107,12 +107,11 @@ class AddProductTest extends TestCase
         ]));
 
         $product = Product::first();
-
-        $this->assertTrue($product->values->first()->attribute->is($attributeA));
+        $this->assertEquals('color', $product->values->first()->attribute->name);
         $this->assertTrue($product->values->last()->attribute->is($attributeB));
         $this->assertEquals('black', $product->values->first()->name);
         $this->assertEquals('32gb', $product->values->last()->name);
-        $this->assertTrue($product->values->first()->attribute->is($attributeA));
+        $this->assertEquals('color', $product->values->first()->attribute->name);
         $this->assertTrue($product->values->last()->attribute->is($attributeB));
     }
 

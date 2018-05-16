@@ -27,7 +27,7 @@
                         placeholder="Search or add an attribute" 
                         :id="index"
                         @select="changeAttribute(index)"
-                        :taggable="true" 
+                        :taggable="true"
                         @tag="addAttribute" 
                         tag-placeholder="Add as a new attribute" 
                         label="name" 
@@ -136,12 +136,14 @@ export default {
             this.numberOfAttributes--
         },
         addAttribute(newAttribute, index) {
+            newAttribute = newAttribute.toLowerCase()
             if(!this.selectedAttributes.some(attribute => attribute.name == newAttribute)){
                 Vue.set(this.selectedAttributes, index, { name: newAttribute, values:[] })
                 Vue.set(this.selectedValues, index, [])
             }
         },
         addValue(newValue, index) {
+            newValue = newValue.toLowerCase()
             this.selectedValues[index].push({ name: newValue, attribute: this.selectedAttributes[index].name })
             this.selectedAttributes[index].values.push({ name: newValue, attribute: this.selectedAttributes[index].name })
         },
