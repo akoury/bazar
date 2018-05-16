@@ -16,20 +16,20 @@
             </ul>
         </h3>
 
-        <div v-for="attribute in attributes" :key="attribute.id">
-            <label class="block uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
+        <fieldset v-for="attribute in attributes" :key="attribute.id">
+            <legend class="block uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
                 {{ attribute.name }}
-            </label>
+            </legend>
 
-            <div class="inline-flex mb-6">
+            <div class="inline-flex mb-6 flex-wrap">
                 <div v-for="value in attribute.values" :key="value.id" class="mr-2 flex flex-col items-center">
-                    <label class="bg-grey-lighter text-grey-darker p-3 w-full rounded cursor-pointer border border-dashed border-transparent" :class="available(value)">
+                    <label class="bg-grey-lighter hover:bg-grey-light text-grey-darker p-3 w-full cursor-pointer rounded border border-dashed border-transparent mb-2" :class="available(value)">
                         <span>{{ value.name }}</span>
-                        <input type="radio" :value="value.id" v-model="values[attribute.id]" :name="attribute.id" class="absolute opacity-0" @change="selectProduct(value)">
+                        <input type="radio" v-model="values[attribute.id]" :name="attribute.name" :value="value.id" class="absolute opacity-0" @change="selectProduct(value)">
                     </label>
                 </div>
             </div>
-        </div>
+        </fieldset>
 
         <div v-if="selectedProduct.item_count > 0">
             <form @submit.prevent="order">
@@ -68,7 +68,7 @@ export default {
         if (this.selectedProduct.values.length > 0) {
             this.values = Object.assign(...this.selectedProduct.values.map(value => ({ [value.attribute.id]: value.id })))
 
-            this.combinations = this.products.filter(product => product.item_count > 0).map(product => ({ product_id: product.id, values: Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))) }))
+            this.combinations = this.products.map(product => ({ product_id: product.id, available: product.item_count > 0, values: Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))) }))
         }
 
         this.stripeHandler = this.initStripe()
@@ -76,9 +76,13 @@ export default {
     methods: {
         selectProduct(selectedValue) {
             let matchingCombination = this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(this.values))
+            console.log(matchingCombination)
+            if (matchingCombination == null || !matchingCombination.available) {
+                let similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id) && combination.available)
 
-            if (matchingCombination == null) {
-                let similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id))
+                if (! similarCombinations.length) {
+                    similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id))
+                }
 
                 matchingCombination = similarCombinations
                     .map(combination => ({
@@ -145,8 +149,8 @@ export default {
             similarValues[value.attribute_id] = value.id
 
             return {
-                'bg-teal text-white': isAvailable,
-                'border-red': !isAvailable && !this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(similarValues))
+                'bg-teal hover:bg-teal text-white': isAvailable,
+                'border-red': !isAvailable && !this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(similarValues) && combination.available)
             }
         },
         productById(id) {

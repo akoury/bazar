@@ -5,6 +5,7 @@ namespace Tests\Feature\Products;
 use Tests\TestCase;
 use App\Models\Brand;
 use App\Models\Product;
+use App\Models\Attribute;
 use App\Models\ProductModel;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Queue;
@@ -98,10 +99,10 @@ class AddProductTest extends TestCase
                     'price'         => '700.50',
                     'item_quantity' => 2,
                     'attributes'    => [
-                        $attributeA->id => 'black',
-                        $attributeB->id => '32gb'
+                        $attributeA->name => 'black',
+                        $attributeB->name => '32gb'
                     ]
-                    ]
+                ]
             ])
         ]));
 

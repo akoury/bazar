@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Brand;
 use App\Models\Value;
 use App\Models\Product;
+use App\Models\Attribute;
 use App\Models\ProductModel;
 use App\Jobs\ProcessProductModelImage;
 
@@ -41,7 +42,9 @@ class ProductsController extends Controller
     {
         $brand = auth()->user()->brands()->findOrFail($brandId);
 
-        return view('products.create', compact('brand'));
+        $attributes = Attribute::with('values')->get();
+
+        return view('products.create', compact('brand', 'attributes'));
     }
 
     public function store($brandId)
@@ -77,8 +80,8 @@ class ProductsController extends Controller
             if (isset($product['attributes'])) {
                 $values = collect();
 
-                foreach ($product['attributes'] as $id => $attribute) {
-                    $values->push(Value::firstOrCreate(['attribute_id' => $id, 'name' => $attribute]));
+                foreach ($product['attributes'] as $name => $value) {
+                    $values->push(Value::firstOrCreate(['attribute_id' => Attribute::firstOrCreate(['name' => $name])->id, 'name' => $value]));
                 }
 
                 $newProduct->values()->attach($values->pluck('id'));
