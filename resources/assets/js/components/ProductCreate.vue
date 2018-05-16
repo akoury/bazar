@@ -114,13 +114,20 @@ export default {
             if(this.products.length === 1){
                 this.products[0].isActive = true
             }
-            let products = this.products.map((product, index) => { 
-                product.attributes = Object.assign(...this.combinations[index].map(value => value.hasOwnProperty('attribute_id') ? {[this.attributes.find(attribute => attribute.id == value.attribute_id).name]:value.name} : {[value.attribute]: value.name } ))
-                return product
-            }).filter(product => product.isActive).map(product => { 
-                delete product.isActive
-                return product
-            })
+
+            let products
+            if(this.combinations[0].length) {
+                products = this.products.map((product, index) => { 
+                    product.attributes = Object.assign(...this.combinations[index].map(value => value.hasOwnProperty('attribute_id') ? {[this.attributes.find(attribute => attribute.id == value.attribute_id).name]:value.name} : {[value.attribute]: value.name } ))
+                    return product
+                }).filter(product => product.isActive).map(product => { 
+                    delete product.isActive
+                    return product
+                })
+            }else {
+                products = this.products
+                delete products[0].isActive
+            }
             formData.append('products', JSON.stringify(products))
             return formData
         },

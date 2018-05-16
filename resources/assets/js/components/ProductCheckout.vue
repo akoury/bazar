@@ -76,7 +76,7 @@ export default {
     methods: {
         selectProduct(selectedValue) {
             let matchingCombination = this.combinations.find(combination => JSON.stringify(combination.values) === JSON.stringify(this.values))
-            console.log(matchingCombination)
+
             if (matchingCombination == null || !matchingCombination.available) {
                 let similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id) && combination.available)
 
