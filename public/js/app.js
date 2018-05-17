@@ -16600,13 +16600,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('description', this.description);
             formData.append('product_image', this.product_image);
             formData.append('published', this.published ? 1 : 0);
-            if (this.products.length === 1) {
-                this.products[0].isActive = true;
+
+            var products = this.products;
+            if (products.length === 1) {
+                products[0].isActive = true;
             }
 
-            var products = void 0;
             if (this.combinations[0].length) {
-                products = this.products.map(function (product, index) {
+                products = products.map(function (product, index) {
                     product.attributes = Object.assign.apply(Object, _toConsumableArray(_this.combinations[index].map(function (value) {
                         return value.hasOwnProperty('attribute_id') ? _defineProperty({}, _this.attributes.find(function (attribute) {
                             return attribute.id == value.attribute_id;
@@ -16616,13 +16617,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }).filter(function (product) {
                     return product.isActive;
                 }).map(function (product) {
-                    delete product.isActive;
                     return product;
                 });
-            } else {
-                products = this.products;
-                delete products[0].isActive;
             }
+
             formData.append('products', JSON.stringify(products));
             return formData;
         },

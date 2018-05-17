@@ -17,4 +17,9 @@ class Value extends Model
     {
         return $this->belongsToMany(Product::class)->withTimestamps();
     }
+
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtolower($value);
+    }
 }

@@ -100,19 +100,31 @@ class AddProductTest extends TestCase
                     'item_quantity' => 2,
                     'attributes'    => [
                         $attributeA->name => 'BLACK',
-                        $attributeB->name => '32gb'
+                        'capaCity'        => '32gb'
+                    ]
+                ],
+                [
+                    'price'         => '800.50',
+                    'item_quantity' => 1,
+                    'attributes'    => [
+                        $attributeA->name => 'Gold',
+                        'capaCity'        => '32gb'
                     ]
                 ]
             ])
         ]));
 
-        $product = Product::first();
-        $this->assertEquals('color', $product->values->first()->attribute->name);
-        $this->assertTrue($product->values->last()->attribute->is($attributeB));
-        $this->assertEquals('black', $product->values->first()->name);
-        $this->assertEquals('32gb', $product->values->last()->name);
-        $this->assertEquals('color', $product->values->first()->attribute->name);
-        $this->assertTrue($product->values->last()->attribute->is($attributeB));
+        $products = Product::all();
+
+        $this->assertEquals('color', $products->first()->values->first()->attribute->name);
+        $this->assertTrue($products->first()->values->first()->attribute->is($attributeA));
+        $this->assertTrue($products->first()->values->last()->attribute->is($attributeB));
+        $this->assertEquals('black', $products->first()->values->first()->name);
+        $this->assertEquals('32gb', $products->first()->values->last()->name);
+        $this->assertTrue($products->first()->values->first()->attribute->is($attributeA));
+        $this->assertTrue($products->first()->values->last()->attribute->is($attributeB));
+        $this->assertTrue($products->last()->values->first()->attribute->is($attributeA));
+        $this->assertEquals('capacity', $products->last()->values->last()->attribute->name);
     }
 
     /** @test */
@@ -132,7 +144,7 @@ class AddProductTest extends TestCase
                 ],
                 [
                     'price'         => '200.50',
-                    'item_quantity' => 1
+                    'item_quantity' => 0
                 ],
             ]),
         ]);
@@ -149,7 +161,7 @@ class AddProductTest extends TestCase
         $this->assertEquals(70050, $model->products->first()->price);
         $this->assertEquals(2, $model->products->first()->itemsRemaining());
         $this->assertEquals(20050, $model->products->last()->price);
-        $this->assertEquals(1, $model->products->last()->itemsRemaining());
+        $this->assertEquals(0, $model->products->last()->itemsRemaining());
     }
 
     private function validParams($overrides = [])

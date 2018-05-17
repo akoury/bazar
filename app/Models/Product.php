@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use App\Classes\Reservation;
 use App\Traits\ProductInformation;
 use Illuminate\Support\Facades\DB;
@@ -83,8 +84,11 @@ class Product extends Model
 
     public function addItems($quantity)
     {
-        for ($i = 0; $i < $quantity; $i++) {
-            $this->items()->create();
+        $now = Carbon::now()->toDateTimeString();
+        $chunkedItems = array_chunk(array_fill(0, $quantity, ['product_id' => $this->id, 'created_at' => $now, 'updated_at' => $now]), 200);
+
+        foreach ($chunkedItems as $items) {
+            Item::insert($items);
         }
 
         return $this;

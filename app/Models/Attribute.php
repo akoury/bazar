@@ -12,4 +12,9 @@ class Attribute extends Model
     {
         return $this->hasMany(Value::class);
     }
+
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = strtolower($value);
+    }
 }

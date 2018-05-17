@@ -69,7 +69,18 @@ class ProductsController extends Controller
             'image_path'  => request('product_image')->store('products', 'public'),
         ]);
 
-        $products = json_decode(request('products'), true);
+        $products = collect(json_decode(request('products'), true))->map(function ($product) {
+            if (isset($product['attributes'])) {
+                $product['attributes'] = array_map('strtolower', $product['attributes']);
+                $product['attributes'] = array_change_key_case($product['attributes'], CASE_LOWER);
+            }
+            return $product;
+        });
+
+        if (isset($products[0]['attributes'])) {
+            $attributes = Attribute::whereIn('name', array_keys($products[0]['attributes']))->get();
+            $values = Value::whereIn('name', $products->pluck('attributes')->flatten()->unique())->get();
+        }
 
         foreach ($products as $product) {
             $newProduct = Product::create([
@@ -78,13 +89,25 @@ class ProductsController extends Controller
             ])->addItems($product['item_quantity']);
 
             if (isset($product['attributes'])) {
-                $values = collect();
+                $productValues = collect();
 
-                foreach ($product['attributes'] as $name => $value) {
-                    $values->push(Value::firstOrCreate(['attribute_id' => Attribute::firstOrCreate(['name' => strtolower($name)])->id, 'name' => strtolower($value)]));
+                foreach ($product['attributes'] as $attributeName => $valueName) {
+                    $foundAttribute = $attributes->firstWhere('name', $attributeName);
+                    if (! $foundAttribute) {
+                        $foundAttribute = Attribute::create(['name' => $attributeName]);
+                        $attributes->push($foundAttribute);
+                    }
+
+                    $foundValue = $values->where('attribute_id', $foundAttribute->id)->firstWhere('name', $valueName);
+                    if (! $foundValue) {
+                        $foundValue = Value::create(['attribute_id' => $foundAttribute->id, 'name' => $valueName]);
+                        $values->push($foundValue);
+                    }
+
+                    $productValues->push($foundValue);
                 }
 
-                $newProduct->values()->attach($values->pluck('id'));
+                $newProduct->values()->attach($productValues->pluck('id'));
             }
         }
 

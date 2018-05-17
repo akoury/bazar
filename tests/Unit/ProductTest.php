@@ -40,7 +40,7 @@ class ProductTest extends TestCase
         $productA->values()->attach($valueA);
         $productA->values()->attach($valueB);
 
-        $this->assertEquals('Shirt (Black, Small)', $productA->fullName);
+        $this->assertEquals('Shirt (black, small)', $productA->fullName);
         $this->assertEquals('Shoes', $productB->fullName);
     }
 
