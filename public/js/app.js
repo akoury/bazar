@@ -57,10 +57,10 @@
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
+/******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 69);
+/******/ 	return __webpack_require__(__webpack_require__.s = 73);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -233,13 +233,13 @@ module.exports = {
   },
   errors: {
     NO_PAYMENT_METHOD_ERROR: 'No payment method is available.',
-    PAYPAL_NON_LINKED_SANDBOX: 'A <a href="https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing" target="_blank" rel="nofollow">linked sandbox account</a> is required to use PayPal Checkout in sandbox.'
+    DEVELOPER_MISCONFIGURATION_MESSAGE: 'Developer Error: Something went wrong. Check the console for details.'
   },
   ANALYTICS_REQUEST_TIMEOUT_MS: 2000,
   ANALYTICS_PREFIX: 'web.dropin.',
   CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT: 200,
   CHECKOUT_JS_SOURCE: 'https://www.paypalobjects.com/api/checkout.min.js',
-  GOOGLE_PAYMENT_SOURCE: 'https://payments.developers.google.com/js/apis/pay.js',
+  GOOGLE_PAYMENT_SOURCE: 'https://pay.google.com/gp/p/js/pay.js',
   INTEGRATION: 'dropin2',
   PAYPAL_CHECKOUT_SCRIPT_ID: 'braintree-dropin-paypal-checkout-script',
   GOOGLE_PAYMENT_SCRIPT_ID: 'braintree-dropin-google-payment-script',
@@ -255,9 +255,9 @@ module.exports = {
 "use strict";
 
 
-var deferred = __webpack_require__(133);
-var once = __webpack_require__(134);
-var promiseOrCallback = __webpack_require__(135);
+var deferred = __webpack_require__(137);
+var once = __webpack_require__(138);
+var promiseOrCallback = __webpack_require__(139);
 
 function wrapPromise(fn) {
   return function () {
@@ -316,7 +316,7 @@ module.exports = wrapPromise;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Promise = global.Promise || __webpack_require__(45);
+var Promise = global.Promise || __webpack_require__(49);
 
 module.exports = Promise;
 
@@ -329,7 +329,7 @@ module.exports = Promise;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Promise = global.Promise || __webpack_require__(45);
+var Promise = global.Promise || __webpack_require__(49);
 
 module.exports = Promise;
 
@@ -342,8 +342,8 @@ module.exports = Promise;
 "use strict";
 
 
-var bind = __webpack_require__(30);
-var isBuffer = __webpack_require__(74);
+var bind = __webpack_require__(32);
+var isBuffer = __webpack_require__(78);
 
 /*global toString:true*/
 
@@ -653,7 +653,7 @@ module.exports = {
 
 
 var constants = __webpack_require__(17);
-var addMetadata = __webpack_require__(43);
+var addMetadata = __webpack_require__(47);
 
 function _millisToSeconds(millis) {
   return Math.floor(millis / 1000);
@@ -725,6 +725,7 @@ module.exports = DropinError;
 
 
 var assign = __webpack_require__(10).assign;
+var classlist = __webpack_require__(15);
 var DropinError = __webpack_require__(8);
 var errors = __webpack_require__(2).errors;
 var Promise = __webpack_require__(5);
@@ -753,6 +754,22 @@ BaseView.prototype.onSelection = function () {};
 
 BaseView.prototype.teardown = function () {
   return Promise.resolve();
+};
+
+BaseView.prototype.preventUserAction = function () {
+  if (this.element) {
+    classlist.add(this.element, 'braintree-sheet--loading');
+  }
+
+  this.model.preventUserAction();
+};
+
+BaseView.prototype.allowUserAction = function () {
+  if (this.element) {
+    classlist.remove(this.element, 'braintree-sheet--loading');
+  }
+
+  this.model.allowUserAction();
 };
 
 module.exports = BaseView;
@@ -795,6 +812,36 @@ module.exports = {
 "use strict";
 
 
+var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
+
+function assignPolyfill(destination) {
+  var i, source, key;
+
+  for (i = 1; i < arguments.length; i++) {
+    source = arguments[i];
+    for (key in source) {
+      if (source.hasOwnProperty(key)) {
+        destination[key] = source[key];
+      }
+    }
+  }
+
+  return destination;
+}
+
+module.exports = {
+  assign: assignNormalized,
+  _assign: assignPolyfill
+};
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
 module.exports = function (obj) {
   return Object.keys(obj).filter(function (key) {
     return typeof obj[key] === 'function';
@@ -803,7 +850,7 @@ module.exports = function (obj) {
 
 
 /***/ }),
-/* 12 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -826,7 +873,55 @@ module.exports = function (instance, methodNames) {
 
 
 /***/ }),
-/* 13 */
+/* 14 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var atob = __webpack_require__(39).atob;
+var constants = __webpack_require__(2);
+var braintreeClientVersion = __webpack_require__(40).VERSION;
+
+function _millisToSeconds(millis) {
+  return Math.floor(millis / 1000);
+}
+
+function sendAnalyticsEvent(client, kind, callback) {
+  var configuration = client.getConfiguration();
+  var analyticsRequest = client._request;
+  var timestamp = _millisToSeconds(Date.now());
+  var url = configuration.gatewayConfiguration.analytics.url;
+  var data = {
+    analytics: [{
+      kind: constants.ANALYTICS_PREFIX + kind,
+      timestamp: timestamp
+    }],
+    _meta: configuration.analyticsMetadata,
+    braintreeLibraryVersion: braintreeClientVersion
+  };
+
+  if (configuration.authorizationType === 'TOKENIZATION_KEY') {
+    data.tokenizationKey = configuration.authorization;
+  } else {
+    data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
+  }
+
+  analyticsRequest({
+    url: url,
+    method: 'post',
+    data: data,
+    timeout: constants.ANALYTICS_REQUEST_TIMEOUT_MS
+  }, callback);
+}
+
+module.exports = {
+  sendEvent: sendAnalyticsEvent
+};
+
+
+/***/ }),
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -880,84 +975,6 @@ module.exports = {
 
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var atob = __webpack_require__(37).atob;
-var constants = __webpack_require__(2);
-var braintreeClientVersion = __webpack_require__(38).VERSION;
-
-function _millisToSeconds(millis) {
-  return Math.floor(millis / 1000);
-}
-
-function sendAnalyticsEvent(client, kind, callback) {
-  var configuration = client.getConfiguration();
-  var analyticsRequest = client._request;
-  var timestamp = _millisToSeconds(Date.now());
-  var url = configuration.gatewayConfiguration.analytics.url;
-  var data = {
-    analytics: [{
-      kind: constants.ANALYTICS_PREFIX + kind,
-      timestamp: timestamp
-    }],
-    _meta: configuration.analyticsMetadata,
-    braintreeLibraryVersion: braintreeClientVersion
-  };
-
-  if (configuration.authorizationType === 'TOKENIZATION_KEY') {
-    data.tokenizationKey = configuration.authorization;
-  } else {
-    data.authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
-  }
-
-  analyticsRequest({
-    url: url,
-    method: 'post',
-    data: data,
-    timeout: constants.ANALYTICS_REQUEST_TIMEOUT_MS
-  }, callback);
-}
-
-module.exports = {
-  sendEvent: sendAnalyticsEvent
-};
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var assignNormalized = typeof Object.assign === 'function' ? Object.assign : assignPolyfill;
-
-function assignPolyfill(destination) {
-  var i, source, key;
-
-  for (i = 1; i < arguments.length; i++) {
-    source = arguments[i];
-    for (key in source) {
-      if (source.hasOwnProperty(key)) {
-        destination[key] = source[key];
-      }
-    }
-  }
-
-  return destination;
-}
-
-module.exports = {
-  assign: assignNormalized,
-  _assign: assignPolyfill
-};
-
-
-/***/ }),
 /* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -967,7 +984,7 @@ module.exports = {
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
 var sharedErrors = __webpack_require__(18);
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 
 function basicComponentVerification(options) {
   var client, clientVersion, name;
@@ -1016,7 +1033,7 @@ module.exports = {
 "use strict";
 
 
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 var PLATFORM = 'web';
 
 module.exports = {
@@ -1254,312 +1271,11 @@ module.exports = uuid;
 
 "use strict";
 
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  HOSTED_FIELDS_TIMEOUT: {
-    type: BraintreeError.types.UNKNOWN,
-    code: 'HOSTED_FIELDS_TIMEOUT',
-    message: 'Hosted Fields timed out when attempting to set up.'
-  },
-  HOSTED_FIELDS_INVALID_FIELD_KEY: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_INVALID_FIELD_KEY'
-  },
-  HOSTED_FIELDS_INVALID_FIELD_SELECTOR: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_INVALID_FIELD_SELECTOR',
-    message: 'Selector does not reference a valid DOM node.'
-  },
-  HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME',
-    message: 'Element already contains a Braintree iframe.'
-  },
-  HOSTED_FIELDS_FIELD_INVALID: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_INVALID'
-  },
-  HOSTED_FIELDS_FIELD_NOT_PRESENT: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_NOT_PRESENT'
-  },
-  HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR: {
-    type: BraintreeError.types.NETWORK,
-    code: 'HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR',
-    message: 'A tokenization network error occurred.'
-  },
-  HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE',
-    message: 'This credit card already exists in the merchant\'s vault.'
-  },
-  HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED',
-    message: 'CVV verification failed during tokenization.'
-  },
-  HOSTED_FIELDS_FAILED_TOKENIZATION: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
-    message: 'The supplied card data failed tokenization.'
-  },
-  HOSTED_FIELDS_FIELDS_EMPTY: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FIELDS_EMPTY',
-    message: 'All fields are empty. Cannot tokenize empty card fields.'
-  },
-  HOSTED_FIELDS_FIELDS_INVALID: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'HOSTED_FIELDS_FIELDS_INVALID',
-    message: 'Some payment input fields are invalid. Cannot tokenize invalid card fields.'
-  },
-  HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED'
-  },
-  HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED'
-  },
-  HOSTED_FIELDS_FIELD_PROPERTY_INVALID: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'HOSTED_FIELDS_FIELD_PROPERTY_INVALID'
-  }
-};
-
-
-/***/ }),
-/* 25 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(process) {
-
-var utils = __webpack_require__(6);
-var normalizeHeaderName = __webpack_require__(76);
-
-var DEFAULT_CONTENT_TYPE = {
-  'Content-Type': 'application/x-www-form-urlencoded'
-};
-
-function setContentTypeIfUnset(headers, value) {
-  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
-    headers['Content-Type'] = value;
-  }
-}
-
-function getDefaultAdapter() {
-  var adapter;
-  if (typeof XMLHttpRequest !== 'undefined') {
-    // For browsers use XHR adapter
-    adapter = __webpack_require__(32);
-  } else if (typeof process !== 'undefined') {
-    // For node use HTTP adapter
-    adapter = __webpack_require__(32);
-  }
-  return adapter;
-}
-
-var defaults = {
-  adapter: getDefaultAdapter(),
-
-  transformRequest: [function transformRequest(data, headers) {
-    normalizeHeaderName(headers, 'Content-Type');
-    if (utils.isFormData(data) ||
-      utils.isArrayBuffer(data) ||
-      utils.isBuffer(data) ||
-      utils.isStream(data) ||
-      utils.isFile(data) ||
-      utils.isBlob(data)
-    ) {
-      return data;
-    }
-    if (utils.isArrayBufferView(data)) {
-      return data.buffer;
-    }
-    if (utils.isURLSearchParams(data)) {
-      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
-      return data.toString();
-    }
-    if (utils.isObject(data)) {
-      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
-      return JSON.stringify(data);
-    }
-    return data;
-  }],
-
-  transformResponse: [function transformResponse(data) {
-    /*eslint no-param-reassign:0*/
-    if (typeof data === 'string') {
-      try {
-        data = JSON.parse(data);
-      } catch (e) { /* Ignore */ }
-    }
-    return data;
-  }],
-
-  timeout: 0,
-
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
-
-  maxContentLength: -1,
-
-  validateStatus: function validateStatus(status) {
-    return status >= 200 && status < 300;
-  }
-};
-
-defaults.headers = {
-  common: {
-    'Accept': 'application/json, text/plain, */*'
-  }
-};
-
-utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
-  defaults.headers[method] = {};
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
-});
-
-module.exports = defaults;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(31)))
-
-/***/ }),
-/* 26 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function once(fn) {
-  var called = false;
-
-  return function () {
-    if (!called) {
-      called = true;
-      fn.apply(null, arguments);
-    }
-  };
-}
-
-module.exports = once;
-
-
-/***/ }),
-/* 27 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-function _notEmpty(obj) {
-  var key;
-
-  for (key in obj) {
-    if (obj.hasOwnProperty(key)) { return true; }
-  }
-
-  return false;
-}
-
-/* eslint-disable no-mixed-operators */
-function _isArray(value) {
-  return value && typeof value === 'object' && typeof value.length === 'number' &&
-    Object.prototype.toString.call(value) === '[object Array]' || false;
-}
-/* eslint-enable no-mixed-operators */
-
-function parse(url) {
-  var query, params;
-
-  url = url || global.location.href;
-
-  if (!/\?/.test(url)) {
-    return {};
-  }
-
-  query = url.replace(/#.*$/, '').replace(/^.*\?/, '').split('&');
-
-  params = query.reduce(function (toReturn, keyValue) {
-    var parts = keyValue.split('=');
-    var key = decodeURIComponent(parts[0]);
-    var value = decodeURIComponent(parts[1]);
-
-    toReturn[key] = value;
-
-    return toReturn;
-  }, {});
-
-  return params;
-}
-
-function stringify(params, namespace) {
-  var k, v, p;
-  var query = [];
-
-  for (p in params) {
-    if (!params.hasOwnProperty(p)) {
-      continue;
-    }
-
-    v = params[p];
-
-    if (namespace) {
-      if (_isArray(params)) {
-        k = namespace + '[]';
-      } else {
-        k = namespace + '[' + p + ']';
-      }
-    } else {
-      k = p;
-    }
-    if (typeof v === 'object') {
-      query.push(stringify(v, k));
-    } else {
-      query.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
-    }
-  }
-
-  return query.join('&');
-}
-
-function queryify(url, params) {
-  url = url || '';
-
-  if (params != null && typeof params === 'object' && _notEmpty(params)) {
-    url += url.indexOf('?') === -1 ? '?' : '';
-    url += url.indexOf('=') !== -1 ? '&' : '';
-    url += stringify(params);
-  }
-
-  return url;
-}
-
-module.exports = {
-  parse: parse,
-  stringify: stringify,
-  queryify: queryify
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 28 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
 /* eslint-disable no-reserved-keys */
 
 var enumerate = __webpack_require__(21);
-var errors = __webpack_require__(24);
-var VERSION = "3.31.0";
+var errors = __webpack_require__(25);
+var VERSION = "3.34.0";
 
 var constants = {
   VERSION: VERSION,
@@ -1659,6 +1375,14 @@ var constants = {
     'aria-required': 'boolean',
     disabled: 'boolean',
     placeholder: 'string'
+  },
+  autocompleteMappings: {
+    'credit-card-number': 'cc-number',
+    expiration: 'cc-exp',
+    'expiration-month': 'cc-exp-month',
+    'expiration-year': 'cc-exp-year',
+    cvv: 'cc-csc',
+    'postal-code': 'billing postal-code'
   }
 };
 
@@ -1682,7 +1406,381 @@ module.exports = constants;
 
 
 /***/ }),
+/* 25 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  HOSTED_FIELDS_TIMEOUT: {
+    type: BraintreeError.types.UNKNOWN,
+    code: 'HOSTED_FIELDS_TIMEOUT',
+    message: 'Hosted Fields timed out when attempting to set up.'
+  },
+  HOSTED_FIELDS_INVALID_FIELD_KEY: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_INVALID_FIELD_KEY'
+  },
+  HOSTED_FIELDS_INVALID_FIELD_SELECTOR: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_INVALID_FIELD_SELECTOR',
+    message: 'Selector does not reference a valid DOM node.'
+  },
+  HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_DUPLICATE_IFRAME',
+    message: 'Element already contains a Braintree iframe.'
+  },
+  HOSTED_FIELDS_FIELD_INVALID: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_INVALID'
+  },
+  HOSTED_FIELDS_FIELD_NOT_PRESENT: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_NOT_PRESENT'
+  },
+  HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR: {
+    type: BraintreeError.types.NETWORK,
+    code: 'HOSTED_FIELDS_TOKENIZATION_NETWORK_ERROR',
+    message: 'A tokenization network error occurred.'
+  },
+  HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE',
+    message: 'This credit card already exists in the merchant\'s vault.'
+  },
+  HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_TOKENIZATION_CVV_VERIFICATION_FAILED',
+    message: 'CVV verification failed during tokenization.'
+  },
+  HOSTED_FIELDS_FAILED_TOKENIZATION: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FAILED_TOKENIZATION',
+    message: 'The supplied card data failed tokenization.'
+  },
+  HOSTED_FIELDS_FIELDS_EMPTY: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FIELDS_EMPTY',
+    message: 'All fields are empty. Cannot tokenize empty card fields.'
+  },
+  HOSTED_FIELDS_FIELDS_INVALID: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'HOSTED_FIELDS_FIELDS_INVALID',
+    message: 'Some payment input fields are invalid. Cannot tokenize invalid card fields.'
+  },
+  HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_ATTRIBUTE_NOT_SUPPORTED'
+  },
+  HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_ATTRIBUTE_VALUE_NOT_ALLOWED'
+  },
+  HOSTED_FIELDS_FIELD_PROPERTY_INVALID: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'HOSTED_FIELDS_FIELD_PROPERTY_INVALID'
+  }
+};
+
+
+/***/ }),
+/* 26 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Promise = __webpack_require__(5);
+
+function loadScript(options) {
+  var script = document.createElement('script');
+  var attrs = options.dataAttributes || {};
+  var container = options.container || document.head;
+
+  script.src = options.src;
+  script.id = options.id;
+  script.async = true;
+
+  Object.keys(attrs).forEach(function (key) {
+    script.setAttribute('data-' + key, attrs[key]);
+  });
+
+  return new Promise(function (resolve, reject) {
+    script.addEventListener('load', resolve);
+    script.addEventListener('error', function () {
+      reject(new Error(options.src + ' failed to load.'));
+    });
+    script.addEventListener('abort', function () {
+      reject(new Error(options.src + ' has aborted.'));
+    });
+    container.appendChild(script);
+  });
+}
+
+function loadStylesheet(options) {
+  var stylesheet = document.createElement('link');
+  var container = options.container || document.head;
+
+  stylesheet.setAttribute('rel', 'stylesheet');
+  stylesheet.setAttribute('type', 'text/css');
+  stylesheet.setAttribute('href', options.href);
+  stylesheet.setAttribute('id', options.id);
+
+  if (container.firstChild) {
+    container.insertBefore(stylesheet, container.firstChild);
+  } else {
+    container.appendChild(stylesheet);
+  }
+}
+
+module.exports = {
+  loadScript: loadScript,
+  loadStylesheet: loadStylesheet
+};
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(process) {
+
+var utils = __webpack_require__(6);
+var normalizeHeaderName = __webpack_require__(80);
+
+var DEFAULT_CONTENT_TYPE = {
+  'Content-Type': 'application/x-www-form-urlencoded'
+};
+
+function setContentTypeIfUnset(headers, value) {
+  if (!utils.isUndefined(headers) && utils.isUndefined(headers['Content-Type'])) {
+    headers['Content-Type'] = value;
+  }
+}
+
+function getDefaultAdapter() {
+  var adapter;
+  if (typeof XMLHttpRequest !== 'undefined') {
+    // For browsers use XHR adapter
+    adapter = __webpack_require__(34);
+  } else if (typeof process !== 'undefined') {
+    // For node use HTTP adapter
+    adapter = __webpack_require__(34);
+  }
+  return adapter;
+}
+
+var defaults = {
+  adapter: getDefaultAdapter(),
+
+  transformRequest: [function transformRequest(data, headers) {
+    normalizeHeaderName(headers, 'Content-Type');
+    if (utils.isFormData(data) ||
+      utils.isArrayBuffer(data) ||
+      utils.isBuffer(data) ||
+      utils.isStream(data) ||
+      utils.isFile(data) ||
+      utils.isBlob(data)
+    ) {
+      return data;
+    }
+    if (utils.isArrayBufferView(data)) {
+      return data.buffer;
+    }
+    if (utils.isURLSearchParams(data)) {
+      setContentTypeIfUnset(headers, 'application/x-www-form-urlencoded;charset=utf-8');
+      return data.toString();
+    }
+    if (utils.isObject(data)) {
+      setContentTypeIfUnset(headers, 'application/json;charset=utf-8');
+      return JSON.stringify(data);
+    }
+    return data;
+  }],
+
+  transformResponse: [function transformResponse(data) {
+    /*eslint no-param-reassign:0*/
+    if (typeof data === 'string') {
+      try {
+        data = JSON.parse(data);
+      } catch (e) { /* Ignore */ }
+    }
+    return data;
+  }],
+
+  /**
+   * A timeout in milliseconds to abort a request. If set to 0 (default) a
+   * timeout is not created.
+   */
+  timeout: 0,
+
+  xsrfCookieName: 'XSRF-TOKEN',
+  xsrfHeaderName: 'X-XSRF-TOKEN',
+
+  maxContentLength: -1,
+
+  validateStatus: function validateStatus(status) {
+    return status >= 200 && status < 300;
+  }
+};
+
+defaults.headers = {
+  common: {
+    'Accept': 'application/json, text/plain, */*'
+  }
+};
+
+utils.forEach(['delete', 'get', 'head'], function forEachMethodNoData(method) {
+  defaults.headers[method] = {};
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  defaults.headers[method] = utils.merge(DEFAULT_CONTENT_TYPE);
+});
+
+module.exports = defaults;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33)))
+
+/***/ }),
+/* 28 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function once(fn) {
+  var called = false;
+
+  return function () {
+    if (!called) {
+      called = true;
+      fn.apply(null, arguments);
+    }
+  };
+}
+
+module.exports = once;
+
+
+/***/ }),
 /* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+function _notEmpty(obj) {
+  var key;
+
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) { return true; }
+  }
+
+  return false;
+}
+
+/* eslint-disable no-mixed-operators */
+function _isArray(value) {
+  return value && typeof value === 'object' && typeof value.length === 'number' &&
+    Object.prototype.toString.call(value) === '[object Array]' || false;
+}
+/* eslint-enable no-mixed-operators */
+
+function parse(url) {
+  var query, params;
+
+  url = url || global.location.href;
+
+  if (!/\?/.test(url)) {
+    return {};
+  }
+
+  query = url.replace(/#.*$/, '').replace(/^.*\?/, '').split('&');
+
+  params = query.reduce(function (toReturn, keyValue) {
+    var parts = keyValue.split('=');
+    var key = decodeURIComponent(parts[0]);
+    var value = decodeURIComponent(parts[1]);
+
+    toReturn[key] = value;
+
+    return toReturn;
+  }, {});
+
+  return params;
+}
+
+function stringify(params, namespace) {
+  var k, v, p;
+  var query = [];
+
+  for (p in params) {
+    if (!params.hasOwnProperty(p)) {
+      continue;
+    }
+
+    v = params[p];
+
+    if (namespace) {
+      if (_isArray(params)) {
+        k = namespace + '[]';
+      } else {
+        k = namespace + '[' + p + ']';
+      }
+    } else {
+      k = p;
+    }
+    if (typeof v === 'object') {
+      query.push(stringify(v, k));
+    } else {
+      query.push(encodeURIComponent(k) + '=' + encodeURIComponent(v));
+    }
+  }
+
+  return query.join('&');
+}
+
+function queryify(url, params) {
+  url = url || '';
+
+  if (params != null && typeof params === 'object' && _notEmpty(params)) {
+    url += url.indexOf('?') === -1 ? '?' : '';
+    url += url.indexOf('=') !== -1 ? '&' : '';
+    url += stringify(params);
+  }
+
+  return url;
+}
+
+module.exports = {
+  parse: parse,
+  stringify: stringify,
+  queryify: queryify
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  BRAINTREE_API_VERSION_HEADER: '2017-04-03',
+  BRAINTREE_VERSION: '2018-05-10'
+};
+
+
+/***/ }),
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1701,7 +1799,7 @@ module.exports = addSelectionEventHandler;
 
 
 /***/ }),
-/* 30 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1719,7 +1817,7 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 31 */
+/* 33 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1909,19 +2007,19 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 32 */
+/* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(6);
-var settle = __webpack_require__(77);
-var buildURL = __webpack_require__(79);
-var parseHeaders = __webpack_require__(80);
-var isURLSameOrigin = __webpack_require__(81);
-var createError = __webpack_require__(33);
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(82);
+var settle = __webpack_require__(81);
+var buildURL = __webpack_require__(83);
+var parseHeaders = __webpack_require__(84);
+var isURLSameOrigin = __webpack_require__(85);
+var createError = __webpack_require__(35);
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(86);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -2018,7 +2116,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(83);
+      var cookies = __webpack_require__(87);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -2096,13 +2194,13 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 33 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(78);
+var enhanceError = __webpack_require__(82);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -2121,7 +2219,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 34 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2133,7 +2231,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 35 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2159,18 +2257,21 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 36 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
-/* WEBPACK VAR INJECTION */(function(global) {var apply = Function.prototype.apply;
+/* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
+            (typeof self !== "undefined" && self) ||
+            window;
+var apply = Function.prototype.apply;
 
 // DOM APIs, for completeness
 
 exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, window, arguments), clearTimeout);
+  return new Timeout(apply.call(setTimeout, scope, arguments), clearTimeout);
 };
 exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, window, arguments), clearInterval);
+  return new Timeout(apply.call(setInterval, scope, arguments), clearInterval);
 };
 exports.clearTimeout =
 exports.clearInterval = function(timeout) {
@@ -2185,7 +2286,7 @@ function Timeout(id, clearFn) {
 }
 Timeout.prototype.unref = Timeout.prototype.ref = function() {};
 Timeout.prototype.close = function() {
-  this._clearFn.call(window, this._id);
+  this._clearFn.call(scope, this._id);
 };
 
 // Does not start the time, just sets up the members needed.
@@ -2212,21 +2313,26 @@ exports._unrefActive = exports.active = function(item) {
 };
 
 // setimmediate attaches itself to the global object
-__webpack_require__(94);
-// On some exotic environments, it's not clear which object `setimmeidate` was
+__webpack_require__(98);
+// On some exotic environments, it's not clear which object `setimmediate` was
 // able to install onto.  Search each possibility in the same order as the
 // `setimmediate` library.
-exports.setImmediate = self && self.setImmediate || global && global.setImmediate || this && this.setImmediate;
-exports.clearImmediate = self && self.clearImmediate || global && global.clearImmediate || this && this.clearImmediate;
+exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
+                       (typeof global !== "undefined" && global.setImmediate) ||
+                       (this && this.setImmediate);
+exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
+                         (typeof global !== "undefined" && global.clearImmediate) ||
+                         (this && this.clearImmediate);
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 37 */
+/* 39 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
+/* eslint-disable no-mixed-operators */
 
 var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
 
@@ -2258,23 +2364,25 @@ function atob(base64String) {
 }
 
 module.exports = {
-  atob: atobNormalized,
+  atob: function (base64String) {
+    return atobNormalized.call(global, base64String);
+  },
   _atob: atob
 };
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 38 */
+/* 40 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BraintreeError = __webpack_require__(1);
-var Client = __webpack_require__(115);
-var getConfiguration = __webpack_require__(137).getConfiguration;
-var VERSION = "3.31.0";
+var Client = __webpack_require__(119);
+var getConfiguration = __webpack_require__(140).getConfiguration;
+var VERSION = "3.34.0";
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 var sharedErrors = __webpack_require__(18);
@@ -2345,13 +2453,87 @@ module.exports = {
 
 
 /***/ }),
-/* 39 */
+/* 41 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isIe = __webpack_require__(117);
+var browserDetection = __webpack_require__(42);
+
+var features = {
+  tokenize_credit_cards: 'payment_methods/credit_cards', // eslint-disable-line camelcase
+  configuration: 'configuration'
+};
+
+var blacklistedInputPaths = [
+  'creditCard.options.unionPayEnrollment'
+];
+
+function GraphQL(config) {
+  this._config = config.graphQL;
+}
+
+GraphQL.prototype.getGraphQLEndpoint = function () {
+  return this._config.url;
+};
+
+GraphQL.prototype.isGraphQLRequest = function (url, body) {
+  var featureEnabled;
+  var path = this.getClientApiPath(url);
+
+  if (!this._isGraphQLEnabled() || !path || browserDetection.isIe9()) {
+    return false;
+  }
+
+  featureEnabled = this._config.features.some(function (feature) {
+    return features[feature] === path;
+  });
+
+  if (containsBlacklistedKeys(body)) {
+    return false;
+  }
+
+  return featureEnabled;
+};
+
+GraphQL.prototype.getClientApiPath = function (url) {
+  var path;
+  var clientApiPrefix = '/client_api/v1/';
+  var pathParts = url.split(clientApiPrefix);
+
+  if (pathParts.length > 1) {
+    path = pathParts[1].split('?')[0];
+  }
+
+  return path;
+};
+
+GraphQL.prototype._isGraphQLEnabled = function () {
+  return Boolean(this._config);
+};
+
+function containsBlacklistedKeys(body) {
+  return blacklistedInputPaths.some(function (keys) {
+    var value = keys.split('.').reduce(function (accumulator, key) {
+      return accumulator && accumulator[key];
+    }, body);
+
+    return value !== undefined; // eslint-disable-line no-undefined
+  });
+}
+
+module.exports = GraphQL;
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isIe = __webpack_require__(120);
 var isIe9 = __webpack_require__(22);
 
 module.exports = {
@@ -2361,18 +2543,18 @@ module.exports = {
 
 
 /***/ }),
-/* 40 */
+/* 43 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var ajaxIsAvaliable;
-var once = __webpack_require__(26);
-var JSONPDriver = __webpack_require__(119);
-var AJAXDriver = __webpack_require__(120);
-var getUserAgent = __webpack_require__(129);
-var isHTTP = __webpack_require__(130);
+var once = __webpack_require__(28);
+var JSONPDriver = __webpack_require__(122);
+var AJAXDriver = __webpack_require__(123);
+var getUserAgent = __webpack_require__(133);
+var isHTTP = __webpack_require__(134);
 
 function isAjaxAvailable() {
   if (ajaxIsAvaliable == null) {
@@ -2397,7 +2579,94 @@ module.exports = function (options, cb) {
 
 
 /***/ }),
-/* 41 */
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function errorResponseAdapter(responseBody) {
+  var response;
+  var errorType = responseBody.errors &&
+    responseBody.errors[0] &&
+    responseBody.errors[0].extensions &&
+    responseBody.errors[0].extensions.errorType;
+
+  if (errorType === 'user_error') {
+    response = userErrorResponseAdapter(responseBody);
+  } else if (errorType) {
+    response = errorWithTypeResponseAdapter(responseBody);
+  } else {
+    response = {error: {message: 'There was a problem serving your request'}, fieldErrors: []};
+  }
+
+  return response;
+}
+
+function errorWithTypeResponseAdapter(responseBody) {
+  return {error: {message: responseBody.errors[0].message}, fieldErrors: []};
+}
+
+function userErrorResponseAdapter(responseBody) {
+  var fieldErrors = buildFieldErrors(responseBody.errors);
+
+  return {error: {message: getLegacyMessage(fieldErrors)}, fieldErrors: fieldErrors};
+}
+
+function buildFieldErrors(errors) {
+  var fieldErrors = [];
+
+  errors.forEach(function (error) {
+    addFieldError(error.extensions.inputPath.slice(1), error, fieldErrors);
+  });
+
+  return fieldErrors;
+}
+
+function addFieldError(inputPath, errorDetail, fieldErrors) {
+  var fieldError;
+  var legacyCode = errorDetail.extensions.legacyCode;
+  var inputField = inputPath[0];
+
+  if (inputPath.length === 1) {
+    fieldErrors.push({
+      code: legacyCode,
+      field: inputField,
+      message: errorDetail.message
+    });
+
+    return;
+  }
+
+  fieldErrors.forEach(function (candidate) {
+    if (candidate.field === inputField) {
+      fieldError = candidate;
+    }
+  });
+
+  if (!fieldError) {
+    fieldError = {field: inputField, fieldErrors: []};
+    fieldErrors.push(fieldError);
+  }
+
+  addFieldError(inputPath.slice(1), errorDetail, fieldError.fieldErrors);
+}
+
+function getLegacyMessage(errors) {
+  var legacyMessages = {
+    creditCard: 'Credit card is invalid'
+  };
+
+  var field = errors[0].field;
+
+  return legacyMessages[field];
+}
+
+module.exports = errorResponseAdapter;
+
+
+/***/ }),
+/* 45 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2435,7 +2704,7 @@ module.exports = isWhitelistedDomain;
 
 
 /***/ }),
-/* 42 */
+/* 46 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2462,14 +2731,14 @@ module.exports = convertToBraintreeError;
 
 
 /***/ }),
-/* 43 */
+/* 47 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createAuthorizationData = __webpack_require__(44);
-var jsonClone = __webpack_require__(132);
+var createAuthorizationData = __webpack_require__(48);
+var jsonClone = __webpack_require__(136);
 var constants = __webpack_require__(17);
 
 function addMetadata(configuration, data) {
@@ -2501,13 +2770,13 @@ module.exports = addMetadata;
 
 
 /***/ }),
-/* 44 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var atob = __webpack_require__(131).atob;
+var atob = __webpack_require__(135).atob;
 
 var apiUrls = {
   production: 'https://api.braintreegateway.com:443',
@@ -2544,6 +2813,7 @@ function createAuthorizationData(authorization) {
     parsedClientToken = JSON.parse(atob(authorization));
     data.attrs.authorizationFingerprint = parsedClientToken.authorizationFingerprint;
     data.configUrl = parsedClientToken.configUrl;
+    data.graphQL = parsedClientToken.graphQL;
   }
 
   return data;
@@ -2553,7 +2823,7 @@ module.exports = createAuthorizationData;
 
 
 /***/ }),
-/* 45 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2784,10 +3054,10 @@ Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
 
 module.exports = Promise;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(36).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(38).setImmediate))
 
 /***/ }),
-/* 46 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2806,7 +3076,7 @@ module.exports = function (fn) {
 
 
 /***/ }),
-/* 47 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2866,7 +3136,7 @@ module.exports = {
 
 
 /***/ }),
-/* 48 */
+/* 52 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2901,13 +3171,13 @@ module.exports = EventEmitter;
 
 
 /***/ }),
-/* 49 */
+/* 53 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var atob = __webpack_require__(37).atob;
+var atob = __webpack_require__(39).atob;
 
 module.exports = function (client) {
   var authorizationFingerprint;
@@ -2915,14 +3185,16 @@ module.exports = function (client) {
 
   if (configuration.authorizationType !== 'TOKENIZATION_KEY') {
     authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
+
     return !authorizationFingerprint || authorizationFingerprint.indexOf('customer_id=') === -1;
   }
+
   return true;
 };
 
 
 /***/ }),
-/* 50 */
+/* 54 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2932,18 +3204,18 @@ var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
 
 var result = {};
 
-result[paymentOptionIDs.applePay] = __webpack_require__(139);
-result[paymentOptionIDs.card] = __webpack_require__(143);
-result[paymentOptionIDs.googlePay] = __webpack_require__(167);
-result[paymentOptionIDs.paypal] = __webpack_require__(171);
-result[paymentOptionIDs.paypalCredit] = __webpack_require__(175);
-result[paymentOptionIDs.venmo] = __webpack_require__(176);
+result[paymentOptionIDs.applePay] = __webpack_require__(143);
+result[paymentOptionIDs.card] = __webpack_require__(147);
+result[paymentOptionIDs.googlePay] = __webpack_require__(173);
+result[paymentOptionIDs.paypal] = __webpack_require__(177);
+result[paymentOptionIDs.paypalCredit] = __webpack_require__(204);
+result[paymentOptionIDs.venmo] = __webpack_require__(205);
 
 module.exports = result;
 
 
 /***/ }),
-/* 51 */
+/* 55 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2986,15 +3258,15 @@ module.exports = {
 
 
 /***/ }),
-/* 52 */
+/* 56 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var setAttributes = __webpack_require__(149);
-var defaultAttributes = __webpack_require__(150);
-var assign = __webpack_require__(151);
+var setAttributes = __webpack_require__(153);
+var defaultAttributes = __webpack_require__(154);
+var assign = __webpack_require__(155);
 
 module.exports = function createFrame(options) {
   var iframe = document.createElement('iframe');
@@ -3016,15 +3288,15 @@ module.exports = function createFrame(options) {
 
 
 /***/ }),
-/* 53 */
+/* 57 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var bus = __webpack_require__(152);
-var events = __webpack_require__(153);
-var checkOrigin = __webpack_require__(154).checkOrigin;
+var bus = __webpack_require__(156);
+var events = __webpack_require__(157);
+var checkOrigin = __webpack_require__(158).checkOrigin;
 var BraintreeError = __webpack_require__(1);
 
 function BraintreeBus(options) {
@@ -3152,7 +3424,7 @@ module.exports = BraintreeBus;
 
 
 /***/ }),
-/* 54 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3166,7 +3438,7 @@ module.exports = useMin;
 
 
 /***/ }),
-/* 55 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3180,14 +3452,14 @@ module.exports = function isAndroid(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 56 */
+/* 60 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isEdge = __webpack_require__(165);
-var isSamsung = __webpack_require__(57);
+var isEdge = __webpack_require__(171);
+var isSamsung = __webpack_require__(61);
 
 module.exports = function isChrome(ua) {
   ua = ua || navigator.userAgent;
@@ -3196,7 +3468,7 @@ module.exports = function isChrome(ua) {
 
 
 /***/ }),
-/* 57 */
+/* 61 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3210,7 +3482,7 @@ module.exports = function isSamsungBrowser(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 58 */
+/* 62 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3225,13 +3497,13 @@ module.exports = function (win) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 59 */
+/* 63 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var browserDetection = __webpack_require__(166);
+var browserDetection = __webpack_require__(172);
 
 function isHidden(element) {
   if (!element) { // no parentNode, so nothing containing the element is hidden
@@ -3248,6 +3520,7 @@ function isHidden(element) {
 function onTransitionEnd(element, propertyName, callback) {
   if (browserDetection.isIe9() || isHidden(element)) {
     callback();
+
     return;
   }
 
@@ -3267,56 +3540,7 @@ module.exports = {
 
 
 /***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Promise = __webpack_require__(5);
-
-function loadScript(container, options) {
-  var script = document.createElement('script');
-  var attrs = options.dataAttributes || {};
-
-  script.src = options.src;
-  script.id = options.id;
-  script.async = true;
-
-  Object.keys(attrs).forEach(function (key) {
-    script.setAttribute('data-' + key, attrs[key]);
-  });
-
-  return new Promise(function (resolve) {
-    script.addEventListener('load', resolve);
-    container.appendChild(script);
-  });
-}
-
-function loadStylesheet(options) {
-  var stylesheet = document.createElement('link');
-  var head = options.head || document.head;
-
-  stylesheet.setAttribute('rel', 'stylesheet');
-  stylesheet.setAttribute('type', 'text/css');
-  stylesheet.setAttribute('href', options.href);
-  stylesheet.setAttribute('id', options.id);
-
-  if (head.firstChild) {
-    head.insertBefore(stylesheet, head.firstChild);
-  } else {
-    head.appendChild(stylesheet);
-  }
-}
-
-module.exports = {
-  loadScript: loadScript,
-  loadStylesheet: loadStylesheet
-};
-
-
-/***/ }),
-/* 61 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3324,12 +3548,18 @@ module.exports = {
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btPaypal = __webpack_require__(172);
+var btPaypal = __webpack_require__(178);
 var DropinError = __webpack_require__(8);
+var constants = __webpack_require__(2);
+var assets = __webpack_require__(26);
+var translations = __webpack_require__(66).fiveCharacterLocales;
 var Promise = __webpack_require__(5);
 
 var ASYNC_DEPENDENCY_TIMEOUT = 30000;
 var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
+var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+
+var paypalScriptLoadInProgressPromise;
 
 function BasePayPalView() {
   BaseView.apply(this, arguments);
@@ -3368,7 +3598,6 @@ BasePayPalView.prototype.initialize = function () {
       env: environment,
       style: self.paypalConfiguration.buttonStyle || {},
       commit: self.paypalConfiguration.commit,
-      locale: locale,
       payment: function () {
         return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
       },
@@ -3383,8 +3612,9 @@ BasePayPalView.prototype.initialize = function () {
       onError: reportError
     };
 
-    if (locale) {
+    if (locale && locale in translations) {
       self.paypalConfiguration.locale = locale;
+      checkoutJSConfiguration.locale = locale;
     }
 
     if (isCredit) {
@@ -3421,7 +3651,35 @@ BasePayPalView.prototype.updateConfiguration = function (key, value) {
 BasePayPalView.isEnabled = function (options) {
   var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
 
-  return Promise.resolve(gatewayConfiguration.paypalEnabled);
+  if (!gatewayConfiguration.paypalEnabled) {
+    return Promise.resolve(false);
+  }
+
+  if (global.paypal && global.paypal.Button) {
+    return Promise.resolve(true);
+  }
+
+  if (paypalScriptLoadInProgressPromise) {
+    return paypalScriptLoadInProgressPromise;
+  }
+
+  paypalScriptLoadInProgressPromise = assets.loadScript({
+    src: constants.CHECKOUT_JS_SOURCE,
+    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+    dataAttributes: {
+      'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+    }
+  }).then(function () {
+    return Promise.resolve(true);
+  }).catch(function () {
+    return Promise.resolve(false);
+  }).then(function (result) {
+    paypalScriptLoadInProgressPromise = null;
+
+    return Promise.resolve(result);
+  });
+
+  return paypalScriptLoadInProgressPromise;
 };
 
 module.exports = BasePayPalView;
@@ -3429,7 +3687,7 @@ module.exports = BasePayPalView;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 62 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3487,7 +3745,71 @@ module.exports = {
 
 
 /***/ }),
-/* 63 */
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* eslint-disable camelcase */
+
+
+var assign = __webpack_require__(10).assign;
+
+var fiveCharacterLocales = {
+  da_DK: __webpack_require__(181),
+  de_DE: __webpack_require__(182),
+  en_US: __webpack_require__(183),
+  en_AU: __webpack_require__(184),
+  en_GB: __webpack_require__(185),
+  es_ES: __webpack_require__(186),
+  fr_CA: __webpack_require__(187),
+  fr_FR: __webpack_require__(188),
+  id_ID: __webpack_require__(189),
+  it_IT: __webpack_require__(190),
+  ja_JP: __webpack_require__(191),
+  ko_KR: __webpack_require__(192),
+  nl_NL: __webpack_require__(193),
+  no_NO: __webpack_require__(194),
+  pl_PL: __webpack_require__(195),
+  pt_BR: __webpack_require__(196),
+  pt_PT: __webpack_require__(197),
+  ru_RU: __webpack_require__(198),
+  sv_SE: __webpack_require__(199),
+  th_TH: __webpack_require__(200),
+  zh_CN: __webpack_require__(201),
+  zh_HK: __webpack_require__(202),
+  zh_TW: __webpack_require__(203)
+};
+
+var twoCharacterLocaleAliases = {
+  da: fiveCharacterLocales.da_DK,
+  de: fiveCharacterLocales.de_DE,
+  en: fiveCharacterLocales.en_US,
+  es: fiveCharacterLocales.es_ES,
+  fr: fiveCharacterLocales.fr_FR,
+  id: fiveCharacterLocales.id_ID,
+  it: fiveCharacterLocales.it_IT,
+  ja: fiveCharacterLocales.ja_JP,
+  ko: fiveCharacterLocales.ko_KR,
+  nl: fiveCharacterLocales.nl_NL,
+  no: fiveCharacterLocales.no_NO,
+  pl: fiveCharacterLocales.pl_PL,
+  pt: fiveCharacterLocales.pt_PT,
+  ru: fiveCharacterLocales.ru_RU,
+  sv: fiveCharacterLocales.sv_SE,
+  th: fiveCharacterLocales.th_TH,
+  zh: fiveCharacterLocales.zh_CN
+};
+
+module.exports = {
+  twoCharacterLocaleAliases: twoCharacterLocaleAliases,
+  fiveCharacterLocales: fiveCharacterLocales,
+  translations: assign({}, twoCharacterLocaleAliases, fiveCharacterLocales)
+};
+/* eslint-enable camelcase */
+
+
+/***/ }),
+/* 67 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3525,13 +3847,13 @@ module.exports = {
 
 
 /***/ }),
-/* 64 */
+/* 68 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var browserDetection = __webpack_require__(179);
+var browserDetection = __webpack_require__(208);
 
 function isBrowserSupported(options) {
   var isAndroidChrome = browserDetection.isAndroid() && browserDetection.isChrome();
@@ -3552,16 +3874,16 @@ module.exports = {
 
 
 /***/ }),
-/* 65 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BaseView = __webpack_require__(9);
-var PaymentMethodView = __webpack_require__(185);
+var PaymentMethodView = __webpack_require__(214);
 var DropinError = __webpack_require__(8);
-var classlist = __webpack_require__(13);
+var classlist = __webpack_require__(15);
 var errors = __webpack_require__(2).errors;
 var Promise = __webpack_require__(5);
 
@@ -3673,6 +3995,7 @@ PaymentMethodsView.prototype.requestPaymentMethod = function () {
   if (!this.activeMethodView) {
     return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
   }
+
   return Promise.resolve(this.activeMethodView.paymentMethod);
 };
 
@@ -3680,14 +4003,14 @@ module.exports = PaymentMethodsView;
 
 
 /***/ }),
-/* 66 */
+/* 70 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var analytics = __webpack_require__(14);
-var addSelectionEventHandler = __webpack_require__(29);
+var addSelectionEventHandler = __webpack_require__(31);
 var BaseView = __webpack_require__(9);
 
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
@@ -3779,11 +4102,12 @@ module.exports = PaymentOptionsView;
 
 
 /***/ }),
-/* 67 */
+/* 71 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+/* eslint-disable no-mixed-operators */
 
 function uuid() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
@@ -3798,7 +4122,7 @@ module.exports = uuid;
 
 
 /***/ }),
-/* 68 */
+/* 72 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -3845,15 +4169,15 @@ module.exports = {
 
 
 /***/ }),
-/* 69 */
+/* 73 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(70);
-module.exports = __webpack_require__(222);
+__webpack_require__(74);
+module.exports = __webpack_require__(228);
 
 
 /***/ }),
-/* 70 */
+/* 74 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -3862,7 +4186,7 @@ module.exports = __webpack_require__(222);
  * building robust, powerful web applications using Vue and Laravel.
  */
 
-__webpack_require__(71);
+__webpack_require__(75);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -3870,10 +4194,10 @@ __webpack_require__(71);
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('cart-checkout', __webpack_require__(96));
-Vue.component('product-create', __webpack_require__(99));
-Vue.component('product-checkout', __webpack_require__(108));
-Vue.component('braintree-checkout', __webpack_require__(111));
+Vue.component('cart-checkout', __webpack_require__(100));
+Vue.component('product-create', __webpack_require__(103));
+Vue.component('product-checkout', __webpack_require__(112));
+Vue.component('braintree-checkout', __webpack_require__(115));
 
 document.addEventListener('turbolinks:load', function () {
   var app = new Vue({
@@ -3882,21 +4206,21 @@ document.addEventListener('turbolinks:load', function () {
 });
 
 /***/ }),
-/* 71 */
+/* 75 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks__ = __webpack_require__(91);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks__ = __webpack_require__(95);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_turbolinks__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__ = __webpack_require__(95);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__ = __webpack_require__(99);
 /**
  * We'll load the axios HTTP library which allows us to easily issue requests
  * to our Laravel back-end. This library automatically handles sending the
  * CSRF token as a header based on the value of the "XSRF" token cookie.
  */
 
-window.axios = __webpack_require__(72);
+window.axios = __webpack_require__(76);
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
@@ -3921,28 +4245,28 @@ if (token) {
 
 __WEBPACK_IMPORTED_MODULE_0_turbolinks___default.a.start();
 
-window.Vue = __webpack_require__(93);
+window.Vue = __webpack_require__(97);
 
 
 Vue.use(__WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__["a" /* default */]);
 
 /***/ }),
-/* 72 */
+/* 76 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(73);
+module.exports = __webpack_require__(77);
 
 /***/ }),
-/* 73 */
+/* 77 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(6);
-var bind = __webpack_require__(30);
-var Axios = __webpack_require__(75);
-var defaults = __webpack_require__(25);
+var bind = __webpack_require__(32);
+var Axios = __webpack_require__(79);
+var defaults = __webpack_require__(27);
 
 /**
  * Create an instance of Axios
@@ -3975,15 +4299,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(35);
-axios.CancelToken = __webpack_require__(89);
-axios.isCancel = __webpack_require__(34);
+axios.Cancel = __webpack_require__(37);
+axios.CancelToken = __webpack_require__(93);
+axios.isCancel = __webpack_require__(36);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(90);
+axios.spread = __webpack_require__(94);
 
 module.exports = axios;
 
@@ -3992,7 +4316,7 @@ module.exports.default = axios;
 
 
 /***/ }),
-/* 74 */
+/* 78 */
 /***/ (function(module, exports) {
 
 /*!
@@ -4019,16 +4343,16 @@ function isSlowBuffer (obj) {
 
 
 /***/ }),
-/* 75 */
+/* 79 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var defaults = __webpack_require__(25);
+var defaults = __webpack_require__(27);
 var utils = __webpack_require__(6);
-var InterceptorManager = __webpack_require__(84);
-var dispatchRequest = __webpack_require__(85);
+var InterceptorManager = __webpack_require__(88);
+var dispatchRequest = __webpack_require__(89);
 
 /**
  * Create a new instance of Axios
@@ -4057,7 +4381,7 @@ Axios.prototype.request = function request(config) {
     }, arguments[1]);
   }
 
-  config = utils.merge(defaults, this.defaults, { method: 'get' }, config);
+  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
   config.method = config.method.toLowerCase();
 
   // Hook up interceptors middleware
@@ -4105,7 +4429,7 @@ module.exports = Axios;
 
 
 /***/ }),
-/* 76 */
+/* 80 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4124,13 +4448,13 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /***/ }),
-/* 77 */
+/* 81 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(33);
+var createError = __webpack_require__(35);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -4157,7 +4481,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 /***/ }),
-/* 78 */
+/* 82 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4185,7 +4509,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
 
 
 /***/ }),
-/* 79 */
+/* 83 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4232,9 +4556,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
       if (utils.isArray(val)) {
         key = key + '[]';
-      }
-
-      if (!utils.isArray(val)) {
+      } else {
         val = [val];
       }
 
@@ -4260,7 +4582,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 
 /***/ }),
-/* 80 */
+/* 84 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4320,7 +4642,7 @@ module.exports = function parseHeaders(headers) {
 
 
 /***/ }),
-/* 81 */
+/* 85 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4395,7 +4717,7 @@ module.exports = (
 
 
 /***/ }),
-/* 82 */
+/* 86 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4438,7 +4760,7 @@ module.exports = btoa;
 
 
 /***/ }),
-/* 83 */
+/* 87 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4498,7 +4820,7 @@ module.exports = (
 
 
 /***/ }),
-/* 84 */
+/* 88 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4557,18 +4879,18 @@ module.exports = InterceptorManager;
 
 
 /***/ }),
-/* 85 */
+/* 89 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(6);
-var transformData = __webpack_require__(86);
-var isCancel = __webpack_require__(34);
-var defaults = __webpack_require__(25);
-var isAbsoluteURL = __webpack_require__(87);
-var combineURLs = __webpack_require__(88);
+var transformData = __webpack_require__(90);
+var isCancel = __webpack_require__(36);
+var defaults = __webpack_require__(27);
+var isAbsoluteURL = __webpack_require__(91);
+var combineURLs = __webpack_require__(92);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -4650,7 +4972,7 @@ module.exports = function dispatchRequest(config) {
 
 
 /***/ }),
-/* 86 */
+/* 90 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4677,7 +4999,7 @@ module.exports = function transformData(data, headers, fns) {
 
 
 /***/ }),
-/* 87 */
+/* 91 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4698,7 +5020,7 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /***/ }),
-/* 88 */
+/* 92 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4719,13 +5041,13 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 
 /***/ }),
-/* 89 */
+/* 93 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(35);
+var Cancel = __webpack_require__(37);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -4783,7 +5105,7 @@ module.exports = CancelToken;
 
 
 /***/ }),
-/* 90 */
+/* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -4817,7 +5139,7 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 91 */
+/* 95 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
@@ -4825,14 +5147,14 @@ Turbolinks 5.1.1
 Copyright © 2018 Basecamp, LLC
  */
 (function(){var t=this;(function(){(function(){this.Turbolinks={supported:function(){return null!=window.history.pushState&&null!=window.requestAnimationFrame&&null!=window.addEventListener}(),visit:function(t,r){return e.controller.visit(t,r)},clearCache:function(){return e.controller.clearCache()},setProgressBarDelay:function(t){return e.controller.setProgressBarDelay(t)}}}).call(this)}).call(t);var e=t.Turbolinks;(function(){(function(){var t,r,n,o=[].slice;e.copyObject=function(t){var e,r,n;r={};for(e in t)n=t[e],r[e]=n;return r},e.closest=function(e,r){return t.call(e,r)},t=function(){var t,e;return t=document.documentElement,null!=(e=t.closest)?e:function(t){var e;for(e=this;e;){if(e.nodeType===Node.ELEMENT_NODE&&r.call(e,t))return e;e=e.parentNode}}}(),e.defer=function(t){return setTimeout(t,1)},e.throttle=function(t){var e;return e=null,function(){var r;return r=1<=arguments.length?o.call(arguments,0):[],null!=e?e:e=requestAnimationFrame(function(n){return function(){return e=null,t.apply(n,r)}}(this))}},e.dispatch=function(t,e){var r,o,i,s,a,u;return a=null!=e?e:{},u=a.target,r=a.cancelable,o=a.data,i=document.createEvent("Events"),i.initEvent(t,!0,r===!0),i.data=null!=o?o:{},i.cancelable&&!n&&(s=i.preventDefault,i.preventDefault=function(){return this.defaultPrevented||Object.defineProperty(this,"defaultPrevented",{get:function(){return!0}}),s.call(this)}),(null!=u?u:document).dispatchEvent(i),i},n=function(){var t;return t=document.createEvent("Events"),t.initEvent("test",!0,!0),t.preventDefault(),t.defaultPrevented}(),e.match=function(t,e){return r.call(t,e)},r=function(){var t,e,r,n;return t=document.documentElement,null!=(e=null!=(r=null!=(n=t.matchesSelector)?n:t.webkitMatchesSelector)?r:t.msMatchesSelector)?e:t.mozMatchesSelector}(),e.uuid=function(){var t,e,r;for(r="",t=e=1;36>=e;t=++e)r+=9===t||14===t||19===t||24===t?"-":15===t?"4":20===t?(Math.floor(4*Math.random())+8).toString(16):Math.floor(15*Math.random()).toString(16);return r}}).call(this),function(){e.Location=function(){function t(t){var e,r;null==t&&(t=""),r=document.createElement("a"),r.href=t.toString(),this.absoluteURL=r.href,e=r.hash.length,2>e?this.requestURL=this.absoluteURL:(this.requestURL=this.absoluteURL.slice(0,-e),this.anchor=r.hash.slice(1))}var e,r,n,o;return t.wrap=function(t){return t instanceof this?t:new this(t)},t.prototype.getOrigin=function(){return this.absoluteURL.split("/",3).join("/")},t.prototype.getPath=function(){var t,e;return null!=(t=null!=(e=this.requestURL.match(/\/\/[^\/]*(\/[^?;]*)/))?e[1]:void 0)?t:"/"},t.prototype.getPathComponents=function(){return this.getPath().split("/").slice(1)},t.prototype.getLastPathComponent=function(){return this.getPathComponents().slice(-1)[0]},t.prototype.getExtension=function(){var t,e;return null!=(t=null!=(e=this.getLastPathComponent().match(/\.[^.]*$/))?e[0]:void 0)?t:""},t.prototype.isHTML=function(){return this.getExtension().match(/^(?:|\.(?:htm|html|xhtml))$/)},t.prototype.isPrefixedBy=function(t){var e;return e=r(t),this.isEqualTo(t)||o(this.absoluteURL,e)},t.prototype.isEqualTo=function(t){return this.absoluteURL===(null!=t?t.absoluteURL:void 0)},t.prototype.toCacheKey=function(){return this.requestURL},t.prototype.toJSON=function(){return this.absoluteURL},t.prototype.toString=function(){return this.absoluteURL},t.prototype.valueOf=function(){return this.absoluteURL},r=function(t){return e(t.getOrigin()+t.getPath())},e=function(t){return n(t,"/")?t:t+"/"},o=function(t,e){return t.slice(0,e.length)===e},n=function(t,e){return t.slice(-e.length)===e},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.HttpRequest=function(){function r(r,n,o){this.delegate=r,this.requestCanceled=t(this.requestCanceled,this),this.requestTimedOut=t(this.requestTimedOut,this),this.requestFailed=t(this.requestFailed,this),this.requestLoaded=t(this.requestLoaded,this),this.requestProgressed=t(this.requestProgressed,this),this.url=e.Location.wrap(n).requestURL,this.referrer=e.Location.wrap(o).absoluteURL,this.createXHR()}return r.NETWORK_FAILURE=0,r.TIMEOUT_FAILURE=-1,r.timeout=60,r.prototype.send=function(){var t;return this.xhr&&!this.sent?(this.notifyApplicationBeforeRequestStart(),this.setProgress(0),this.xhr.send(),this.sent=!0,"function"==typeof(t=this.delegate).requestStarted?t.requestStarted():void 0):void 0},r.prototype.cancel=function(){return this.xhr&&this.sent?this.xhr.abort():void 0},r.prototype.requestProgressed=function(t){return t.lengthComputable?this.setProgress(t.loaded/t.total):void 0},r.prototype.requestLoaded=function(){return this.endRequest(function(t){return function(){var e;return 200<=(e=t.xhr.status)&&300>e?t.delegate.requestCompletedWithResponse(t.xhr.responseText,t.xhr.getResponseHeader("Turbolinks-Location")):(t.failed=!0,t.delegate.requestFailedWithStatusCode(t.xhr.status,t.xhr.responseText))}}(this))},r.prototype.requestFailed=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.NETWORK_FAILURE)}}(this))},r.prototype.requestTimedOut=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.TIMEOUT_FAILURE)}}(this))},r.prototype.requestCanceled=function(){return this.endRequest()},r.prototype.notifyApplicationBeforeRequestStart=function(){return e.dispatch("turbolinks:request-start",{data:{url:this.url,xhr:this.xhr}})},r.prototype.notifyApplicationAfterRequestEnd=function(){return e.dispatch("turbolinks:request-end",{data:{url:this.url,xhr:this.xhr}})},r.prototype.createXHR=function(){return this.xhr=new XMLHttpRequest,this.xhr.open("GET",this.url,!0),this.xhr.timeout=1e3*this.constructor.timeout,this.xhr.setRequestHeader("Accept","text/html, application/xhtml+xml"),this.xhr.setRequestHeader("Turbolinks-Referrer",this.referrer),this.xhr.onprogress=this.requestProgressed,this.xhr.onload=this.requestLoaded,this.xhr.onerror=this.requestFailed,this.xhr.ontimeout=this.requestTimedOut,this.xhr.onabort=this.requestCanceled},r.prototype.endRequest=function(t){return this.xhr?(this.notifyApplicationAfterRequestEnd(),null!=t&&t.call(this),this.destroy()):void 0},r.prototype.setProgress=function(t){var e;return this.progress=t,"function"==typeof(e=this.delegate).requestProgressed?e.requestProgressed(this.progress):void 0},r.prototype.destroy=function(){var t;return this.setProgress(1),"function"==typeof(t=this.delegate).requestFinished&&t.requestFinished(),this.delegate=null,this.xhr=null},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ProgressBar=function(){function e(){this.trickle=t(this.trickle,this),this.stylesheetElement=this.createStylesheetElement(),this.progressElement=this.createProgressElement()}var r;return r=300,e.defaultCSS=".turbolinks-progress-bar {\n  position: fixed;\n  display: block;\n  top: 0;\n  left: 0;\n  height: 3px;\n  background: #0076ff;\n  z-index: 9999;\n  transition: width "+r+"ms ease-out, opacity "+r/2+"ms "+r/2+"ms ease-in;\n  transform: translate3d(0, 0, 0);\n}",e.prototype.show=function(){return this.visible?void 0:(this.visible=!0,this.installStylesheetElement(),this.installProgressElement(),this.startTrickling())},e.prototype.hide=function(){return this.visible&&!this.hiding?(this.hiding=!0,this.fadeProgressElement(function(t){return function(){return t.uninstallProgressElement(),t.stopTrickling(),t.visible=!1,t.hiding=!1}}(this))):void 0},e.prototype.setValue=function(t){return this.value=t,this.refresh()},e.prototype.installStylesheetElement=function(){return document.head.insertBefore(this.stylesheetElement,document.head.firstChild)},e.prototype.installProgressElement=function(){return this.progressElement.style.width=0,this.progressElement.style.opacity=1,document.documentElement.insertBefore(this.progressElement,document.body),this.refresh()},e.prototype.fadeProgressElement=function(t){return this.progressElement.style.opacity=0,setTimeout(t,1.5*r)},e.prototype.uninstallProgressElement=function(){return this.progressElement.parentNode?document.documentElement.removeChild(this.progressElement):void 0},e.prototype.startTrickling=function(){return null!=this.trickleInterval?this.trickleInterval:this.trickleInterval=setInterval(this.trickle,r)},e.prototype.stopTrickling=function(){return clearInterval(this.trickleInterval),this.trickleInterval=null},e.prototype.trickle=function(){return this.setValue(this.value+Math.random()/100)},e.prototype.refresh=function(){return requestAnimationFrame(function(t){return function(){return t.progressElement.style.width=10+90*t.value+"%"}}(this))},e.prototype.createStylesheetElement=function(){var t;return t=document.createElement("style"),t.type="text/css",t.textContent=this.constructor.defaultCSS,t},e.prototype.createProgressElement=function(){var t;return t=document.createElement("div"),t.className="turbolinks-progress-bar",t},e}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.BrowserAdapter=function(){function r(r){this.controller=r,this.showProgressBar=t(this.showProgressBar,this),this.progressBar=new e.ProgressBar}var n,o,i;return i=e.HttpRequest,n=i.NETWORK_FAILURE,o=i.TIMEOUT_FAILURE,r.prototype.visitProposedToLocationWithAction=function(t,e){return this.controller.startVisitToLocationWithAction(t,e)},r.prototype.visitStarted=function(t){return t.issueRequest(),t.changeHistory(),t.loadCachedSnapshot()},r.prototype.visitRequestStarted=function(t){return this.progressBar.setValue(0),t.hasCachedSnapshot()||"restore"!==t.action?this.showProgressBarAfterDelay():this.showProgressBar()},r.prototype.visitRequestProgressed=function(t){return this.progressBar.setValue(t.progress)},r.prototype.visitRequestCompleted=function(t){return t.loadResponse()},r.prototype.visitRequestFailedWithStatusCode=function(t,e){switch(e){case n:case o:return this.reload();default:return t.loadResponse()}},r.prototype.visitRequestFinished=function(t){return this.hideProgressBar()},r.prototype.visitCompleted=function(t){return t.followRedirect()},r.prototype.pageInvalidated=function(){return this.reload()},r.prototype.showProgressBarAfterDelay=function(){return this.progressBarTimeout=setTimeout(this.showProgressBar,this.controller.progressBarDelay)},r.prototype.showProgressBar=function(){return this.progressBar.show()},r.prototype.hideProgressBar=function(){return this.progressBar.hide(),clearTimeout(this.progressBarTimeout)},r.prototype.reload=function(){return window.location.reload()},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.History=function(){function r(e){this.delegate=e,this.onPageLoad=t(this.onPageLoad,this),this.onPopState=t(this.onPopState,this)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("popstate",this.onPopState,!1),addEventListener("load",this.onPageLoad,!1),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("popstate",this.onPopState,!1),removeEventListener("load",this.onPageLoad,!1),this.started=!1):void 0},r.prototype.push=function(t,r){return t=e.Location.wrap(t),this.update("push",t,r)},r.prototype.replace=function(t,r){return t=e.Location.wrap(t),this.update("replace",t,r)},r.prototype.onPopState=function(t){var r,n,o,i;return this.shouldHandlePopState()&&(i=null!=(n=t.state)?n.turbolinks:void 0)?(r=e.Location.wrap(window.location),o=i.restorationIdentifier,this.delegate.historyPoppedToLocationWithRestorationIdentifier(r,o)):void 0},r.prototype.onPageLoad=function(t){return e.defer(function(t){return function(){return t.pageLoaded=!0}}(this))},r.prototype.shouldHandlePopState=function(){return this.pageIsLoaded()},r.prototype.pageIsLoaded=function(){return this.pageLoaded||"complete"===document.readyState},r.prototype.update=function(t,e,r){var n;return n={turbolinks:{restorationIdentifier:r}},history[t+"State"](n,null,e)},r}()}.call(this),function(){e.Snapshot=function(){function t(t){var e,r;r=t.head,e=t.body,this.head=null!=r?r:document.createElement("head"),this.body=null!=e?e:document.createElement("body")}return t.wrap=function(t){return t instanceof this?t:this.fromHTML(t)},t.fromHTML=function(t){var e;return e=document.createElement("html"),e.innerHTML=t,this.fromElement(e)},t.fromElement=function(t){return new this({head:t.querySelector("head"),body:t.querySelector("body")})},t.prototype.clone=function(){return new t({head:this.head.cloneNode(!0),body:this.body.cloneNode(!0)})},t.prototype.getRootLocation=function(){var t,r;return r=null!=(t=this.getSetting("root"))?t:"/",new e.Location(r)},t.prototype.getCacheControlValue=function(){return this.getSetting("cache-control")},t.prototype.getElementForAnchor=function(t){try{return this.body.querySelector("[id='"+t+"'], a[name='"+t+"']")}catch(e){}},t.prototype.hasAnchor=function(t){return null!=this.getElementForAnchor(t)},t.prototype.isPreviewable=function(){return"no-preview"!==this.getCacheControlValue()},t.prototype.isCacheable=function(){return"no-cache"!==this.getCacheControlValue()},t.prototype.isVisitable=function(){return"reload"!==this.getSetting("visit-control")},t.prototype.getSetting=function(t){var e,r;return r=this.head.querySelectorAll("meta[name='turbolinks-"+t+"']"),e=r[r.length-1],null!=e?e.getAttribute("content"):void 0},t}()}.call(this),function(){var t=[].slice;e.Renderer=function(){function e(){}var r;return e.render=function(){var e,r,n,o;return n=arguments[0],r=arguments[1],e=3<=arguments.length?t.call(arguments,2):[],o=function(t,e,r){r.prototype=t.prototype;var n=new r,o=t.apply(n,e);return Object(o)===o?o:n}(this,e,function(){}),o.delegate=n,o.render(r),o},e.prototype.renderView=function(t){return this.delegate.viewWillRender(this.newBody),t(),this.delegate.viewRendered(this.newBody)},e.prototype.invalidateView=function(){return this.delegate.viewInvalidated()},e.prototype.createScriptElement=function(t){var e;return"false"===t.getAttribute("data-turbolinks-eval")?t:(e=document.createElement("script"),e.textContent=t.textContent,e.async=!1,r(e,t),e)},r=function(t,e){var r,n,o,i,s,a,u;for(i=e.attributes,a=[],r=0,n=i.length;n>r;r++)s=i[r],o=s.name,u=s.value,a.push(t.setAttribute(o,u));return a},e}()}.call(this),function(){e.HeadDetails=function(){function t(t){var e,r,i,s,a,u,l;for(this.element=t,this.elements={},l=this.element.childNodes,s=0,u=l.length;u>s;s++)i=l[s],i.nodeType===Node.ELEMENT_NODE&&(a=i.outerHTML,r=null!=(e=this.elements)[a]?e[a]:e[a]={type:o(i),tracked:n(i),elements:[]},r.elements.push(i))}var e,r,n,o;return t.prototype.hasElementWithKey=function(t){return t in this.elements},t.prototype.getTrackedElementSignature=function(){var t,e;return function(){var r,n;r=this.elements,n=[];for(t in r)e=r[t].tracked,e&&n.push(t);return n}.call(this).join("")},t.prototype.getScriptElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("script",t)},t.prototype.getStylesheetElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("stylesheet",t)},t.prototype.getElementsMatchingTypeNotInDetails=function(t,e){var r,n,o,i,s,a;o=this.elements,s=[];for(n in o)i=o[n],a=i.type,r=i.elements,a!==t||e.hasElementWithKey(n)||s.push(r[0]);return s},t.prototype.getProvisionalElements=function(){var t,e,r,n,o,i,s;r=[],n=this.elements;for(e in n)o=n[e],s=o.type,i=o.tracked,t=o.elements,null!=s||i?t.length>1&&r.push.apply(r,t.slice(1)):r.push.apply(r,t);return r},o=function(t){return e(t)?"script":r(t)?"stylesheet":void 0},n=function(t){return"reload"===t.getAttribute("data-turbolinks-track")},e=function(t){var e;return e=t.tagName.toLowerCase(),"script"===e},r=function(t){var e;return e=t.tagName.toLowerCase(),"style"===e||"link"===e&&"stylesheet"===t.getAttribute("rel")},t}()}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.SnapshotRenderer=function(r){function n(t,r,n){this.currentSnapshot=t,this.newSnapshot=r,this.isPreview=n,this.currentHeadDetails=new e.HeadDetails(this.currentSnapshot.head),this.newHeadDetails=new e.HeadDetails(this.newSnapshot.head),this.newBody=this.newSnapshot.body}return t(n,r),n.prototype.render=function(t){return this.shouldRender()?(this.mergeHead(),this.renderView(function(e){return function(){return e.replaceBody(),e.isPreview||e.focusFirstAutofocusableElement(),t()}}(this))):this.invalidateView()},n.prototype.mergeHead=function(){return this.copyNewHeadStylesheetElements(),this.copyNewHeadScriptElements(),this.removeCurrentHeadProvisionalElements(),this.copyNewHeadProvisionalElements()},n.prototype.replaceBody=function(){return this.activateBodyScriptElements(),this.importBodyPermanentElements(),this.assignNewBody()},n.prototype.shouldRender=function(){return this.newSnapshot.isVisitable()&&this.trackedElementsAreIdentical()},n.prototype.trackedElementsAreIdentical=function(){return this.currentHeadDetails.getTrackedElementSignature()===this.newHeadDetails.getTrackedElementSignature()},n.prototype.copyNewHeadStylesheetElements=function(){var t,e,r,n,o;for(n=this.getNewHeadStylesheetElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.copyNewHeadScriptElements=function(){var t,e,r,n,o;for(n=this.getNewHeadScriptElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(this.createScriptElement(t)));return o},n.prototype.removeCurrentHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getCurrentHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.removeChild(t));return o},n.prototype.copyNewHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getNewHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.importBodyPermanentElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyPermanentElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],(t=this.findCurrentBodyPermanentElement(o))?i.push(o.parentNode.replaceChild(t,o)):i.push(void 0);return i},n.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},n.prototype.assignNewBody=function(){return document.body=this.newBody},n.prototype.focusFirstAutofocusableElement=function(){var t;return null!=(t=this.findFirstAutofocusableElement())?t.focus():void 0},n.prototype.getNewHeadStylesheetElements=function(){return this.newHeadDetails.getStylesheetElementsNotInDetails(this.currentHeadDetails)},n.prototype.getNewHeadScriptElements=function(){return this.newHeadDetails.getScriptElementsNotInDetails(this.currentHeadDetails)},n.prototype.getCurrentHeadProvisionalElements=function(){return this.currentHeadDetails.getProvisionalElements()},n.prototype.getNewHeadProvisionalElements=function(){return this.newHeadDetails.getProvisionalElements()},n.prototype.getNewBodyPermanentElements=function(){return this.newBody.querySelectorAll("[id][data-turbolinks-permanent]")},n.prototype.findCurrentBodyPermanentElement=function(t){return document.body.querySelector("#"+t.id+"[data-turbolinks-permanent]")},n.prototype.getNewBodyScriptElements=function(){return this.newBody.querySelectorAll("script")},n.prototype.findFirstAutofocusableElement=function(){return document.body.querySelector("[autofocus]")},n}(e.Renderer)}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.ErrorRenderer=function(e){function r(t){this.html=t}return t(r,e),r.prototype.render=function(t){return this.renderView(function(e){return function(){return e.replaceDocumentHTML(),e.activateBodyScriptElements(),t()}}(this))},r.prototype.replaceDocumentHTML=function(){return document.documentElement.innerHTML=this.html},r.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},r.prototype.getScriptElements=function(){return document.documentElement.querySelectorAll("script")},r}(e.Renderer)}.call(this),function(){e.View=function(){function t(t){this.delegate=t,this.element=document.documentElement}return t.prototype.getRootLocation=function(){return this.getSnapshot().getRootLocation()},t.prototype.getElementForAnchor=function(t){return this.getSnapshot().getElementForAnchor(t)},t.prototype.getSnapshot=function(){return e.Snapshot.fromElement(this.element)},t.prototype.render=function(t,e){var r,n,o;return o=t.snapshot,r=t.error,n=t.isPreview,this.markAsPreview(n),null!=o?this.renderSnapshot(o,n,e):this.renderError(r,e)},t.prototype.markAsPreview=function(t){return t?this.element.setAttribute("data-turbolinks-preview",""):this.element.removeAttribute("data-turbolinks-preview")},t.prototype.renderSnapshot=function(t,r,n){return e.SnapshotRenderer.render(this.delegate,n,this.getSnapshot(),e.Snapshot.wrap(t),r)},t.prototype.renderError=function(t,r){return e.ErrorRenderer.render(this.delegate,r,t)},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ScrollManager=function(){function r(r){this.delegate=r,this.onScroll=t(this.onScroll,this),this.onScroll=e.throttle(this.onScroll)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("scroll",this.onScroll,!1),this.onScroll(),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("scroll",this.onScroll,!1),this.started=!1):void 0},r.prototype.scrollToElement=function(t){return t.scrollIntoView()},r.prototype.scrollToPosition=function(t){var e,r;return e=t.x,r=t.y,window.scrollTo(e,r)},r.prototype.onScroll=function(t){return this.updatePosition({x:window.pageXOffset,y:window.pageYOffset})},r.prototype.updatePosition=function(t){var e;return this.position=t,null!=(e=this.delegate)?e.scrollPositionChanged(this.position):void 0},r}()}.call(this),function(){e.SnapshotCache=function(){function t(t){this.size=t,this.keys=[],this.snapshots={}}var r;return t.prototype.has=function(t){var e;return e=r(t),e in this.snapshots},t.prototype.get=function(t){var e;if(this.has(t))return e=this.read(t),this.touch(t),e},t.prototype.put=function(t,e){return this.write(t,e),this.touch(t),e},t.prototype.read=function(t){var e;return e=r(t),this.snapshots[e]},t.prototype.write=function(t,e){var n;return n=r(t),this.snapshots[n]=e},t.prototype.touch=function(t){var e,n;return n=r(t),e=this.keys.indexOf(n),e>-1&&this.keys.splice(e,1),this.keys.unshift(n),this.trim()},t.prototype.trim=function(){var t,e,r,n,o;for(n=this.keys.splice(this.size),o=[],t=0,r=n.length;r>t;t++)e=n[t],o.push(delete this.snapshots[e]);return o},r=function(t){return e.Location.wrap(t).toCacheKey()},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Visit=function(){function r(r,n,o){this.controller=r,this.action=o,this.performScroll=t(this.performScroll,this),this.identifier=e.uuid(),this.location=e.Location.wrap(n),this.adapter=this.controller.adapter,this.state="initialized",this.timingMetrics={}}var n;return r.prototype.start=function(){return"initialized"===this.state?(this.recordTimingMetric("visitStart"),this.state="started",this.adapter.visitStarted(this)):void 0},r.prototype.cancel=function(){var t;return"started"===this.state?(null!=(t=this.request)&&t.cancel(),this.cancelRender(),this.state="canceled"):void 0},r.prototype.complete=function(){var t;return"started"===this.state?(this.recordTimingMetric("visitEnd"),this.state="completed","function"==typeof(t=this.adapter).visitCompleted&&t.visitCompleted(this),this.controller.visitCompleted(this)):void 0},r.prototype.fail=function(){var t;return"started"===this.state?(this.state="failed","function"==typeof(t=this.adapter).visitFailed?t.visitFailed(this):void 0):void 0},r.prototype.changeHistory=function(){var t,e;return this.historyChanged?void 0:(t=this.location.isEqualTo(this.referrer)?"replace":this.action,e=n(t),this.controller[e](this.location,this.restorationIdentifier),this.historyChanged=!0)},r.prototype.issueRequest=function(){return this.shouldIssueRequest()&&null==this.request?(this.progress=0,this.request=new e.HttpRequest(this,this.location,this.referrer),this.request.send()):void 0},r.prototype.getCachedSnapshot=function(){var t;return!(t=this.controller.getCachedSnapshotForLocation(this.location))||null!=this.location.anchor&&!t.hasAnchor(this.location.anchor)||"restore"!==this.action&&!t.isPreviewable()?void 0:t},r.prototype.hasCachedSnapshot=function(){return null!=this.getCachedSnapshot()},r.prototype.loadCachedSnapshot=function(){var t,e;return(e=this.getCachedSnapshot())?(t=this.shouldIssueRequest(),this.render(function(){var r;return this.cacheSnapshot(),this.controller.render({snapshot:e,isPreview:t},this.performScroll),"function"==typeof(r=this.adapter).visitRendered&&r.visitRendered(this),t?void 0:this.complete()})):void 0},r.prototype.loadResponse=function(){return null!=this.response?this.render(function(){var t,e;return this.cacheSnapshot(),this.request.failed?(this.controller.render({error:this.response},this.performScroll),"function"==typeof(t=this.adapter).visitRendered&&t.visitRendered(this),this.fail()):(this.controller.render({snapshot:this.response},this.performScroll),"function"==typeof(e=this.adapter).visitRendered&&e.visitRendered(this),this.complete())}):void 0},r.prototype.followRedirect=function(){return this.redirectedToLocation&&!this.followedRedirect?(this.location=this.redirectedToLocation,this.controller.replaceHistoryWithLocationAndRestorationIdentifier(this.redirectedToLocation,this.restorationIdentifier),this.followedRedirect=!0):void 0},r.prototype.requestStarted=function(){var t;return this.recordTimingMetric("requestStart"),"function"==typeof(t=this.adapter).visitRequestStarted?t.visitRequestStarted(this):void 0},r.prototype.requestProgressed=function(t){var e;return this.progress=t,"function"==typeof(e=this.adapter).visitRequestProgressed?e.visitRequestProgressed(this):void 0},r.prototype.requestCompletedWithResponse=function(t,r){return this.response=t,null!=r&&(this.redirectedToLocation=e.Location.wrap(r)),this.adapter.visitRequestCompleted(this)},r.prototype.requestFailedWithStatusCode=function(t,e){return this.response=e,this.adapter.visitRequestFailedWithStatusCode(this,t)},r.prototype.requestFinished=function(){var t;return this.recordTimingMetric("requestEnd"),"function"==typeof(t=this.adapter).visitRequestFinished?t.visitRequestFinished(this):void 0},r.prototype.performScroll=function(){return this.scrolled?void 0:("restore"===this.action?this.scrollToRestoredPosition()||this.scrollToTop():this.scrollToAnchor()||this.scrollToTop(),this.scrolled=!0)},r.prototype.scrollToRestoredPosition=function(){var t,e;return t=null!=(e=this.restorationData)?e.scrollPosition:void 0,null!=t?(this.controller.scrollToPosition(t),!0):void 0},r.prototype.scrollToAnchor=function(){return null!=this.location.anchor?(this.controller.scrollToAnchor(this.location.anchor),!0):void 0},r.prototype.scrollToTop=function(){return this.controller.scrollToPosition({x:0,y:0})},r.prototype.recordTimingMetric=function(t){var e;return null!=(e=this.timingMetrics)[t]?e[t]:e[t]=(new Date).getTime()},r.prototype.getTimingMetrics=function(){return e.copyObject(this.timingMetrics)},n=function(t){switch(t){case"replace":return"replaceHistoryWithLocationAndRestorationIdentifier";case"advance":case"restore":return"pushHistoryWithLocationAndRestorationIdentifier"}},r.prototype.shouldIssueRequest=function(){return"restore"===this.action?!this.hasCachedSnapshot():!0},r.prototype.cacheSnapshot=function(){return this.snapshotCached?void 0:(this.controller.cacheSnapshot(),this.snapshotCached=!0)},r.prototype.render=function(t){return this.cancelRender(),this.frame=requestAnimationFrame(function(e){return function(){return e.frame=null,t.call(e)}}(this))},r.prototype.cancelRender=function(){return this.frame?cancelAnimationFrame(this.frame):void 0},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Controller=function(){function r(){this.clickBubbled=t(this.clickBubbled,this),this.clickCaptured=t(this.clickCaptured,this),this.pageLoaded=t(this.pageLoaded,this),this.history=new e.History(this),this.view=new e.View(this),this.scrollManager=new e.ScrollManager(this),this.restorationData={},this.clearCache(),this.setProgressBarDelay(500)}return r.prototype.start=function(){return e.supported&&!this.started?(addEventListener("click",this.clickCaptured,!0),addEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.start(),this.startHistory(),this.started=!0,this.enabled=!0):void 0},r.prototype.disable=function(){return this.enabled=!1},r.prototype.stop=function(){return this.started?(removeEventListener("click",this.clickCaptured,!0),removeEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.stop(),this.stopHistory(),this.started=!1):void 0},r.prototype.clearCache=function(){return this.cache=new e.SnapshotCache(10)},r.prototype.visit=function(t,r){var n,o;return null==r&&(r={}),t=e.Location.wrap(t),this.applicationAllowsVisitingLocation(t)?this.locationIsVisitable(t)?(n=null!=(o=r.action)?o:"advance",this.adapter.visitProposedToLocationWithAction(t,n)):window.location=t:void 0},r.prototype.startVisitToLocationWithAction=function(t,r,n){var o;return e.supported?(o=this.getRestorationDataForIdentifier(n),this.startVisit(t,r,{restorationData:o})):window.location=t},r.prototype.setProgressBarDelay=function(t){return this.progressBarDelay=t},r.prototype.startHistory=function(){return this.location=e.Location.wrap(window.location),this.restorationIdentifier=e.uuid(),this.history.start(),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.stopHistory=function(){return this.history.stop()},r.prototype.pushHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.push(this.location,this.restorationIdentifier)},r.prototype.replaceHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.historyPoppedToLocationWithRestorationIdentifier=function(t,r){var n;return this.restorationIdentifier=r,this.enabled?(n=this.getRestorationDataForIdentifier(this.restorationIdentifier),this.startVisit(t,"restore",{restorationIdentifier:this.restorationIdentifier,restorationData:n,historyChanged:!0}),this.location=e.Location.wrap(t)):this.adapter.pageInvalidated()},r.prototype.getCachedSnapshotForLocation=function(t){var e;return e=this.cache.get(t),e?e.clone():void 0},r.prototype.shouldCacheSnapshot=function(){return this.view.getSnapshot().isCacheable()},r.prototype.cacheSnapshot=function(){var t;return this.shouldCacheSnapshot()?(this.notifyApplicationBeforeCachingSnapshot(),t=this.view.getSnapshot(),this.cache.put(this.lastRenderedLocation,t.clone())):void 0},r.prototype.scrollToAnchor=function(t){var e;return(e=this.view.getElementForAnchor(t))?this.scrollToElement(e):this.scrollToPosition({x:0,y:0})},r.prototype.scrollToElement=function(t){return this.scrollManager.scrollToElement(t)},r.prototype.scrollToPosition=function(t){return this.scrollManager.scrollToPosition(t)},r.prototype.scrollPositionChanged=function(t){var e;return e=this.getCurrentRestorationData(),e.scrollPosition=t},r.prototype.render=function(t,e){return this.view.render(t,e)},r.prototype.viewInvalidated=function(){return this.adapter.pageInvalidated()},r.prototype.viewWillRender=function(t){return this.notifyApplicationBeforeRender(t)},r.prototype.viewRendered=function(){return this.lastRenderedLocation=this.currentVisit.location,this.notifyApplicationAfterRender()},r.prototype.pageLoaded=function(){return this.lastRenderedLocation=this.location,this.notifyApplicationAfterPageLoad()},r.prototype.clickCaptured=function(){return removeEventListener("click",this.clickBubbled,!1),addEventListener("click",this.clickBubbled,!1)},r.prototype.clickBubbled=function(t){var e,r,n;return this.enabled&&this.clickEventIsSignificant(t)&&(r=this.getVisitableLinkForNode(t.target))&&(n=this.getVisitableLocationForLink(r))&&this.applicationAllowsFollowingLinkToLocation(r,n)?(t.preventDefault(),e=this.getActionForLink(r),
-this.visit(n,{action:e})):void 0},r.prototype.applicationAllowsFollowingLinkToLocation=function(t,e){var r;return r=this.notifyApplicationAfterClickingLinkToLocation(t,e),!r.defaultPrevented},r.prototype.applicationAllowsVisitingLocation=function(t){var e;return e=this.notifyApplicationBeforeVisitingLocation(t),!e.defaultPrevented},r.prototype.notifyApplicationAfterClickingLinkToLocation=function(t,r){return e.dispatch("turbolinks:click",{target:t,data:{url:r.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationBeforeVisitingLocation=function(t){return e.dispatch("turbolinks:before-visit",{data:{url:t.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationAfterVisitingLocation=function(t){return e.dispatch("turbolinks:visit",{data:{url:t.absoluteURL}})},r.prototype.notifyApplicationBeforeCachingSnapshot=function(){return e.dispatch("turbolinks:before-cache")},r.prototype.notifyApplicationBeforeRender=function(t){return e.dispatch("turbolinks:before-render",{data:{newBody:t}})},r.prototype.notifyApplicationAfterRender=function(){return e.dispatch("turbolinks:render")},r.prototype.notifyApplicationAfterPageLoad=function(t){return null==t&&(t={}),e.dispatch("turbolinks:load",{data:{url:this.location.absoluteURL,timing:t}})},r.prototype.startVisit=function(t,e,r){var n;return null!=(n=this.currentVisit)&&n.cancel(),this.currentVisit=this.createVisit(t,e,r),this.currentVisit.start(),this.notifyApplicationAfterVisitingLocation(t)},r.prototype.createVisit=function(t,r,n){var o,i,s,a,u;return i=null!=n?n:{},a=i.restorationIdentifier,s=i.restorationData,o=i.historyChanged,u=new e.Visit(this,t,r),u.restorationIdentifier=null!=a?a:e.uuid(),u.restorationData=e.copyObject(s),u.historyChanged=o,u.referrer=this.location,u},r.prototype.visitCompleted=function(t){return this.notifyApplicationAfterPageLoad(t.getTimingMetrics())},r.prototype.clickEventIsSignificant=function(t){return!(t.defaultPrevented||t.target.isContentEditable||t.which>1||t.altKey||t.ctrlKey||t.metaKey||t.shiftKey)},r.prototype.getVisitableLinkForNode=function(t){return this.nodeIsVisitable(t)?e.closest(t,"a[href]:not([target]):not([download])"):void 0},r.prototype.getVisitableLocationForLink=function(t){var r;return r=new e.Location(t.getAttribute("href")),this.locationIsVisitable(r)?r:void 0},r.prototype.getActionForLink=function(t){var e;return null!=(e=t.getAttribute("data-turbolinks-action"))?e:"advance"},r.prototype.nodeIsVisitable=function(t){var r;return(r=e.closest(t,"[data-turbolinks]"))?"false"!==r.getAttribute("data-turbolinks"):!0},r.prototype.locationIsVisitable=function(t){return t.isPrefixedBy(this.view.getRootLocation())&&t.isHTML()},r.prototype.getCurrentRestorationData=function(){return this.getRestorationDataForIdentifier(this.restorationIdentifier)},r.prototype.getRestorationDataForIdentifier=function(t){var e;return null!=(e=this.restorationData)[t]?e[t]:e[t]={}},r}()}.call(this),function(){!function(){var t,e;if((t=e=document.currentScript)&&!e.hasAttribute("data-turbolinks-suppress-warning"))for(;t=t.parentNode;)if(t===document.body)return console.warn("You are loading Turbolinks from a <script> element inside the <body> element. This is probably not what you meant to do!\n\nLoad your application\u2019s JavaScript bundle inside the <head> element instead. <script> elements in <body> are evaluated with each page change.\n\nFor more information, see: https://github.com/turbolinks/turbolinks#working-with-script-elements\n\n\u2014\u2014\nSuppress this warning by adding a `data-turbolinks-suppress-warning` attribute to: %s",e.outerHTML)}()}.call(this),function(){var t,r,n;e.start=function(){return r()?(null==e.controller&&(e.controller=t()),e.controller.start()):void 0},r=function(){return null==window.Turbolinks&&(window.Turbolinks=e),n()},t=function(){var t;return t=new e.Controller,t.adapter=new e.BrowserAdapter(t),t},n=function(){return window.Turbolinks===e},n()&&e.start()}.call(this)}).call(this),"object"==typeof module&&module.exports?module.exports=e:"function"=="function"&&__webpack_require__(92)&&!(__WEBPACK_AMD_DEFINE_FACTORY__ = (e),
+this.visit(n,{action:e})):void 0},r.prototype.applicationAllowsFollowingLinkToLocation=function(t,e){var r;return r=this.notifyApplicationAfterClickingLinkToLocation(t,e),!r.defaultPrevented},r.prototype.applicationAllowsVisitingLocation=function(t){var e;return e=this.notifyApplicationBeforeVisitingLocation(t),!e.defaultPrevented},r.prototype.notifyApplicationAfterClickingLinkToLocation=function(t,r){return e.dispatch("turbolinks:click",{target:t,data:{url:r.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationBeforeVisitingLocation=function(t){return e.dispatch("turbolinks:before-visit",{data:{url:t.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationAfterVisitingLocation=function(t){return e.dispatch("turbolinks:visit",{data:{url:t.absoluteURL}})},r.prototype.notifyApplicationBeforeCachingSnapshot=function(){return e.dispatch("turbolinks:before-cache")},r.prototype.notifyApplicationBeforeRender=function(t){return e.dispatch("turbolinks:before-render",{data:{newBody:t}})},r.prototype.notifyApplicationAfterRender=function(){return e.dispatch("turbolinks:render")},r.prototype.notifyApplicationAfterPageLoad=function(t){return null==t&&(t={}),e.dispatch("turbolinks:load",{data:{url:this.location.absoluteURL,timing:t}})},r.prototype.startVisit=function(t,e,r){var n;return null!=(n=this.currentVisit)&&n.cancel(),this.currentVisit=this.createVisit(t,e,r),this.currentVisit.start(),this.notifyApplicationAfterVisitingLocation(t)},r.prototype.createVisit=function(t,r,n){var o,i,s,a,u;return i=null!=n?n:{},a=i.restorationIdentifier,s=i.restorationData,o=i.historyChanged,u=new e.Visit(this,t,r),u.restorationIdentifier=null!=a?a:e.uuid(),u.restorationData=e.copyObject(s),u.historyChanged=o,u.referrer=this.location,u},r.prototype.visitCompleted=function(t){return this.notifyApplicationAfterPageLoad(t.getTimingMetrics())},r.prototype.clickEventIsSignificant=function(t){return!(t.defaultPrevented||t.target.isContentEditable||t.which>1||t.altKey||t.ctrlKey||t.metaKey||t.shiftKey)},r.prototype.getVisitableLinkForNode=function(t){return this.nodeIsVisitable(t)?e.closest(t,"a[href]:not([target]):not([download])"):void 0},r.prototype.getVisitableLocationForLink=function(t){var r;return r=new e.Location(t.getAttribute("href")),this.locationIsVisitable(r)?r:void 0},r.prototype.getActionForLink=function(t){var e;return null!=(e=t.getAttribute("data-turbolinks-action"))?e:"advance"},r.prototype.nodeIsVisitable=function(t){var r;return(r=e.closest(t,"[data-turbolinks]"))?"false"!==r.getAttribute("data-turbolinks"):!0},r.prototype.locationIsVisitable=function(t){return t.isPrefixedBy(this.view.getRootLocation())&&t.isHTML()},r.prototype.getCurrentRestorationData=function(){return this.getRestorationDataForIdentifier(this.restorationIdentifier)},r.prototype.getRestorationDataForIdentifier=function(t){var e;return null!=(e=this.restorationData)[t]?e[t]:e[t]={}},r}()}.call(this),function(){!function(){var t,e;if((t=e=document.currentScript)&&!e.hasAttribute("data-turbolinks-suppress-warning"))for(;t=t.parentNode;)if(t===document.body)return console.warn("You are loading Turbolinks from a <script> element inside the <body> element. This is probably not what you meant to do!\n\nLoad your application\u2019s JavaScript bundle inside the <head> element instead. <script> elements in <body> are evaluated with each page change.\n\nFor more information, see: https://github.com/turbolinks/turbolinks#working-with-script-elements\n\n\u2014\u2014\nSuppress this warning by adding a `data-turbolinks-suppress-warning` attribute to: %s",e.outerHTML)}()}.call(this),function(){var t,r,n;e.start=function(){return r()?(null==e.controller&&(e.controller=t()),e.controller.start()):void 0},r=function(){return null==window.Turbolinks&&(window.Turbolinks=e),n()},t=function(){var t;return t=new e.Controller,t.adapter=new e.BrowserAdapter(t),t},n=function(){return window.Turbolinks===e},n()&&e.start()}.call(this)}).call(this),"object"==typeof module&&module.exports?module.exports=e:"function"=="function"&&__webpack_require__(96)&&!(__WEBPACK_AMD_DEFINE_FACTORY__ = (e),
 				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
 				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
 				__WEBPACK_AMD_DEFINE_FACTORY__),
 				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}).call(this);
 
 /***/ }),
-/* 92 */
+/* 96 */
 /***/ (function(module, exports) {
 
 /* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
@@ -4841,13 +5163,13 @@ module.exports = __webpack_amd_options__;
 /* WEBPACK VAR INJECTION */}.call(exports, {}))
 
 /***/ }),
-/* 93 */
+/* 97 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global, setImmediate) {/*!
- * Vue.js v2.5.13
- * (c) 2014-2017 Evan You
+ * Vue.js v2.5.16
+ * (c) 2014-2018 Evan You
  * Released under the MIT License.
  */
 
@@ -5028,9 +5350,15 @@ var hyphenate = cached(function (str) {
 });
 
 /**
- * Simple bind, faster than native
+ * Simple bind polyfill for environments that do not support it... e.g.
+ * PhantomJS 1.x. Technically we don't need this anymore since native bind is
+ * now more performant in most browsers, but removing it would be breaking for
+ * code that was able to run in PhantomJS 1.x, so this must be kept for
+ * backwards compatibility.
  */
-function bind (fn, ctx) {
+
+/* istanbul ignore next */
+function polyfillBind (fn, ctx) {
   function boundFn (a) {
     var l = arguments.length;
     return l
@@ -5039,10 +5367,18 @@ function bind (fn, ctx) {
         : fn.call(ctx, a)
       : fn.call(ctx)
   }
-  // record original fn length
+
   boundFn._length = fn.length;
   return boundFn
 }
+
+function nativeBind (fn, ctx) {
+  return fn.bind(ctx)
+}
+
+var bind = Function.prototype.bind
+  ? nativeBind
+  : polyfillBind;
 
 /**
  * Convert an Array-like object to a real Array.
@@ -5273,7 +5609,7 @@ var config = ({
    * Exposed for legacy reasons
    */
   _lifecycleHooks: LIFECYCLE_HOOKS
-});
+})
 
 /*  */
 
@@ -5317,7 +5653,6 @@ function parsePath (path) {
 
 /*  */
 
-
 // can we use __proto__?
 var hasProto = '__proto__' in {};
 
@@ -5356,7 +5691,7 @@ var _isServer;
 var isServerRendering = function () {
   if (_isServer === undefined) {
     /* istanbul ignore if */
-    if (!inBrowser && typeof global !== 'undefined') {
+    if (!inBrowser && !inWeex && typeof global !== 'undefined') {
       // detect presence of vue-server-renderer and avoid
       // Webpack shimming the process
       _isServer = global['process'].env.VUE_ENV === 'server';
@@ -5613,8 +5948,7 @@ function createTextVNode (val) {
 // used for static nodes and slot nodes because they may be reused across
 // multiple renders, cloning them avoids errors when DOM manipulations rely
 // on their elm reference.
-function cloneVNode (vnode, deep) {
-  var componentOptions = vnode.componentOptions;
+function cloneVNode (vnode) {
   var cloned = new VNode(
     vnode.tag,
     vnode.data,
@@ -5622,7 +5956,7 @@ function cloneVNode (vnode, deep) {
     vnode.text,
     vnode.elm,
     vnode.context,
-    componentOptions,
+    vnode.componentOptions,
     vnode.asyncFactory
   );
   cloned.ns = vnode.ns;
@@ -5633,24 +5967,7 @@ function cloneVNode (vnode, deep) {
   cloned.fnOptions = vnode.fnOptions;
   cloned.fnScopeId = vnode.fnScopeId;
   cloned.isCloned = true;
-  if (deep) {
-    if (vnode.children) {
-      cloned.children = cloneVNodes(vnode.children, true);
-    }
-    if (componentOptions && componentOptions.children) {
-      componentOptions.children = cloneVNodes(componentOptions.children, true);
-    }
-  }
   return cloned
-}
-
-function cloneVNodes (vnodes, deep) {
-  var len = vnodes.length;
-  var res = new Array(len);
-  for (var i = 0; i < len; i++) {
-    res[i] = cloneVNode(vnodes[i], deep);
-  }
-  return res
 }
 
 /*
@@ -5659,7 +5976,9 @@ function cloneVNodes (vnodes, deep) {
  */
 
 var arrayProto = Array.prototype;
-var arrayMethods = Object.create(arrayProto);[
+var arrayMethods = Object.create(arrayProto);
+
+var methodsToPatch = [
   'push',
   'pop',
   'shift',
@@ -5667,7 +5986,12 @@ var arrayMethods = Object.create(arrayProto);[
   'splice',
   'sort',
   'reverse'
-].forEach(function (method) {
+];
+
+/**
+ * Intercept mutating methods and emit events
+ */
+methodsToPatch.forEach(function (method) {
   // cache original method
   var original = arrayProto[method];
   def(arrayMethods, method, function mutator () {
@@ -5698,20 +6022,20 @@ var arrayMethods = Object.create(arrayProto);[
 var arrayKeys = Object.getOwnPropertyNames(arrayMethods);
 
 /**
- * By default, when a reactive property is set, the new value is
- * also converted to become reactive. However when passing down props,
- * we don't want to force conversion because the value may be a nested value
- * under a frozen data structure. Converting it would defeat the optimization.
+ * In some cases we may want to disable observation inside a component's
+ * update computation.
  */
-var observerState = {
-  shouldConvert: true
-};
+var shouldObserve = true;
+
+function toggleObserving (value) {
+  shouldObserve = value;
+}
 
 /**
- * Observer class that are attached to each observed
- * object. Once attached, the observer converts target
+ * Observer class that is attached to each observed
+ * object. Once attached, the observer converts the target
  * object's property keys into getter/setters that
- * collect dependencies and dispatches updates.
+ * collect dependencies and dispatch updates.
  */
 var Observer = function Observer (value) {
   this.value = value;
@@ -5737,7 +6061,7 @@ var Observer = function Observer (value) {
 Observer.prototype.walk = function walk (obj) {
   var keys = Object.keys(obj);
   for (var i = 0; i < keys.length; i++) {
-    defineReactive(obj, keys[i], obj[keys[i]]);
+    defineReactive(obj, keys[i]);
   }
 };
 
@@ -5787,7 +6111,7 @@ function observe (value, asRootData) {
   if (hasOwn(value, '__ob__') && value.__ob__ instanceof Observer) {
     ob = value.__ob__;
   } else if (
-    observerState.shouldConvert &&
+    shouldObserve &&
     !isServerRendering() &&
     (Array.isArray(value) || isPlainObject(value)) &&
     Object.isExtensible(value) &&
@@ -5820,6 +6144,9 @@ function defineReactive (
 
   // cater for pre-defined getter/setters
   var getter = property && property.get;
+  if (!getter && arguments.length === 2) {
+    val = obj[key];
+  }
   var setter = property && property.set;
 
   var childOb = !shallow && observe(val);
@@ -5866,6 +6193,11 @@ function defineReactive (
  * already exist.
  */
 function set (target, key, val) {
+  if ("development" !== 'production' &&
+    (isUndef(target) || isPrimitive(target))
+  ) {
+    warn(("Cannot set reactive property on undefined, null, or primitive value: " + ((target))));
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.length = Math.max(target.length, key);
     target.splice(key, 1, val);
@@ -5896,6 +6228,11 @@ function set (target, key, val) {
  * Delete a property and trigger change if necessary.
  */
 function del (target, key) {
+  if ("development" !== 'production' &&
+    (isUndef(target) || isPrimitive(target))
+  ) {
+    warn(("Cannot delete reactive property on undefined, null, or primitive value: " + ((target))));
+  }
   if (Array.isArray(target) && isValidArrayIndex(key)) {
     target.splice(key, 1);
     return
@@ -6362,12 +6699,18 @@ function validateProp (
   var prop = propOptions[key];
   var absent = !hasOwn(propsData, key);
   var value = propsData[key];
-  // handle boolean props
-  if (isType(Boolean, prop.type)) {
+  // boolean casting
+  var booleanIndex = getTypeIndex(Boolean, prop.type);
+  if (booleanIndex > -1) {
     if (absent && !hasOwn(prop, 'default')) {
       value = false;
-    } else if (!isType(String, prop.type) && (value === '' || value === hyphenate(key))) {
-      value = true;
+    } else if (value === '' || value === hyphenate(key)) {
+      // only cast empty string / same name to boolean if
+      // boolean has higher priority
+      var stringIndex = getTypeIndex(String, prop.type);
+      if (stringIndex < 0 || booleanIndex < stringIndex) {
+        value = true;
+      }
     }
   }
   // check default value
@@ -6375,10 +6718,10 @@ function validateProp (
     value = getPropDefaultValue(vm, prop, key);
     // since the default value is a fresh copy,
     // make sure to observe it.
-    var prevShouldConvert = observerState.shouldConvert;
-    observerState.shouldConvert = true;
+    var prevShouldObserve = shouldObserve;
+    toggleObserving(true);
     observe(value);
-    observerState.shouldConvert = prevShouldConvert;
+    toggleObserving(prevShouldObserve);
   }
   if (
     true
@@ -6509,17 +6852,20 @@ function getType (fn) {
   return match ? match[1] : ''
 }
 
-function isType (type, fn) {
-  if (!Array.isArray(fn)) {
-    return getType(fn) === getType(type)
+function isSameType (a, b) {
+  return getType(a) === getType(b)
+}
+
+function getTypeIndex (type, expectedTypes) {
+  if (!Array.isArray(expectedTypes)) {
+    return isSameType(expectedTypes, type) ? 0 : -1
   }
-  for (var i = 0, len = fn.length; i < len; i++) {
-    if (getType(fn[i]) === getType(type)) {
-      return true
+  for (var i = 0, len = expectedTypes.length; i < len; i++) {
+    if (isSameType(expectedTypes[i], type)) {
+      return i
     }
   }
-  /* istanbul ignore next */
-  return false
+  return -1
 }
 
 /*  */
@@ -6582,19 +6928,19 @@ function flushCallbacks () {
   }
 }
 
-// Here we have async deferring wrappers using both micro and macro tasks.
-// In < 2.4 we used micro tasks everywhere, but there are some scenarios where
-// micro tasks have too high a priority and fires in between supposedly
+// Here we have async deferring wrappers using both microtasks and (macro) tasks.
+// In < 2.4 we used microtasks everywhere, but there are some scenarios where
+// microtasks have too high a priority and fire in between supposedly
 // sequential events (e.g. #4521, #6690) or even between bubbling of the same
-// event (#6566). However, using macro tasks everywhere also has subtle problems
+// event (#6566). However, using (macro) tasks everywhere also has subtle problems
 // when state is changed right before repaint (e.g. #6813, out-in transitions).
-// Here we use micro task by default, but expose a way to force macro task when
+// Here we use microtask by default, but expose a way to force (macro) task when
 // needed (e.g. in event handlers attached by v-on).
 var microTimerFunc;
 var macroTimerFunc;
 var useMacroTask = false;
 
-// Determine (macro) Task defer implementation.
+// Determine (macro) task defer implementation.
 // Technically setImmediate should be the ideal choice, but it's only available
 // in IE. The only polyfill that consistently queues the callback after all DOM
 // events triggered in the same loop is by using MessageChannel.
@@ -6621,7 +6967,7 @@ if (typeof setImmediate !== 'undefined' && isNative(setImmediate)) {
   };
 }
 
-// Determine MicroTask defer implementation.
+// Determine microtask defer implementation.
 /* istanbul ignore next, $flow-disable-line */
 if (typeof Promise !== 'undefined' && isNative(Promise)) {
   var p = Promise.resolve();
@@ -6641,7 +6987,7 @@ if (typeof Promise !== 'undefined' && isNative(Promise)) {
 
 /**
  * Wrap a function so that if any code inside triggers state change,
- * the changes are queued using a Task instead of a MicroTask.
+ * the changes are queued using a (macro) task instead of a microtask.
  */
 function withMacroTask (fn) {
   return fn._withTask || (fn._withTask = function () {
@@ -6730,8 +7076,7 @@ if (true) {
   };
 
   var hasProxy =
-    typeof Proxy !== 'undefined' &&
-    Proxy.toString().match(/native code/);
+    typeof Proxy !== 'undefined' && isNative(Proxy);
 
   if (hasProxy) {
     var isBuiltInModifier = makeMap('stop,prevent,self,ctrl,shift,alt,meta,exact');
@@ -6799,7 +7144,7 @@ function traverse (val) {
 function _traverse (val, seen) {
   var i, keys;
   var isA = Array.isArray(val);
-  if ((!isA && !isObject(val)) || Object.isFrozen(val)) {
+  if ((!isA && !isObject(val)) || Object.isFrozen(val) || val instanceof VNode) {
     return
   }
   if (val.__ob__) {
@@ -7659,29 +8004,30 @@ function updateChildComponent (
   // update $attrs and $listeners hash
   // these are also reactive so they may trigger child update if the child
   // used them during render
-  vm.$attrs = (parentVnode.data && parentVnode.data.attrs) || emptyObject;
+  vm.$attrs = parentVnode.data.attrs || emptyObject;
   vm.$listeners = listeners || emptyObject;
 
   // update props
   if (propsData && vm.$options.props) {
-    observerState.shouldConvert = false;
+    toggleObserving(false);
     var props = vm._props;
     var propKeys = vm.$options._propKeys || [];
     for (var i = 0; i < propKeys.length; i++) {
       var key = propKeys[i];
-      props[key] = validateProp(key, vm.$options.props, propsData, vm);
+      var propOptions = vm.$options.props; // wtf flow?
+      props[key] = validateProp(key, propOptions, propsData, vm);
     }
-    observerState.shouldConvert = true;
+    toggleObserving(true);
     // keep a copy of raw propsData
     vm.$options.propsData = propsData;
   }
 
   // update listeners
-  if (listeners) {
-    var oldListeners = vm.$options._parentListeners;
-    vm.$options._parentListeners = listeners;
-    updateComponentListeners(vm, listeners, oldListeners);
-  }
+  listeners = listeners || emptyObject;
+  var oldListeners = vm.$options._parentListeners;
+  vm.$options._parentListeners = listeners;
+  updateComponentListeners(vm, listeners, oldListeners);
+
   // resolve slots + force update if has children
   if (hasChildren) {
     vm.$slots = resolveSlots(renderChildren, parentVnode.context);
@@ -7735,6 +8081,8 @@ function deactivateChildComponent (vm, direct) {
 }
 
 function callHook (vm, hook) {
+  // #7573 disable dep collection when invoking lifecycle hooks
+  pushTarget();
   var handlers = vm.$options[hook];
   if (handlers) {
     for (var i = 0, j = handlers.length; i < j; i++) {
@@ -7748,6 +8096,7 @@ function callHook (vm, hook) {
   if (vm._hasHookEvent) {
     vm.$emit('hook:' + hook);
   }
+  popTarget();
 }
 
 /*  */
@@ -7892,7 +8241,7 @@ function queueWatcher (watcher) {
 
 /*  */
 
-var uid$2 = 0;
+var uid$1 = 0;
 
 /**
  * A watcher parses an expression, collects dependencies,
@@ -7921,7 +8270,7 @@ var Watcher = function Watcher (
     this.deep = this.user = this.lazy = this.sync = false;
   }
   this.cb = cb;
-  this.id = ++uid$2; // uid for batching
+  this.id = ++uid$1; // uid for batching
   this.active = true;
   this.dirty = this.lazy; // for lazy watchers
   this.deps = [];
@@ -8146,7 +8495,9 @@ function initProps (vm, propsOptions) {
   var keys = vm.$options._propKeys = [];
   var isRoot = !vm.$parent;
   // root instance props should be converted
-  observerState.shouldConvert = isRoot;
+  if (!isRoot) {
+    toggleObserving(false);
+  }
   var loop = function ( key ) {
     keys.push(key);
     var value = validateProp(key, propsOptions, propsData, vm);
@@ -8183,7 +8534,7 @@ function initProps (vm, propsOptions) {
   };
 
   for (var key in propsOptions) loop( key );
-  observerState.shouldConvert = true;
+  toggleObserving(true);
 }
 
 function initData (vm) {
@@ -8229,11 +8580,15 @@ function initData (vm) {
 }
 
 function getData (data, vm) {
+  // #7573 disable dep collection when invoking data getters
+  pushTarget();
   try {
     return data.call(vm, vm)
   } catch (e) {
     handleError(e, vm, "data()");
     return {}
+  } finally {
+    popTarget();
   }
 }
 
@@ -8371,7 +8726,7 @@ function initWatch (vm, watch) {
 
 function createWatcher (
   vm,
-  keyOrFn,
+  expOrFn,
   handler,
   options
 ) {
@@ -8382,7 +8737,7 @@ function createWatcher (
   if (typeof handler === 'string') {
     handler = vm[handler];
   }
-  return vm.$watch(keyOrFn, handler, options)
+  return vm.$watch(expOrFn, handler, options)
 }
 
 function stateMixin (Vue) {
@@ -8446,7 +8801,7 @@ function initProvide (vm) {
 function initInjections (vm) {
   var result = resolveInject(vm.$options.inject, vm);
   if (result) {
-    observerState.shouldConvert = false;
+    toggleObserving(false);
     Object.keys(result).forEach(function (key) {
       /* istanbul ignore else */
       if (true) {
@@ -8462,7 +8817,7 @@ function initInjections (vm) {
         defineReactive(vm, key, result[key]);
       }
     });
-    observerState.shouldConvert = true;
+    toggleObserving(true);
   }
 }
 
@@ -8482,7 +8837,7 @@ function resolveInject (inject, vm) {
       var provideKey = inject[key].from;
       var source = vm;
       while (source) {
-        if (source._provided && provideKey in source._provided) {
+        if (source._provided && hasOwn(source._provided, provideKey)) {
           result[key] = source._provided[provideKey];
           break
         }
@@ -8597,6 +8952,14 @@ function resolveFilter (id) {
 
 /*  */
 
+function isKeyNotMatch (expect, actual) {
+  if (Array.isArray(expect)) {
+    return expect.indexOf(actual) === -1
+  } else {
+    return expect !== actual
+  }
+}
+
 /**
  * Runtime helper for checking keyCodes from config.
  * exposed as Vue.prototype._k
@@ -8605,16 +8968,15 @@ function resolveFilter (id) {
 function checkKeyCodes (
   eventKeyCode,
   key,
-  builtInAlias,
-  eventKeyName
+  builtInKeyCode,
+  eventKeyName,
+  builtInKeyName
 ) {
-  var keyCodes = config.keyCodes[key] || builtInAlias;
-  if (keyCodes) {
-    if (Array.isArray(keyCodes)) {
-      return keyCodes.indexOf(eventKeyCode) === -1
-    } else {
-      return keyCodes !== eventKeyCode
-    }
+  var mappedKeyCode = config.keyCodes[key] || builtInKeyCode;
+  if (builtInKeyName && eventKeyName && !config.keyCodes[key]) {
+    return isKeyNotMatch(builtInKeyName, eventKeyName)
+  } else if (mappedKeyCode) {
+    return isKeyNotMatch(mappedKeyCode, eventKeyCode)
   } else if (eventKeyName) {
     return hyphenate(eventKeyName) !== key
   }
@@ -8686,11 +9048,9 @@ function renderStatic (
   var cached = this._staticTrees || (this._staticTrees = []);
   var tree = cached[index];
   // if has already-rendered static tree and not inside v-for,
-  // we can reuse the same tree by doing a shallow clone.
+  // we can reuse the same tree.
   if (tree && !isInFor) {
-    return Array.isArray(tree)
-      ? cloneVNodes(tree)
-      : cloneVNode(tree)
+    return tree
   }
   // otherwise, render a fresh tree.
   tree = cached[index] = this.$options.staticRenderFns[index].call(
@@ -8788,6 +9148,24 @@ function FunctionalRenderContext (
   Ctor
 ) {
   var options = Ctor.options;
+  // ensure the createElement function in functional components
+  // gets a unique context - this is necessary for correct named slot check
+  var contextVm;
+  if (hasOwn(parent, '_uid')) {
+    contextVm = Object.create(parent);
+    // $flow-disable-line
+    contextVm._original = parent;
+  } else {
+    // the context vm passed in is a functional context as well.
+    // in this case we want to make sure we are able to get a hold to the
+    // real context instance.
+    contextVm = parent;
+    // $flow-disable-line
+    parent = parent._original;
+  }
+  var isCompiled = isTrue(options._compiled);
+  var needNormalization = !isCompiled;
+
   this.data = data;
   this.props = props;
   this.children = children;
@@ -8795,12 +9173,6 @@ function FunctionalRenderContext (
   this.listeners = data.on || emptyObject;
   this.injections = resolveInject(options.inject, parent);
   this.slots = function () { return resolveSlots(children, parent); };
-
-  // ensure the createElement function in functional components
-  // gets a unique context - this is necessary for correct named slot check
-  var contextVm = Object.create(parent);
-  var isCompiled = isTrue(options._compiled);
-  var needNormalization = !isCompiled;
 
   // support for compiled functional template
   if (isCompiled) {
@@ -8814,7 +9186,7 @@ function FunctionalRenderContext (
   if (options._scopeId) {
     this._c = function (a, b, c, d) {
       var vnode = createElement(contextVm, a, b, c, d, needNormalization);
-      if (vnode) {
+      if (vnode && !Array.isArray(vnode)) {
         vnode.fnScopeId = options._scopeId;
         vnode.fnContext = parent;
       }
@@ -8857,14 +9229,28 @@ function createFunctionalComponent (
   var vnode = options.render.call(null, renderContext._c, renderContext);
 
   if (vnode instanceof VNode) {
-    vnode.fnContext = contextVm;
-    vnode.fnOptions = options;
-    if (data.slot) {
-      (vnode.data || (vnode.data = {})).slot = data.slot;
+    return cloneAndMarkFunctionalResult(vnode, data, renderContext.parent, options)
+  } else if (Array.isArray(vnode)) {
+    var vnodes = normalizeChildren(vnode) || [];
+    var res = new Array(vnodes.length);
+    for (var i = 0; i < vnodes.length; i++) {
+      res[i] = cloneAndMarkFunctionalResult(vnodes[i], data, renderContext.parent, options);
     }
+    return res
   }
+}
 
-  return vnode
+function cloneAndMarkFunctionalResult (vnode, data, contextVm, options) {
+  // #7817 clone node before setting fnContext, otherwise if the node is reused
+  // (e.g. it was from a cached normal slot) the fnContext causes named slots
+  // that should not be matched to match.
+  var clone = cloneVNode(vnode);
+  clone.fnContext = contextVm;
+  clone.fnOptions = options;
+  if (data.slot) {
+    (clone.data || (clone.data = {})).slot = data.slot;
+  }
+  return clone
 }
 
 function mergeProps (to, from) {
@@ -8894,7 +9280,7 @@ function mergeProps (to, from) {
 
 /*  */
 
-// hooks to be invoked on component VNodes during patch
+// inline hooks to be invoked on component VNodes during patch
 var componentVNodeHooks = {
   init: function init (
     vnode,
@@ -8902,7 +9288,15 @@ var componentVNodeHooks = {
     parentElm,
     refElm
   ) {
-    if (!vnode.componentInstance || vnode.componentInstance._isDestroyed) {
+    if (
+      vnode.componentInstance &&
+      !vnode.componentInstance._isDestroyed &&
+      vnode.data.keepAlive
+    ) {
+      // kept-alive components, treat as a patch
+      var mountedNode = vnode; // work around flow
+      componentVNodeHooks.prepatch(mountedNode, mountedNode);
+    } else {
       var child = vnode.componentInstance = createComponentInstanceForVnode(
         vnode,
         activeInstance,
@@ -8910,10 +9304,6 @@ var componentVNodeHooks = {
         refElm
       );
       child.$mount(hydrating ? vnode.elm : undefined, hydrating);
-    } else if (vnode.data.keepAlive) {
-      // kept-alive components, treat as a patch
-      var mountedNode = vnode; // work around flow
-      componentVNodeHooks.prepatch(mountedNode, mountedNode);
     }
   },
 
@@ -9048,8 +9438,8 @@ function createComponent (
     }
   }
 
-  // merge component management hooks onto the placeholder node
-  mergeHooks(data);
+  // install component management hooks onto the placeholder node
+  installComponentHooks(data);
 
   // return a placeholder vnode
   var name = Ctor.options.name || tag;
@@ -9089,22 +9479,11 @@ function createComponentInstanceForVnode (
   return new vnode.componentOptions.Ctor(options)
 }
 
-function mergeHooks (data) {
-  if (!data.hook) {
-    data.hook = {};
-  }
+function installComponentHooks (data) {
+  var hooks = data.hook || (data.hook = {});
   for (var i = 0; i < hooksToMerge.length; i++) {
     var key = hooksToMerge[i];
-    var fromParent = data.hook[key];
-    var ours = componentVNodeHooks[key];
-    data.hook[key] = fromParent ? mergeHook$1(ours, fromParent) : ours;
-  }
-}
-
-function mergeHook$1 (one, two) {
-  return function (a, b, c, d) {
-    one(a, b, c, d);
-    two(a, b, c, d);
+    hooks[key] = componentVNodeHooks[key];
   }
 }
 
@@ -9221,8 +9600,11 @@ function _createElement (
     // direct component options / constructor
     vnode = createComponent(tag, data, context, children);
   }
-  if (isDef(vnode)) {
-    if (ns) { applyNS(vnode, ns); }
+  if (Array.isArray(vnode)) {
+    return vnode
+  } else if (isDef(vnode)) {
+    if (isDef(ns)) { applyNS(vnode, ns); }
+    if (isDef(data)) { registerDeepBindings(data); }
     return vnode
   } else {
     return createEmptyVNode()
@@ -9239,10 +9621,23 @@ function applyNS (vnode, ns, force) {
   if (isDef(vnode.children)) {
     for (var i = 0, l = vnode.children.length; i < l; i++) {
       var child = vnode.children[i];
-      if (isDef(child.tag) && (isUndef(child.ns) || isTrue(force))) {
+      if (isDef(child.tag) && (
+        isUndef(child.ns) || (isTrue(force) && child.tag !== 'svg'))) {
         applyNS(child, ns, force);
       }
     }
+  }
+}
+
+// ref #5318
+// necessary to ensure parent re-render when deep bindings like :style and
+// :class are used on slot nodes
+function registerDeepBindings (data) {
+  if (isObject(data.style)) {
+    traverse(data.style);
+  }
+  if (isObject(data.class)) {
+    traverse(data.class);
   }
 }
 
@@ -9297,20 +9692,17 @@ function renderMixin (Vue) {
     var render = ref.render;
     var _parentVnode = ref._parentVnode;
 
-    if (vm._isMounted) {
-      // if the parent didn't update, the slot nodes will be the ones from
-      // last render. They need to be cloned to ensure "freshness" for this render.
+    // reset _rendered flag on slots for duplicate slot check
+    if (true) {
       for (var key in vm.$slots) {
-        var slot = vm.$slots[key];
-        // _rendered is a flag added by renderSlot, but may not be present
-        // if the slot is passed from manually written render functions
-        if (slot._rendered || (slot[0] && slot[0].elm)) {
-          vm.$slots[key] = cloneVNodes(slot, true /* deep */);
-        }
+        // $flow-disable-line
+        vm.$slots[key]._rendered = false;
       }
     }
 
-    vm.$scopedSlots = (_parentVnode && _parentVnode.data.scopedSlots) || emptyObject;
+    if (_parentVnode) {
+      vm.$scopedSlots = _parentVnode.data.scopedSlots || emptyObject;
+    }
 
     // set parent vnode. this allows render functions to have access
     // to the data on the placeholder node.
@@ -9358,13 +9750,13 @@ function renderMixin (Vue) {
 
 /*  */
 
-var uid$1 = 0;
+var uid$3 = 0;
 
 function initMixin (Vue) {
   Vue.prototype._init = function (options) {
     var vm = this;
     // a uid
-    vm._uid = uid$1++;
+    vm._uid = uid$3++;
 
     var startTag, endTag;
     /* istanbul ignore if */
@@ -9497,20 +9889,20 @@ function dedupe (latest, extended, sealed) {
   }
 }
 
-function Vue$3 (options) {
+function Vue (options) {
   if ("development" !== 'production' &&
-    !(this instanceof Vue$3)
+    !(this instanceof Vue)
   ) {
     warn('Vue is a constructor and should be called with the `new` keyword');
   }
   this._init(options);
 }
 
-initMixin(Vue$3);
-stateMixin(Vue$3);
-eventsMixin(Vue$3);
-lifecycleMixin(Vue$3);
-renderMixin(Vue$3);
+initMixin(Vue);
+stateMixin(Vue);
+eventsMixin(Vue);
+lifecycleMixin(Vue);
+renderMixin(Vue);
 
 /*  */
 
@@ -9739,13 +10131,15 @@ var KeepAlive = {
     }
   },
 
-  watch: {
-    include: function include (val) {
-      pruneCache(this, function (name) { return matches(val, name); });
-    },
-    exclude: function exclude (val) {
-      pruneCache(this, function (name) { return !matches(val, name); });
-    }
+  mounted: function mounted () {
+    var this$1 = this;
+
+    this.$watch('include', function (val) {
+      pruneCache(this$1, function (name) { return matches(val, name); });
+    });
+    this.$watch('exclude', function (val) {
+      pruneCache(this$1, function (name) { return !matches(val, name); });
+    });
   },
 
   render: function render () {
@@ -9793,11 +10187,11 @@ var KeepAlive = {
     }
     return vnode || (slot && slot[0])
   }
-};
+}
 
 var builtInComponents = {
   KeepAlive: KeepAlive
-};
+}
 
 /*  */
 
@@ -9845,20 +10239,25 @@ function initGlobalAPI (Vue) {
   initAssetRegisters(Vue);
 }
 
-initGlobalAPI(Vue$3);
+initGlobalAPI(Vue);
 
-Object.defineProperty(Vue$3.prototype, '$isServer', {
+Object.defineProperty(Vue.prototype, '$isServer', {
   get: isServerRendering
 });
 
-Object.defineProperty(Vue$3.prototype, '$ssrContext', {
+Object.defineProperty(Vue.prototype, '$ssrContext', {
   get: function get () {
     /* istanbul ignore next */
     return this.$vnode && this.$vnode.ssrContext
   }
 });
 
-Vue$3.version = '2.5.13';
+// expose FunctionalRenderContext for ssr runtime helper installation
+Object.defineProperty(Vue, 'FunctionalRenderContext', {
+  value: FunctionalRenderContext
+});
+
+Vue.version = '2.5.16';
 
 /*  */
 
@@ -10132,8 +10531,8 @@ function setTextContent (node, text) {
   node.textContent = text;
 }
 
-function setAttribute (node, key, val) {
-  node.setAttribute(key, val);
+function setStyleScope (node, scopeId) {
+  node.setAttribute(scopeId, '');
 }
 
 
@@ -10149,7 +10548,7 @@ var nodeOps = Object.freeze({
 	nextSibling: nextSibling,
 	tagName: tagName,
 	setTextContent: setTextContent,
-	setAttribute: setAttribute
+	setStyleScope: setStyleScope
 });
 
 /*  */
@@ -10167,11 +10566,11 @@ var ref = {
   destroy: function destroy (vnode) {
     registerRef(vnode, true);
   }
-};
+}
 
 function registerRef (vnode, isRemoval) {
   var key = vnode.data.ref;
-  if (!key) { return }
+  if (!isDef(key)) { return }
 
   var vm = vnode.context;
   var ref = vnode.componentInstance || vnode.elm;
@@ -10302,7 +10701,25 @@ function createPatchFunction (backend) {
   }
 
   var creatingElmInVPre = 0;
-  function createElm (vnode, insertedVnodeQueue, parentElm, refElm, nested) {
+
+  function createElm (
+    vnode,
+    insertedVnodeQueue,
+    parentElm,
+    refElm,
+    nested,
+    ownerArray,
+    index
+  ) {
+    if (isDef(vnode.elm) && isDef(ownerArray)) {
+      // This vnode was used in a previous render!
+      // now it's used as a new node, overwriting its elm would cause
+      // potential patch errors down the road when it's used as an insertion
+      // reference node. Instead, we clone the node on-demand before creating
+      // associated DOM element for it.
+      vnode = ownerArray[index] = cloneVNode(vnode);
+    }
+
     vnode.isRootInsert = !nested; // for transition enter check
     if (createComponent(vnode, insertedVnodeQueue, parentElm, refElm)) {
       return
@@ -10325,6 +10742,7 @@ function createPatchFunction (backend) {
           );
         }
       }
+
       vnode.elm = vnode.ns
         ? nodeOps.createElementNS(vnode.ns, tag)
         : nodeOps.createElement(tag, vnode);
@@ -10430,7 +10848,7 @@ function createPatchFunction (backend) {
         checkDuplicateKeys(children);
       }
       for (var i = 0; i < children.length; ++i) {
-        createElm(children[i], insertedVnodeQueue, vnode.elm, null, true);
+        createElm(children[i], insertedVnodeQueue, vnode.elm, null, true, children, i);
       }
     } else if (isPrimitive(vnode.text)) {
       nodeOps.appendChild(vnode.elm, nodeOps.createTextNode(String(vnode.text)));
@@ -10461,12 +10879,12 @@ function createPatchFunction (backend) {
   function setScope (vnode) {
     var i;
     if (isDef(i = vnode.fnScopeId)) {
-      nodeOps.setAttribute(vnode.elm, i, '');
+      nodeOps.setStyleScope(vnode.elm, i);
     } else {
       var ancestor = vnode;
       while (ancestor) {
         if (isDef(i = ancestor.context) && isDef(i = i.$options._scopeId)) {
-          nodeOps.setAttribute(vnode.elm, i, '');
+          nodeOps.setStyleScope(vnode.elm, i);
         }
         ancestor = ancestor.parent;
       }
@@ -10477,13 +10895,13 @@ function createPatchFunction (backend) {
       i !== vnode.fnContext &&
       isDef(i = i.$options._scopeId)
     ) {
-      nodeOps.setAttribute(vnode.elm, i, '');
+      nodeOps.setStyleScope(vnode.elm, i);
     }
   }
 
   function addVnodes (parentElm, refElm, vnodes, startIdx, endIdx, insertedVnodeQueue) {
     for (; startIdx <= endIdx; ++startIdx) {
-      createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm);
+      createElm(vnodes[startIdx], insertedVnodeQueue, parentElm, refElm, false, vnodes, startIdx);
     }
   }
 
@@ -10593,7 +11011,7 @@ function createPatchFunction (backend) {
           ? oldKeyToIdx[newStartVnode.key]
           : findIdxInOld(newStartVnode, oldCh, oldStartIdx, oldEndIdx);
         if (isUndef(idxInOld)) { // New element
-          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm);
+          createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
         } else {
           vnodeToMove = oldCh[idxInOld];
           if (sameVnode(vnodeToMove, newStartVnode)) {
@@ -10602,7 +11020,7 @@ function createPatchFunction (backend) {
             canMove && nodeOps.insertBefore(parentElm, vnodeToMove.elm, oldStartVnode.elm);
           } else {
             // same key but different element. treat as new element
-            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm);
+            createElm(newStartVnode, insertedVnodeQueue, parentElm, oldStartVnode.elm, false, newCh, newStartIdx);
           }
         }
         newStartVnode = newCh[++newStartIdx];
@@ -10940,7 +11358,7 @@ var directives = {
   destroy: function unbindDirectives (vnode) {
     updateDirectives(vnode, emptyNode);
   }
-};
+}
 
 function updateDirectives (oldVnode, vnode) {
   if (oldVnode.data.directives || vnode.data.directives) {
@@ -11051,7 +11469,7 @@ function callHook$1 (dir, hook, vnode, oldVnode, isDestroy) {
 var baseModules = [
   ref,
   directives
-];
+]
 
 /*  */
 
@@ -11097,7 +11515,9 @@ function updateAttrs (oldVnode, vnode) {
 }
 
 function setAttr (el, key, value) {
-  if (isBooleanAttr(key)) {
+  if (el.tagName.indexOf('-') > -1) {
+    baseSetAttr(el, key, value);
+  } else if (isBooleanAttr(key)) {
     // set attribute for blank value
     // e.g. <option disabled>Select one</option>
     if (isFalsyAttrValue(value)) {
@@ -11119,35 +11539,39 @@ function setAttr (el, key, value) {
       el.setAttributeNS(xlinkNS, key, value);
     }
   } else {
-    if (isFalsyAttrValue(value)) {
-      el.removeAttribute(key);
-    } else {
-      // #7138: IE10 & 11 fires input event when setting placeholder on
-      // <textarea>... block the first input event and remove the blocker
-      // immediately.
-      /* istanbul ignore if */
-      if (
-        isIE && !isIE9 &&
-        el.tagName === 'TEXTAREA' &&
-        key === 'placeholder' && !el.__ieph
-      ) {
-        var blocker = function (e) {
-          e.stopImmediatePropagation();
-          el.removeEventListener('input', blocker);
-        };
-        el.addEventListener('input', blocker);
-        // $flow-disable-line
-        el.__ieph = true; /* IE placeholder patched */
-      }
-      el.setAttribute(key, value);
+    baseSetAttr(el, key, value);
+  }
+}
+
+function baseSetAttr (el, key, value) {
+  if (isFalsyAttrValue(value)) {
+    el.removeAttribute(key);
+  } else {
+    // #7138: IE10 & 11 fires input event when setting placeholder on
+    // <textarea>... block the first input event and remove the blocker
+    // immediately.
+    /* istanbul ignore if */
+    if (
+      isIE && !isIE9 &&
+      el.tagName === 'TEXTAREA' &&
+      key === 'placeholder' && !el.__ieph
+    ) {
+      var blocker = function (e) {
+        e.stopImmediatePropagation();
+        el.removeEventListener('input', blocker);
+      };
+      el.addEventListener('input', blocker);
+      // $flow-disable-line
+      el.__ieph = true; /* IE placeholder patched */
     }
+    el.setAttribute(key, value);
   }
 }
 
 var attrs = {
   create: updateAttrs,
   update: updateAttrs
-};
+}
 
 /*  */
 
@@ -11185,7 +11609,7 @@ function updateClass (oldVnode, vnode) {
 var klass = {
   create: updateClass,
   update: updateClass
-};
+}
 
 /*  */
 
@@ -11281,7 +11705,7 @@ function wrapFilter (exp, filter) {
   } else {
     var name = filter.slice(0, i);
     var args = filter.slice(i + 1);
-    return ("_f(\"" + name + "\")(" + exp + "," + args)
+    return ("_f(\"" + name + "\")(" + exp + (args !== ')' ? ',' + args : args))
   }
 }
 
@@ -11384,7 +11808,9 @@ function addHandler (
     events = el.events || (el.events = {});
   }
 
-  var newHandler = { value: value };
+  var newHandler = {
+    value: value.trim()
+  };
   if (modifiers !== emptyObject) {
     newHandler.modifiers = modifiers;
   }
@@ -11464,8 +11890,8 @@ function genComponentModel (
   if (trim) {
     valueExpression =
       "(typeof " + baseValueExpression + " === 'string'" +
-        "? " + baseValueExpression + ".trim()" +
-        ": " + baseValueExpression + ")";
+      "? " + baseValueExpression + ".trim()" +
+      ": " + baseValueExpression + ")";
   }
   if (number) {
     valueExpression = "_n(" + valueExpression + ")";
@@ -11519,6 +11945,9 @@ var expressionEndPos;
 
 
 function parseModel (val) {
+  // Fix https://github.com/vuejs/vue/pull/7730
+  // allow v-model="obj.val " (trailing whitespace)
+  val = val.trim();
   len = val.length;
 
   if (val.indexOf('[') < 0 || val.lastIndexOf(']') < len - 1) {
@@ -11679,8 +12108,8 @@ function genCheckboxModel (
     'if(Array.isArray($$a)){' +
       "var $$v=" + (number ? '_n(' + valueBinding + ')' : valueBinding) + "," +
           '$$i=_i($$a,$$v);' +
-      "if($$el.checked){$$i<0&&(" + value + "=$$a.concat([$$v]))}" +
-      "else{$$i>-1&&(" + value + "=$$a.slice(0,$$i).concat($$a.slice($$i+1)))}" +
+      "if($$el.checked){$$i<0&&(" + (genAssignmentCode(value, '$$a.concat([$$v])')) + ")}" +
+      "else{$$i>-1&&(" + (genAssignmentCode(value, '$$a.slice(0,$$i).concat($$a.slice($$i+1))')) + ")}" +
     "}else{" + (genAssignmentCode(value, '$$c')) + "}",
     null, true
   );
@@ -11723,9 +12152,11 @@ function genDefaultModel (
   var type = el.attrsMap.type;
 
   // warn if v-bind:value conflicts with v-model
+  // except for inputs with v-bind:type
   if (true) {
     var value$1 = el.attrsMap['v-bind:value'] || el.attrsMap[':value'];
-    if (value$1) {
+    var typeBinding = el.attrsMap['v-bind:type'] || el.attrsMap[':type'];
+    if (value$1 && !typeBinding) {
       var binding = el.attrsMap['v-bind:value'] ? 'v-bind:value' : ':value';
       warn$1(
         binding + "=\"" + value$1 + "\" conflicts with v-model on the same element " +
@@ -11846,7 +12277,7 @@ function updateDOMListeners (oldVnode, vnode) {
 var events = {
   create: updateDOMListeners,
   update: updateDOMListeners
-};
+}
 
 /*  */
 
@@ -11940,7 +12371,7 @@ function isDirtyWithModifiers (elm, newVal) {
 var domProps = {
   create: updateDOMProps,
   update: updateDOMProps
-};
+}
 
 /*  */
 
@@ -12101,7 +12532,7 @@ function updateStyle (oldVnode, vnode) {
 var style = {
   create: updateStyle,
   update: updateStyle
-};
+}
 
 /*  */
 
@@ -12474,13 +12905,15 @@ function enter (vnode, toggleDisplay) {
     addTransitionClass(el, startClass);
     addTransitionClass(el, activeClass);
     nextFrame(function () {
-      addTransitionClass(el, toClass);
       removeTransitionClass(el, startClass);
-      if (!cb.cancelled && !userWantsControl) {
-        if (isValidDuration(explicitEnterDuration)) {
-          setTimeout(cb, explicitEnterDuration);
-        } else {
-          whenTransitionEnds(el, type, cb);
+      if (!cb.cancelled) {
+        addTransitionClass(el, toClass);
+        if (!userWantsControl) {
+          if (isValidDuration(explicitEnterDuration)) {
+            setTimeout(cb, explicitEnterDuration);
+          } else {
+            whenTransitionEnds(el, type, cb);
+          }
         }
       }
     });
@@ -12580,13 +13013,15 @@ function leave (vnode, rm) {
       addTransitionClass(el, leaveClass);
       addTransitionClass(el, leaveActiveClass);
       nextFrame(function () {
-        addTransitionClass(el, leaveToClass);
         removeTransitionClass(el, leaveClass);
-        if (!cb.cancelled && !userWantsControl) {
-          if (isValidDuration(explicitLeaveDuration)) {
-            setTimeout(cb, explicitLeaveDuration);
-          } else {
-            whenTransitionEnds(el, type, cb);
+        if (!cb.cancelled) {
+          addTransitionClass(el, leaveToClass);
+          if (!userWantsControl) {
+            if (isValidDuration(explicitLeaveDuration)) {
+              setTimeout(cb, explicitLeaveDuration);
+            } else {
+              whenTransitionEnds(el, type, cb);
+            }
           }
         }
       });
@@ -12659,7 +13094,7 @@ var transition = inBrowser ? {
       rm();
     }
   }
-} : {};
+} : {}
 
 var platformModules = [
   attrs,
@@ -12668,7 +13103,7 @@ var platformModules = [
   domProps,
   style,
   transition
-];
+]
 
 /*  */
 
@@ -12709,15 +13144,13 @@ var directive = {
     } else if (vnode.tag === 'textarea' || isTextInputType(el.type)) {
       el._vModifiers = binding.modifiers;
       if (!binding.modifiers.lazy) {
+        el.addEventListener('compositionstart', onCompositionStart);
+        el.addEventListener('compositionend', onCompositionEnd);
         // Safari < 10.2 & UIWebView doesn't fire compositionend when
         // switching focus before confirming composition choice
         // this also fixes the issue where some browsers e.g. iOS Chrome
         // fires "change" instead of "input" on autocomplete.
         el.addEventListener('change', onCompositionEnd);
-        if (!isAndroid) {
-          el.addEventListener('compositionstart', onCompositionStart);
-          el.addEventListener('compositionend', onCompositionEnd);
-        }
         /* istanbul ignore if */
         if (isIE9) {
           el.vmodel = true;
@@ -12851,7 +13284,7 @@ var show = {
     var oldValue = ref.oldValue;
 
     /* istanbul ignore if */
-    if (value === oldValue) { return }
+    if (!value === !oldValue) { return }
     vnode = locateNode(vnode);
     var transition$$1 = vnode.data && vnode.data.transition;
     if (transition$$1) {
@@ -12881,12 +13314,12 @@ var show = {
       el.style.display = el.__vOriginalDisplay;
     }
   }
-};
+}
 
 var platformDirectives = {
   model: directive,
   show: show
-};
+}
 
 /*  */
 
@@ -13075,7 +13508,7 @@ var Transition = {
 
     return rawChild
   }
-};
+}
 
 /*  */
 
@@ -13149,7 +13582,7 @@ var TransitionGroup = {
       this._vnode,
       this.kept,
       false, // hydrating
-      true // removeOnly (!important avoids unnecessary moves)
+      true // removeOnly (!important, avoids unnecessary moves)
     );
     this._vnode = this.kept;
   },
@@ -13216,7 +13649,7 @@ var TransitionGroup = {
       return (this._hasMove = info.hasTransform)
     }
   }
-};
+}
 
 function callPendingCbs (c) {
   /* istanbul ignore if */
@@ -13249,26 +13682,26 @@ function applyTranslation (c) {
 var platformComponents = {
   Transition: Transition,
   TransitionGroup: TransitionGroup
-};
+}
 
 /*  */
 
 // install platform specific utils
-Vue$3.config.mustUseProp = mustUseProp;
-Vue$3.config.isReservedTag = isReservedTag;
-Vue$3.config.isReservedAttr = isReservedAttr;
-Vue$3.config.getTagNamespace = getTagNamespace;
-Vue$3.config.isUnknownElement = isUnknownElement;
+Vue.config.mustUseProp = mustUseProp;
+Vue.config.isReservedTag = isReservedTag;
+Vue.config.isReservedAttr = isReservedAttr;
+Vue.config.getTagNamespace = getTagNamespace;
+Vue.config.isUnknownElement = isUnknownElement;
 
 // install platform runtime directives & components
-extend(Vue$3.options.directives, platformDirectives);
-extend(Vue$3.options.components, platformComponents);
+extend(Vue.options.directives, platformDirectives);
+extend(Vue.options.components, platformComponents);
 
 // install platform patch function
-Vue$3.prototype.__patch__ = inBrowser ? patch : noop;
+Vue.prototype.__patch__ = inBrowser ? patch : noop;
 
 // public mount method
-Vue$3.prototype.$mount = function (
+Vue.prototype.$mount = function (
   el,
   hydrating
 ) {
@@ -13278,28 +13711,35 @@ Vue$3.prototype.$mount = function (
 
 // devtools global hook
 /* istanbul ignore next */
-Vue$3.nextTick(function () {
-  if (config.devtools) {
-    if (devtools) {
-      devtools.emit('init', Vue$3);
-    } else if ("development" !== 'production' && isChrome) {
+if (inBrowser) {
+  setTimeout(function () {
+    if (config.devtools) {
+      if (devtools) {
+        devtools.emit('init', Vue);
+      } else if (
+        "development" !== 'production' &&
+        "development" !== 'test' &&
+        isChrome
+      ) {
+        console[console.info ? 'info' : 'log'](
+          'Download the Vue Devtools extension for a better development experience:\n' +
+          'https://github.com/vuejs/vue-devtools'
+        );
+      }
+    }
+    if ("development" !== 'production' &&
+      "development" !== 'test' &&
+      config.productionTip !== false &&
+      typeof console !== 'undefined'
+    ) {
       console[console.info ? 'info' : 'log'](
-        'Download the Vue Devtools extension for a better development experience:\n' +
-        'https://github.com/vuejs/vue-devtools'
+        "You are running Vue in development mode.\n" +
+        "Make sure to turn on production mode when deploying for production.\n" +
+        "See more tips at https://vuejs.org/guide/deployment.html"
       );
     }
-  }
-  if ("development" !== 'production' &&
-    config.productionTip !== false &&
-    inBrowser && typeof console !== 'undefined'
-  ) {
-    console[console.info ? 'info' : 'log'](
-      "You are running Vue in development mode.\n" +
-      "Make sure to turn on production mode when deploying for production.\n" +
-      "See more tips at https://vuejs.org/guide/deployment.html"
-    );
-  }
-}, 0);
+  }, 0);
+}
 
 /*  */
 
@@ -13389,7 +13829,7 @@ var klass$1 = {
   staticKeys: ['staticClass'],
   transformNode: transformNode,
   genData: genData
-};
+}
 
 /*  */
 
@@ -13433,7 +13873,7 @@ var style$1 = {
   staticKeys: ['staticStyle'],
   transformNode: transformNode$1,
   genData: genData$1
-};
+}
 
 /*  */
 
@@ -13445,7 +13885,7 @@ var he = {
     decoder.innerHTML = html;
     return decoder.textContent
   }
-};
+}
 
 /*  */
 
@@ -13491,7 +13931,8 @@ var startTagOpen = new RegExp(("^<" + qnameCapture));
 var startTagClose = /^\s*(\/?)>/;
 var endTag = new RegExp(("^<\\/" + qnameCapture + "[^>]*>"));
 var doctype = /^<!DOCTYPE [^>]+>/i;
-var comment = /^<!--/;
+// #7298: escape - to avoid being pased as HTML comment when inlined in page
+var comment = /^<!\--/;
 var conditionalComment = /^<!\[/;
 
 var IS_REGEX_CAPTURING_BROKEN = false;
@@ -13621,7 +14062,7 @@ function parseHTML (html, options) {
         endTagLength = endTag.length;
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
-            .replace(/<!--([\s\S]*?)-->/g, '$1')
+            .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
             .replace(/<!\[CDATA\[([\s\S]*?)]]>/g, '$1');
         }
         if (shouldIgnoreFirstNewline(stackedTag, text)) {
@@ -13781,7 +14222,7 @@ function parseHTML (html, options) {
 
 var onRE = /^@|^v-on:/;
 var dirRE = /^v-|^@|^:/;
-var forAliasRE = /(.*?)\s+(?:in|of)\s+(.*)/;
+var forAliasRE = /([^]*?)\s+(?:in|of)\s+([^]*)/;
 var forIteratorRE = /,([^,\}\]]*)(?:,([^,\}\]]*))?$/;
 var stripParensRE = /^\(|\)$/g;
 
@@ -14119,6 +14560,8 @@ function processFor (el) {
   }
 }
 
+
+
 function parseFor (exp) {
   var inMatch = exp.match(forAliasRE);
   if (!inMatch) { return }
@@ -14441,8 +14884,19 @@ function checkForAliasModel (el, value) {
 function preTransformNode (el, options) {
   if (el.tag === 'input') {
     var map = el.attrsMap;
-    if (map['v-model'] && (map['v-bind:type'] || map[':type'])) {
-      var typeBinding = getBindingAttr(el, 'type');
+    if (!map['v-model']) {
+      return
+    }
+
+    var typeBinding;
+    if (map[':type'] || map['v-bind:type']) {
+      typeBinding = getBindingAttr(el, 'type');
+    }
+    if (!map.type && !typeBinding && map['v-bind']) {
+      typeBinding = "(" + (map['v-bind']) + ").type";
+    }
+
+    if (typeBinding) {
       var ifCondition = getAndRemoveAttr(el, 'v-if', true);
       var ifConditionExtra = ifCondition ? ("&&(" + ifCondition + ")") : "";
       var hasElse = getAndRemoveAttr(el, 'v-else', true) != null;
@@ -14495,13 +14949,13 @@ function cloneASTElement (el) {
 
 var model$2 = {
   preTransformNode: preTransformNode
-};
+}
 
 var modules$1 = [
   klass$1,
   style$1,
   model$2
-];
+]
 
 /*  */
 
@@ -14523,7 +14977,7 @@ var directives$1 = {
   model: model,
   text: text,
   html: html
-};
+}
 
 /*  */
 
@@ -14669,10 +15123,10 @@ function isDirectChildOfTemplateFor (node) {
 
 /*  */
 
-var fnExpRE = /^\s*([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/;
-var simplePathRE = /^\s*[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['.*?']|\[".*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*\s*$/;
+var fnExpRE = /^([\w$_]+|\([^)]*?\))\s*=>|^function\s*\(/;
+var simplePathRE = /^[A-Za-z_$][\w$]*(?:\.[A-Za-z_$][\w$]*|\['[^']*?']|\["[^"]*?"]|\[\d+]|\[[A-Za-z_$][\w$]*])*$/;
 
-// keyCode aliases
+// KeyboardEvent.keyCode aliases
 var keyCodes = {
   esc: 27,
   tab: 9,
@@ -14683,6 +15137,20 @@ var keyCodes = {
   right: 39,
   down: 40,
   'delete': [8, 46]
+};
+
+// KeyboardEvent.key aliases
+var keyNames = {
+  esc: 'Escape',
+  tab: 'Tab',
+  enter: 'Enter',
+  space: ' ',
+  // #7806: IE11 uses key names without `Arrow` prefix for arrow keys.
+  up: ['Up', 'ArrowUp'],
+  left: ['Left', 'ArrowLeft'],
+  right: ['Right', 'ArrowRight'],
+  down: ['Down', 'ArrowDown'],
+  'delete': ['Backspace', 'Delete']
 };
 
 // #4868: modifiers that prevent the execution of the listener
@@ -14767,9 +15235,9 @@ function genHandler (
       code += genModifierCode;
     }
     var handlerCode = isMethodPath
-      ? handler.value + '($event)'
+      ? ("return " + (handler.value) + "($event)")
       : isFunctionExpression
-        ? ("(" + (handler.value) + ")($event)")
+        ? ("return (" + (handler.value) + ")($event)")
         : handler.value;
     /* istanbul ignore if */
     return ("function($event){" + code + handlerCode + "}")
@@ -14785,12 +15253,15 @@ function genFilterCode (key) {
   if (keyVal) {
     return ("$event.keyCode!==" + keyVal)
   }
-  var code = keyCodes[key];
+  var keyCode = keyCodes[key];
+  var keyName = keyNames[key];
   return (
     "_k($event.keyCode," +
     (JSON.stringify(key)) + "," +
-    (JSON.stringify(code)) + "," +
-    "$event.key)"
+    (JSON.stringify(keyCode)) + "," +
+    "$event.key," +
+    "" + (JSON.stringify(keyName)) +
+    ")"
   )
 }
 
@@ -14817,7 +15288,7 @@ var baseDirectives = {
   on: on,
   bind: bind$1,
   cloak: noop
-};
+}
 
 /*  */
 
@@ -15568,8 +16039,8 @@ var idToTemplate = cached(function (id) {
   return el && el.innerHTML
 });
 
-var mount = Vue$3.prototype.$mount;
-Vue$3.prototype.$mount = function (
+var mount = Vue.prototype.$mount;
+Vue.prototype.$mount = function (
   el,
   hydrating
 ) {
@@ -15651,14 +16122,14 @@ function getOuterHTML (el) {
   }
 }
 
-Vue$3.compile = compileToFunctions;
+Vue.compile = compileToFunctions;
 
-module.exports = Vue$3;
+module.exports = Vue;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(36).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(38).setImmediate))
 
 /***/ }),
-/* 94 */
+/* 98 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -15848,10 +16319,10 @@ module.exports = Vue$3;
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(31)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(33)))
 
 /***/ }),
-/* 95 */
+/* 99 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -15870,7 +16341,8 @@ function plugin(Vue, options) {
       // If this is the root component, we want to cache the original element contents to replace later
       // We don't care about sub-components, just the root
       if (this == this.$root) {
-        handleVueDestructionOn('turbolinks:visit', this);
+        var destroyEvent = this.$options.turbolinksDestroyEvent || 'turbolinks:visit'
+        handleVueDestructionOn(destroyEvent, this);
         this.$originalEl = this.$el.outerHTML;
       }
     },
@@ -15888,15 +16360,15 @@ function plugin(Vue, options) {
 
 
 /***/ }),
-/* 96 */
+/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(20)
 /* script */
-var __vue_script__ = __webpack_require__(97)
+var __vue_script__ = __webpack_require__(101)
 /* template */
-var __vue_template__ = __webpack_require__(98)
+var __vue_template__ = __webpack_require__(102)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -15935,7 +16407,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 97 */
+/* 101 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -16005,7 +16477,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 98 */
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -16019,7 +16491,7 @@ var render = function() {
         on: {
           submit: function($event) {
             $event.preventDefault()
-            _vm.order($event)
+            return _vm.order($event)
           }
         }
       },
@@ -16042,19 +16514,19 @@ if (false) {
 }
 
 /***/ }),
-/* 99 */
+/* 103 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(100)
+  __webpack_require__(104)
 }
 var normalizeComponent = __webpack_require__(20)
 /* script */
-var __vue_script__ = __webpack_require__(105)
+var __vue_script__ = __webpack_require__(109)
 /* template */
-var __vue_template__ = __webpack_require__(107)
+var __vue_template__ = __webpack_require__(111)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -16093,17 +16565,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 100 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(101);
+var content = __webpack_require__(105);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(103)("7a7f8932", content, false, {});
+var update = __webpack_require__(107)("7a7f8932", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -16119,10 +16591,10 @@ if(false) {
 }
 
 /***/ }),
-/* 101 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(102)(false);
+exports = module.exports = __webpack_require__(106)(false);
 // imports
 
 
@@ -16133,7 +16605,7 @@ exports.push([module.i, "\nfieldset[disabled] .multiselect {\n  pointer-events: 
 
 
 /***/ }),
-/* 102 */
+/* 106 */
 /***/ (function(module, exports) {
 
 /*
@@ -16215,7 +16687,7 @@ function toComment(sourceMap) {
 
 
 /***/ }),
-/* 103 */
+/* 107 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /*
@@ -16234,7 +16706,7 @@ if (typeof DEBUG !== 'undefined' && DEBUG) {
   ) }
 }
 
-var listToStyles = __webpack_require__(104)
+var listToStyles = __webpack_require__(108)
 
 /*
 type StyleObject = {
@@ -16420,7 +16892,7 @@ function applyToTag (styleElement, obj) {
     styleElement.setAttribute('media', media)
   }
   if (options.ssrId) {
-    styleElement.setAttribute(ssridKey, obj.id)
+    styleElement.setAttribute(ssrIdKey, obj.id)
   }
 
   if (sourceMap) {
@@ -16443,7 +16915,7 @@ function applyToTag (styleElement, obj) {
 
 
 /***/ }),
-/* 104 */
+/* 108 */
 /***/ (function(module, exports) {
 
 /**
@@ -16476,12 +16948,12 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 105 */
+/* 109 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(106);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(110);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue_multiselect__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -16616,8 +17088,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     return product;
                 }).filter(function (product) {
                     return product.isActive;
-                }).map(function (product) {
-                    return product;
                 });
             }
 
@@ -16691,14 +17161,14 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 });
 
 /***/ }),
-/* 106 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 !function(t,e){ true?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.VueMultiselect=e():t.VueMultiselect=e()}(this,function(){return function(t){function e(i){if(n[i])return n[i].exports;var r=n[i]={i:i,l:!1,exports:{}};return t[i].call(r.exports,r,r.exports,e),r.l=!0,r.exports}var n={};return e.m=t,e.c=n,e.i=function(t){return t},e.d=function(t,n,i){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:i})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="/",e(e.s=66)}([function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){t.exports=!n(12)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){var i=n(10),r=n(43),o=n(31),s=Object.defineProperty;e.f=n(1)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e,n){var i=n(77),r=n(21);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(9),r=n(52),o=n(18),s=n(55),u=n(53),a=function(t,e,n){var l,c,f,p,h=t&a.F,d=t&a.G,v=t&a.S,y=t&a.P,g=t&a.B,b=d?i:v?i[e]||(i[e]={}):(i[e]||{}).prototype,m=d?r:r[e]||(r[e]={}),_=m.prototype||(m.prototype={});d&&(n=e);for(l in n)c=!h&&b&&void 0!==b[l],f=(c?b:n)[l],p=g&&c?u(f,i):y&&"function"==typeof f?u(Function.call,f):f,b&&s(b,l,f,t&a.U),m[l]!=f&&o(m,l,p),y&&_[l]!=f&&(_[l]=f)};i.core=r,a.F=1,a.G=2,a.S=4,a.P=8,a.B=16,a.W=32,a.U=64,a.R=128,t.exports=a},function(t,e,n){var i=n(3),r=n(15);t.exports=n(1)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e,n){var i=n(29)("wks"),r=n(16),o=n(0).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){var i=n(13);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(48),r=n(22);t.exports=Object.keys||function(t){return i(t,r)}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e,n){var i=n(109),r=n(110);t.exports=n(35)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(8);t.exports=function(t,e){return!!t&&i(function(){e?t.call(null,function(){},1):t.call(null)})}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e){t.exports="constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf".split(",")},function(t,e,n){var i=n(0),r=n(11),o=n(74),s=n(6),u=function(t,e,n){var a,l,c,f=t&u.F,p=t&u.G,h=t&u.S,d=t&u.P,v=t&u.B,y=t&u.W,g=p?r:r[e]||(r[e]={}),b=g.prototype,m=p?i:h?i[e]:(i[e]||{}).prototype;p&&(n=e);for(a in n)(l=!f&&m&&void 0!==m[a])&&a in g||(c=l?m[a]:n[a],g[a]=p&&"function"!=typeof m[a]?n[a]:v&&l?o(c,i):y&&m[a]==c?function(t){var e=function(e,n,i){if(this instanceof t){switch(arguments.length){case 0:return new t;case 1:return new t(e);case 2:return new t(e,n)}return new t(e,n,i)}return t.apply(this,arguments)};return e.prototype=t.prototype,e}(c):d&&"function"==typeof c?o(Function.call,c):c,d&&((g.virtual||(g.virtual={}))[a]=c,t&u.R&&b&&!b[a]&&s(b,a,c)))};u.F=1,u.G=2,u.S=4,u.P=8,u.B=16,u.W=32,u.U=64,u.R=128,t.exports=u},function(t,e){t.exports={}},function(t,e){t.exports=!0},function(t,e){e.f={}.propertyIsEnumerable},function(t,e,n){var i=n(3).f,r=n(2),o=n(7)("toStringTag");t.exports=function(t,e,n){t&&!r(t=n?t:t.prototype,o)&&i(t,o,{configurable:!0,value:e})}},function(t,e,n){var i=n(29)("keys"),r=n(16);t.exports=function(t){return i[t]||(i[t]=r(t))}},function(t,e,n){var i=n(0),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(13);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){var i=n(0),r=n(11),o=n(25),s=n(33),u=n(3).f;t.exports=function(t){var e=r.Symbol||(r.Symbol=o?{}:i.Symbol||{});"_"==t.charAt(0)||t in e||u(e,t,{value:s.f(t)})}},function(t,e,n){e.f=n(7)},function(t,e,n){var i=n(53),r=n(36),o=n(57),s=n(37),u=n(104);t.exports=function(t,e){var n=1==t,a=2==t,l=3==t,c=4==t,f=6==t,p=5==t||f,h=e||u;return function(e,u,d){for(var v,y,g=o(e),b=r(g),m=i(u,d,3),_=s(b.length),x=0,w=n?h(e,_):a?h(e,0):void 0;_>x;x++)if((p||x in b)&&(v=b[x],y=m(v,x,g),t))if(n)w[x]=y;else if(y)switch(t){case 3:return!0;case 5:return v;case 6:return x;case 2:w.push(v)}else if(c)return!1;return f?-1:l||c?c:w}}},function(t,e,n){t.exports=!n(8)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(51);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(56),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(111)("wks"),r=n(58),o=n(9).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e,n){"use strict";function i(t){return 0!==t&&(!(!Array.isArray(t)||0!==t.length)||!t)}function r(t){return function(){return!t.apply(void 0,arguments)}}function o(t,e){return void 0===t&&(t="undefined"),null===t&&(t="null"),!1===t&&(t="false"),-1!==t.toString().toLowerCase().indexOf(e.trim())}function s(t,e,n,i){return t.filter(function(t){return o(i(t,n),e)})}function u(t){return t.filter(function(t){return!t.$isLabel})}function a(t,e){return function(n){return n.reduce(function(n,i){return i[t]&&i[t].length?(n.push({$groupLabel:i[e],$isLabel:!0}),n.concat(i[t])):n},[])}}function l(t,e,n,i,r){return function(o){return o.map(function(o){var u;if(!o[n])return console.warn("Options passed to vue-multiselect do not contain groups, despite the config."),[];var a=s(o[n],t,e,r);return a.length?(u={},v()(u,i,o[i]),v()(u,n,a),u):[]})}}var c=n(65),f=n.n(c),p=n(59),h=(n.n(p),n(122)),d=(n.n(h),n(64)),v=n.n(d),y=n(120),g=(n.n(y),n(121)),b=(n.n(g),n(117)),m=(n.n(b),n(123)),_=(n.n(m),n(118)),x=(n.n(_),n(119)),w=(n.n(x),function(){for(var t=arguments.length,e=new Array(t),n=0;n<t;n++)e[n]=arguments[n];return function(t){return e.reduce(function(t,e){return e(t)},t)}});e.a={data:function(){return{search:"",isOpen:!1,prefferedOpenDirection:"below",optimizedHeight:this.maxHeight}},props:{internalSearch:{type:Boolean,default:!0},options:{type:Array,required:!0},multiple:{type:Boolean,default:!1},value:{type:null,default:function(){return[]}},trackBy:{type:String},label:{type:String},searchable:{type:Boolean,default:!0},clearOnSelect:{type:Boolean,default:!0},hideSelected:{type:Boolean,default:!1},placeholder:{type:String,default:"Select option"},allowEmpty:{type:Boolean,default:!0},resetAfter:{type:Boolean,default:!1},closeOnSelect:{type:Boolean,default:!0},customLabel:{type:Function,default:function(t,e){return i(t)?"":e?t[e]:t}},taggable:{type:Boolean,default:!1},tagPlaceholder:{type:String,default:"Press enter to create a tag"},tagPosition:{type:String,default:"top"},max:{type:[Number,Boolean],default:!1},id:{default:null},optionsLimit:{type:Number,default:1e3},groupValues:{type:String},groupLabel:{type:String},groupSelect:{type:Boolean,default:!1},blockKeys:{type:Array,default:function(){return[]}},preserveSearch:{type:Boolean,default:!1},preselectFirst:{type:Boolean,default:!1}},mounted:function(){this.multiple||this.clearOnSelect||console.warn("[Vue-Multiselect warn]: ClearOnSelect and Multiple props can’t be both set to false."),!this.multiple&&this.max&&console.warn("[Vue-Multiselect warn]: Max prop should not be used when prop Multiple equals false."),this.preselectFirst&&!this.internalValue.length&&this.options.length&&this.select(this.filteredOptions[0])},computed:{internalValue:function(){return this.value||0===this.value?Array.isArray(this.value)?this.value:[this.value]:[]},filteredOptions:function(){var t=this.search||"",e=t.toLowerCase().trim(),n=this.options.concat();return n=this.internalSearch?this.groupValues?this.filterAndFlat(n,e,this.label):s(n,e,this.label,this.customLabel):this.groupValues?a(this.groupValues,this.groupLabel)(n):n,n=this.hideSelected?n.filter(r(this.isSelected)):n,this.taggable&&e.length&&!this.isExistingOption(e)&&("bottom"===this.tagPosition?n.push({isTag:!0,label:t}):n.unshift({isTag:!0,label:t})),n.slice(0,this.optionsLimit)},valueKeys:function(){var t=this;return this.trackBy?this.internalValue.map(function(e){return e[t.trackBy]}):this.internalValue},optionKeys:function(){var t=this;return(this.groupValues?this.flatAndStrip(this.options):this.options).map(function(e){return t.customLabel(e,t.label).toString().toLowerCase()})},currentOptionLabel:function(){return this.multiple?this.searchable?"":this.placeholder:this.internalValue.length?this.getOptionLabel(this.internalValue[0]):this.searchable?"":this.placeholder}},watch:{internalValue:function(){this.resetAfter&&this.internalValue.length&&(this.search="",this.$emit("input",this.multiple?[]:null))},search:function(){this.$emit("search-change",this.search,this.id)}},methods:{getValue:function(){return this.multiple?this.internalValue:0===this.internalValue.length?null:this.internalValue[0]},filterAndFlat:function(t,e,n){return w(l(e,n,this.groupValues,this.groupLabel,this.customLabel),a(this.groupValues,this.groupLabel))(t)},flatAndStrip:function(t){return w(a(this.groupValues,this.groupLabel),u)(t)},updateSearch:function(t){this.search=t},isExistingOption:function(t){return!!this.options&&this.optionKeys.indexOf(t)>-1},isSelected:function(t){var e=this.trackBy?t[this.trackBy]:t;return this.valueKeys.indexOf(e)>-1},getOptionLabel:function(t){if(i(t))return"";if(t.isTag)return t.label;if(t.$isLabel)return t.$groupLabel;var e=this.customLabel(t,this.label);return i(e)?"":e},select:function(t,e){if(t.$isLabel&&this.groupSelect)return void this.selectGroup(t);if(!(-1!==this.blockKeys.indexOf(e)||this.disabled||t.$isDisabled||t.$isLabel)&&(!this.max||!this.multiple||this.internalValue.length!==this.max)&&("Tab"!==e||this.pointerDirty)){if(t.isTag)this.$emit("tag",t.label,this.id),this.search="",this.closeOnSelect&&!this.multiple&&this.deactivate();else{if(this.isSelected(t))return void("Tab"!==e&&this.removeElement(t));this.$emit("select",t,this.id),this.multiple?this.$emit("input",this.internalValue.concat([t]),this.id):this.$emit("input",t,this.id),this.clearOnSelect&&(this.search="")}this.closeOnSelect&&this.deactivate()}},selectGroup:function(t){var e=this,n=this.options.find(function(n){return n[e.groupLabel]===t.$groupLabel});if(n)if(this.wholeGroupSelected(n)){this.$emit("remove",n[this.groupValues],this.id);var i=this.internalValue.filter(function(t){return-1===n[e.groupValues].indexOf(t)});this.$emit("input",i,this.id)}else{var o=n[this.groupValues].filter(r(this.isSelected));this.$emit("select",o,this.id),this.$emit("input",this.internalValue.concat(o),this.id)}},wholeGroupSelected:function(t){return t[this.groupValues].every(this.isSelected)},removeElement:function(t){var e=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];if(!this.disabled){if(!this.allowEmpty&&this.internalValue.length<=1)return void this.deactivate();var n="object"===f()(t)?this.valueKeys.indexOf(t[this.trackBy]):this.valueKeys.indexOf(t);if(this.$emit("remove",t,this.id),this.multiple){var i=this.internalValue.slice(0,n).concat(this.internalValue.slice(n+1));this.$emit("input",i,this.id)}else this.$emit("input",null,this.id);this.closeOnSelect&&e&&this.deactivate()}},removeLastElement:function(){-1===this.blockKeys.indexOf("Delete")&&0===this.search.length&&Array.isArray(this.internalValue)&&this.removeElement(this.internalValue[this.internalValue.length-1],!1)},activate:function(){var t=this;this.isOpen||this.disabled||(this.adjustPosition(),this.groupValues&&0===this.pointer&&this.filteredOptions.length&&(this.pointer=1),this.isOpen=!0,this.searchable?(this.preserveSearch||(this.search=""),this.$nextTick(function(){return t.$refs.search.focus()})):this.$el.focus(),this.$emit("open",this.id))},deactivate:function(){this.isOpen&&(this.isOpen=!1,this.searchable?this.$refs.search.blur():this.$el.blur(),this.preserveSearch||(this.search=""),this.$emit("close",this.getValue(),this.id))},toggle:function(){this.isOpen?this.deactivate():this.activate()},adjustPosition:function(){if("undefined"!=typeof window){var t=this.$el.getBoundingClientRect().top,e=window.innerHeight-this.$el.getBoundingClientRect().bottom;e>this.maxHeight||e>t||"below"===this.openDirection||"bottom"===this.openDirection?(this.prefferedOpenDirection="below",this.optimizedHeight=Math.min(e-40,this.maxHeight)):(this.prefferedOpenDirection="above",this.optimizedHeight=Math.min(t-40,this.maxHeight))}}}}},function(t,e,n){"use strict";var i=n(59);n.n(i);e.a={data:function(){return{pointer:0,pointerDirty:!1}},props:{showPointer:{type:Boolean,default:!0},optionHeight:{type:Number,default:40}},computed:{pointerPosition:function(){return this.pointer*this.optionHeight},visibleElements:function(){return this.optimizedHeight/this.optionHeight}},watch:{filteredOptions:function(){this.pointerAdjust()},isOpen:function(){this.pointerDirty=!1}},methods:{optionHighlight:function(t,e){return{"multiselect__option--highlight":t===this.pointer&&this.showPointer,"multiselect__option--selected":this.isSelected(e)}},groupHighlight:function(t,e){var n=this;if(!this.groupSelect)return["multiselect__option--disabled"];var i=this.options.find(function(t){return t[n.groupLabel]===e.$groupLabel});return[this.groupSelect?"multiselect__option--group":"multiselect__option--disabled",{"multiselect__option--highlight":t===this.pointer&&this.showPointer},{"multiselect__option--group-selected":this.wholeGroupSelected(i)}]},addPointerElement:function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"Enter",e=t.key;this.filteredOptions.length>0&&this.select(this.filteredOptions[this.pointer],e),this.pointerReset()},pointerForward:function(){this.pointer<this.filteredOptions.length-1&&(this.pointer++,this.$refs.list.scrollTop<=this.pointerPosition-(this.visibleElements-1)*this.optionHeight&&(this.$refs.list.scrollTop=this.pointerPosition-(this.visibleElements-1)*this.optionHeight),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()),this.pointerDirty=!0},pointerBackward:function(){this.pointer>0?(this.pointer--,this.$refs.list.scrollTop>=this.pointerPosition&&(this.$refs.list.scrollTop=this.pointerPosition),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerBackward()):this.filteredOptions[this.pointer]&&this.filteredOptions[0].$isLabel&&!this.groupSelect&&this.pointerForward(),this.pointerDirty=!0},pointerReset:function(){this.closeOnSelect&&(this.pointer=0,this.$refs.list&&(this.$refs.list.scrollTop=0))},pointerAdjust:function(){this.pointer>=this.filteredOptions.length-1&&(this.pointer=this.filteredOptions.length?this.filteredOptions.length-1:0),this.filteredOptions.length>0&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()},pointerSet:function(t){this.pointer=t,this.pointerDirty=!0}}}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e,n){var i=n(13),r=n(0).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){t.exports=!n(1)&&!n(12)(function(){return 7!=Object.defineProperty(n(42)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){"use strict";var i=n(25),r=n(23),o=n(49),s=n(6),u=n(2),a=n(24),l=n(79),c=n(27),f=n(86),p=n(7)("iterator"),h=!([].keys&&"next"in[].keys()),d=function(){return this};t.exports=function(t,e,n,v,y,g,b){l(n,e,v);var m,_,x,w=function(t){if(!h&&t in P)return P[t];switch(t){case"keys":case"values":return function(){return new n(this,t)}}return function(){return new n(this,t)}},S=e+" Iterator",O="values"==y,L=!1,P=t.prototype,k=P[p]||P["@@iterator"]||y&&P[y],E=k||w(y),j=y?O?w("entries"):E:void 0,V="Array"==e?P.entries||k:k;if(V&&(x=f(V.call(new t)))!==Object.prototype&&(c(x,S,!0),i||u(x,p)||s(x,p,d)),O&&k&&"values"!==k.name&&(L=!0,E=function(){return k.call(this)}),i&&!b||!h&&!L&&P[p]||s(P,p,E),a[e]=E,a[S]=d,y)if(m={values:O?E:w("values"),keys:g?E:w("keys"),entries:j},b)for(_ in m)_ in P||o(P,_,m[_]);else r(r.P+r.F*(h||L),e,m);return m}},function(t,e,n){var i=n(10),r=n(83),o=n(22),s=n(28)("IE_PROTO"),u=function(){},a=function(){var t,e=n(42)("iframe"),i=o.length;for(e.style.display="none",n(76).appendChild(e),e.src="javascript:",t=e.contentWindow.document,t.open(),t.write("<script>document.F=Object<\/script>"),t.close(),a=t.F;i--;)delete a.prototype[o[i]];return a()};t.exports=Object.create||function(t,e){var n;return null!==t?(u.prototype=i(t),n=new u,u.prototype=null,n[s]=t):n=a(),void 0===e?n:r(n,e)}},function(t,e,n){var i=n(48),r=n(22).concat("length","prototype");e.f=Object.getOwnPropertyNames||function(t){return i(t,r)}},function(t,e){e.f=Object.getOwnPropertySymbols},function(t,e,n){var i=n(2),r=n(4),o=n(73)(!1),s=n(28)("IE_PROTO");t.exports=function(t,e){var n,u=r(t),a=0,l=[];for(n in u)n!=s&&i(u,n)&&l.push(n);for(;e.length>a;)i(u,n=e[a++])&&(~o(l,n)||l.push(n));return l}},function(t,e,n){t.exports=n(6)},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e,n){var i=n(50);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(51);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){var i=n(9),r=n(18),o=n(107),s=n(58)("src"),u=Function.toString,a=(""+u).split("toString");n(52).inspectSource=function(t){return u.call(t)},(t.exports=function(t,e,n,u){var l="function"==typeof n;l&&(o(n,"name")||r(n,"name",e)),t[e]!==n&&(l&&(o(n,s)||r(n,s,t[e]?""+t[e]:a.join(String(e)))),t===i?t[e]=n:u?t[e]?t[e]=n:r(t,e,n):(delete t[e],r(t,e,n)))})(Function.prototype,"toString",function(){return"function"==typeof this&&this[s]||u.call(this)})},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(17);t.exports=function(t){return Object(i(t))}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e,n){"use strict";var i=n(5),r=n(34)(5),o=!0;"find"in[]&&Array(1).find(function(){o=!1}),i(i.P+i.F*o,"Array",{find:function(t){return r(this,t,arguments.length>1?arguments[1]:void 0)}}),n(99)("find")},function(t,e,n){"use strict";function i(t){n(124)}var r=n(67),o=n(126),s=n(125),u=i,a=s(r.a,o.a,!1,u,null,null);e.a=a.exports},function(t,e,n){t.exports=n(68)},function(t,e,n){t.exports=n(69)},function(t,e,n){t.exports=n(70)},function(t,e,n){function i(t,e,n){return e in t?r(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}var r=n(61);t.exports=i},function(t,e,n){function i(t){return(i="function"==typeof s&&"symbol"==typeof o?function(t){return typeof t}:function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":typeof t})(t)}function r(e){return"function"==typeof s&&"symbol"===i(o)?t.exports=r=function(t){return i(t)}:t.exports=r=function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":i(t)},r(e)}var o=n(63),s=n(62);t.exports=r},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var i=n(60),r=n(39),o=n(40);n.d(e,"Multiselect",function(){return i.a}),n.d(e,"multiselectMixin",function(){return r.a}),n.d(e,"pointerMixin",function(){return o.a}),e.default=i.a},function(t,e,n){"use strict";var i=n(39),r=n(40);e.a={name:"vue-multiselect",mixins:[i.a,r.a],props:{name:{type:String,default:""},selectLabel:{type:String,default:"Press enter to select"},selectGroupLabel:{type:String,default:"Press enter to select group"},selectedLabel:{type:String,default:"Selected"},deselectLabel:{type:String,default:"Press enter to remove"},deselectGroupLabel:{type:String,default:"Press enter to deselect group"},showLabels:{type:Boolean,default:!0},limit:{type:Number,default:99999},maxHeight:{type:Number,default:300},limitText:{type:Function,default:function(t){return"and ".concat(t," more")}},loading:{type:Boolean,default:!1},disabled:{type:Boolean,default:!1},openDirection:{type:String,default:""},showNoResults:{type:Boolean,default:!0},tabindex:{type:Number,default:0}},computed:{isSingleLabelVisible:function(){return this.singleValue&&(!this.isOpen||!this.searchable)&&!this.visibleValues.length},isPlaceholderVisible:function(){return!(this.internalValue.length||this.searchable&&this.isOpen)},visibleValues:function(){return this.multiple?this.internalValue.slice(0,this.limit):[]},singleValue:function(){return this.internalValue[0]},deselectLabelText:function(){return this.showLabels?this.deselectLabel:""},deselectGroupLabelText:function(){return this.showLabels?this.deselectGroupLabel:""},selectLabelText:function(){return this.showLabels?this.selectLabel:""},selectGroupLabelText:function(){return this.showLabels?this.selectGroupLabel:""},selectedLabelText:function(){return this.showLabels?this.selectedLabel:""},inputStyle:function(){if(this.searchable||this.multiple&&this.value&&this.value.length)return this.isOpen?{width:"auto"}:{width:"0",position:"absolute",padding:"0"}},contentStyle:function(){return this.options.length?{display:"inline-block"}:{display:"block"}},isAbove:function(){return"above"===this.openDirection||"top"===this.openDirection||"below"!==this.openDirection&&"bottom"!==this.openDirection&&"above"===this.prefferedOpenDirection},showSearchInput:function(){return this.searchable&&(!this.hasSingleSelectedSlot||!this.visibleSingleValue&&0!==this.visibleSingleValue||this.isOpen)}}}},function(t,e,n){n(92);var i=n(11).Object;t.exports=function(t,e,n){return i.defineProperty(t,e,n)}},function(t,e,n){n(95),n(93),n(96),n(97),t.exports=n(11).Symbol},function(t,e,n){n(94),n(98),t.exports=n(33).f("iterator")},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){t.exports=function(){}},function(t,e,n){var i=n(4),r=n(89),o=n(88);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(71);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(14),r=n(47),o=n(26);t.exports=function(t){var e=i(t),n=r.f;if(n)for(var s,u=n(t),a=o.f,l=0;u.length>l;)a.call(t,s=u[l++])&&e.push(s);return e}},function(t,e,n){t.exports=n(0).document&&document.documentElement},function(t,e,n){var i=n(41);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(41);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){"use strict";var i=n(45),r=n(15),o=n(27),s={};n(6)(s,n(7)("iterator"),function(){return this}),t.exports=function(t,e,n){t.prototype=i(s,{next:r(1,n)}),o(t,e+" Iterator")}},function(t,e){t.exports=function(t,e){return{value:e,done:!!t}}},function(t,e,n){var i=n(14),r=n(4);t.exports=function(t,e){for(var n,o=r(t),s=i(o),u=s.length,a=0;u>a;)if(o[n=s[a++]]===e)return n}},function(t,e,n){var i=n(16)("meta"),r=n(13),o=n(2),s=n(3).f,u=0,a=Object.isExtensible||function(){return!0},l=!n(12)(function(){return a(Object.preventExtensions({}))}),c=function(t){s(t,i,{value:{i:"O"+ ++u,w:{}}})},f=function(t,e){if(!r(t))return"symbol"==typeof t?t:("string"==typeof t?"S":"P")+t;if(!o(t,i)){if(!a(t))return"F";if(!e)return"E";c(t)}return t[i].i},p=function(t,e){if(!o(t,i)){if(!a(t))return!0;if(!e)return!1;c(t)}return t[i].w},h=function(t){return l&&d.NEED&&a(t)&&!o(t,i)&&c(t),t},d=t.exports={KEY:i,NEED:!1,fastKey:f,getWeak:p,onFreeze:h}},function(t,e,n){var i=n(3),r=n(10),o=n(14);t.exports=n(1)?Object.defineProperties:function(t,e){r(t);for(var n,s=o(e),u=s.length,a=0;u>a;)i.f(t,n=s[a++],e[n]);return t}},function(t,e,n){var i=n(26),r=n(15),o=n(4),s=n(31),u=n(2),a=n(43),l=Object.getOwnPropertyDescriptor;e.f=n(1)?l:function(t,e){if(t=o(t),e=s(e,!0),a)try{return l(t,e)}catch(t){}if(u(t,e))return r(!i.f.call(t,e),t[e])}},function(t,e,n){var i=n(4),r=n(46).f,o={}.toString,s="object"==typeof window&&window&&Object.getOwnPropertyNames?Object.getOwnPropertyNames(window):[],u=function(t){try{return r(t)}catch(t){return s.slice()}};t.exports.f=function(t){return s&&"[object Window]"==o.call(t)?u(t):r(i(t))}},function(t,e,n){var i=n(2),r=n(90),o=n(28)("IE_PROTO"),s=Object.prototype;t.exports=Object.getPrototypeOf||function(t){return t=r(t),i(t,o)?t[o]:"function"==typeof t.constructor&&t instanceof t.constructor?t.constructor.prototype:t instanceof Object?s:null}},function(t,e,n){var i=n(30),r=n(21);t.exports=function(t){return function(e,n){var o,s,u=String(r(e)),a=i(n),l=u.length;return a<0||a>=l?t?"":void 0:(o=u.charCodeAt(a),o<55296||o>56319||a+1===l||(s=u.charCodeAt(a+1))<56320||s>57343?t?u.charAt(a):o:t?u.slice(a,a+2):s-56320+(o-55296<<10)+65536)}}},function(t,e,n){var i=n(30),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(30),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(21);t.exports=function(t){return Object(i(t))}},function(t,e,n){"use strict";var i=n(72),r=n(80),o=n(24),s=n(4);t.exports=n(44)(Array,"Array",function(t,e){this._t=s(t),this._i=0,this._k=e},function(){var t=this._t,e=this._k,n=this._i++;return!t||n>=t.length?(this._t=void 0,r(1)):"keys"==e?r(0,n):"values"==e?r(0,t[n]):r(0,[n,t[n]])},"values"),o.Arguments=o.Array,i("keys"),i("values"),i("entries")},function(t,e,n){var i=n(23);i(i.S+i.F*!n(1),"Object",{defineProperty:n(3).f})},function(t,e){},function(t,e,n){"use strict";var i=n(87)(!0);n(44)(String,"String",function(t){this._t=String(t),this._i=0},function(){var t,e=this._t,n=this._i;return n>=e.length?{value:void 0,done:!0}:(t=i(e,n),this._i+=t.length,{value:t,done:!1})})},function(t,e,n){"use strict";var i=n(0),r=n(2),o=n(1),s=n(23),u=n(49),a=n(82).KEY,l=n(12),c=n(29),f=n(27),p=n(16),h=n(7),d=n(33),v=n(32),y=n(81),g=n(75),b=n(78),m=n(10),_=n(4),x=n(31),w=n(15),S=n(45),O=n(85),L=n(84),P=n(3),k=n(14),E=L.f,j=P.f,V=O.f,C=i.Symbol,T=i.JSON,A=T&&T.stringify,$=h("_hidden"),D=h("toPrimitive"),F={}.propertyIsEnumerable,M=c("symbol-registry"),B=c("symbols"),N=c("op-symbols"),R=Object.prototype,H="function"==typeof C,G=i.QObject,I=!G||!G.prototype||!G.prototype.findChild,K=o&&l(function(){return 7!=S(j({},"a",{get:function(){return j(this,"a",{value:7}).a}})).a})?function(t,e,n){var i=E(R,e);i&&delete R[e],j(t,e,n),i&&t!==R&&j(R,e,i)}:j,z=function(t){var e=B[t]=S(C.prototype);return e._k=t,e},U=H&&"symbol"==typeof C.iterator?function(t){return"symbol"==typeof t}:function(t){return t instanceof C},W=function(t,e,n){return t===R&&W(N,e,n),m(t),e=x(e,!0),m(n),r(B,e)?(n.enumerable?(r(t,$)&&t[$][e]&&(t[$][e]=!1),n=S(n,{enumerable:w(0,!1)})):(r(t,$)||j(t,$,w(1,{})),t[$][e]=!0),K(t,e,n)):j(t,e,n)},J=function(t,e){m(t);for(var n,i=g(e=_(e)),r=0,o=i.length;o>r;)W(t,n=i[r++],e[n]);return t},q=function(t,e){return void 0===e?S(t):J(S(t),e)},X=function(t){var e=F.call(this,t=x(t,!0));return!(this===R&&r(B,t)&&!r(N,t))&&(!(e||!r(this,t)||!r(B,t)||r(this,$)&&this[$][t])||e)},Y=function(t,e){if(t=_(t),e=x(e,!0),t!==R||!r(B,e)||r(N,e)){var n=E(t,e);return!n||!r(B,e)||r(t,$)&&t[$][e]||(n.enumerable=!0),n}},Q=function(t){for(var e,n=V(_(t)),i=[],o=0;n.length>o;)r(B,e=n[o++])||e==$||e==a||i.push(e);return i},Z=function(t){for(var e,n=t===R,i=V(n?N:_(t)),o=[],s=0;i.length>s;)!r(B,e=i[s++])||n&&!r(R,e)||o.push(B[e]);return o};H||(C=function(){if(this instanceof C)throw TypeError("Symbol is not a constructor!");var t=p(arguments.length>0?arguments[0]:void 0),e=function(n){this===R&&e.call(N,n),r(this,$)&&r(this[$],t)&&(this[$][t]=!1),K(this,t,w(1,n))};return o&&I&&K(R,t,{configurable:!0,set:e}),z(t)},u(C.prototype,"toString",function(){return this._k}),L.f=Y,P.f=W,n(46).f=O.f=Q,n(26).f=X,n(47).f=Z,o&&!n(25)&&u(R,"propertyIsEnumerable",X,!0),d.f=function(t){return z(h(t))}),s(s.G+s.W+s.F*!H,{Symbol:C});for(var tt="hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables".split(","),et=0;tt.length>et;)h(tt[et++]);for(var tt=k(h.store),et=0;tt.length>et;)v(tt[et++]);s(s.S+s.F*!H,"Symbol",{for:function(t){return r(M,t+="")?M[t]:M[t]=C(t)},keyFor:function(t){if(U(t))return y(M,t);throw TypeError(t+" is not a symbol!")},useSetter:function(){I=!0},useSimple:function(){I=!1}}),s(s.S+s.F*!H,"Object",{create:q,defineProperty:W,defineProperties:J,getOwnPropertyDescriptor:Y,getOwnPropertyNames:Q,getOwnPropertySymbols:Z}),T&&s(s.S+s.F*(!H||l(function(){var t=C();return"[null]"!=A([t])||"{}"!=A({a:t})||"{}"!=A(Object(t))})),"JSON",{stringify:function(t){if(void 0!==t&&!U(t)){for(var e,n,i=[t],r=1;arguments.length>r;)i.push(arguments[r++]);return e=i[1],"function"==typeof e&&(n=e),!n&&b(e)||(e=function(t,e){if(n&&(e=n.call(this,t,e)),!U(e))return e}),i[1]=e,A.apply(T,i)}}}),C.prototype[D]||n(6)(C.prototype,D,C.prototype.valueOf),f(C,"Symbol"),f(Math,"Math",!0),f(i.JSON,"JSON",!0)},function(t,e,n){n(32)("asyncIterator")},function(t,e,n){n(32)("observable")},function(t,e,n){n(91);for(var i=n(0),r=n(6),o=n(24),s=n(7)("toStringTag"),u=["NodeList","DOMTokenList","MediaList","StyleSheetList","CSSRuleList"],a=0;a<5;a++){var l=u[a],c=i[l],f=c&&c.prototype;f&&!f[s]&&r(f,s,l),o[l]=o.Array}},function(t,e,n){var i=n(38)("unscopables"),r=Array.prototype;void 0==r[i]&&n(18)(r,i,{}),t.exports=function(t){r[i][t]=!0}},function(t,e,n){var i=n(19);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e,n){var i=n(115),r=n(37),o=n(114);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(50),r=n(57),o=n(36),s=n(37);t.exports=function(t,e,n,u,a){i(e);var l=r(t),c=o(l),f=s(l.length),p=a?f-1:0,h=a?-1:1;if(n<2)for(;;){if(p in c){u=c[p],p+=h;break}if(p+=h,a?p<0:f<=p)throw TypeError("Reduce of empty array with no initial value")}for(;a?p>=0:f>p;p+=h)p in c&&(u=e(u,c[p],p,l));return u}},function(t,e,n){var i=n(19),r=n(54),o=n(38)("species");t.exports=function(t){var e;return r(t)&&(e=t.constructor,"function"!=typeof e||e!==Array&&!r(e.prototype)||(e=void 0),i(e)&&null===(e=e[o])&&(e=void 0)),void 0===e?Array:e}},function(t,e,n){var i=n(103);t.exports=function(t,e){return new(i(t))(e)}},function(t,e,n){var i=n(19),r=n(9).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){"use strict";var i=n(18),r=n(55),o=n(8),s=n(17),u=n(38);t.exports=function(t,e,n){var a=u(t),l=n(s,a,""[t]),c=l[0],f=l[1];o(function(){var e={};return e[a]=function(){return 7},7!=""[t](e)})&&(r(String.prototype,t,c),i(RegExp.prototype,a,2==e?function(t,e){return f.call(t,this,e)}:function(t){return f.call(t,this)}))}},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){t.exports=!n(35)&&!n(8)(function(){return 7!=Object.defineProperty(n(105)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(100),r=n(108),o=n(116),s=Object.defineProperty;e.f=n(35)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e,n){var i=n(9),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e,n){var i=n(5),r=n(17),o=n(8),s=n(113),u="["+s+"]",a="​",l=RegExp("^"+u+u+"*"),c=RegExp(u+u+"*$"),f=function(t,e,n){var r={},u=o(function(){return!!s[t]()||a[t]()!=a}),l=r[t]=u?e(p):s[t];n&&(r[n]=l),i(i.P+i.F*u,"String",r)},p=f.trim=function(t,e){return t=String(r(t)),1&e&&(t=t.replace(l,"")),2&e&&(t=t.replace(c,"")),t};t.exports=f},function(t,e){t.exports="\t\n\v\f\r   ᠎             　\u2028\u2029\ufeff"},function(t,e,n){var i=n(56),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(36),r=n(17);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(19);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){"use strict";var i=n(5),r=n(34)(2);i(i.P+i.F*!n(20)([].filter,!0),"Array",{filter:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(101)(!1),o=[].indexOf,s=!!o&&1/[1].indexOf(1,-0)<0;i(i.P+i.F*(s||!n(20)(o)),"Array",{indexOf:function(t){return s?o.apply(this,arguments)||0:r(this,t,arguments[1])}})},function(t,e,n){var i=n(5);i(i.S,"Array",{isArray:n(54)})},function(t,e,n){"use strict";var i=n(5),r=n(34)(1);i(i.P+i.F*!n(20)([].map,!0),"Array",{map:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(102);i(i.P+i.F*!n(20)([].reduce,!0),"Array",{reduce:function(t){return r(this,t,arguments.length,arguments[1],!1)}})},function(t,e,n){n(106)("search",1,function(t,e,n){return[function(n){"use strict";var i=t(this),r=void 0==n?void 0:n[e];return void 0!==r?r.call(n,i):new RegExp(n)[e](String(i))},n]})},function(t,e,n){"use strict";n(112)("trim",function(t){return function(){return t(this,3)}})},function(t,e){},function(t,e){t.exports=function(t,e,n,i,r,o){var s,u=t=t||{},a=typeof t.default;"object"!==a&&"function"!==a||(s=t,u=t.default);var l="function"==typeof u?u.options:u;e&&(l.render=e.render,l.staticRenderFns=e.staticRenderFns,l._compiled=!0),n&&(l.functional=!0),r&&(l._scopeId=r);var c;if(o?(c=function(t){t=t||this.$vnode&&this.$vnode.ssrContext||this.parent&&this.parent.$vnode&&this.parent.$vnode.ssrContext,t||"undefined"==typeof __VUE_SSR_CONTEXT__||(t=__VUE_SSR_CONTEXT__),i&&i.call(this,t),t&&t._registeredComponents&&t._registeredComponents.add(o)},l._ssrRegister=c):i&&(c=i),c){var f=l.functional,p=f?l.render:l.beforeCreate;f?(l._injectStyles=c,l.render=function(t,e){return c.call(e),p(t,e)}):l.beforeCreate=p?[].concat(p,c):[c]}return{esModule:s,exports:u,options:l}}},function(t,e,n){"use strict";var i=function(){var t=this,e=t.$createElement,n=t._self._c||e;return n("div",{staticClass:"multiselect",class:{"multiselect--active":t.isOpen,"multiselect--disabled":t.disabled,"multiselect--above":t.isAbove},attrs:{tabindex:t.searchable?-1:t.tabindex},on:{focus:function(e){t.activate()},blur:function(e){!t.searchable&&t.deactivate()},keydown:[function(e){return"button"in e||!t._k(e.keyCode,"down",40,e.key,"ArrowDown")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerForward()):null},function(e){return"button"in e||!t._k(e.keyCode,"up",38,e.key,"ArrowUp")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerBackward()):null},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")||!t._k(e.keyCode,"tab",9,e.key,"Tab")?(e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null}],keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()}}},[t._t("caret",[n("div",{staticClass:"multiselect__select",on:{mousedown:function(e){e.preventDefault(),e.stopPropagation(),t.toggle()}}})],{toggle:t.toggle}),t._v(" "),t._t("clear",null,{search:t.search}),t._v(" "),n("div",{ref:"tags",staticClass:"multiselect__tags"},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.visibleValues.length>0,expression:"visibleValues.length > 0"}],staticClass:"multiselect__tags-wrap"},[t._l(t.visibleValues,function(e){return[t._t("tag",[n("span",{staticClass:"multiselect__tag"},[n("span",{domProps:{textContent:t._s(t.getOptionLabel(e))}}),t._v(" "),n("i",{staticClass:"multiselect__tag-icon",attrs:{"aria-hidden":"true",tabindex:"1"},on:{keydown:function(n){if(!("button"in n)&&t._k(n.keyCode,"enter",13,n.key,"Enter"))return null;n.preventDefault(),t.removeElement(e)},mousedown:function(n){n.preventDefault(),t.removeElement(e)}}})])],{option:e,search:t.search,remove:t.removeElement})]})],2),t._v(" "),t.internalValue&&t.internalValue.length>t.limit?[t._t("limit",[n("strong",{staticClass:"multiselect__strong",domProps:{textContent:t._s(t.limitText(t.internalValue.length-t.limit))}})])]:t._e(),t._v(" "),n("transition",{attrs:{name:"multiselect__loading"}},[t._t("loading",[n("div",{directives:[{name:"show",rawName:"v-show",value:t.loading,expression:"loading"}],staticClass:"multiselect__spinner"})])],2),t._v(" "),t.searchable?n("input",{ref:"search",staticClass:"multiselect__input",style:t.inputStyle,attrs:{name:t.name,id:t.id,type:"text",autocomplete:"off",placeholder:t.placeholder,disabled:t.disabled,tabindex:t.tabindex},domProps:{value:t.search},on:{input:function(e){t.updateSearch(e.target.value)},focus:function(e){e.preventDefault(),t.activate()},blur:function(e){e.preventDefault(),t.deactivate()},keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()},keydown:[function(e){if(!("button"in e)&&t._k(e.keyCode,"down",40,e.key,"ArrowDown"))return null;e.preventDefault(),t.pointerForward()},function(e){if(!("button"in e)&&t._k(e.keyCode,"up",38,e.key,"ArrowUp"))return null;e.preventDefault(),t.pointerBackward()},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")?(e.preventDefault(),e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null},function(e){if(!("button"in e)&&t._k(e.keyCode,"delete",[8,46],e.key,["Backspace","Delete"]))return null;e.stopPropagation(),t.removeLastElement()}]}}):t._e(),t._v(" "),t.isSingleLabelVisible?n("span",{staticClass:"multiselect__single",on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("singleLabel",[[t._v(t._s(t.currentOptionLabel))]],{option:t.singleValue})],2):t._e(),t._v(" "),t.isPlaceholderVisible?n("span",{on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("placeholder",[n("span",{staticClass:"multiselect__single"},[t._v("\n            "+t._s(t.placeholder)+"\n          ")])])],2):t._e()],2),t._v(" "),n("transition",{attrs:{name:"multiselect"}},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.isOpen,expression:"isOpen"}],ref:"list",staticClass:"multiselect__content-wrapper",style:{maxHeight:t.optimizedHeight+"px"},on:{focus:t.activate,mousedown:function(t){t.preventDefault()}}},[n("ul",{staticClass:"multiselect__content",style:t.contentStyle},[t._t("beforeList"),t._v(" "),t.multiple&&t.max===t.internalValue.length?n("li",[n("span",{staticClass:"multiselect__option"},[t._t("maxElements",[t._v("Maximum of "+t._s(t.max)+" options selected. First remove a selected option to select another.")])],2)]):t._e(),t._v(" "),!t.max||t.internalValue.length<t.max?t._l(t.filteredOptions,function(e,i){return n("li",{key:i,staticClass:"multiselect__element"},[e&&(e.$isLabel||e.$isDisabled)?t._e():n("span",{staticClass:"multiselect__option",class:t.optionHighlight(i,e),attrs:{"data-select":e&&e.isTag?t.tagPlaceholder:t.selectLabelText,"data-selected":t.selectedLabelText,"data-deselect":t.deselectLabelText},on:{click:function(n){n.stopPropagation(),t.select(e)},mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.pointerSet(i)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2),t._v(" "),e&&(e.$isLabel||e.$isDisabled)?n("span",{staticClass:"multiselect__option",class:t.groupHighlight(i,e),attrs:{"data-select":t.groupSelect&&t.selectGroupLabelText,"data-deselect":t.groupSelect&&t.deselectGroupLabelText},on:{mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.groupSelect&&t.pointerSet(i)},mousedown:function(n){n.preventDefault(),t.selectGroup(e)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2):t._e()])}):t._e(),t._v(" "),n("li",{directives:[{name:"show",rawName:"v-show",value:t.showNoResults&&0===t.filteredOptions.length&&t.search&&!t.loading,expression:"showNoResults && (filteredOptions.length === 0 && search && !loading)"}]},[n("span",{staticClass:"multiselect__option"},[t._t("noResult",[t._v("No elements found. Consider changing the search query.")])],2)]),t._v(" "),t._t("afterList")],2)])])],2)},r=[],o={render:i,staticRenderFns:r};e.a=o}])});
 
 
 /***/ }),
-/* 107 */
+/* 111 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -16715,7 +17185,7 @@ var render = function() {
         on: {
           submit: function($event) {
             $event.preventDefault()
-            _vm.createProduct($event)
+            return _vm.createProduct($event)
           }
         }
       },
@@ -17020,12 +17490,18 @@ var render = function() {
                             $$i = _vm._i($$a, $$v)
                           if ($$el.checked) {
                             $$i < 0 &&
-                              (_vm.products[index].isActive = $$a.concat([$$v]))
+                              _vm.$set(
+                                _vm.products[index],
+                                "isActive",
+                                $$a.concat([$$v])
+                              )
                           } else {
                             $$i > -1 &&
-                              (_vm.products[index].isActive = $$a
-                                .slice(0, $$i)
-                                .concat($$a.slice($$i + 1)))
+                              _vm.$set(
+                                _vm.products[index],
+                                "isActive",
+                                $$a.slice(0, $$i).concat($$a.slice($$i + 1))
+                              )
                           }
                         } else {
                           _vm.$set(_vm.products[index], "isActive", $$c)
@@ -17147,15 +17623,15 @@ if (false) {
 }
 
 /***/ }),
-/* 108 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(20)
 /* script */
-var __vue_script__ = __webpack_require__(109)
+var __vue_script__ = __webpack_require__(113)
 /* template */
-var __vue_template__ = __webpack_require__(110)
+var __vue_template__ = __webpack_require__(114)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -17194,7 +17670,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 109 */
+/* 113 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17397,7 +17873,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 });
 
 /***/ }),
-/* 110 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -17534,7 +18010,7 @@ var render = function() {
                 on: {
                   submit: function($event) {
                     $event.preventDefault()
-                    _vm.order($event)
+                    return _vm.order($event)
                   }
                 }
               },
@@ -17653,15 +18129,15 @@ if (false) {
 }
 
 /***/ }),
-/* 111 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(20)
 /* script */
-var __vue_script__ = __webpack_require__(112)
+var __vue_script__ = __webpack_require__(116)
 /* template */
-var __vue_template__ = __webpack_require__(221)
+var __vue_template__ = __webpack_require__(227)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -17700,12 +18176,12 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 112 */
+/* 116 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__ = __webpack_require__(113);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__ = __webpack_require__(117);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__);
 //
 //
@@ -17760,7 +18236,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 113 */
+/* 117 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -17869,16 +18345,16 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * </form>
  */
 
-var Dropin = __webpack_require__(114);
-var client = __webpack_require__(38);
-var createFromScriptTag = __webpack_require__(218);
+var Dropin = __webpack_require__(118);
+var client = __webpack_require__(40);
+var createFromScriptTag = __webpack_require__(224);
 var constants = __webpack_require__(2);
 var analytics = __webpack_require__(14);
 var DropinError = __webpack_require__(8);
 var Promise = __webpack_require__(5);
 var wrapPromise = __webpack_require__(3);
 
-var VERSION = "1.10.0";
+var VERSION = "1.11.0";
 
 /**
  * @typedef {object} cardCreateOptions The configuration options for cards. Internally, Drop-in uses [Hosted Fields](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html) to render the card form. The `overrides.fields` and `overrides.styles` allow the Hosted Fields to be customized.
@@ -17887,6 +18363,7 @@ var VERSION = "1.10.0";
  * @param {boolean} [cardholderName.required=false] When true, the cardholder name field will be required to request the payment method nonce.
  * @param {object} [overrides.fields] The Hosted Fields [`fields` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~fieldOptions). Only `number`, `cvv`, `expirationDate` and `postalCode` can be configured. Each is a [Hosted Fields `field` object](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~field). `selector` cannot be modified.
  * @param {object} [overrides.styles] The Hosted Fields [`styles` options](http://braintree.github.io/braintree-web/{@pkg bt-web-version}/module-braintree-web_hosted-fields.html#~styleOptions).
+ * @param {boolean} [clearFieldsAfterTokenization=true] When false, the card form will not clear the card data when the customer returns to the card view after a succesful tokenization.
  */
 
 /**
@@ -18001,8 +18478,6 @@ var VERSION = "1.10.0";
  * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {object} [options.threeDSecure] The configuration options for 3D Secure. See [`threeDSecureOptions`](#~threeDSecureOptions) for all `threeDSecure` options. If 3D Secure is configured and fails to load, Drop-in creation will fail.
- *
- * @param {object} [options.dataCollector] The configuration options for data collector. See [`dataCollectorOptions`](#~dataCollectorOptions) for all `dataCollector` options. If Data Collector is configured and fails to load, Drop-in creation will fail.
  *
  * @param {boolean} [options.preselectVaultedPaymentMethod=true] Whether or not to initialize Drop-in with a vaulted payment method pre-selected. Only applicable when using a [client token with a customer id](https://developers.braintreepayments.com/reference/request/client-token/generate/#customer_id) and a customer with saved payment methods.
  *
@@ -18272,6 +18747,7 @@ function create(options) {
       })._initialize(function (err, instance) {
         if (err) {
           reject(err);
+
           return;
         }
 
@@ -18309,34 +18785,35 @@ module.exports = {
 
 
 /***/ }),
-/* 114 */
+/* 118 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
+
 
 var assign = __webpack_require__(10).assign;
 var analytics = __webpack_require__(14);
 var constants = __webpack_require__(2);
 var DropinError = __webpack_require__(8);
-var DropinModel = __webpack_require__(138);
-var EventEmitter = __webpack_require__(48);
-var isGuestCheckout = __webpack_require__(49);
-var assets = __webpack_require__(60);
+var DropinModel = __webpack_require__(142);
+var EventEmitter = __webpack_require__(52);
+var isGuestCheckout = __webpack_require__(53);
+var assets = __webpack_require__(26);
 
-var MainView = __webpack_require__(184);
-var paymentMethodsViewID = __webpack_require__(65).ID;
-var paymentOptionsViewID = __webpack_require__(66).ID;
+var MainView = __webpack_require__(213);
+var paymentMethodsViewID = __webpack_require__(69).ID;
+var paymentOptionsViewID = __webpack_require__(70).ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var translations = __webpack_require__(187);
-var isUtf8 = __webpack_require__(58);
-var uuid = __webpack_require__(67);
+var translations = __webpack_require__(66).translations;
+var isUtf8 = __webpack_require__(62);
+var uuid = __webpack_require__(71);
 var Promise = __webpack_require__(5);
-var sanitizeHtml = __webpack_require__(211);
-var ThreeDSecure = __webpack_require__(212);
+var sanitizeHtml = __webpack_require__(216);
+var DataCollector = __webpack_require__(217);
+var ThreeDSecure = __webpack_require__(218);
 var wrapPrototype = __webpack_require__(3).wrapPrototype;
 
-var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <button type=\"button\" data-braintree-id=\"google-pay-button\" class=\"braintree-sheet__button--google-pay google-pay-button\"></button>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                  <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n                </div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n\n                <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n              </div>\n            </label>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n";
+var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <button type=\"button\" data-braintree-id=\"google-pay-button\" class=\"braintree-sheet__button--google-pay google-pay-button\"></button>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                  <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n                </div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n\n                <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n              </div>\n            </label>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n<div data-braintree-id=\"disable-wrapper\" class=\"braintree-dropin__disabled braintree-hidden\"></div>\n";
 var svgHTML = "<svg data-braintree-id=\"svgs\" style=\"display: none\">\n  <defs>\n    <symbol id=\"icon-visa\" viewBox=\"0 0 40 24\">\n      <title>Visa</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M0 22.033C0 23.12.892 24 1.992 24h36.016c1.1 0 1.992-.88 1.992-1.967V20.08H0v1.953z\" style=\"fill: #F8B600\" />\n      <path d=\"M0 3.92h40V1.967C40 .88 39.108 0 38.008 0H1.992C.892 0 0 .88 0 1.967V3.92zM19.596 7.885l-2.11 9.478H14.93l2.11-9.478h2.554zm10.743 6.12l1.343-3.56.773 3.56H30.34zm2.85 3.358h2.36l-2.063-9.478H31.31c-.492 0-.905.274-1.088.695l-3.832 8.783h2.682l.532-1.415h3.276l.31 1.415zm-6.667-3.094c.01-2.502-3.6-2.64-3.577-3.76.008-.338.345-.7 1.083-.793.365-.045 1.373-.08 2.517.425l.448-2.01c-.615-.214-1.405-.42-2.39-.42-2.523 0-4.3 1.288-4.313 3.133-.016 1.364 1.268 2.125 2.234 2.58.996.464 1.33.762 1.325 1.177-.006.636-.793.918-1.526.928-1.285.02-2.03-.333-2.623-.6l-.462 2.08c.598.262 1.7.49 2.84.502 2.682 0 4.437-1.273 4.445-3.243zM15.948 7.884l-4.138 9.478h-2.7L7.076 9.8c-.123-.466-.23-.637-.606-.834-.615-.32-1.63-.62-2.52-.806l.06-.275h4.345c.554 0 1.052.354 1.178.966l1.076 5.486 2.655-6.45h2.683z\" style=\"fill: #1A1F71\" />\n    </symbol>\n\n    <symbol id=\"icon-master-card\" viewBox=\"0 0 40 24\">\n      <title>MasterCard</title>\n      <path d=\"M0 1.927C0 .863.892 0 1.992 0h36.016C39.108 0 40 .863 40 1.927v20.146C40 23.137 39.108 24 38.008 24H1.992C.892 24 0 23.137 0 22.073V1.927z\" style=\"fill: #FFF\" />\n      <path d=\"M11.085 22.2v-1.36c0-.522-.318-.863-.864-.863-.272 0-.568.09-.773.386-.16-.25-.386-.386-.727-.386-.228 0-.455.068-.637.318v-.272h-.478V22.2h.478v-1.202c0-.386.204-.567.523-.567.318 0 .478.205.478.568V22.2h.477v-1.202c0-.386.23-.567.524-.567.32 0 .478.205.478.568V22.2h.523zm7.075-2.177h-.774v-.658h-.478v.658h-.432v.43h.432v.998c0 .5.205.795.75.795.206 0 .433-.068.592-.16l-.136-.407c-.136.09-.296.114-.41.114-.227 0-.318-.137-.318-.363v-.976h.774v-.43zm4.048-.046c-.273 0-.454.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .204.023.295.046l.137-.454c-.09-.023-.228-.023-.32-.023zm-6.118.227c-.228-.16-.546-.227-.888-.227-.546 0-.91.272-.91.703 0 .363.274.567.75.635l.23.023c.25.045.385.113.385.227 0 .16-.182.272-.5.272-.32 0-.57-.113-.728-.227l-.228.363c.25.18.59.272.932.272.637 0 1-.295 1-.703 0-.385-.295-.59-.75-.658l-.227-.022c-.205-.023-.364-.068-.364-.204 0-.16.16-.25.41-.25.272 0 .545.114.682.182l.205-.386zm12.692-.227c-.273 0-.455.136-.568.318v-.272h-.478V22.2h.478v-1.225c0-.363.16-.567.455-.567.09 0 .203.023.294.046L29.1 20c-.09-.023-.227-.023-.318-.023zm-6.096 1.134c0 .66.455 1.135 1.16 1.135.32 0 .546-.068.774-.25l-.228-.385c-.182.136-.364.204-.57.204-.385 0-.658-.272-.658-.703 0-.407.273-.68.66-.702.204 0 .386.068.568.204l.228-.385c-.228-.182-.455-.25-.774-.25-.705 0-1.16.477-1.16 1.134zm4.413 0v-1.087h-.48v.272c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.317 0 .545-.113.68-.317v.272h.48v-1.09zm-1.753 0c0-.384.25-.702.66-.702.387 0 .66.295.66.703 0 .387-.273.704-.66.704-.41-.022-.66-.317-.66-.703zm-5.71-1.133c-.636 0-1.09.454-1.09 1.134 0 .682.454 1.135 1.114 1.135.32 0 .638-.09.888-.295l-.228-.34c-.18.136-.41.227-.636.227-.296 0-.592-.136-.66-.522h1.615v-.18c.022-.704-.388-1.158-1.002-1.158zm0 .41c.297 0 .502.18.547.52h-1.137c.045-.295.25-.52.59-.52zm11.852.724v-1.95h-.48v1.135c-.158-.204-.385-.318-.68-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.68-.317v.272h.48v-1.09zm-1.752 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703zm-15.97 0v-1.087h-.476v.272c-.16-.204-.387-.318-.683-.318-.615 0-1.093.477-1.093 1.134 0 .66.478 1.135 1.092 1.135.318 0 .545-.113.682-.317v.272h.477v-1.09zm-1.773 0c0-.384.25-.702.66-.702.386 0 .66.295.66.703 0 .387-.274.704-.66.704-.41-.022-.66-.317-.66-.703z\" style=\"fill: #000\" />\n      <path style=\"fill: #FF5F00\" d=\"M23.095 3.49H15.93v12.836h7.165\" />\n      <path d=\"M16.382 9.91c0-2.61 1.23-4.922 3.117-6.42-1.39-1.087-3.14-1.745-5.05-1.745-4.528 0-8.19 3.65-8.19 8.164 0 4.51 3.662 8.162 8.19 8.162 1.91 0 3.66-.657 5.05-1.746-1.89-1.474-3.118-3.81-3.118-6.417z\" style=\"fill: #EB001B\" />\n      <path d=\"M32.76 9.91c0 4.51-3.664 8.162-8.19 8.162-1.91 0-3.662-.657-5.05-1.746 1.91-1.496 3.116-3.81 3.116-6.417 0-2.61-1.228-4.922-3.116-6.42 1.388-1.087 3.14-1.745 5.05-1.745 4.526 0 8.19 3.674 8.19 8.164z\" style=\"fill: #F79E1B\" />\n    </symbol>\n\n    <symbol id=\"icon-unionpay\" viewBox=\"0 0 40 24\">\n      <title>Union Pay</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.877 2h8.126c1.135 0 1.84.93 1.575 2.077l-3.783 16.35c-.267 1.142-1.403 2.073-2.538 2.073H5.13c-1.134 0-1.84-.93-1.574-2.073L7.34 4.076C7.607 2.93 8.74 2 9.878 2z\" style=\"fill: #E21836\" />\n      <path d=\"M17.325 2h9.345c1.134 0 .623.93.356 2.077l-3.783 16.35c-.265 1.142-.182 2.073-1.32 2.073H12.58c-1.137 0-1.84-.93-1.574-2.073l3.783-16.35C15.056 2.93 16.19 2 17.324 2z\" style=\"fill: #00447B\" />\n      <path d=\"M26.3 2h8.126c1.136 0 1.84.93 1.575 2.077l-3.782 16.35c-.266 1.142-1.402 2.073-2.54 2.073h-8.122c-1.137 0-1.842-.93-1.574-2.073l3.78-16.35C24.03 2.93 25.166 2 26.303 2z\" style=\"fill: #007B84\" />\n      <path d=\"M27.633 14.072l-.99 3.3h.266l-.208.68h-.266l-.062.212h-.942l.064-.21H23.58l.193-.632h.194l1.005-3.35.2-.676h.962l-.1.34s.255-.184.498-.248c.242-.064 1.636-.088 1.636-.088l-.206.672h-.33zm-1.695 0l-.254.843s.285-.13.44-.172c.16-.04.395-.057.395-.057l.182-.614h-.764zm-.38 1.262l-.263.877s.29-.15.447-.196c.157-.037.396-.066.396-.066l.185-.614h-.766zm-.614 2.046h.767l.222-.74h-.765l-.223.74z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M28.055 13.4h1.027l.01.385c-.005.065.05.096.17.096h.208l-.19.637h-.555c-.48.035-.662-.172-.65-.406l-.02-.71zM28.193 16.415h-.978l.167-.566H28.5l.16-.517h-1.104l.19-.638h3.072l-.193.638h-1.03l-.16.516h1.032l-.17.565H29.18l-.2.24h.454l.11.712c.013.07.014.116.036.147.023.026.158.038.238.038h.137l-.21.694h-.348c-.054 0-.133-.004-.243-.01-.105-.008-.18-.07-.25-.105-.064-.03-.16-.11-.182-.24l-.11-.712-.507.7c-.162.222-.38.39-.748.39h-.712l.186-.62h.273c.078 0 .15-.03.2-.056.052-.023.098-.05.15-.126l.74-1.05zM17.478 14.867h2.59l-.19.622H18.84l-.16.53h1.06l-.194.64h-1.06l-.256.863c-.03.095.25.108.353.108l.53-.072-.212.71h-1.193c-.096 0-.168-.013-.272-.037-.1-.023-.145-.07-.19-.138-.043-.07-.11-.128-.064-.278l.343-1.143h-.588l.195-.65h.592l.156-.53h-.588l.188-.623zM19.223 13.75h1.063l-.194.65H18.64l-.157.136c-.067.066-.09.038-.18.087-.08.04-.254.123-.477.123h-.466l.19-.625h.14c.118 0 .198-.01.238-.036.046-.03.098-.096.157-.203l.267-.487h1.057l-.187.356zM20.74 13.4h.905l-.132.46s.286-.23.487-.313c.2-.075.65-.143.65-.143l1.464-.007-.498 1.672c-.085.286-.183.472-.244.555-.055.087-.12.16-.248.23-.124.066-.236.104-.34.115-.096.007-.244.01-.45.012h-1.41l-.4 1.324c-.037.13-.055.194-.03.23.02.03.068.066.135.066l.62-.06-.21.726h-.698c-.22 0-.383-.004-.495-.013-.108-.01-.22 0-.295-.058-.065-.058-.164-.133-.162-.21.007-.073.037-.192.082-.356l1.268-4.23zm1.922 1.69h-1.484l-.09.3h1.283c.152-.018.184.004.196-.003l.096-.297zm-1.402-.272s.29-.266.786-.353c.112-.022.82-.015.82-.015l.106-.357h-1.496l-.216.725z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M23.382 16.1l-.084.402c-.036.125-.067.22-.16.302-.1.084-.216.172-.488.172l-.502.02-.004.455c-.006.13.028.117.048.138.024.022.045.032.067.04l.157-.008.48-.028-.198.663h-.552c-.385 0-.67-.008-.765-.084-.092-.057-.105-.132-.103-.26l.035-1.77h.88l-.013.362h.212c.072 0 .12-.007.15-.026.027-.02.047-.048.06-.093l.087-.282h.692zM10.84 7.222c-.032.143-.596 2.763-.598 2.764-.12.53-.21.91-.508 1.152-.172.14-.37.21-.6.21-.37 0-.587-.185-.624-.537l-.007-.12.113-.712s.593-2.388.7-2.703c.002-.017.005-.026.007-.035-1.152.01-1.357 0-1.37-.018-.007.024-.037.173-.037.173l-.605 2.688-.05.23-.1.746c0 .22.042.4.13.553.275.485 1.06.557 1.504.557.573 0 1.11-.123 1.47-.345.63-.375.797-.962.944-1.48l.067-.267s.61-2.48.716-2.803c.003-.017.006-.026.01-.035-.835.01-1.08 0-1.16-.018zM14.21 12.144c-.407-.006-.55-.006-1.03.018l-.018-.036c.042-.182.087-.363.127-.548l.06-.25c.086-.39.173-.843.184-.98.007-.084.036-.29-.2-.29-.1 0-.203.048-.307.096-.058.207-.174.79-.23 1.055-.118.558-.126.62-.178.897l-.036.037c-.42-.006-.566-.006-1.05.018l-.024-.04c.08-.332.162-.668.24-.998.203-.9.25-1.245.307-1.702l.04-.028c.47-.067.585-.08 1.097-.185l.043.047-.077.287c.086-.052.168-.104.257-.15.242-.12.51-.155.658-.155.223 0 .468.062.57.323.098.232.034.52-.094 1.084l-.066.287c-.13.627-.152.743-.225 1.174l-.05.036zM15.87 12.144c-.245 0-.405-.006-.56 0-.153 0-.303.008-.532.018l-.013-.02-.015-.02c.062-.238.097-.322.128-.406.03-.084.06-.17.115-.41.072-.315.116-.535.147-.728.033-.187.052-.346.075-.53l.02-.014.02-.018c.244-.036.4-.057.56-.082.16-.024.32-.055.574-.103l.008.023.008.022c-.047.195-.094.39-.14.588-.047.197-.094.392-.137.587-.093.414-.13.57-.152.68-.02.105-.026.163-.063.377l-.022.02-.023.017zM19.542 10.728c.143-.633.033-.928-.108-1.11-.213-.273-.59-.36-.978-.36-.235 0-.793.023-1.23.43-.312.29-.458.687-.546 1.066-.088.387-.19 1.086.447 1.344.198.085.48.108.662.108.466 0 .945-.13 1.304-.513.278-.312.405-.775.448-.965zm-1.07-.046c-.02.106-.113.503-.24.673-.086.123-.19.198-.305.198-.033 0-.235 0-.238-.3-.003-.15.027-.304.063-.47.108-.478.236-.88.56-.88.255 0 .27.298.16.78zM29.536 12.187c-.493-.004-.635-.004-1.09.015l-.03-.037c.124-.472.248-.943.358-1.42.142-.62.175-.882.223-1.244l.037-.03c.49-.07.625-.09 1.135-.186l.015.044c-.093.388-.186.777-.275 1.166-.19.816-.258 1.23-.33 1.658l-.044.035z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M29.77 10.784c.144-.63-.432-.056-.525-.264-.14-.323-.052-.98-.62-1.2-.22-.085-.732.025-1.17.428-.31.29-.458.683-.544 1.062-.088.38-.19 1.078.444 1.328.2.085.384.11.567.103.638-.034 1.124-1.002 1.483-1.386.277-.303.326.115.368-.07zm-.974-.047c-.024.1-.117.503-.244.67-.083.117-.283.192-.397.192-.032 0-.232 0-.24-.3 0-.146.03-.3.067-.467.11-.47.235-.87.56-.87.254 0 .363.293.254.774zM22.332 12.144c-.41-.006-.55-.006-1.03.018l-.018-.036c.04-.182.087-.363.13-.548l.057-.25c.09-.39.176-.843.186-.98.008-.084.036-.29-.198-.29-.1 0-.203.048-.308.096-.057.207-.175.79-.232 1.055-.115.558-.124.62-.176.897l-.035.037c-.42-.006-.566-.006-1.05.018l-.022-.04.238-.998c.203-.9.25-1.245.307-1.702l.038-.028c.472-.067.587-.08 1.098-.185l.04.047-.073.287c.084-.052.17-.104.257-.15.24-.12.51-.155.655-.155.224 0 .47.062.575.323.095.232.03.52-.098 1.084l-.065.287c-.133.627-.154.743-.225 1.174l-.05.036zM26.32 8.756c-.07.326-.282.603-.554.736-.225.114-.498.123-.78.123h-.183l.013-.074.336-1.468.01-.076.007-.058.132.015.71.062c.275.105.388.38.31.74zM25.88 7.22l-.34.003c-.883.01-1.238.006-1.383-.012l-.037.182-.315 1.478-.793 3.288c.77-.01 1.088-.01 1.22.004l.21-1.024s.153-.644.163-.667c0 0 .047-.066.096-.092h.07c.665 0 1.417 0 2.005-.437.4-.298.675-.74.797-1.274.03-.132.054-.29.054-.446 0-.205-.04-.41-.16-.568-.3-.423-.896-.43-1.588-.433zM33.572 9.28l-.04-.043c-.502.1-.594.118-1.058.18l-.034.034-.005.023-.003-.007c-.345.803-.334.63-.615 1.26-.003-.03-.003-.048-.004-.077l-.07-1.37-.044-.043c-.53.1-.542.118-1.03.18l-.04.034-.006.056.003.007c.06.315.047.244.108.738.03.244.065.49.093.73.05.4.077.6.134 1.21-.328.55-.408.757-.722 1.238l.017.044c.478-.018.587-.018.94-.018l.08-.088c.265-.578 2.295-4.085 2.295-4.085zM16.318 9.62c.27-.19.304-.45.076-.586-.23-.137-.634-.094-.906.095-.273.186-.304.45-.075.586.228.134.633.094.905-.096z\" style=\"fill: #FEFEFE\" />\n      <path d=\"M31.238 13.415l-.397.684c-.124.232-.357.407-.728.41l-.632-.01.184-.618h.124c.064 0 .11-.004.148-.022.03-.01.054-.035.08-.072l.233-.373h.988z\" style=\"fill: #FEFEFE\" />\n    </symbol>\n\n    <symbol id=\"icon-american-express\" viewBox=\"0 0 40 24\">\n      <title>American Express</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path style=\"fill: #1478BE\" d=\"M6.26 12.32h2.313L7.415 9.66M27.353 9.977h-3.738v1.23h3.666v1.384h-3.675v1.385h3.821v1.005c.623-.77 1.33-1.466 2.025-2.235l.707-.77c-.934-1.004-1.87-2.08-2.804-3.075v1.077z\" />\n      <path d=\"M38.25 7h-5.605l-1.328 1.4L30.072 7H16.984l-1.017 2.416L14.877 7h-9.58L1.25 16.5h4.826l.623-1.556h1.4l.623 1.556H29.99l1.327-1.483 1.328 1.483h5.605l-4.36-4.667L38.25 7zm-17.685 8.1h-1.557V9.883L16.673 15.1h-1.33L13.01 9.883l-.084 5.217H9.73l-.623-1.556h-3.27L5.132 15.1H3.42l2.884-6.772h2.42l2.645 6.233V8.33h2.646l2.107 4.51 1.868-4.51h2.575V15.1zm14.727 0h-2.024l-2.024-2.26-2.023 2.26H22.06V8.328H29.53l1.795 2.177 2.024-2.177h2.025L32.26 11.75l3.032 3.35z\" style=\"fill: #1478BE\" />\n    </symbol>\n\n    <symbol id=\"icon-jcb\" viewBox=\"0 0 40 24\">\n      <title>JCB</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M33.273 2.01h.013v17.062c-.004 1.078-.513 2.103-1.372 2.746-.63.47-1.366.67-2.14.67-.437 0-4.833.026-4.855 0-.01-.01 0-.07 0-.082v-6.82c0-.04.004-.064.033-.064h5.253c.867 0 1.344-.257 1.692-.61.44-.448.574-1.162.294-1.732-.24-.488-.736-.78-1.244-.913-.158-.04-.32-.068-.483-.083-.01 0-.064 0-.07-.006-.03-.034.023-.04.038-.046.102-.033.215-.042.32-.073.532-.164.993-.547 1.137-1.105.15-.577-.05-1.194-.524-1.552-.34-.257-.768-.376-1.187-.413-.43-.038-4.774-.022-5.21-.022-.072 0-.05-.02-.05-.09V5.63c0-.31.01-.616.073-.92.126-.592.41-1.144.815-1.59.558-.615 1.337-1.01 2.16-1.093.478-.048 4.89-.017 5.305-.017zm-4.06 8.616c.06.272-.01.567-.204.77-.173.176-.407.25-.648.253-.195.003-1.725 0-1.788 0l.003-1.645c.012-.027.02-.018.06-.018.097 0 1.713-.004 1.823.005.232.02.45.12.598.306.076.096.128.208.155.328zm-2.636 2.038h1.944c.242.002.47.063.652.228.226.204.327.515.283.815-.04.263-.194.5-.422.634-.187.112-.39.125-.6.125h-1.857v-1.8z\" style=\"fill: #53B230\" />\n      <path d=\"M6.574 13.89c-.06-.03-.06-.018-.07-.06-.006-.026-.005-8.365.003-8.558.04-.95.487-1.857 1.21-2.47.517-.434 1.16-.71 1.83-.778.396-.04.803-.018 1.2-.018.69 0 4.11-.013 4.12 0 .008.008.002 16.758 0 17.074-.003.956-.403 1.878-1.105 2.523-.506.465-1.15.77-1.83.86-.41.056-5.02.032-5.363.032-.066 0-.054.013-.066-.024-.01-.025 0-7 0-7.17.66.178 1.35.28 2.03.348.662.067 1.33.093 1.993.062.93-.044 1.947-.192 2.712-.762.32-.238.574-.553.73-.922.148-.353.2-.736.2-1.117 0-.348.006-3.93-.016-3.942-.023-.014-2.885-.015-2.9.012-.012.022 0 3.87 0 3.95-.003.47-.16.933-.514 1.252-.468.42-1.11.47-1.707.423-.687-.055-1.357-.245-1.993-.508-.157-.065-.312-.135-.466-.208z\" style=\"fill: #006CB9\" />\n      <path d=\"M15.95 9.835c-.025.02-.05.04-.072.06V6.05c0-.295-.012-.594.01-.888.12-1.593 1.373-2.923 2.944-3.126.382-.05 5.397-.042 5.41-.026.01.01 0 .062 0 .074v16.957c0 1.304-.725 2.52-1.89 3.1-.504.25-1.045.35-1.605.35-.322 0-4.757.015-4.834 0-.05-.01-.023.01-.035-.02-.007-.022 0-6.548 0-7.44v-.422c.554.48 1.256.75 1.96.908.536.12 1.084.176 1.63.196.537.02 1.076.01 1.61-.037.546-.05 1.088-.136 1.625-.244.137-.028.274-.057.41-.09.033-.006.17-.017.187-.044.013-.02 0-.097 0-.12v-1.324c-.582.292-1.19.525-1.83.652-.778.155-1.64.198-2.385-.123-.752-.326-1.2-1.024-1.274-1.837-.076-.837.173-1.716.883-2.212.736-.513 1.7-.517 2.553-.38.634.1 1.245.305 1.825.58.078.037.154.075.23.113V9.322c0-.02.013-.1 0-.118-.02-.028-.152-.038-.188-.046-.066-.016-.133-.03-.2-.045C22.38 9 21.84 8.908 21.3 8.85c-.533-.06-1.068-.077-1.603-.066-.542.01-1.086.054-1.62.154-.662.125-1.32.337-1.883.716-.085.056-.167.117-.245.18z\" style=\"fill: #E20138\" />\n    </symbol>\n\n    <symbol id=\"icon-discover\" viewBox=\"0 0 40 24\">\n      <title>Discover</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M38.995 11.75S27.522 20.1 6.5 23.5h31.495c.552 0 1-.448 1-1V11.75z\" style=\"fill: #F48024\" />\n      <path d=\"M5.332 11.758c-.338.305-.776.438-1.47.438h-.29V8.55h.29c.694 0 1.115.124 1.47.446.37.33.595.844.595 1.372 0 .53-.224 1.06-.595 1.39zM4.077 7.615H2.5v5.515h1.57c.833 0 1.435-.197 1.963-.637.63-.52 1-1.305 1-2.116 0-1.628-1.214-2.762-2.956-2.762zM7.53 13.13h1.074V7.616H7.53M11.227 9.732c-.645-.24-.834-.397-.834-.695 0-.347.338-.61.8-.61.322 0 .587.132.867.446l.562-.737c-.462-.405-1.015-.612-1.618-.612-.975 0-1.718.678-1.718 1.58 0 .76.346 1.15 1.355 1.513.42.148.635.247.743.314.215.14.322.34.322.57 0 .448-.354.78-.834.78-.51 0-.924-.258-1.17-.736l-.695.67c.495.726 1.09 1.05 1.907 1.05 1.116 0 1.9-.745 1.9-1.812 0-.876-.363-1.273-1.585-1.72zM13.15 10.377c0 1.62 1.27 2.877 2.907 2.877.462 0 .858-.09 1.347-.32v-1.267c-.43.43-.81.604-1.297.604-1.082 0-1.85-.785-1.85-1.9 0-1.06.792-1.895 1.8-1.895.512 0 .9.183 1.347.62V7.83c-.472-.24-.86-.34-1.322-.34-1.627 0-2.932 1.283-2.932 2.887zM25.922 11.32l-1.468-3.705H23.28l2.337 5.656h.578l2.38-5.655H27.41M29.06 13.13h3.046v-.934h-1.973v-1.488h1.9v-.934h-1.9V8.55h1.973v-.935H29.06M34.207 10.154h-.314v-1.67h.33c.67 0 1.034.28 1.034.818 0 .554-.364.852-1.05.852zm2.155-.91c0-1.033-.71-1.628-1.95-1.628H32.82v5.514h1.073v-2.215h.14l1.487 2.215h1.32l-1.733-2.323c.81-.165 1.255-.72 1.255-1.563z\" style=\"fill: #221F20\" />\n      <path d=\"M23.6 10.377c0 1.62-1.31 2.93-2.927 2.93-1.617.002-2.928-1.31-2.928-2.93s1.31-2.932 2.928-2.932c1.618 0 2.928 1.312 2.928 2.932z\" style=\"fill: #F48024\" />\n    </symbol>\n\n    <symbol id=\"icon-diners-club\" viewBox=\"0 0 40 24\">\n      <title>Diners Club</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M9.02 11.83c0-5.456 4.54-9.88 10.14-9.88 5.6 0 10.139 4.424 10.139 9.88-.002 5.456-4.54 9.88-10.14 9.88-5.6 0-10.14-4.424-10.14-9.88z\" style=\"fill: #FEFEFE\" />\n      <path style=\"fill: #FFF\" d=\"M32.522 22H8.5V1.5h24.022\" />\n      <path d=\"M25.02 11.732c-.003-2.534-1.607-4.695-3.868-5.55v11.102c2.26-.857 3.865-3.017 3.87-5.552zm-8.182 5.55V6.18c-2.26.86-3.86 3.017-3.867 5.55.007 2.533 1.61 4.69 3.868 5.55zm2.158-14.934c-5.25.002-9.503 4.202-9.504 9.384 0 5.182 4.254 9.38 9.504 9.382 5.25 0 9.504-4.2 9.505-9.382 0-5.182-4.254-9.382-9.504-9.384zM18.973 22C13.228 22.027 8.5 17.432 8.5 11.84 8.5 5.726 13.228 1.5 18.973 1.5h2.692c5.677 0 10.857 4.225 10.857 10.34 0 5.59-5.18 10.16-10.857 10.16h-2.692z\" style=\"fill: #004A97\" />\n    </symbol>\n\n    <symbol id=\"icon-maestro\" viewBox=\"0 0 40 24\">\n      <title>Maestro</title>\n      <path d=\"M38.333 24H1.667C.75 24 0 23.28 0 22.4V1.6C0 .72.75 0 1.667 0h36.666C39.25 0 40 .72 40 1.6v20.8c0 .88-.75 1.6-1.667 1.6z\" style=\"fill: #FFF\" />\n      <path d=\"M14.67 22.39V21c.022-.465-.303-.86-.767-.882h-.116c-.3-.023-.603.14-.788.394-.164-.255-.442-.417-.743-.394-.256-.023-.51.116-.65.324v-.278h-.487v2.203h.487v-1.183c-.046-.278.162-.533.44-.58h.094c.325 0 .488.21.488.58v1.23h.487v-1.23c-.047-.278.162-.556.44-.58h.093c.325 0 .487.21.487.58v1.23l.534-.024zm2.712-1.09v-1.113h-.487v.28c-.162-.21-.417-.326-.695-.326-.65 0-1.16.51-1.16 1.16 0 .65.51 1.16 1.16 1.16.278 0 .533-.117.695-.325v.278h.487V21.3zm-1.786 0c.024-.37.348-.65.72-.626.37.023.65.348.626.72-.023.347-.302.625-.673.625-.372 0-.674-.28-.674-.65-.023-.047-.023-.047 0-.07zm12.085-1.16c.163 0 .325.024.465.094.14.046.278.14.37.255.117.115.186.23.256.37.117.3.117.626 0 .927-.046.14-.138.255-.254.37-.116.117-.232.186-.37.256-.303.116-.65.116-.952 0-.14-.046-.28-.14-.37-.255-.118-.116-.187-.232-.257-.37-.116-.302-.116-.627 0-.928.047-.14.14-.255.256-.37.115-.117.23-.187.37-.256.163-.07.325-.116.488-.093zm0 .465c-.092 0-.185.023-.278.046-.092.024-.162.094-.232.14-.07.07-.116.14-.14.232-.068.185-.068.394 0 .58.024.092.094.162.14.23.07.07.14.117.232.14.186.07.37.07.557 0 .092-.023.16-.092.23-.14.07-.068.117-.138.14-.23.07-.186.07-.395 0-.58-.023-.093-.093-.162-.14-.232-.07-.07-.138-.116-.23-.14-.094-.045-.187-.07-.28-.045zm-7.677.695c0-.695-.44-1.16-1.043-1.16-.65 0-1.16.534-1.137 1.183.023.65.534 1.16 1.183 1.136.325 0 .65-.093.905-.302l-.23-.348c-.187.14-.42.232-.65.232-.326.023-.627-.21-.673-.533h1.646v-.21zm-1.646-.21c.023-.3.278-.532.58-.532.3 0 .556.232.556.533h-1.136zm3.664-.346c-.207-.116-.44-.186-.695-.186-.255 0-.417.093-.417.255 0 .163.162.186.37.21l.233.022c.488.07.766.278.766.672 0 .395-.37.72-1.02.72-.348 0-.673-.094-.95-.28l.23-.37c.21.162.465.232.743.232.324 0 .51-.094.51-.28 0-.115-.117-.185-.395-.23l-.232-.024c-.487-.07-.765-.302-.765-.65 0-.44.37-.718.927-.718.325 0 .627.07.905.232l-.21.394zm2.32-.116h-.788v.997c0 .23.07.37.325.37.14 0 .3-.046.417-.115l.14.417c-.186.116-.395.162-.604.162-.58 0-.765-.302-.765-.812v-1.02h-.44v-.44h.44v-.673h.487v.672h.79v.44zm1.67-.51c.117 0 .233.023.35.07l-.14.463c-.093-.045-.21-.045-.302-.045-.325 0-.464.208-.464.58v1.25h-.487v-2.2h.487v.277c.116-.255.325-.37.557-.394z\" style=\"fill: #000\" />\n      <path style=\"fill: #7673C0\" d=\"M23.64 3.287h-7.305V16.41h7.306\" />\n      <path d=\"M16.8 9.848c0-2.55 1.183-4.985 3.2-6.56C16.384.435 11.12 1.06 8.29 4.7 5.435 8.32 6.06 13.58 9.703 16.41c3.038 2.387 7.283 2.387 10.32 0-2.04-1.578-3.223-3.99-3.223-6.562z\" style=\"fill: #EB001B\" />\n      <path d=\"M33.5 9.848c0 4.613-3.735 8.346-8.35 8.346-1.88 0-3.69-.626-5.15-1.785 3.618-2.83 4.245-8.092 1.415-11.71-.418-.532-.882-.996-1.415-1.413C23.618.437 28.883 1.06 31.736 4.7 32.873 6.163 33.5 7.994 33.5 9.85z\" style=\"fill: #00A1DF\" />\n    </symbol>\n\n    <symbol id=\"logoPayPal\" viewBox=\"0 0 48 29\">\n      <title>PayPal Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" />\n      <path d=\"M31.216 16.4c.394-.7.69-1.5.886-2.4.196-.8.196-1.6.1-2.2-.1-.7-.396-1.2-.79-1.7-.195-.3-.59-.5-.885-.7.1-.8.1-1.5 0-2.1-.1-.6-.394-1.1-.886-1.6-.885-1-2.56-1.6-4.922-1.6h-6.4c-.492 0-.787.3-.886.8l-2.658 17.2c0 .2 0 .3.1.4.097.1.294.2.393.2h4.036l-.295 1.8c0 .1 0 .3.1.4.098.1.195.2.393.2h3.35c.393 0 .688-.3.786-.7v-.2l.59-4.1v-.2c.1-.4.395-.7.788-.7h.59c1.675 0 3.152-.4 4.137-1.1.59-.5 1.083-1 1.478-1.7h-.002z\" style=\"fill: #263B80\" />\n      <path d=\"M21.364 9.4c0-.3.196-.5.492-.6.098-.1.196-.1.394-.1h5.02c.592 0 1.183 0 1.675.1.1 0 .295.1.394.1.098 0 .294.1.393.1.1 0 .1 0 .197.102.295.1.492.2.69.3.295-1.6 0-2.7-.887-3.8-.985-1.1-2.658-1.6-4.923-1.6h-6.4c-.49 0-.885.3-.885.8l-2.758 17.3c-.098.3.197.6.59.6h3.94l.985-6.4 1.083-6.9z\" style=\"fill: #263B80\" />\n      <path d=\"M30.523 9.4c0 .1 0 .3-.098.4-.887 4.4-3.742 5.9-7.484 5.9h-1.87c-.492 0-.787.3-.886.8l-.985 6.2-.296 1.8c0 .3.196.6.492.6h3.348c.394 0 .69-.3.787-.7v-.2l.592-4.1v-.2c.1-.4.394-.7.787-.7h.69c3.248 0 5.808-1.3 6.497-5.2.296-1.6.197-3-.69-3.9-.196-.3-.49-.5-.885-.7z\" style=\"fill: #159BD7\" />\n      <path d=\"M29.635 9c-.098 0-.295-.1-.394-.1-.098 0-.294-.1-.393-.1-.492-.102-1.083-.102-1.673-.102h-5.022c-.1 0-.197 0-.394.1-.198.1-.394.3-.492.6l-1.083 6.9v.2c.1-.5.492-.8.886-.8h1.87c3.742 0 6.598-1.5 7.484-5.9 0-.1 0-.3.098-.4-.196-.1-.492-.2-.69-.3 0-.1-.098-.1-.196-.1z\" style=\"fill: #232C65\" />\n    </symbol>\n\n    <symbol id=\"logoPayPalCredit\" viewBox=\"0 0 48 29\">\n      <title>PayPal Credit Logo</title>\n      <path d=\"M46 29H2c-1.1 0-2-.87-2-1.932V1.934C0 .87.9 0 2 0h44c1.1 0 2 .87 2 1.934v25.134C48 28.13 47.1 29 46 29z\" fill-opacity=\"0\" style=\"fill: #FFF\" fill-rule=\"nonzero\" />\n      <path d=\"M27.44 21.6h.518c1.377 0 2.67-.754 2.953-2.484.248-1.588-.658-2.482-2.14-2.482h-.38c-.093 0-.172.067-.187.16l-.763 4.805zm-1.254-6.646c.024-.158.16-.273.32-.273h2.993c2.47 0 4.2 1.942 3.81 4.436-.4 2.495-2.752 4.436-5.21 4.436h-3.05c-.116 0-.205-.104-.187-.218l1.323-8.38zM22.308 16.907l-.192 1.21h2.38c.116 0 .204.103.186.217l-.23 1.462c-.023.157-.16.273-.318.273h-2.048c-.16 0-.294.114-.32.27l-.203 1.26h2.52c.117 0 .205.102.187.217l-.228 1.46c-.025.16-.16.275-.32.275h-4.55c-.116 0-.204-.104-.186-.218l1.322-8.38c.025-.158.16-.273.32-.273h4.55c.116 0 .205.104.187.22l-.23 1.46c-.024.158-.16.274-.32.274H22.63c-.16 0-.295.115-.32.273M35.325 23.552h-1.81c-.115 0-.203-.104-.185-.218l1.322-8.38c.025-.158.16-.273.32-.273h1.81c.115 0 .203.104.185.22l-1.322 8.38c-.025.156-.16.272-.32.272M14.397 18.657h.224c.754 0 1.62-.14 1.777-1.106.158-.963-.345-1.102-1.15-1.104h-.326c-.097 0-.18.07-.197.168l-.326 2.043zm3.96 4.895h-2.37c-.102 0-.194-.058-.238-.15l-1.565-3.262h-.023l-.506 3.19c-.02.128-.13.222-.26.222h-1.86c-.116 0-.205-.104-.187-.218l1.33-8.432c.02-.128.13-.22.26-.22h3.222c1.753 0 2.953.834 2.66 2.728-.2 1.224-1.048 2.283-2.342 2.506l2.037 3.35c.076.125-.014.286-.16.286zM40.216 23.552h-1.808c-.116 0-.205-.104-.187-.218l1.06-6.7h-1.684c-.116 0-.205-.104-.187-.218l.228-1.462c.025-.157.16-.273.32-.273h5.62c.116 0 .205.104.186.22l-.228 1.46c-.025.158-.16.274-.32.274h-1.63l-1.05 6.645c-.025.156-.16.272-.32.272M11.467 17.202c-.027.164-.228.223-.345.104-.395-.405-.975-.62-1.6-.62-1.41 0-2.526 1.083-2.75 2.458-.21 1.4.588 2.41 2.022 2.41.592 0 1.22-.225 1.74-.6.144-.105.34.02.313.194l-.328 2.03c-.02.12-.108.22-.226.254-.702.207-1.24.355-1.9.355-3.823 0-4.435-3.266-4.238-4.655.553-3.894 3.712-4.786 5.65-4.678.623.034 1.182.117 1.73.323.177.067.282.25.252.436l-.32 1.99\" style=\"fill: #21306F\" />\n      <path d=\"M23.184 7.67c-.11.717-.657.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.105.123.137.305.097.557zm-.23-1.87h-1.998c-.137 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h1.024c.095 0 .177-.07.192-.164l.23-1.452c.02-.135.136-.235.273-.235h.63c1.317 0 2.076-.636 2.275-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51z\" style=\"fill: #0093C7\" />\n      <path d=\"M8.936 7.67c-.11.717-.656.717-1.186.717h-.302l.212-1.34c.013-.08.082-.14.164-.14h.138c.36 0 .702 0 .877.206.104.123.136.305.096.557zm-.23-1.87H6.708c-.136 0-.253.098-.274.233l-.808 5.123c-.016.1.062.192.165.192h.955c.136 0 .252-.1.274-.234l.217-1.382c.02-.135.137-.235.274-.235h.633c1.316 0 2.075-.636 2.274-1.898.09-.553.003-.987-.255-1.29-.284-.334-.788-.51-1.456-.51zM13.343 9.51c-.092.545-.526.912-1.08.912-.277 0-.5-.09-.642-.258-.14-.168-.193-.406-.148-.672.086-.542.527-.92 1.072-.92.27 0 .492.09.637.26.148.172.205.412.163.677zm1.334-1.863h-.957c-.082 0-.152.06-.164.14l-.042.268-.067-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.135 1.923-.092.56.038 1.097.356 1.47.29.344.708.487 1.204.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.017-.102-.06-.193-.163-.193z\" style=\"fill: #21306F\" />\n      <path d=\"M27.59 9.51c-.09.545-.525.912-1.078.912-.278 0-.5-.09-.643-.258-.142-.168-.195-.406-.15-.672.086-.542.526-.92 1.07-.92.273 0 .494.09.64.26.146.172.203.412.16.677zm1.334-1.863h-.956c-.082 0-.152.06-.164.14l-.043.268-.065-.097c-.208-.3-.67-.4-1.13-.4-1.057 0-1.96.8-2.136 1.923-.092.56.038 1.097.355 1.47.292.344.71.487 1.205.487.852 0 1.325-.548 1.325-.548l-.043.265c-.016.1.062.193.164.193h.862c.136 0 .253-.1.274-.234l.517-3.275c.015-.102-.063-.193-.166-.193z\" style=\"fill: #0093C7\" />\n      <path d=\"M19.77 7.647h-.96c-.092 0-.178.045-.23.122L17.254 9.72l-.562-1.877c-.035-.118-.143-.198-.266-.198h-.945c-.113 0-.194.112-.157.22l1.06 3.108-.997 1.404c-.078.11 0 .262.136.262h.96c.092 0 .177-.044.23-.12l3.196-4.614c.077-.11-.002-.26-.137-.26\" style=\"fill: #21306F\" />\n      <path d=\"M30.052 5.94l-.82 5.216c-.016.1.062.192.165.192h.824c.138 0 .254-.1.275-.234l.81-5.122c.015-.1-.064-.193-.166-.193h-.924c-.082 0-.15.06-.164.14\" style=\"fill: #0093C7\" />\n    </symbol>\n\n    <symbol id=\"iconCardFront\" viewBox=\"0 0 48 29\">\n      <title>Generic Card</title>\n      <path d=\"M46.177 29H1.823C.9 29 0 28.13 0 27.187V1.813C0 .87.9 0 1.823 0h44.354C47.1 0 48 .87 48 1.813v25.375C48 28.13 47.1 29 46.177 29z\" style=\"fill: #FFF\" />\n      <path d=\"M4.8 9.14c0-.427.57-.973 1.067-.973h7.466c.496 0 1.067.546 1.067.972v3.888c0 .425-.57.972-1.067.972H5.867c-.496 0-1.067-.547-1.067-.972v-3.89z\" style=\"fill: #828282\" />\n      <rect style=\"fill: #828282\" x=\"10.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <rect style=\"fill: #828282\" x=\"4.8\" y=\"22.167\" width=\"3.6\" height=\"2.333\" rx=\"1.167\" />\n      <path d=\"M6.55 16.333h34.9c.966 0 1.75.784 1.75 1.75 0 .967-.784 1.75-1.75 1.75H6.55c-.966 0-1.75-.783-1.75-1.75 0-.966.784-1.75 1.75-1.75z\" style=\"fill: #828282\" />\n      <ellipse style=\"fill: #828282\" cx=\"40.2\" cy=\"6.417\" rx=\"3\" ry=\"2.917\" />\n    </symbol>\n\n    <symbol id=\"iconCVVBack\" viewBox=\"0 0 40 24\">\n      <title>CVV Back</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\"/>\n      <path style=\"fill: #828282\" d=\"M0 5h40v4H0z\" />\n      <path d=\"M20 13.772v5.456c0 .423.37.772.82.772h13.36c.45 0 .82-.35.82-.772v-5.456c0-.423-.37-.772-.82-.772H20.82c-.45 0-.82.35-.82.772zm-1-.142c0-.9.76-1.63 1.68-1.63h13.64c.928 0 1.68.737 1.68 1.63v5.74c0 .9-.76 1.63-1.68 1.63H20.68c-.928 0-1.68-.737-1.68-1.63v-5.74z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"16.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"16.5\" r=\"1.5\" />\n    </symbol>\n\n    <symbol id=\"iconCVVFront\" viewBox=\"0 0 40 24\">\n      <title>CVV Front</title>\n      <path d=\"M38.48 24H1.52C.75 24 0 23.28 0 22.5v-21C0 .72.75 0 1.52 0h36.96C39.25 0 40 .72 40 1.5v21c0 .78-.75 1.5-1.52 1.5z\" style=\"fill: #FFF\" />\n      <path d=\"M16 5.772v5.456c0 .423.366.772.81.772h17.38c.444 0 .81-.348.81-.772V5.772C35 5.35 34.634 5 34.19 5H16.81c-.444 0-.81.348-.81.772zm-1-.142c0-.9.75-1.63 1.66-1.63h17.68c.917 0 1.66.737 1.66 1.63v5.74c0 .9-.75 1.63-1.66 1.63H16.66c-.917 0-1.66-.737-1.66-1.63V5.63z\" style=\"fill: #000\" fill-rule=\"nonzero\" />\n      <circle style=\"fill: #828282\" cx=\"19.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"27.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"23.5\" cy=\"8.5\" r=\"1.5\" />\n      <circle style=\"fill: #828282\" cx=\"31.5\" cy=\"8.5\" r=\"1.5\" />\n      <path d=\"M4 7.833C4 7.47 4.476 7 4.89 7h6.22c.414 0 .89.47.89.833v3.334c0 .364-.476.833-.89.833H4.89c-.414 0-.89-.47-.89-.833V7.833zM4 18.5c0-.828.668-1.5 1.5-1.5h29c.828 0 1.5.666 1.5 1.5 0 .828-.668 1.5-1.5 1.5h-29c-.828 0-1.5-.666-1.5-1.5z\" style=\"fill: #828282\" />\n    </symbol>\n\n    <symbol id=\"iconCheck\" viewBox=\"0 0 42 32\">\n      <title>Check</title>\n      <path class=\"path1\" d=\"M14.379 29.76L39.741 3.415 36.194.001l-21.815 22.79-10.86-11.17L0 15.064z\" />\n    </symbol>\n\n    <symbol id=\"iconLockLoader\" viewBox=\"0 0 28 32\">\n      <title>Lock Loader</title>\n      <path d=\"M6 10V8c0-4.422 3.582-8 8-8 4.41 0 8 3.582 8 8v2h-4V7.995C18 5.79 16.205 4 14 4c-2.21 0-4 1.792-4 3.995V10H6zM.997 14c-.55 0-.997.445-.997.993v16.014c0 .548.44.993.997.993h26.006c.55 0 .997-.445.997-.993V14.993c0-.548-.44-.993-.997-.993H.997z\" />\n    </symbol>\n\n    <symbol id=\"iconError\" height=\"24\" viewBox=\"0 0 24 24\" width=\"24\">\n      <path d=\"M0 0h24v24H0z\" style=\"fill: none\" />\n      <path d=\"M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z\" />\n    </symbol>\n\n    <symbol id=\"logoApplePay\" viewBox=\"0 0 165.52 105.97\" width=\"24\">\n      <title>Apple Pay Logo</title>\n      <defs>\n      <style>\n        .cls-1{fill:#231f20;}.cls-2{fill:#fff;}\n      </style>\n      </defs>\n      <path id=\"_Path_\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M150.7 0h-139a20.78 20.78 0 0 0-3.12.3 10.51 10.51 0 0 0-3 1 9.94 9.94 0 0 0-4.31 4.32 10.46 10.46 0 0 0-1 3A20.65 20.65 0 0 0 0 11.7v82.57a20.64 20.64 0 0 0 .3 3.11 10.46 10.46 0 0 0 1 3 9.94 9.94 0 0 0 4.35 4.35 10.47 10.47 0 0 0 3 1 20.94 20.94 0 0 0 3.11.27h142.06a21 21 0 0 0 3.11-.27 10.48 10.48 0 0 0 3-1 9.94 9.94 0 0 0 4.35-4.35 10.4 10.4 0 0 0 1-3 20.63 20.63 0 0 0 .27-3.11V11.69a20.64 20.64 0 0 0-.27-3.11 10.4 10.4 0 0 0-1-3 9.94 9.94 0 0 0-4.35-4.35 10.52 10.52 0 0 0-3-1 20.84 20.84 0 0 0-3.1-.23h-1.43z\"/>\n      <path id=\"_Path_2\" data-name=\"&lt;Path&gt;\" class=\"cls-2\" d=\"M150.7 3.53h3.03a17.66 17.66 0 0 1 2.58.22 7 7 0 0 1 2 .65 6.41 6.41 0 0 1 2.8 2.81 6.88 6.88 0 0 1 .64 2 17.56 17.56 0 0 1 .22 2.58v82.38a17.54 17.54 0 0 1-.22 2.59 6.85 6.85 0 0 1-.64 2 6.41 6.41 0 0 1-2.81 2.81 6.92 6.92 0 0 1-2 .65 18 18 0 0 1-2.57.22H11.79a18 18 0 0 1-2.58-.22 6.94 6.94 0 0 1-2-.65 6.41 6.41 0 0 1-2.8-2.8 6.93 6.93 0 0 1-.65-2 17.47 17.47 0 0 1-.22-2.58v-82.4a17.49 17.49 0 0 1 .22-2.59 6.92 6.92 0 0 1 .65-2 6.41 6.41 0 0 1 2.8-2.8 7 7 0 0 1 2-.65 17.63 17.63 0 0 1 2.58-.22H150.7\"/>\n      <g id=\"_Group_\" data-name=\"&lt;Group&gt;\">\n      <g id=\"_Group_2\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Path_3\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M43.51 35.77a9.15 9.15 0 0 0 2.1-6.52 9.07 9.07 0 0 0-6 3.11 8.56 8.56 0 0 0-2.16 6.27 7.57 7.57 0 0 0 6.06-2.86\"/>\n      <path id=\"_Path_4\" data-name=\"&lt;Path&gt;\" class=\"cls-1\" d=\"M45.59 39.08c-3.35-.2-6.2 1.9-7.79 1.9s-4-1.8-6.7-1.75a9.87 9.87 0 0 0-8.4 5.1c-3.6 6.2-.95 15.4 2.55 20.45 1.7 2.5 3.75 5.25 6.45 5.15s3.55-1.65 6.65-1.65 4 1.65 6.7 1.6 4.55-2.5 6.25-5a22.2 22.2 0 0 0 2.8-5.75 9.08 9.08 0 0 1-5.45-8.25A9.26 9.26 0 0 1 53 43.13a9.57 9.57 0 0 0-7.45-4\"/>\n      </g>\n      <g id=\"_Group_3\" data-name=\"&lt;Group&gt;\">\n      <path id=\"_Compound_Path_\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M79 32.11c7.28 0 12.35 5 12.35 12.32S86.15 56.8 78.79 56.8h-8.06v12.82h-5.82V32.11zm-8.27 19.81h6.68c5.07 0 8-2.73 8-7.46S82.48 37 77.44 37h-6.71z\"/>\n      <path id=\"_Compound_Path_2\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M92.76 61.85c0-4.81 3.67-7.56 10.42-8l7.25-.44v-2.06c0-3-2-4.7-5.56-4.7-2.94 0-5.07 1.51-5.51 3.82h-5.24c.16-4.86 4.73-8.4 10.92-8.4 6.65 0 11 3.48 11 8.89v18.66h-5.38v-4.5h-.13a9.59 9.59 0 0 1-8.58 4.78c-5.42 0-9.19-3.22-9.19-8.05zm17.68-2.42v-2.11l-6.47.42c-3.64.23-5.54 1.59-5.54 4s2 3.77 5.07 3.77c3.95-.05 6.94-2.57 6.94-6.08z\"/>\n      <path id=\"_Compound_Path_3\" data-name=\"&lt;Compound Path&gt;\" class=\"cls-1\" d=\"M121 79.65v-4.5a17.14 17.14 0 0 0 1.72.1c2.57 0 4-1.09 4.91-3.9l.52-1.66-9.88-27.29h6.08l6.86 22.15h.13l6.86-22.15h5.93l-10.21 28.67c-2.34 6.58-5 8.73-10.68 8.73a15.93 15.93 0 0 1-2.24-.15z\"/>\n      </g>\n      </g>\n    </symbol>\n    <symbol id=\"logoGooglePay\" viewBox=\"0 0 60.51 24.04\">\n      <title>GooglePay_AcceptanceMark_RGB_60x24pt</title>\n      <path d=\"M28.67,11.76v7H26.43V1.42h5.92a5.39,5.39,0,0,1,3.84,1.51A5,5,0,0,1,36.44,10l-.25.26a5.35,5.35,0,0,1-3.84,1.48Zm0-8.2V9.62H32.4a2.93,2.93,0,0,0,2.21-.9A3,3,0,0,0,32.4,3.56Z\" fill=\"#5f6368\"/>\n      <path d=\"M42.93,6.52a5.56,5.56,0,0,1,3.91,1.32,4.71,4.71,0,0,1,1.43,3.63v7.32H46.13V17.14H46a4.28,4.28,0,0,1-3.69,2A4.83,4.83,0,0,1,39.06,18a3.74,3.74,0,0,1-1.32-2.92,3.52,3.52,0,0,1,1.39-2.93,5.87,5.87,0,0,1,3.73-1.09,6.65,6.65,0,0,1,3.27.72v-.51a2.5,2.5,0,0,0-.92-2,3.17,3.17,0,0,0-2.16-.81,3.4,3.4,0,0,0-2.95,1.57l-2-1.23A5.45,5.45,0,0,1,42.93,6.52ZM40,15.15a1.82,1.82,0,0,0,.74,1.46,2.74,2.74,0,0,0,1.74.58,3.58,3.58,0,0,0,2.51-1,3.26,3.26,0,0,0,1.11-2.45,4.54,4.54,0,0,0-2.91-.83,3.74,3.74,0,0,0-2.27.66A2,2,0,0,0,40,15.15Z\" fill=\"#5f6368\"/>\n      <path d=\"M60.52,6.9,53.07,24H50.76l2.77-6L48.63,6.91h2.43l3.54,8.54h0l3.44-8.54Z\" fill=\"#5f6368\"/>\n      <path d=\"M19.65,10.24a12.54,12.54,0,0,0-.17-2H10.06v3.84h5.39a4.61,4.61,0,0,1-2,3v2.49h3.22A9.75,9.75,0,0,0,19.65,10.24Z\" fill=\"#4285f4\"/>\n      <path d=\"M10.06,20a9.54,9.54,0,0,0,6.62-2.41l-3.22-2.49a6,6,0,0,1-3.4.95,6,6,0,0,1-5.6-4.12H1.15V14.5A10,10,0,0,0,10.06,20Z\" fill=\"#34a853\"/>\n      <path d=\"M4.46,11.92a6,6,0,0,1,0-3.82V5.53H1.15a10,10,0,0,0,0,9Z\" fill=\"#fbbc04\"/>\n      <path d=\"M10.06,4a5.44,5.44,0,0,1,3.83,1.5h0l2.85-2.85A9.58,9.58,0,0,0,10.06,0a10,10,0,0,0-8.91,5.5L4.46,8.1A6,6,0,0,1,10.06,4Z\" fill=\"#ea4335\"/>\n    </symbol>\n\n    <symbol id=\"logoVenmo\" viewBox=\"0 0 48 32\">\n      <title>Venmo</title>\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"47.4074074\" height=\"31.6049383\" rx=\"3.16049383\"/>\n        <path d=\"M33.1851852,10.1131555 C33.1851852,14.8373944 29.2425262,20.9745161 26.0425868,25.2839506 L18.7337285,25.2839506 L15.8024691,7.35534396 L22.202175,6.73384536 L23.7519727,19.4912014 C25.2000422,17.0781163 26.9870326,13.2859484 26.9870326,10.7005 C26.9870326,9.28531656 26.7500128,8.32139205 26.3796046,7.52770719 L32.207522,6.32098765 C32.8813847,7.45939896 33.1851852,8.63196439 33.1851852,10.1131555 Z\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n    <symbol id=\"buttonVenmo\" viewBox=\"0 0 295 42\">\n      <g fill=\"none\" fill-rule=\"evenodd\">\n        <rect fill=\"#3D95CE\" width=\"295\" height=\"42\" rx=\"3\"/>\n        <path d=\"M11.3250791 0C11.7902741.780434316 12 1.58428287 12 2.59970884 12 5.838396 9.27822123 10.0456806 7.06917212 13L2.02356829 13 0 .709099732 4.41797878.283033306 5.48786751 9.02879887C6.48752911 7.3745159 7.72116169 4.77480706 7.72116169 3.00236102 7.72116169 2.03218642 7.55753727 1.37137098 7.30182933.827262801L11.3250791 0 11.3250791 0zM17.5051689 5.68512193C18.333931 5.68512193 20.4203856 5.28483546 20.4203856 4.03281548 20.4203856 3.43161451 20.0177536 3.13172102 19.5432882 3.13172102 18.7131868 3.13172102 17.6238766 4.18269796 17.5051689 5.68512193L17.5051689 5.68512193zM17.4102028 8.1647385C17.4102028 9.69351403 18.2153451 10.293301 19.2827401 10.293301 20.4451012 10.293301 21.5580312 9.99340752 23.0045601 9.21725797L22.4597224 13.1234575C21.440541 13.649203 19.8521716 14 18.310433 14 14.3996547 14 13 11.49596 13 8.36552446 13 4.30815704 15.2767521 0 19.9706358 0 22.554932 0 24 1.52864698 24 3.65720949 24.0002435 7.08869546 19.8287953 8.13992948 17.4102028 8.1647385L17.4102028 8.1647385zM37 2.84753211C37 3.32189757 36.9261179 4.00994664 36.8526108 4.45959542L35.4649774 12.9998782 30.9621694 12.9998782 32.2279161 5.1711436C32.2519185 4.95879931 32.3256755 4.53131032 32.3256755 4.29412759 32.3256755 3.72466988 31.9603904 3.5825794 31.5212232 3.5825794 30.9379171 3.5825794 30.3532359 3.84326124 29.9638234 4.03356751L28.5281854 13 24 13 26.0686989.213683657 29.9878258.213683657 30.0374555 1.23425123C30.9620444.641294408 32.1795365 3.90379019e-8 33.9069526 3.90379019e-8 36.1955476-.000243475057 37 1.1387937 37 2.84753211L37 2.84753211zM51.2981937 1.39967969C52.6582977.49918987 53.9425913 0 55.7133897 0 58.1518468 0 59 1.13900518 59 2.84769558 59 3.32204771 58.9223438 4.01007745 58.8448195 4.4597136L57.3830637 12.9997565 52.6328518 12.9997565 53.9932194 5.00577861C54.0182698 4.792101 54.0708756 4.53142648 54.0708756 4.36608506 54.0708756 3.72493046 53.6854953 3.58272222 53.2224587 3.58272222 52.6325881 3.58272222 52.0429812 3.81989829 51.6052587 4.03369766L50.0914245 12.9998782 45.3423992 12.9998782 46.7027668 5.00590037C46.7278172 4.79222275 46.7788409 4.53154824 46.7788409 4.36620681 46.7788409 3.72505221 46.3933287 3.58284398 45.9318743 3.58284398 45.3153711 3.58284398 44.7000546 3.84351849 44.2893602 4.03381941L42.7740757 13 38 13 40.1814929.214042876 44.2643098.214042876 44.3925941 1.28145692C45.3423992.641763367 46.6253743.000487014507 48.3452809.000487014507 49.8344603 0 50.8094476.593061916 51.2981937 1.39967969L51.2981937 1.39967969zM67.5285327 5.39061542C67.5285327 4.29258876 67.2694573 3.54396333 66.4936812 3.54396333 64.7759775 3.54396333 64.4232531 6.76273249 64.4232531 8.4093242 64.4232531 9.65848482 64.7530184 10.4315735 65.5285529 10.4315735 67.1521242 10.4315735 67.5285327 7.03707905 67.5285327 5.39061542L67.5285327 5.39061542zM60 8.21054461C60 3.96893154 62.1170713 0 66.988027 0 70.6583423 0 72 2.29633967 72 5.46592624 72 9.65835674 69.905767 14 64.9173573 14 61.2233579 14 60 11.4294418 60 8.21054461L60 8.21054461z\" transform=\"translate(112 14)\" fill=\"#FFF\"/>\n      </g>\n    </symbol>\n\n    <symbol id=\"iconClose\" width=\"21\" height=\"21\" viewBox=\"0 0 21 21\" overflow=\"visible\">\n      <path d=\"M16 5.414L14.586 4 10 8.586 5.414 4 4 5.414 8.586 10 4 14.586 5.414 16 10 11.414 14.586 16 16 14.586 11.414 10\"/>\n    </symbol>\n  </defs>\n</svg>\n";
 
 var UPDATABLE_CONFIGURATION_OPTIONS = [
@@ -18352,8 +18829,7 @@ var UPDATABLE_CONFIGURATION_OPTIONS_THAT_REQUIRE_UNVAULTED_PAYMENT_METHODS_TO_BE
   paymentOptionIDs.applePay,
   paymentOptionIDs.googlePay
 ];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-var VERSION = "1.10.0";
+var VERSION = "1.11.0";
 
 /**
  * @typedef {object} Dropin~cardPaymentMethodPayload
@@ -18563,20 +19039,21 @@ Dropin.prototype = Object.create(EventEmitter.prototype, {
 });
 
 Dropin.prototype._initialize = function (callback) {
-  var localizedStrings, localizedHTML, paypalScriptOptions;
+  var localizedStrings, localizedHTML;
   var self = this;
   var container = self._merchantConfiguration.container || self._merchantConfiguration.selector;
-  var setupPromise = Promise.resolve();
 
   self._injectStylesheet();
 
   if (!container) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.container is required.'));
+
     return;
   } else if (self._merchantConfiguration.container && self._merchantConfiguration.selector) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('Must only have one options.selector or options.container.'));
+
     return;
   }
 
@@ -18587,12 +19064,14 @@ Dropin.prototype._initialize = function (callback) {
   if (!container || container.nodeType !== 1) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference a valid DOM node.'));
+
     return;
   }
 
   if (container.innerHTML.trim()) {
     analytics.sendEvent(self._client, 'configuration-error');
     callback(new DropinError('options.selector or options.container must reference an empty DOM node.'));
+
     return;
   }
 
@@ -18634,8 +19113,6 @@ Dropin.prototype._initialize = function (callback) {
 
     return self._model.initialize();
   }).then(function () {
-    var paypalRequired;
-
     self._model.on('cancelInitialization', function (err) {
       self._dropinWrapper.innerHTML = '';
       analytics.sendEvent(self._client, 'load-error');
@@ -18667,24 +19144,6 @@ Dropin.prototype._initialize = function (callback) {
       self._emit('paymentOptionSelected', event);
     });
 
-    paypalRequired = self._supportsPaymentOption(paymentOptionIDs.paypal) || self._supportsPaymentOption(paymentOptionIDs.paypalCredit);
-
-    if (paypalRequired && !global.paypal) {
-      paypalScriptOptions = {
-        src: constants.CHECKOUT_JS_SOURCE,
-        id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-        dataAttributes: {
-          'log-level': self._merchantConfiguration.paypal && self._merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
-        }
-      };
-
-      setupPromise = setupPromise.then(function () {
-        return assets.loadScript(self._dropinWrapper, paypalScriptOptions);
-      });
-    }
-
-    return setupPromise;
-  }).then(function () {
     return self._setUpDependenciesAndViews();
   }).catch(function (err) {
     self.teardown().then(function () {
@@ -18767,8 +19226,9 @@ Dropin.prototype._setUpDataCollector = function () {
   var config = assign({}, self._merchantConfiguration.dataCollector, {client: self._client});
 
   this._model.asyncDependencyStarting();
-  global.braintree.dataCollector.create(config).then(function (instance) {
-    self._dataCollectorInstance = instance;
+  this._dataCollector = new DataCollector(config);
+
+  this._dataCollector.initialize().then(function () {
     self._model.asyncDependencyReady();
   }).catch(function (err) {
     self._model.cancelInitialization(new DropinError({
@@ -18797,16 +19257,8 @@ Dropin.prototype._setUpThreeDSecure = function () {
 };
 
 Dropin.prototype._setUpDependenciesAndViews = function () {
-  var braintreeWebVersion, dataCollectorScriptOptions;
-
-  if (this._merchantConfiguration.dataCollector && !document.querySelector('#' + constants.DATA_COLLECTOR_SCRIPT_ID)) {
-    braintreeWebVersion = this._client.getVersion();
-    dataCollectorScriptOptions = {
-      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
-      id: constants.DATA_COLLECTOR_SCRIPT_ID
-    };
-
-    assets.loadScript(this._dropinWrapper, dataCollectorScriptOptions).then(this._setUpDataCollector.bind(this));
+  if (this._merchantConfiguration.dataCollector) {
+    this._setUpDataCollector();
   }
 
   if (this._merchantConfiguration.threeDSecure) {
@@ -18873,11 +19325,8 @@ Dropin.prototype._disableErroredPaymentMethods = function () {
 
     div.classList.add('braintree-disabled');
     div.removeEventListener('click', clickHandler);
-    if (error.code === 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED') {
-      errorMessageDiv.innerHTML = constants.errors.PAYPAL_NON_LINKED_SANDBOX;
-    } else {
-      errorMessageDiv.innerHTML = error.message;
-    }
+    errorMessageDiv.innerHTML = constants.errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
+    console.error(error); // eslint-disable-line no-console
   }.bind(this));
 };
 
@@ -18970,9 +19419,10 @@ Dropin.prototype.requestPaymentMethod = function () {
 
     return payload;
   }.bind(this)).then(function (payload) {
-    if (this._dataCollectorInstance) {
-      payload.deviceData = this._dataCollectorInstance.deviceData;
+    if (this._dataCollector) {
+      payload.deviceData = this._dataCollector.getDeviceData();
     }
+
     return payload;
   }.bind(this)).then(function (payload) {
     return formatPaymentMethodPayload(payload);
@@ -19015,6 +19465,7 @@ Dropin.prototype._getVaultedPaymentMethods = function () {
   }).then(function (paymentMethodsPayload) {
     var paymentMethods = paymentMethodsPayload.paymentMethods.map(function (paymentMethod) {
       paymentMethod.vaulted = true;
+
       return paymentMethod;
     }).map(formatPaymentMethodPayload);
 
@@ -19031,7 +19482,7 @@ Dropin.prototype._getVaultedPaymentMethods = function () {
  * @returns {void|Promise} Returns a promise if no callback is provided.
  */
 Dropin.prototype.teardown = function () {
-  var mainviewTeardownError, dataCollectorError;
+  var teardownError;
   var promise = Promise.resolve();
   var self = this;
 
@@ -19040,15 +19491,15 @@ Dropin.prototype.teardown = function () {
   if (this._mainView) {
     promise.then(function () {
       return self._mainView.teardown().catch(function (err) {
-        mainviewTeardownError = err;
+        teardownError = err;
       });
     });
   }
 
-  if (this._dataCollectorInstance) {
+  if (this._dataCollector) {
     promise.then(function () {
-      return this._dataCollectorInstance.teardown().catch(function (error) {
-        dataCollectorError = new DropinError({
+      return this._dataCollector.teardown().catch(function (error) {
+        teardownError = new DropinError({
           message: 'Drop-in errored tearing down Data Collector.',
           braintreeWebError: error
         });
@@ -19059,7 +19510,7 @@ Dropin.prototype.teardown = function () {
   if (this._threeDSecure) {
     promise.then(function () {
       return this._threeDSecure.teardown().catch(function (error) {
-        dataCollectorError = new DropinError({
+        teardownError = new DropinError({
           message: 'Drop-in errored tearing down 3D Secure.',
           braintreeWebError: error
         });
@@ -19070,10 +19521,8 @@ Dropin.prototype.teardown = function () {
   return promise.then(function () {
     return self._removeDropinWrapper();
   }).then(function () {
-    if (mainviewTeardownError) {
-      return Promise.reject(mainviewTeardownError);
-    } else if (dataCollectorError) {
-      return Promise.reject(dataCollectorError);
+    if (teardownError) {
+      return Promise.reject(teardownError);
     }
 
     return Promise.resolve();
@@ -19132,33 +19581,32 @@ function formatPaymentMethodPayload(paymentMethod) {
 
 module.exports = wrapPrototype(Dropin);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 115 */
+/* 119 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var GraphQL = __webpack_require__(116);
-var request = __webpack_require__(40);
-var isWhitelistedDomain = __webpack_require__(41);
+var GraphQL = __webpack_require__(41);
+var request = __webpack_require__(43);
+var isWhitelistedDomain = __webpack_require__(45);
 var BraintreeError = __webpack_require__(1);
-var convertToBraintreeError = __webpack_require__(42);
-var addMetadata = __webpack_require__(43);
+var convertToBraintreeError = __webpack_require__(46);
+var addMetadata = __webpack_require__(47);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var once = __webpack_require__(26);
-var deferred = __webpack_require__(46);
-var assign = __webpack_require__(15).assign;
+var once = __webpack_require__(28);
+var deferred = __webpack_require__(50);
+var assign = __webpack_require__(11).assign;
 var analytics = __webpack_require__(7);
-var constants = __webpack_require__(136);
-var errors = __webpack_require__(47);
+var constants = __webpack_require__(30);
+var errors = __webpack_require__(51);
 var sharedErrors = __webpack_require__(18);
 var VERSION = __webpack_require__(17).VERSION;
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
 
 /**
  * This object is returned by {@link Client#getConfiguration|getConfiguration}. This information is used extensively by other Braintree modules to properly configure themselves.
@@ -19359,7 +19807,8 @@ Client.prototype.request = function (options, callback) {
     requestOptions = {
       method: options.method,
       graphQL: self._graphQL,
-      timeout: options.timeout
+      timeout: options.timeout,
+      metadata: self._configuration.analyticsMetadata
     };
 
     if (api === 'clientApi') {
@@ -19499,86 +19948,13 @@ module.exports = Client;
 
 
 /***/ }),
-/* 116 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var browserDetection = __webpack_require__(39);
-
-var features = {
-  tokenize_credit_cards: 'payment_methods/credit_cards' // eslint-disable-line camelcase
-};
-
-var blacklistedInputPaths = [
-  'creditCard.options.unionPayEnrollment'
-];
-
-function GraphQL(config) {
-  this._config = config.graphQL;
-}
-
-GraphQL.prototype.getGraphQLEndpoint = function () {
-  return this._config.url;
-};
-
-GraphQL.prototype.isGraphQLRequest = function (url, body) {
-  var featureEnabled;
-  var path = this.getClientApiPath(url);
-
-  if (!this._isGraphQLEnabled() || !path || browserDetection.isIe9()) {
-    return false;
-  }
-
-  featureEnabled = this._config.features.some(function (feature) {
-    return features[feature] === path;
-  });
-
-  if (containsBlacklistedKeys(body)) {
-    return false;
-  }
-
-  return featureEnabled;
-};
-
-GraphQL.prototype.getClientApiPath = function (url) {
-  var path;
-  var clientApiPrefix = '/client_api/v1/';
-  var pathParts = url.split(clientApiPrefix);
-
-  if (pathParts.length > 1) {
-    path = pathParts[1].split('?')[0];
-  }
-
-  return path;
-};
-
-GraphQL.prototype._isGraphQLEnabled = function () {
-  return Boolean(this._config);
-};
-
-function containsBlacklistedKeys(body) {
-  return blacklistedInputPaths.some(function (keys) {
-    var value = keys.split('.').reduce(function (accumulator, key) {
-      return accumulator && accumulator[key];
-    }, body);
-
-    return value !== undefined; // eslint-disable-line no-undefined
-  });
-}
-
-module.exports = GraphQL;
-
-
-/***/ }),
-/* 117 */
+/* 120 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var isIE11 = __webpack_require__(118);
+var isIE11 = __webpack_require__(121);
 
 module.exports = function isIE(ua) {
   ua = ua || global.navigator.userAgent;
@@ -19588,7 +19964,7 @@ module.exports = function isIE(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 118 */
+/* 121 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19601,7 +19977,7 @@ module.exports = function isIe11(ua) {
 
 
 /***/ }),
-/* 119 */
+/* 122 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19609,7 +19985,7 @@ module.exports = function isIe11(ua) {
 
 var head;
 var uuid = __webpack_require__(23);
-var querystring = __webpack_require__(27);
+var querystring = __webpack_require__(29);
 var timeouts = {};
 
 function _removeScript(script) {
@@ -19717,21 +20093,21 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 120 */
+/* 123 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var querystring = __webpack_require__(27);
-var browserDetection = __webpack_require__(39);
-var assign = __webpack_require__(15).assign;
-var prepBody = __webpack_require__(121);
-var parseBody = __webpack_require__(122);
-var xhr = __webpack_require__(123);
+var querystring = __webpack_require__(29);
+var browserDetection = __webpack_require__(42);
+var assign = __webpack_require__(11).assign;
+var prepBody = __webpack_require__(124);
+var parseBody = __webpack_require__(125);
+var xhr = __webpack_require__(126);
 var isXHRAvailable = xhr.isAvailable;
-var GraphQLRequest = __webpack_require__(124);
-var DefaultRequest = __webpack_require__(128);
+var GraphQLRequest = __webpack_require__(127);
+var DefaultRequest = __webpack_require__(132);
 
 var MAX_TCP_RETRYCOUNT = 1;
 var TCP_PRECONNECT_BUG_STATUS_CODE = 408;
@@ -19880,7 +20256,7 @@ module.exports = {
 
 
 /***/ }),
-/* 121 */
+/* 124 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19900,7 +20276,7 @@ module.exports = function (method, body) {
 
 
 /***/ }),
-/* 122 */
+/* 125 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19916,7 +20292,7 @@ module.exports = function (body) {
 
 
 /***/ }),
-/* 123 */
+/* 126 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19936,24 +20312,29 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 124 */
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BRAINTREE_VERSION = '2017-12-15';
+var BRAINTREE_VERSION = __webpack_require__(30).BRAINTREE_VERSION;
 
-var assign = __webpack_require__(15).assign;
+var assign = __webpack_require__(11).assign;
 
-var creditCardTokenizationBodyGenerator = __webpack_require__(125);
-var creditCardTokenizationResponseAdapter = __webpack_require__(126);
+var creditCardTokenizationBodyGenerator = __webpack_require__(128);
+var creditCardTokenizationResponseAdapter = __webpack_require__(129);
+
+var configurationBodyGenerator = __webpack_require__(130);
+var configurationResponseAdapter = __webpack_require__(131);
 
 var generators = {
-  'payment_methods/credit_cards': creditCardTokenizationBodyGenerator
+  'payment_methods/credit_cards': creditCardTokenizationBodyGenerator,
+  configuration: configurationBodyGenerator
 };
 var adapters = {
-  'payment_methods/credit_cards': creditCardTokenizationResponseAdapter
+  'payment_methods/credit_cards': creditCardTokenizationResponseAdapter,
+  configuration: configurationResponseAdapter
 };
 
 function GraphQLRequest(options) {
@@ -19963,6 +20344,11 @@ function GraphQLRequest(options) {
   this._data = options.data;
   this._method = options.method;
   this._headers = options.headers;
+  this._clientSdkMetadata = {
+    source: options.metadata.source,
+    integration: options.metadata.integration,
+    sessionId: options.metadata.sessionId
+  };
   this._sendAnalyticsEvent = options.sendAnalyticsEvent || Function.prototype;
 
   this._generator = generators[clientApiPath];
@@ -19977,8 +20363,10 @@ GraphQLRequest.prototype.getUrl = function () {
 
 GraphQLRequest.prototype.getBody = function () {
   var formattedBody = formatBodyKeys(this._data);
+  var generatedBody = this._generator(formattedBody);
+  var body = assign({clientSdkMetadata: this._clientSdkMetadata}, generatedBody);
 
-  return this._generator(formattedBody);
+  return JSON.stringify(body);
 };
 
 GraphQLRequest.prototype.getMethod = function () {
@@ -20005,7 +20393,7 @@ GraphQLRequest.prototype.getHeaders = function () {
 };
 
 GraphQLRequest.prototype.adaptResponseBody = function (parsedBody) {
-  return this._adapter(parsedBody);
+  return this._adapter(parsedBody, this);
 };
 
 GraphQLRequest.prototype.determineStatus = function (httpStatus, parsedResponse) {
@@ -20078,19 +20466,19 @@ module.exports = GraphQLRequest;
 
 
 /***/ }),
-/* 125 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var assign = __webpack_require__(15).assign;
+var assign = __webpack_require__(11).assign;
 
 var CREDIT_CARD_TOKENIZATION_MUTATION = 'mutation TokenizeCreditCard($input: TokenizeCreditCardInput!) { ' +
 '  tokenizeCreditCard(input: $input) { ' +
 '    token ' +
 '    creditCard { ' +
-'      brand ' +
+'      brandCode ' +
 '      last4 ' +
 '      binData { ' +
 '        prepaid ' +
@@ -20156,24 +20544,44 @@ function addValidationRule(body, input) {
 }
 
 function creditCardTokenization(body) {
-  return JSON.stringify({
+  return {
     query: CREDIT_CARD_TOKENIZATION_MUTATION,
     variables: createCreditCardTokenizationBody(body),
     operationName: 'TokenizeCreditCard'
-  });
+  };
 }
 
 module.exports = creditCardTokenization;
 
 
 /***/ }),
-/* 126 */
+/* 129 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorResponseAdapter = __webpack_require__(127);
+var errorResponseAdapter = __webpack_require__(44);
+
+var CARD_BRAND_MAP = {
+  /* eslint-disable camelcase */
+  AMERICAN_EXPRESS: 'American Express',
+  DINERS: 'Discover',
+  DISCOVER: 'Discover',
+  INTERNATIONAL_MAESTRO: 'Maestro',
+  JCB: 'JCB',
+  MASTERCARD: 'MasterCard',
+  UK_MAESTRO: 'Maestro',
+  UNION_PAY: 'Union Pay',
+  VISA: 'Visa'
+  /* eslint-enable camelcase */
+};
+
+var BIN_DATA_MAP = {
+  YES: 'Yes',
+  NO: 'No',
+  UNKNOWN: 'Unknown'
+};
 
 function creditCardTokenizationResponseAdapter(responseBody) {
   var adaptedResponse;
@@ -20195,8 +20603,16 @@ function adaptTokenizeCreditCardResponseBody(body) {
   var response;
 
   if (binData) {
+    ['commercial', 'debit', 'durbinRegulated', 'healthcare', 'payroll', 'prepaid'].forEach(function (key) {
+      if (binData[key]) {
+        binData[key] = BIN_DATA_MAP[binData[key]];
+      } else {
+        binData[key] = 'Unknown';
+      }
+    });
+
     ['issuingBank', 'countryOfIssuance', 'productId'].forEach(function (key) {
-      if (binData[key] === null) { binData[key] = 'Unknown'; }
+      if (!binData[key]) { binData[key] = 'Unknown'; }
     });
   }
 
@@ -20208,7 +20624,7 @@ function adaptTokenizeCreditCardResponseBody(body) {
         description: lastTwo ? 'ending in ' + lastTwo : '',
         nonce: data.token,
         details: {
-          cardType: creditCard.brand || 'Unknown',
+          cardType: CARD_BRAND_MAP[creditCard.brandCode] || 'Unknown',
           lastFour: creditCard.last4 || '',
           lastTwo: lastTwo
         },
@@ -20225,87 +20641,302 @@ module.exports = creditCardTokenizationResponseAdapter;
 
 
 /***/ }),
-/* 127 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-function errorResponseAdapter(responseBody) {
-  var response;
-  var errorType = responseBody.errors &&
-    responseBody.errors[0] &&
-    responseBody.errors[0].extensions &&
-    responseBody.errors[0].extensions.errorType;
+var CONFIGURATION_QUERY = 'query ClientConfiguration { ' +
+'  clientConfiguration { ' +
+'    analyticsUrl ' +
+'    environment ' +
+'    merchantId ' +
+'    assetsUrl ' +
+'    clientApiUrl ' +
+'    creditCard { ' +
+'      supportedCardBrands ' +
+'      challenges ' +
+'      threeDSecureEnabled ' +
+'    } ' +
+'    applePayWeb { ' +
+'      countryCode ' +
+'      currencyCode ' +
+'      merchantIdentifier ' +
+'      supportedCardBrands ' +
+'    } ' +
+'    googlePay { ' +
+'      displayName ' +
+'      supportedCardBrands ' +
+'      environment ' +
+'      googleAuthorization ' +
+'    } ' +
+'    ideal { ' +
+'      routeId ' +
+'      assetsUrl ' +
+'    } ' +
+'    kount { ' +
+'      merchantId ' +
+'    } ' +
+'    masterpass { ' +
+'      merchantCheckoutId ' +
+'      supportedCardBrands ' +
+'    } ' +
+'    paypal { ' +
+'      displayName ' +
+'      clientId ' +
+'      privacyUrl ' +
+'      userAgreementUrl ' +
+'      assetsUrl ' +
+'      environment ' +
+'      environmentNoNetwork ' +
+'      unvettedMerchant ' +
+'      braintreeClientId ' +
+'      billingAgreementsEnabled ' +
+'      merchantAccountId ' +
+'      currencyCode ' +
+'      payeeEmail ' +
+'    } ' +
+'    unionPay { ' +
+'      merchantAccountId ' +
+'    } ' +
+'    usBankAccount { ' +
+'      routeId ' +
+'      plaidPublicKey ' +
+'    } ' +
+'    venmo { ' +
+'      merchantId ' +
+'      accessToken ' +
+'      environment ' +
+'    } ' +
+'    visaCheckout { ' +
+'      apiKey ' +
+'      externalClientId ' +
+'      supportedCardBrands ' +
+'    } ' +
+'    braintreeApi { ' +
+'      accessToken ' +
+'      url ' +
+'    } ' +
+'    supportedFeatures ' +
+'  } ' +
+'}';
 
-  if (errorType === 'user_error') {
-    response = userErrorResponseAdapter(responseBody);
-  } else if (errorType) {
-    response = errorWithTypeResponseAdapter(responseBody);
+function configuration() {
+  return {
+    query: CONFIGURATION_QUERY,
+    operationName: 'ClientConfiguration'
+  };
+}
+
+module.exports = configuration;
+
+
+/***/ }),
+/* 131 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var errorResponseAdapter = __webpack_require__(44);
+var assign = __webpack_require__(11).assign;
+
+/* eslint-disable camelcase */
+var cardTypeTransforms = {
+  creditCard: {
+    AMERICAN_EXPRESS: 'American Express',
+    DISCOVER: 'Discover',
+    INTERNATIONAL_MAESTRO: 'Maestro',
+    JCB: 'JCB',
+    MASTERCARD: 'MasterCard',
+    SOLO: 'Solo',
+    UK_MAESTRO: 'UK Maestro',
+    UNION_PAY: 'UnionPay',
+    VISA: 'Visa'
+  },
+  applePayWeb: {
+    VISA: 'visa',
+    MASTERCARD: 'mastercard',
+    DISCOVER: 'discover',
+    AMERICAN_EXPRESS: 'amex'
+  },
+  visaCheckout: {
+    VISA: 'Visa',
+    MASTERCARD: 'MasterCard',
+    DISCOVER: 'Discover',
+    AMERICAN_EXPRESS: 'American Express'
+  },
+  googlePay: {
+    VISA: 'visa',
+    MASTERCARD: 'mastercard',
+    DISCOVER: 'discover',
+    AMERICAN_EXPRESS: 'amex'
+  },
+  masterpass: {
+    VISA: 'visa',
+    MASTERCARD: 'master',
+    DISCOVER: 'discover',
+    AMERICAN_EXPRESS: 'amex',
+    DINERS: 'diners',
+    INTERNATIONAL_MAESTRO: 'maestro',
+    JCB: 'jcb'
+  }
+};
+/* eslint-enable camelcase */
+
+function configurationResponseAdapter(responseBody, ctx) {
+  var adaptedResponse;
+
+  if (responseBody.data && !responseBody.errors) {
+    adaptedResponse = adaptConfigurationResponseBody(responseBody, ctx);
   } else {
-    response = {error: {message: 'There was a problem serving your request'}, fieldErrors: []};
+    adaptedResponse = errorResponseAdapter(responseBody);
+  }
+
+  return adaptedResponse;
+}
+
+function adaptConfigurationResponseBody(body, ctx) {
+  var configuration = body.data.clientConfiguration;
+  var response;
+
+  response = {
+    environment: configuration.environment.toLowerCase(),
+    clientApiUrl: configuration.clientApiUrl,
+    assetsUrl: configuration.assetsUrl,
+    analytics: {
+      url: configuration.analyticsUrl
+    },
+    merchantId: configuration.merchantId,
+    venmo: 'off'
+  };
+
+  if (configuration.supportedFeatures) {
+    response.graphQL = {
+      url: ctx._graphQL._config.url,
+      features: configuration.supportedFeatures.map(function (feature) {
+        return feature.toLowerCase();
+      })
+    };
+  }
+
+  if (configuration.braintreeApi) {
+    response.braintreeApi = configuration.braintreeApi;
+  }
+
+  if (configuration.applePayWeb) {
+    response.applePayWeb = configuration.applePayWeb;
+    response.applePayWeb.supportedNetworks = mapCardTypes(configuration.applePayWeb.supportedCardBrands, cardTypeTransforms.applePayWeb);
+
+    delete response.applePayWeb.supportedCardBrands;
+  }
+
+  if (configuration.ideal) {
+    response.ideal = configuration.ideal;
+  }
+
+  if (configuration.kount) {
+    response.kount = {
+      kountMerchantId: configuration.kount.merchantId
+    };
+  }
+
+  if (configuration.creditCard) {
+    response.challenges = configuration.creditCard.challenges.map(function (challenge) {
+      return challenge.toLowerCase();
+    });
+
+    response.creditCards = {
+      supportedCardTypes: mapCardTypes(configuration.creditCard.supportedCardBrands, cardTypeTransforms.creditCard)
+    };
+    response.threeDSecureEnabled = configuration.creditCard.threeDSecureEnabled;
+  } else {
+    response.challenges = [];
+    response.creditCards = {
+      supportedCardTypes: []
+    };
+    response.threeDSecureEnabled = false;
+  }
+
+  if (configuration.googlePay) {
+    response.androidPay = {
+      displayName: configuration.googlePay.displayName,
+      enabled: true,
+      environment: configuration.googlePay.environment.toLowerCase(),
+      googleAuthorizationFingerprint: configuration.googlePay.googleAuthorization,
+      supportedNetworks: mapCardTypes(configuration.googlePay.supportedCardBrands, cardTypeTransforms.googlePay)
+    };
+  }
+
+  if (configuration.venmo) {
+    response.payWithVenmo = {
+      merchantId: configuration.venmo.merchantId,
+      accessToken: configuration.venmo.accessToken,
+      environment: configuration.venmo.environment.toLowerCase()
+    };
+  }
+
+  if (configuration.paypal) {
+    response.paypalEnabled = true;
+    response.paypal = assign({}, configuration.paypal);
+    response.paypal.currencyIsoCode = response.paypal.currencyCode;
+    response.paypal.environment = response.paypal.environment.toLowerCase();
+
+    delete response.paypal.currencyCode;
+  } else {
+    response.paypalEnabled = false;
+  }
+
+  if (configuration.unionPay) {
+    response.unionPay = {
+      enabled: true,
+      merchantAccountId: configuration.unionPay.merchantAccountId
+    };
+  }
+
+  if (configuration.visaCheckout) {
+    response.visaCheckout = {
+      apikey: configuration.visaCheckout.apiKey,
+      externalClientId: configuration.visaCheckout.externalClientId,
+      supportedCardTypes: mapCardTypes(configuration.visaCheckout.supportedCardBrands, cardTypeTransforms.visaCheckout)
+    };
+  }
+
+  if (configuration.masterpass) {
+    response.masterpass = {
+      merchantCheckoutId: configuration.masterpass.merchantCheckoutId,
+      supportedNetworks: mapCardTypes(configuration.masterpass.supportedCardBrands, cardTypeTransforms.masterpass)
+    };
+  }
+
+  if (configuration.usBankAccount) {
+    response.usBankAccount = {
+      routeId: configuration.usBankAccount.routeId,
+      plaid: {
+        publicKey: configuration.usBankAccount.plaidPublicKey
+      }
+    };
   }
 
   return response;
 }
 
-function errorWithTypeResponseAdapter(responseBody) {
-  return {error: {message: responseBody.errors[0].message}, fieldErrors: []};
-}
-
-function userErrorResponseAdapter(responseBody) {
-  var error = responseBody.errors[0];
-  var message = error.extensions.legacyMessage;
-  var errorDetails = error.extensions.errorDetails;
-  var fieldErrors = buildFieldErrors(errorDetails);
-
-  return {error: {message: message}, fieldErrors: fieldErrors};
-}
-
-function buildFieldErrors(errorDetails) {
-  var fieldErrors = [];
-
-  errorDetails.forEach(function (detail) {
-    addFieldError(detail.inputPath.slice(1), detail, fieldErrors);
-  });
-
-  return fieldErrors;
-}
-
-function addFieldError(inputPath, errorDetail, fieldErrors) {
-  var fieldError;
-  var legacyCode = errorDetail.legacyCode;
-  var inputField = inputPath[0];
-
-  if (inputPath.length === 1) {
-    fieldErrors.push({
-      code: legacyCode,
-      field: inputField,
-      message: errorDetail.message
-    });
-
-    return;
-  }
-
-  fieldErrors.forEach(function (candidate) {
-    if (candidate.field === inputField) {
-      fieldError = candidate;
+function mapCardTypes(cardTypes, cardTypeTransformMap) {
+  return cardTypes.reduce(function (acc, type) {
+    if (cardTypeTransformMap.hasOwnProperty(type)) {
+      return acc.concat(cardTypeTransformMap[type]);
     }
-  });
 
-  if (!fieldError) {
-    fieldError = {field: inputField, fieldErrors: []};
-    fieldErrors.push(fieldError);
-  }
-
-  addFieldError(inputPath.slice(1), errorDetail, fieldError.fieldErrors);
+    return acc;
+  }, []);
 }
 
-module.exports = errorResponseAdapter;
+module.exports = configurationResponseAdapter;
 
 
 /***/ }),
-/* 128 */
+/* 132 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20346,7 +20977,7 @@ module.exports = DefaultRequest;
 
 
 /***/ }),
-/* 129 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20359,7 +20990,7 @@ module.exports = function getUserAgent() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 130 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20372,7 +21003,7 @@ module.exports = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 131 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20417,7 +21048,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 132 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20429,7 +21060,7 @@ module.exports = function (value) {
 
 
 /***/ }),
-/* 133 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20450,7 +21081,7 @@ module.exports = deferred;
 
 
 /***/ }),
-/* 134 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20471,7 +21102,7 @@ module.exports = once;
 
 
 /***/ }),
-/* 135 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20495,19 +21126,7 @@ module.exports = promiseOrCallback;
 
 
 /***/ }),
-/* 136 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  BRAINTREE_API_VERSION_HEADER: '2017-04-03'
-};
-
-
-/***/ }),
-/* 137 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20516,15 +21135,19 @@ module.exports = {
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var request = __webpack_require__(40);
+var request = __webpack_require__(43);
 var uuid = __webpack_require__(23);
 var constants = __webpack_require__(17);
-var createAuthorizationData = __webpack_require__(44);
-var errors = __webpack_require__(47);
+var createAuthorizationData = __webpack_require__(48);
+var errors = __webpack_require__(51);
+var GraphQL = __webpack_require__(41);
+var isDateStringBeforeOrOn = __webpack_require__(141);
+
+var BRAINTREE_VERSION = __webpack_require__(30).BRAINTREE_VERSION;
 
 function getConfiguration(options) {
   return new Promise(function (resolve, reject) {
-    var configuration, authData, attrs, configUrl;
+    var configuration, authData, attrs, configUrl, reqOptions;
     var sessionId = uuid();
     var analyticsMetadata = {
       merchantAppId: global.location.host,
@@ -20550,11 +21173,26 @@ function getConfiguration(options) {
     attrs.braintreeLibraryVersion = constants.BRAINTREE_LIBRARY_VERSION;
     attrs.configVersion = '3';
 
-    request({
+    reqOptions = {
       url: configUrl,
       method: 'GET',
       data: attrs
-    }, function (err, response, status) {
+    };
+
+    if (attrs.authorizationFingerprint && authData.graphQL) {
+      if (isDateStringBeforeOrOn(authData.graphQL.date, BRAINTREE_VERSION)) {
+        reqOptions.graphQL = new GraphQL({
+          graphQL: {
+            url: authData.graphQL.url,
+            features: ['configuration']
+          }
+        });
+      }
+
+      reqOptions.metadata = analyticsMetadata;
+    }
+
+    request(reqOptions, function (err, response, status) {
       var errorTemplate;
 
       if (err) {
@@ -20595,20 +21233,40 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 138 */
+/* 141 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function convertDateStringToDate(dateString) {
+  var splitDate = dateString.split('-');
+
+  return new Date(splitDate[0], splitDate[1], splitDate[2]);
+}
+
+function isDateStringBeforeOrOn(firstDate, secondDate) {
+  return convertDateStringToDate(firstDate) <= convertDateStringToDate(secondDate);
+}
+
+module.exports = isDateStringBeforeOrOn;
+
+
+/***/ }),
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var DropinError = __webpack_require__(8);
-var EventEmitter = __webpack_require__(48);
+var EventEmitter = __webpack_require__(52);
 var constants = __webpack_require__(2);
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var isGuestCheckout = __webpack_require__(49);
+var isGuestCheckout = __webpack_require__(53);
 var Promise = __webpack_require__(5);
-var paymentSheetViews = __webpack_require__(50);
+var paymentSheetViews = __webpack_require__(54);
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -20796,6 +21454,14 @@ DropinModel.prototype.clearError = function () {
   this._emit('errorCleared');
 };
 
+DropinModel.prototype.preventUserAction = function () {
+  this._emit('preventUserAction');
+};
+
+DropinModel.prototype.allowUserAction = function () {
+  this._emit('allowUserAction');
+};
+
 DropinModel.prototype._getSupportedPaymentMethods = function (paymentMethods) {
   var supportedPaymentMethods = this.supportedPaymentOptions.reduce(function (array, key) {
     var paymentMethodType = paymentMethodTypes[key];
@@ -20859,6 +21525,11 @@ function isPaymentOptionEnabled(paymentOption, options) {
   return SheetView.isEnabled({
     client: options.client,
     merchantConfiguration: options.merchantConfiguration
+  }).catch(function (error) {
+    console.error(SheetView.ID + ' view errored when checking if it was supported.'); // eslint-disable-line no-console
+    console.error(error); // eslint-disable-line no-console
+
+    return Promise.resolve(false);
   });
 }
 
@@ -20870,7 +21541,7 @@ module.exports = DropinModel;
 
 
 /***/ }),
-/* 139 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20878,9 +21549,9 @@ module.exports = DropinModel;
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btApplePay = __webpack_require__(140);
+var btApplePay = __webpack_require__(144);
 var DropinError = __webpack_require__(8);
-var isHTTPS = __webpack_require__(142);
+var isHTTPS = __webpack_require__(146);
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
 
@@ -20959,6 +21630,7 @@ ApplePayView.prototype._showPaymentSheet = function () {
   };
 
   session.begin();
+
   return false;
 };
 
@@ -20989,7 +21661,7 @@ module.exports = ApplePayView;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 140 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21001,11 +21673,11 @@ module.exports = ApplePayView;
  */
 
 var BraintreeError = __webpack_require__(1);
-var ApplePay = __webpack_require__(141);
+var ApplePay = __webpack_require__(145);
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(51);
-var VERSION = "3.31.0";
+var errors = __webpack_require__(55);
+var VERSION = "3.34.0";
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -21043,7 +21715,7 @@ module.exports = {
 
 
 /***/ }),
-/* 141 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21051,10 +21723,10 @@ module.exports = {
 
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
-var errors = __webpack_require__(51);
+var errors = __webpack_require__(55);
 var Promise = __webpack_require__(4);
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
 var wrapPromise = __webpack_require__(3);
 
 /**
@@ -21360,7 +22032,7 @@ module.exports = wrapPromise.wrapPrototype(ApplePay);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 142 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21377,7 +22049,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 143 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21386,12 +22058,12 @@ module.exports = {
 var assign = __webpack_require__(10).assign;
 
 var BaseView = __webpack_require__(9);
-var classlist = __webpack_require__(13);
+var classlist = __webpack_require__(15);
 var constants = __webpack_require__(2);
 var DropinError = __webpack_require__(8);
-var hostedFields = __webpack_require__(144);
-var isUtf8 = __webpack_require__(58);
-var transitionHelper = __webpack_require__(59);
+var hostedFields = __webpack_require__(148);
+var isUtf8 = __webpack_require__(62);
+var transitionHelper = __webpack_require__(63);
 var Promise = __webpack_require__(5);
 
 var cardIconHTML = "<div data-braintree-id=\"visa-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-visa\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"master-card-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-master-card\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"unionpay-card-icon\" class=\"braintree-sheet__card-icon braintree-hidden\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-unionpay\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"american-express-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-american-express\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"jcb-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-jcb\"></use>\n    </svg>\n</div>\n<!-- Remove braintree-hidden class when supportedCardType accurately indicates Diners Club support -->\n<div data-braintree-id=\"diners-club-card-icon\" class=\"braintree-sheet__card-icon braintree-hidden\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-diners-club\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"discover-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-discover\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"maestro-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-maestro\"></use>\n    </svg>\n</div>\n";
@@ -21593,6 +22265,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     Object.keys(overrides.fields).forEach(function (field) {
       if ((field === 'cvv' || field === 'postalCode') && overrides.fields[field] === null) {
         delete options.fields[field];
+
         return;
       }
 
@@ -21610,6 +22283,7 @@ CardView.prototype._generateHostedFieldsOptions = function () {
     Object.keys(overrides.styles).forEach(function (style) {
       if (overrides.styles[style] === null) {
         delete options.styles[style];
+
         return;
       }
 
@@ -21737,7 +22411,7 @@ CardView.prototype.tokenize = function () {
 
   if (!this._validateForm(true)) {
     self.model.reportError('hostedFieldsFieldsInvalidError');
-    classlist.remove(self.element, 'braintree-sheet--loading');
+    self.allowUserAction();
 
     return Promise.reject(new DropinError(constants.errors.NO_PAYMENT_METHOD_ERROR));
   }
@@ -21749,9 +22423,18 @@ CardView.prototype.tokenize = function () {
   self._isTokenizing = true;
 
   return self.hostedFieldsInstance.tokenize(tokenizeOptions).then(function (payload) {
-    Object.keys(state.fields).forEach(function (field) {
-      self.hostedFieldsInstance.clear(field);
-    });
+    var retainCardFields = self.model.merchantConfiguration.card &&
+      self.model.merchantConfiguration.card.clearFieldsAfterTokenization === false;
+
+    if (!retainCardFields) {
+      Object.keys(state.fields).forEach(function (field) {
+        self.hostedFieldsInstance.clear(field);
+      });
+
+      if (self.hasCardholderName) {
+        self.cardholderNameInput.value = '';
+      }
+    }
 
     if (!self.model.isGuestCheckout) {
       payload.vaulted = true;
@@ -21772,15 +22455,20 @@ CardView.prototype.tokenize = function () {
       transitionHelper.onTransitionEnd(self.element, 'max-height', transitionCallback);
 
       setTimeout(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       }, constants.CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT);
 
       classlist.add(self.element, 'braintree-sheet--tokenized');
     });
   }).catch(function (err) {
     self._isTokenizing = false;
+    // this is a little magical, but if the code property exists
+    // in the translations with the word Error appended to the end,
+    // then reportError will automatically print that translation.
+    // See https://github.com/braintree/braintree-web-drop-in/blob/6ecba73f2f16e8b7ae2119702ac162a1a985908e/src/views/main-view.js#L255-L256
     self.model.reportError(err);
-    classlist.remove(self.element, 'braintree-sheet--loading');
+    self.allowUserAction();
+
     return Promise.reject(new DropinError({
       message: constants.errors.NO_PAYMENT_METHOD_ERROR,
       braintreeWebError: err
@@ -21941,7 +22629,8 @@ CardView.prototype._onValidityChangeEvent = function (event) {
 };
 
 CardView.prototype.requestPaymentMethod = function () {
-  classlist.add(this.element, 'braintree-sheet--loading');
+  this.preventUserAction();
+
   return this.tokenize();
 };
 
@@ -22033,21 +22722,21 @@ module.exports = CardView;
 
 
 /***/ }),
-/* 144 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /** @module braintree-web/hosted-fields */
 
-var HostedFields = __webpack_require__(145);
+var HostedFields = __webpack_require__(149);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(24);
-var supportsInputFormatting = __webpack_require__(163);
+var errors = __webpack_require__(25);
+var supportsInputFormatting = __webpack_require__(169);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 
 /**
  * Fields used in {@link module:braintree-web/hosted-fields~fieldOptions fields options}
@@ -22065,6 +22754,7 @@ var VERSION = "3.31.0";
  * For postal code fields, the default value is 3, representing the Icelandic postal code length. This option's primary use case is to increase the `minlength`, e.g. for US customers, the postal code `minlength` can be set to 5.
  * For cvv fields, the default value is 3. The `minlength` attribute only applies to integrations capturing a cvv without a number field.
  * @property {string} [prefill] A value to prefill the field with. For example, when creating an update card form, you can prefill the expiration date fields with the old expiration date data.
+ * @property {boolean} [rejectUnsupportedCards=false] Only allow card types that your merchant account is able to process. Unsupported card types will invalidate the card form. e.g. if you only process Visa cards, a customer entering a American Express card would get an invalid card field. This can only be used for the `number` field.
  */
 
 /**
@@ -22074,12 +22764,14 @@ var VERSION = "3.31.0";
  * @property {field} [expirationDate] A field for expiration date in `MM/YYYY` format. This should not be used with the `expirationMonth` and `expirationYear` properties.
  * @property {field} [expirationMonth] A field for expiration month in `MM` format. This should be used with the `expirationYear` property.
  * @property {field} [expirationYear] A field for expiration year in `YYYY` format. This should be used with the `expirationMonth` property.
- * @property {field} [cvv] A field for 3 or 4 digit CVV or CID.
+ * @property {field} [cvv] A field for 3 or 4 digit card verification code (like CVV or CID). If you wish to create a CVV-only payment method nonce to verify a card already stored in your Vault, omit all other fields to only collect CVV.
  * @property {field} [postalCode] A field for postal or region code.
  */
 
 /**
  * An object that represents CSS that will be applied in each hosted field. This object looks similar to CSS. Typically, these styles involve fonts (such as `font-family` or `color`).
+ *
+ * You may also pass the name of a class on your site that contains the styles you would like to apply. The style properties will be automatically pulled off the class and applied to the Hosted Fields inputs. Note: this is recomended for `input` elements only. If using a `select` for the expiration date, unexpected styling may occur.
  *
  * These are the CSS properties that Hosted Fields supports. Any other CSS should be specified on your page and outside of any Braintree configuration. Trying to set unsupported properties will fail and put a warning in the console.
  *
@@ -22124,7 +22816,7 @@ var VERSION = "3.31.0";
  * @param {object} options Creation options:
  * @param {Client} options.client A {@link Client} instance.
  * @param {fieldOptions} options.fields A {@link module:braintree-web/hosted-fields~fieldOptions set of options for each field}.
- * @param {styleOptions} options.styles {@link module:braintree-web/hosted-fields~styleOptions Styles} applied to each field.
+ * @param {styleOptions} [options.styles] {@link module:braintree-web/hosted-fields~styleOptions Styles} applied to each field.
  * @param {callback} [callback] The second argument, `data`, is the {@link HostedFields} instance. If no callback is provided, `create` returns a promise that resolves with the {@link HostedFields} instance.
  * @returns {void}
  * @example
@@ -22156,6 +22848,38 @@ var VERSION = "3.31.0";
  *     }
  *   }
  * }, callback);
+ * @example <caption>Applying styles with a class name</caption>
+ * // in document head
+ * <style>
+ *   .braintree-input-class {
+ *     color: black;
+ *   }
+ *   .braintree-valid-class {
+ *     color: green;
+ *   }
+ *   .braintree-invalid-class {
+ *     color: red;
+ *   }
+ * </style>
+ * // in a script tag
+ * braintree.hostedFields.create({
+ *   client: clientInstance,
+ *   styles: {
+ *     'input': 'braintree-input-class',
+ *     '.invalid': 'braintree-invalid-class',
+ *     '.valid': {
+ *       // you can also use the object syntax alongside
+ *       // the class name syntax
+ *       color: green;
+ *     }
+ *   },
+ *   fields: {
+ *     number: {
+ *       selector: '#card-number'
+ *     },
+ *     // etc...
+ *   }
+ * }, callback);
  * @example <caption>Right to Left Language Support</caption>
  * braintree.hostedFields.create({
  *   client: clientInstance,
@@ -22182,6 +22906,17 @@ var VERSION = "3.31.0";
  *     }
  *   }
  * }, callback);
+ * @example <caption>Setting up Hosted Fields to tokenize CVV only</caption>
+ * braintree.hostedFields.create({
+ *   client: clientInstance,
+ *   fields: {
+ *     // Only add the `cvv` option.
+ *     cvv: {
+ *       selector: '#cvv',
+ *       placeholder: '•••'
+ *     }
+ *   }
+ * }, callback);
  * @example <caption>Creating an expiration date update form with prefilled data</caption>
  * var storedCreditCardInformation = {
  *   // get this info from your server
@@ -22197,11 +22932,29 @@ var VERSION = "3.31.0";
  *       selector: '#expiration-month',
  *       prefill: storedCreditCardInformation.month
  *     },
- *     expirationMonth: {
+ *     expirationYear: {
  *       selector: '#expiration-year',
  *       prefill: storedCreditCardInformation.year
  *     }
  *   }
+ * }, callback);
+ * @example <caption>Validate the card form for supported card types</caption>
+ * braintree.hostedFields.create({
+ *   client: clientInstance,
+ *   fields: {
+ *     number: {
+ *       selector: '#card-number',
+ *       rejectUnsupportedCards: true
+ *     },
+ *     cvv: {
+ *       selector: '#cvv',
+ *       placeholder: '•••'
+ *     },
+ *     expirationDate: {
+ *       selector: '#expiration-date',
+ *       type: 'month'
+ *     }
+ *   },
  * }, callback);
  */
 function create(options) {
@@ -22274,34 +23027,36 @@ module.exports = {
 
 
 /***/ }),
-/* 145 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Destructor = __webpack_require__(146);
-var classlist = __webpack_require__(148);
-var iFramer = __webpack_require__(52);
-var Bus = __webpack_require__(53);
+var assign = __webpack_require__(11).assign;
+var Destructor = __webpack_require__(150);
+var classlist = __webpack_require__(152);
+var iFramer = __webpack_require__(56);
+var Bus = __webpack_require__(57);
 var BraintreeError = __webpack_require__(1);
-var composeUrl = __webpack_require__(155);
-var constants = __webpack_require__(28);
-var errors = __webpack_require__(24);
+var composeUrl = __webpack_require__(159);
+var getStylesFromClass = __webpack_require__(160);
+var constants = __webpack_require__(24);
+var errors = __webpack_require__(25);
 var INTEGRATION_TIMEOUT_MS = __webpack_require__(17).INTEGRATION_TIMEOUT_MS;
 var uuid = __webpack_require__(23);
-var findParentTags = __webpack_require__(156);
-var browserDetection = __webpack_require__(157);
+var findParentTags = __webpack_require__(161);
+var browserDetection = __webpack_require__(162);
 var events = constants.events;
-var EventEmitter = __webpack_require__(159);
-var injectFrame = __webpack_require__(160);
+var EventEmitter = __webpack_require__(164);
+var injectFrame = __webpack_require__(165);
 var analytics = __webpack_require__(7);
 var whitelistedFields = constants.whitelistedFields;
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
 var sharedErrors = __webpack_require__(18);
-var getCardTypes = __webpack_require__(161);
-var attributeValidationError = __webpack_require__(162);
+var getCardTypes = __webpack_require__(166);
+var attributeValidationError = __webpack_require__(168);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -22593,6 +23348,7 @@ function HostedFields(options) {
   var failureTimeout, clientConfig;
   var self = this;
   var fields = {};
+  var busOptions = assign({}, options);
   var fieldCount = 0;
   var componentId = uuid();
 
@@ -22733,6 +23489,21 @@ function HostedFields(options) {
     }, 0);
   }.bind(this));
 
+  // TODO rejecting unsupported cards should be the default behavior after the next major revision
+  if (options.fields.number && options.fields.number.rejectUnsupportedCards) {
+    busOptions.supportedCardTypes = clientConfig.gatewayConfiguration.creditCards.supportedCardTypes;
+  }
+
+  if (busOptions.styles) {
+    Object.keys(busOptions.styles).forEach(function (selector) {
+      var className = busOptions.styles[selector];
+
+      if (typeof className === 'string') {
+        busOptions.styles[selector] = getStylesFromClass(className);
+      }
+    });
+  }
+
   failureTimeout = setTimeout(function () {
     analytics.sendEvent(self._client, 'custom.hosted-fields.load.timed-out');
     self._emit('timeout');
@@ -22742,7 +23513,7 @@ function HostedFields(options) {
     fieldCount--;
     if (fieldCount === 0) {
       clearTimeout(failureTimeout);
-      reply(options);
+      reply(busOptions);
       self._emit('ready');
     }
   });
@@ -22807,6 +23578,16 @@ HostedFields.prototype._setupLabelFocus = function (type, container) {
   });
 };
 
+HostedFields.prototype._attachInvalidFieldContainersToError = function (err) {
+  if (!(err.details && err.details.invalidFieldKeys && err.details.invalidFieldKeys.length > 0)) {
+    return;
+  }
+  err.details.invalidFields = {};
+  err.details.invalidFieldKeys.forEach(function (field) {
+    err.details.invalidFields[field] = this._fields[field].containerElement;
+  }.bind(this));
+};
+
 /**
  * Cleanly remove anything set up by {@link module:braintree-web/hosted-fields.create|create}.
  * @public
@@ -22868,6 +23649,11 @@ HostedFields.prototype.teardown = function () {
  *       case 'HOSTED_FIELDS_FIELDS_INVALID':
  *         // occurs when certain fields do not pass client side validation
  *         console.error('Some fields are invalid:', tokenizeErr.details.invalidFieldKeys);
+ *
+ *         // you can also programtically access the field containers for the invalid fields
+ *         tokenizeErr.details.invalidFields.forEach(function (fieldContainer) {
+ *           fieldContainer.className = 'invalid';
+ *         });
  *         break;
  *       case 'HOSTED_FIELDS_TOKENIZATION_FAIL_ON_DUPLICATE':
  *         // occurs when:
@@ -22974,7 +23760,8 @@ HostedFields.prototype.tokenize = function (options) {
       var payload = response[1];
 
       if (err) {
-        reject(err);
+        self._attachInvalidFieldContainersToError(err);
+        reject(new BraintreeError(err));
       } else {
         resolve(payload);
       }
@@ -23328,7 +24115,7 @@ HostedFields.prototype.focus = function (field) {
  * @public
  * @returns {object} {@link HostedFields~stateObject|stateObject}
  * @example <caption>Check if all fields are valid</caption>
- * var state = hostedFields.getState();
+ * var state = hostedFieldsInstance.getState();
  *
  * var formValid = Object.keys(state.fields).every(function (key) {
  *   return state.fields[key].isValid;
@@ -23343,13 +24130,13 @@ module.exports = wrapPromise.wrapPrototype(HostedFields);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 146 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var batchExecuteFunctions = __webpack_require__(147);
+var batchExecuteFunctions = __webpack_require__(151);
 
 function Destructor() {
   this._teardownRegistry = [];
@@ -23386,13 +24173,13 @@ module.exports = Destructor;
 
 
 /***/ }),
-/* 147 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var once = __webpack_require__(26);
+var once = __webpack_require__(28);
 
 function call(fn, callback) {
   var isSync = fn.length === 0;
@@ -23437,7 +24224,7 @@ module.exports = function (functions, cb) {
 
 
 /***/ }),
-/* 148 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23481,7 +24268,7 @@ module.exports = {
 
 
 /***/ }),
-/* 149 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23505,7 +24292,7 @@ module.exports = function setAttributes(element, attributes) {
 
 
 /***/ }),
-/* 150 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23520,7 +24307,7 @@ module.exports = {
 
 
 /***/ }),
-/* 151 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23542,289 +24329,321 @@ module.exports = function assign(target) {
 
 
 /***/ }),
-/* 152 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
-(function (root, factory) {
-  if (true) {
-    module.exports = factory(typeof global === 'undefined' ? root : global);
-  } else if (typeof define === 'function' && define.amd) {
-    define([], function () { return factory(root); });
-  } else {
-    root.framebus = factory(root);
-  }
-})(this, function (root) { // eslint-disable-line no-invalid-this
-  var win, framebus;
-  var popups = [];
-  var subscribers = {};
-  var prefix = '/*framebus*/';
 
-  function include(popup) {
-    if (popup == null) { return false; }
-    if (popup.Window == null) { return false; }
-    if (popup.constructor !== popup.Window) { return false; }
+var win, framebus;
+var popups = [];
+var subscribers = {};
+var prefix = '/*framebus*/';
 
-    popups.push(popup);
-    return true;
-  }
+function include(popup) {
+  if (popup == null) { return false; }
+  if (popup.Window == null) { return false; }
+  if (popup.constructor !== popup.Window) { return false; }
 
-  function target(origin) {
-    var key;
-    var targetedFramebus = {};
+  popups.push(popup);
+  return true;
+}
 
-    for (key in framebus) {
-      if (!framebus.hasOwnProperty(key)) { continue; }
+function target(origin) {
+  var key;
+  var targetedFramebus = {};
 
-      targetedFramebus[key] = framebus[key];
-    }
+  for (key in framebus) {
+    if (!framebus.hasOwnProperty(key)) { continue; }
 
-    targetedFramebus._origin = origin || '*';
-
-    return targetedFramebus;
+    targetedFramebus[key] = framebus[key];
   }
 
-  function publish(event) {
-    var payload, args;
-    var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
+  targetedFramebus._origin = origin || '*';
 
-    if (_isntString(event)) { return false; }
-    if (_isntString(origin)) { return false; }
+  return targetedFramebus;
+}
 
-    args = Array.prototype.slice.call(arguments, 1);
+function publish(event) {
+  var payload, args;
+  var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
 
-    payload = _packagePayload(event, args, origin);
-    if (payload === false) { return false; }
+  if (_isntString(event)) { return false; }
+  if (_isntString(origin)) { return false; }
 
-    _broadcast(win.top || win.self, payload, origin);
+  args = Array.prototype.slice.call(arguments, 1);
 
-    return true;
-  }
+  payload = _packagePayload(event, args, origin);
+  if (payload === false) { return false; }
 
-  function subscribe(event, fn) {
-    var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
+  _broadcast(win.top || win.self, payload, origin);
 
-    if (_subscriptionArgsInvalid(event, fn, origin)) { return false; }
+  return true;
+}
 
-    subscribers[origin] = subscribers[origin] || {};
-    subscribers[origin][event] = subscribers[origin][event] || [];
-    subscribers[origin][event].push(fn);
+function subscribe(event, fn) {
+  var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
 
-    return true;
-  }
+  if (_subscriptionArgsInvalid(event, fn, origin)) { return false; }
 
-  function unsubscribe(event, fn) {
-    var i, subscriberList;
-    var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
+  subscribers[origin] = subscribers[origin] || {};
+  subscribers[origin][event] = subscribers[origin][event] || [];
+  subscribers[origin][event].push(fn);
 
-    if (_subscriptionArgsInvalid(event, fn, origin)) { return false; }
+  return true;
+}
 
-    subscriberList = subscribers[origin] && subscribers[origin][event];
-    if (!subscriberList) { return false; }
+function unsubscribe(event, fn) {
+  var i, subscriberList;
+  var origin = _getOrigin(this); // eslint-disable-line no-invalid-this
 
-    for (i = 0; i < subscriberList.length; i++) {
-      if (subscriberList[i] === fn) {
-        subscriberList.splice(i, 1);
-        return true;
-      }
-    }
+  if (_subscriptionArgsInvalid(event, fn, origin)) { return false; }
 
-    return false;
-  }
+  subscriberList = subscribers[origin] && subscribers[origin][event];
+  if (!subscriberList) { return false; }
 
-  function _getOrigin(scope) {
-    return scope && scope._origin || '*';
-  }
-
-  function _isntString(string) {
-    return typeof string !== 'string';
-  }
-
-  function _packagePayload(event, args, origin) {
-    var packaged = false;
-    var payload = {
-      event: event,
-      origin: origin
-    };
-    var reply = args[args.length - 1];
-
-    if (typeof reply === 'function') {
-      payload.reply = _subscribeReplier(reply, origin);
-      args = args.slice(0, -1);
-    }
-
-    payload.args = args;
-
-    try {
-      packaged = prefix + JSON.stringify(payload);
-    } catch (e) {
-      throw new Error('Could not stringify event: ' + e.message);
-    }
-    return packaged;
-  }
-
-  function _unpackPayload(e) {
-    var payload, replyOrigin, replySource, replyEvent;
-
-    if (e.data.slice(0, prefix.length) !== prefix) { return false; }
-
-    try {
-      payload = JSON.parse(e.data.slice(prefix.length));
-    } catch (err) {
-      return false;
-    }
-
-    if (payload.reply != null) {
-      replyOrigin = e.origin;
-      replySource = e.source;
-      replyEvent = payload.reply;
-
-      payload.reply = function reply(data) { // eslint-disable-line consistent-return
-        var replyPayload = _packagePayload(replyEvent, [data], replyOrigin);
-
-        if (replyPayload === false) { return false; }
-
-        replySource.postMessage(replyPayload, replyOrigin);
-      };
-
-      payload.args.push(payload.reply);
-    }
-
-    return payload;
-  }
-
-  function _attach(w) {
-    if (win) { return; }
-    win = w || root;
-
-    if (win.addEventListener) {
-      win.addEventListener('message', _onmessage, false);
-    } else if (win.attachEvent) {
-      win.attachEvent('onmessage', _onmessage);
-    } else if (win.onmessage === null) {
-      win.onmessage = _onmessage;
-    } else {
-      win = null;
+  for (i = 0; i < subscriberList.length; i++) {
+    if (subscriberList[i] === fn) {
+      subscriberList.splice(i, 1);
+      return true;
     }
   }
 
-  function _uuid() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      var r = Math.random() * 16 | 0;
-      var v = c === 'x' ? r : r & 0x3 | 0x8;
+  return false;
+}
 
-      return v.toString(16);
-    });
-  }
+function _getOrigin(scope) {
+  return scope && scope._origin || '*';
+}
 
-  function _onmessage(e) {
-    var payload;
+function _isntString(string) {
+  return typeof string !== 'string';
+}
 
-    if (_isntString(e.data)) { return; }
-
-    payload = _unpackPayload(e);
-    if (!payload) { return; }
-
-    _dispatch('*', payload.event, payload.args, e);
-    _dispatch(e.origin, payload.event, payload.args, e);
-    _broadcastPopups(e.data, payload.origin, e.source);
-  }
-
-  function _dispatch(origin, event, args, e) {
-    var i;
-
-    if (!subscribers[origin]) { return; }
-    if (!subscribers[origin][event]) { return; }
-
-    for (i = 0; i < subscribers[origin][event].length; i++) {
-      subscribers[origin][event][i].apply(e, args);
-    }
-  }
-
-  function _hasOpener(frame) {
-    if (frame.top !== frame) { return false; }
-    if (frame.opener == null) { return false; }
-    if (frame.opener === frame) { return false; }
-    if (frame.opener.closed === true) { return false; }
-
-    return true;
-  }
-
-  function _broadcast(frame, payload, origin) {
-    var i;
-
-    try {
-      frame.postMessage(payload, origin);
-
-      if (_hasOpener(frame)) {
-        _broadcast(frame.opener.top, payload, origin);
-      }
-
-      for (i = 0; i < frame.frames.length; i++) {
-        _broadcast(frame.frames[i], payload, origin);
-      }
-    } catch (_) { /* ignored */ }
-  }
-
-  function _broadcastPopups(payload, origin, source) {
-    var i, popup;
-
-    for (i = popups.length - 1; i >= 0; i--) {
-      popup = popups[i];
-
-      if (popup.closed === true) {
-        popups = popups.slice(i, 1);
-      } else if (source !== popup) {
-        _broadcast(popup.top, payload, origin);
-      }
-    }
-  }
-
-  function _subscribeReplier(fn, origin) {
-    var uuid = _uuid();
-
-    function replier(d, o) {
-      fn(d, o);
-      framebus.target(origin).unsubscribe(uuid, replier);
-    }
-
-    framebus.target(origin).subscribe(uuid, replier);
-    return uuid;
-  }
-
-  function _subscriptionArgsInvalid(event, fn, origin) {
-    if (_isntString(event)) { return true; }
-    if (typeof fn !== 'function') { return true; }
-    if (_isntString(origin)) { return true; }
-
-    return false;
-  }
-
-  _attach();
-
-  framebus = {
-    target: target,
-    include: include,
-    publish: publish,
-    pub: publish,
-    trigger: publish,
-    emit: publish,
-    subscribe: subscribe,
-    sub: subscribe,
-    on: subscribe,
-    unsubscribe: unsubscribe,
-    unsub: unsubscribe,
-    off: unsubscribe
+function _packagePayload(event, args, origin) {
+  var packaged = false;
+  var payload = {
+    event: event,
+    origin: origin
   };
+  var reply = args[args.length - 1];
 
-  return framebus;
-});
+  if (typeof reply === 'function') {
+    payload.reply = _subscribeReplier(reply, origin);
+    args = args.slice(0, -1);
+  }
+
+  payload.args = args;
+
+  try {
+    packaged = prefix + JSON.stringify(payload);
+  } catch (e) {
+    throw new Error('Could not stringify event: ' + e.message);
+  }
+  return packaged;
+}
+
+function _unpackPayload(e) {
+  var payload, replyOrigin, replySource, replyEvent;
+
+  if (e.data.slice(0, prefix.length) !== prefix) { return false; }
+
+  try {
+    payload = JSON.parse(e.data.slice(prefix.length));
+  } catch (err) {
+    return false;
+  }
+
+  if (payload.reply != null) {
+    replyOrigin = e.origin;
+    replySource = e.source;
+    replyEvent = payload.reply;
+
+    payload.reply = function reply(data) { // eslint-disable-line consistent-return
+      var replyPayload = _packagePayload(replyEvent, [data], replyOrigin);
+
+      if (replyPayload === false) { return false; }
+
+      replySource.postMessage(replyPayload, replyOrigin);
+    };
+
+    payload.args.push(payload.reply);
+  }
+
+  return payload;
+}
+
+function _attach(w) {
+  if (win) { return; }
+  win = w || global;
+
+  if (win.addEventListener) {
+    win.addEventListener('message', _onmessage, false);
+  } else if (win.attachEvent) {
+    win.attachEvent('onmessage', _onmessage);
+  } else if (win.onmessage === null) {
+    win.onmessage = _onmessage;
+  } else {
+    win = null;
+  }
+}
+
+// removeIf(production)
+function _detach() {
+  if (win == null) { return; }
+
+  if (win.removeEventListener) {
+    win.removeEventListener('message', _onmessage, false);
+  } else if (win.detachEvent) {
+    win.detachEvent('onmessage', _onmessage);
+  } else if (win.onmessage === _onmessage) {
+    win.onmessage = null;
+  }
+
+  win = null;
+  popups = [];
+  subscribers = {};
+}
+// endRemoveIf(production)
+
+function _uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0;
+    var v = c === 'x' ? r : r & 0x3 | 0x8;
+
+    return v.toString(16);
+  });
+}
+
+function _onmessage(e) {
+  var payload;
+
+  if (_isntString(e.data)) { return; }
+
+  payload = _unpackPayload(e);
+  if (!payload) { return; }
+
+  _dispatch('*', payload.event, payload.args, e);
+  _dispatch(e.origin, payload.event, payload.args, e);
+  _broadcastPopups(e.data, payload.origin, e.source);
+}
+
+function _dispatch(origin, event, args, e) {
+  var i;
+
+  if (!subscribers[origin]) { return; }
+  if (!subscribers[origin][event]) { return; }
+
+  for (i = 0; i < subscribers[origin][event].length; i++) {
+    subscribers[origin][event][i].apply(e, args);
+  }
+}
+
+function _hasOpener(frame) {
+  if (frame.top !== frame) { return false; }
+  if (frame.opener == null) { return false; }
+  if (frame.opener === frame) { return false; }
+  if (frame.opener.closed === true) { return false; }
+
+  return true;
+}
+
+function _broadcast(frame, payload, origin) {
+  var i = 0;
+  var frameToBroadcastTo;
+
+  try {
+    frame.postMessage(payload, origin);
+
+    if (_hasOpener(frame)) {
+      _broadcast(frame.opener.top, payload, origin);
+    }
+
+    // previously, our max value was frame.frames.length
+    // but frames.length inherits from window.length
+    // which can be overwritten if a developer does
+    // `var length = value;` outside of a function
+    // scope, it'll prevent us from looping through
+    // all the frames. With this, we loop through
+    // until there are no longer any frames
+    while (frameToBroadcastTo = frame.frames[i]) { // eslint-disable-line no-cond-assign
+      _broadcast(frameToBroadcastTo, payload, origin);
+      i++;
+    }
+  } catch (_) { /* ignored */ }
+}
+
+function _broadcastPopups(payload, origin, source) {
+  var i, popup;
+
+  for (i = popups.length - 1; i >= 0; i--) {
+    popup = popups[i];
+
+    if (popup.closed === true) {
+      popups = popups.slice(i, 1);
+    } else if (source !== popup) {
+      _broadcast(popup.top, payload, origin);
+    }
+  }
+}
+
+function _subscribeReplier(fn, origin) {
+  var uuid = _uuid();
+
+  function replier(d, o) {
+    fn(d, o);
+    framebus.target(origin).unsubscribe(uuid, replier);
+  }
+
+  framebus.target(origin).subscribe(uuid, replier);
+  return uuid;
+}
+
+function _subscriptionArgsInvalid(event, fn, origin) {
+  if (_isntString(event)) { return true; }
+  if (typeof fn !== 'function') { return true; }
+  if (_isntString(origin)) { return true; }
+
+  return false;
+}
+
+_attach();
+
+framebus = {
+  target: target,
+  // removeIf(production)
+  _packagePayload: _packagePayload,
+  _unpackPayload: _unpackPayload,
+  _attach: _attach,
+  _detach: _detach,
+  _dispatch: _dispatch,
+  _broadcast: _broadcast,
+  _subscribeReplier: _subscribeReplier,
+  _subscriptionArgsInvalid: _subscriptionArgsInvalid,
+  _onmessage: _onmessage,
+  _uuid: _uuid,
+  _getSubscribers: function () { return subscribers; },
+  _win: function () { return win; },
+  // endRemoveIf(production)
+  include: include,
+  publish: publish,
+  pub: publish,
+  trigger: publish,
+  emit: publish,
+  subscribe: subscribe,
+  sub: subscribe,
+  on: subscribe,
+  unsubscribe: unsubscribe,
+  unsub: unsubscribe,
+  off: unsubscribe
+};
+
+module.exports = framebus;
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 153 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23838,13 +24657,13 @@ module.exports = enumerate([
 
 
 /***/ }),
-/* 154 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isWhitelistedDomain = __webpack_require__(41);
+var isWhitelistedDomain = __webpack_require__(45);
 
 function checkOrigin(postMessageOrigin, merchantUrl) {
   var merchantOrigin, merchantHost;
@@ -23875,14 +24694,14 @@ module.exports = {
 
 
 /***/ }),
-/* 155 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var constants = __webpack_require__(28);
-var useMin = __webpack_require__(54);
+var constants = __webpack_require__(24);
+var useMin = __webpack_require__(58);
 
 module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
   return assetsUrl +
@@ -23894,7 +24713,49 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
 
 
 /***/ }),
-/* 156 */
+/* 160 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var whitelistedStyles = __webpack_require__(24).whitelistedStyles;
+
+module.exports = function getStylesFromClass(cssClass) {
+  var element = document.createElement('input');
+  var styles = {};
+  var computedStyles;
+
+  if (cssClass[0] === '.') {
+    cssClass = cssClass.substring(1);
+  }
+
+  element.className = cssClass;
+  element.style.display = 'none !important';
+  element.style.position = 'fixed !important';
+  element.style.left = '-99999px !important';
+  element.style.top = '-99999px !important';
+  global.document.body.appendChild(element);
+
+  computedStyles = global.getComputedStyle(element);
+
+  whitelistedStyles.forEach(function (style) {
+    var value = computedStyles[style];
+
+    if (value) {
+      styles[style] = value;
+    }
+  });
+
+  global.document.body.removeChild(element);
+
+  return styles;
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23919,7 +24780,7 @@ module.exports = findParentTags;
 
 
 /***/ }),
-/* 157 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23928,12 +24789,12 @@ module.exports = findParentTags;
 module.exports = {
   isIe9: __webpack_require__(22),
   isIos: __webpack_require__(19),
-  isIosWebview: __webpack_require__(158)
+  isIosWebview: __webpack_require__(163)
 };
 
 
 /***/ }),
-/* 158 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23960,7 +24821,7 @@ module.exports = function isIosWebview(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 159 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23995,7 +24856,7 @@ module.exports = EventEmitter;
 
 
 /***/ }),
-/* 160 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24017,7 +24878,21 @@ module.exports = function injectFrame(frame, container) {
 
 
 /***/ }),
-/* 161 */
+/* 166 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var creditCardType = __webpack_require__(167);
+
+creditCardType.removeCard(creditCardType.types.MIR);
+
+module.exports = creditCardType;
+
+
+/***/ }),
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24027,17 +24902,19 @@ var testOrder;
 var types = {};
 var customCards = {};
 var VISA = 'visa';
-var MASTERCARD = 'master-card';
+var MASTERCARD = 'master-card'; // TODO: rename to mastercard in major version bunmp
 var AMERICAN_EXPRESS = 'american-express';
 var DINERS_CLUB = 'diners-club';
 var DISCOVER = 'discover';
 var JCB = 'jcb';
 var UNIONPAY = 'unionpay';
 var MAESTRO = 'maestro';
+var MIR = 'mir';
 var CVV = 'CVV';
 var CID = 'CID';
 var CVC = 'CVC';
 var CVN = 'CVN';
+var CVP2 = 'CVP2';
 var ORIGINAL_TEST_ORDER = [
   VISA,
   MASTERCARD,
@@ -24046,7 +24923,8 @@ var ORIGINAL_TEST_ORDER = [
   DISCOVER,
   JCB,
   UNIONPAY,
-  MAESTRO
+  MAESTRO,
+  MIR
 ];
 
 function clone(originalObject) {
@@ -24168,6 +25046,19 @@ types[MAESTRO] = {
   }
 };
 
+types[MIR] = {
+  niceType: 'Mir',
+  type: MIR,
+  prefixPattern: /^(2|22|220|220[0-4])$/,
+  exactPattern: /^(220[0-4])\d*$/,
+  gaps: [4, 8, 12],
+  lengths: [16, 17, 18, 19],
+  code: {
+    name: CVP2,
+    size: 3
+  }
+};
+
 function findType(type) {
   return customCards[type] || types[type];
 }
@@ -24250,22 +25141,23 @@ creditCardType.types = {
   DISCOVER: DISCOVER,
   JCB: JCB,
   UNIONPAY: UNIONPAY,
-  MAESTRO: MAESTRO
+  MAESTRO: MAESTRO,
+  MIR: MIR
 };
 
 module.exports = creditCardType;
 
 
 /***/ }),
-/* 162 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BraintreeError = __webpack_require__(1);
-var errors = __webpack_require__(24);
-var whitelist = __webpack_require__(28).whitelistedAttributes;
+var errors = __webpack_require__(25);
+var whitelist = __webpack_require__(24).whitelistedAttributes;
 
 function attributeValidationError(attribute, value) {
   var err;
@@ -24301,13 +25193,13 @@ module.exports = attributeValidationError;
 
 
 /***/ }),
-/* 163 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var device = __webpack_require__(164);
+var device = __webpack_require__(170);
 
 module.exports = function () {
   // Digits get dropped in samsung browser
@@ -24316,7 +25208,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 164 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24324,8 +25216,8 @@ module.exports = function () {
 
 var UA = global.navigator && global.navigator.userAgent;
 
-var isAndroid = __webpack_require__(55);
-var isChrome = __webpack_require__(56);
+var isAndroid = __webpack_require__(59);
+var isChrome = __webpack_require__(60);
 var isIos = __webpack_require__(19);
 var isIE9 = __webpack_require__(22);
 
@@ -24365,7 +25257,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 165 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24378,7 +25270,7 @@ module.exports = function isEdge(ua) {
 
 
 /***/ }),
-/* 166 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24392,7 +25284,7 @@ module.exports = {
 
 
 /***/ }),
-/* 167 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24400,11 +25292,10 @@ module.exports = {
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btGooglePay = __webpack_require__(168);
+var btGooglePay = __webpack_require__(174);
 var DropinError = __webpack_require__(8);
 var constants = __webpack_require__(2);
-var assets = __webpack_require__(60);
-var classlist = __webpack_require__(13);
+var assets = __webpack_require__(26);
 var Promise = __webpack_require__(5);
 var analytics = __webpack_require__(14);
 
@@ -24432,10 +25323,10 @@ GooglePayView.prototype.initialize = function () {
     buttonDiv.addEventListener('click', function (event) {
       event.preventDefault();
 
-      classlist.add(self.element, 'braintree-sheet--loading');
+      self.preventUserAction();
 
       self.tokenize().then(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       });
     });
     self.model.asyncDependencyReady();
@@ -24454,6 +25345,7 @@ GooglePayView.prototype.tokenize = function () {
 
   return self.paymentsClient.loadPaymentData(paymentDataRequest).then(function (paymentData) {
     rawPaymentData = paymentData;
+
     return self.googlePayInstance.parseResponse(paymentData);
   }).then(function (tokenizePayload) {
     tokenizePayload.rawPaymentData = rawPaymentData;
@@ -24466,6 +25358,7 @@ GooglePayView.prototype.tokenize = function () {
       reportedError = 'developerError';
     } else if (err.statusCode === 'CANCELED') {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.canceled');
+
       return;
     } else if (err.statusCode) {
       analytics.sendEvent(self.client, 'googlepay.loadPaymentData.failed');
@@ -24487,8 +25380,8 @@ GooglePayView.isEnabled = function (options) {
   }
 
   return Promise.resolve().then(function () {
-    if (!global.google) {
-      return assets.loadScript(global.document.head, {
+    if (!(global.google && global.google.payments && global.google.payments.api && global.google.payments.api.PaymentsClient)) {
+      return assets.loadScript({
         id: constants.GOOGLE_PAYMENT_SCRIPT_ID,
         src: constants.GOOGLE_PAYMENT_SOURCE
       });
@@ -24517,7 +25410,7 @@ module.exports = GooglePayView;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 168 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24525,16 +25418,14 @@ module.exports = GooglePayView;
 /**
  * @module braintree-web/google-payment
  * @description A component to integrate with Google Pay. The majority of the integration uses [Google's pay.js JavaScript file](https://payments.developers.google.com/js/apis/pay.js). The Braintree component generates the configuration object necessary for Google Pay to initiate the Payment Request and parse the returned data to retrieve the payment method nonce which is used to process the transaction on the server.
- *
- * **Note:** This component is currently in beta and the API may include breaking changes when upgrading. Please review the [Changelog](https://github.com/braintree/braintree-web/blob/master/CHANGELOG.md) for upgrade steps whenever you upgrade the version of braintree-web.
- * */
+ */
 
 var basicComponentVerification = __webpack_require__(16);
 var BraintreeError = __webpack_require__(1);
-var GooglePayment = __webpack_require__(169);
+var GooglePayment = __webpack_require__(175);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 
 /**
  * @static
@@ -24665,18 +25556,18 @@ module.exports = {
 
 
 /***/ }),
-/* 169 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var analytics = __webpack_require__(7);
-var assign = __webpack_require__(15).assign;
-var convertMethodsToError = __webpack_require__(12);
-var generateGooglePayConfiguration = __webpack_require__(170);
+var assign = __webpack_require__(11).assign;
+var convertMethodsToError = __webpack_require__(13);
+var generateGooglePayConfiguration = __webpack_require__(176);
 var BraintreeError = __webpack_require__(1);
-var methods = __webpack_require__(11);
+var methods = __webpack_require__(12);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -24706,8 +25597,6 @@ var wrapPromise = __webpack_require__(3);
  * @param {object} options Google Payment {@link module:braintree-web/google-payment.create create} options.
  * @description <strong>Do not use this constructor directly. Use {@link module:braintree-web/google-payment.create|braintree-web.google-payment.create} instead.</strong>
  * @classdesc This class represents a Google Payment component produced by {@link module:braintree-web/google-payment.create|braintree-web/google-payment.create}. Instances of this class have methods for initializing the Google Pay flow.
- *
- * **Note:** This component is currently in beta and the API may include breaking changes when upgrading. Please review the [Changelog](https://github.com/braintree/braintree-web/blob/master/CHANGELOG.md) for upgrade steps whenever you upgrade the version of braintree-web.
  */
 function GooglePayment(options) {
   this._client = options.client;
@@ -24840,13 +25729,13 @@ module.exports = wrapPromise.wrapPrototype(GooglePayment);
 
 
 /***/ }),
-/* 170 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 
 module.exports = function (configuration) {
   var isProduction = configuration.gatewayConfiguration.environment === 'production';
@@ -24886,14 +25775,15 @@ module.exports = function (configuration) {
 
 
 /***/ }),
-/* 171 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-var BasePayPalView = __webpack_require__(61);
+var BasePayPalView = __webpack_require__(64);
 
 function PayPalView() {
   BasePayPalView.apply(this, arguments);
@@ -24904,16 +25794,18 @@ PayPalView.prototype.constructor = PayPalView;
 PayPalView.ID = PayPalView.prototype.ID = paymentOptionIDs.paypal;
 
 PayPalView.isEnabled = function (options) {
-  return BasePayPalView.isEnabled(options).then(function (enabled) {
-    return enabled && Boolean(options.merchantConfiguration.paypal);
-  });
+  if (!options.merchantConfiguration.paypal) {
+    return Promise.resolve(false);
+  }
+
+  return BasePayPalView.isEnabled(options);
 };
 
 module.exports = PayPalView;
 
 
 /***/ }),
-/* 172 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -24926,11 +25818,11 @@ module.exports = PayPalView;
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(62);
+var errors = __webpack_require__(65);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var PayPalCheckout = __webpack_require__(173);
-var VERSION = "3.31.0";
+var PayPalCheckout = __webpack_require__(179);
+var VERSION = "3.34.0";
 
 /**
  * @static
@@ -24965,7 +25857,7 @@ function create(options) {
       return Promise.reject(new BraintreeError(errors.PAYPAL_NOT_ENABLED));
     }
 
-    if (!config.gatewayConfiguration.paypal.clientId) {
+    if (config.gatewayConfiguration.paypal.environmentNoNetwork === true) {
       return Promise.reject(new BraintreeError(errors.PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED));
     }
 
@@ -24998,7 +25890,7 @@ module.exports = {
 
 
 /***/ }),
-/* 173 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25008,11 +25900,11 @@ var analytics = __webpack_require__(7);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
-var convertToBraintreeError = __webpack_require__(42);
-var errors = __webpack_require__(62);
-var constants = __webpack_require__(174);
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
+var convertToBraintreeError = __webpack_require__(46);
+var errors = __webpack_require__(65);
+var constants = __webpack_require__(180);
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
 
 /**
  * PayPal Checkout tokenized payload. Returned in {@link PayPalCheckout#tokenizePayment}'s callback as the second argument, `data`.
@@ -25453,7 +26345,7 @@ module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
 
 /***/ }),
-/* 174 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25469,14 +26361,1536 @@ module.exports = {
 
 
 /***/ }),
-/* 175 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
+module.exports = {
+  "payingWith": "Betaler med {{paymentSource}}",
+  "chooseAnotherWayToPay": "Vælg en anden betalingsmetode",
+  "chooseAWayToPay": "Vælg, hvordan du vil betale",
+  "otherWaysToPay": "Andre betalingsmetoder",
+  "cardVerification": "Bekræftelse af kort",
+  "fieldEmptyForCvv": "Du skal angive kontrolcifrene.",
+  "fieldEmptyForExpirationDate": "Du skal angive udløbsdatoen.",
+  "fieldEmptyForCardholderName": "Du skal angive kortindehaverens navn.",
+  "fieldTooLongForCardholderName": "Kortejerens navn skal være mindre end 256 tegn.",
+  "fieldEmptyForNumber": "Du skal angive et nummer.",
+  "fieldEmptyForPostalCode": "Du skal angive et postnummer.",
+  "fieldInvalidForCvv": "Sikkerhedskoden er ugyldig.",
+  "fieldInvalidForExpirationDate": "Udløbsdatoen er ugyldig.",
+  "fieldInvalidForNumber": "Kortnummeret er ugyldigt.",
+  "fieldInvalidForPostalCode": "Postnummeret er ugyldigt.",
+  "genericError": "Der opstod fejl i vores system.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Dette betalingskort er allerede en gemt betalingsmetode.",
+  "hostedFieldsFailedTokenizationError": "Kontroller oplysningerne, og prøv igen.",
+  "hostedFieldsFieldsInvalidError": "Kontroller oplysningerne, og prøv igen.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Betalingskortet blev ikke bekræftet. Kontrollér oplysningerne, og prøv igen.",
+  "paypalAccountTokenizationFailedError": "PayPal-kontoen blev ikke tilføjet. Prøv igen.",
+  "paypalFlowFailedError": "Der kunne ikke oprettes forbindelse til PayPal. Prøv igen.",
+  "paypalTokenizationRequestActiveError": "PayPal-betalingen er i gang med at blive autoriseret.",
+  "venmoCanceledError": "Der opstod en fejl. Sørg for, at du har den seneste version af Venmo-appen installeret på din enhed, og at din browser understøtter skift til Venmo.",
+  "venmoAppFailedError": "Venmo-appen blev ikke fundet på din enhed.",
+  "unsupportedCardTypeError": "Korttypen understøttes ikke. Prøv et andet kort.",
+  "applePayTokenizationError": "Der opstod en netværksfejl under behandlingen af betalingen med Apple Pay. Prøv igen.",
+  "applePayActiveCardError": "Knyt et understøttet kort til din Apple Pay-e-pung.",
+  "cardholderNameLabel": "Kortindehaverens navn",
+  "cardNumberLabel": "Kortnummer",
+  "cvvLabel": "Kontrolcifre",
+  "cvvThreeDigitLabelSubheading": "(3 cifre)",
+  "cvvFourDigitLabelSubheading": "(4 cifre)",
+  "cardholderNamePlaceholder": "Kortindehaverens navn",
+  "expirationDateLabel": "Udløbsdato",
+  "expirationDateLabelSubheading": "(MM/ÅÅ)",
+  "expirationDatePlaceholder": "MM/ÅÅ",
+  "postalCodeLabel": "Postnummer",
+  "payWithCard": "Betal med kort",
+  "endingIn": "Slutter med ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Kort",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 182 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Zahlen mit {{paymentSource}}",
+  "chooseAnotherWayToPay": "Andere Zahlungsmethode wählen",
+  "chooseAWayToPay": "Wie möchten Sie bezahlen?",
+  "otherWaysToPay": "Andere Zahlungsmethoden",
+  "cardVerification": "Kartenbestätigung",
+  "fieldEmptyForCvv": "Geben Sie die Kartenprüfnummer ein.",
+  "fieldEmptyForExpirationDate": "Geben Sie das Ablaufdatum ein.",
+  "fieldEmptyForCardholderName": "Geben Sie den Namen des Karteninhabers ein.",
+  "fieldTooLongForCardholderName": "Der Name des Karteninhabers darf 255 Zeichen nicht übersteigen.",
+  "fieldEmptyForNumber": "Geben Sie die Nummer ein.",
+  "fieldEmptyForPostalCode": "Geben Sie die PLZ ein.",
+  "fieldInvalidForCvv": "Die Kartenprüfnummer ist ungültig.",
+  "fieldInvalidForExpirationDate": "Das Ablaufdatum ist ungültig.",
+  "fieldInvalidForNumber": "Die Kreditkartennummer ist ungültig.",
+  "fieldInvalidForPostalCode": "Die PLZ ist ungültig.",
+  "genericError": "Bei uns ist ein Problem aufgetreten.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Diese Kreditkarte ist bereits als gespeicherte Zahlungsmethode vorhanden.",
+  "hostedFieldsFailedTokenizationError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+  "hostedFieldsFieldsInvalidError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Überprüfung der Karte fehlgeschlagen. Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
+  "paypalAccountTokenizationFailedError": "Beim Hinzufügen des PayPal-Kontos ist ein Problem aufgetreten. Versuchen Sie es erneut.",
+  "paypalFlowFailedError": "Beim Verbinden mit PayPal ist ein Problem aufgetreten. Versuchen Sie es erneut.",
+  "paypalTokenizationRequestActiveError": "Die PayPal-Zahlung wird bereits autorisiert.",
+  "venmoCanceledError": "Etwas ist schief gelaufen. Vergewissern Sie sich, dass Sie die neueste Version der Venmo-App auf Ihrem Gerät installiert haben und Ihr Browser den Wechsel zu Venmo unterstützt.",
+  "venmoAppFailedError": "Die Venmo-App wurde auf Ihrem Gerät nicht gefunden.",
+  "unsupportedCardTypeError": "Dieser Kreditkartentyp wird nicht unterstützt. Versuchen Sie es mit einer anderen Karte.",
+  "applePayTokenizationError": "Netzwerkfehler bei der Zahlungsabwicklung mit Apple Pay. Versuchen Sie es erneut.",
+  "applePayActiveCardError": "Fügen Sie der Apple-Pay-Börse eine unterstützte Kreditkarte hinzu.",
+  "cardholderNameLabel": "Name des Karteninhabers",
+  "cardNumberLabel": "Kartennummer",
+  "cvvLabel": "Prüfnr.",
+  "cvvThreeDigitLabelSubheading": "(3-stellig)",
+  "cvvFourDigitLabelSubheading": "(4-stellig)",
+  "cardholderNamePlaceholder": "Name des Karteninhabers",
+  "expirationDateLabel": "Gültig bis",
+  "expirationDateLabelSubheading": "(MM/JJ)",
+  "expirationDatePlaceholder": "MM/JJ",
+  "postalCodeLabel": "PLZ",
+  "payWithCard": "Mit Kreditkarte zahlen",
+  "endingIn": "Mit den Endziffern ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Kreditkarte",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 183 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  payingWith: 'Paying with {{paymentSource}}',
+  chooseAnotherWayToPay: 'Choose another way to pay',
+  chooseAWayToPay: 'Choose a way to pay',
+  otherWaysToPay: 'Other ways to pay',
+  cardVerification: 'Card Verification',
+  // Errors
+  fieldEmptyForCvv: 'Please fill out a CVV.',
+  fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
+  fieldEmptyForCardholderName: 'Please fill out a cardholder name.',
+  fieldEmptyForNumber: 'Please fill out a card number.',
+  fieldEmptyForPostalCode: 'Please fill out a postal code.',
+  fieldInvalidForCvv: 'This security code is not valid.',
+  fieldInvalidForExpirationDate: 'This expiration date is not valid.',
+  fieldInvalidForNumber: 'This card number is not valid.',
+  fieldInvalidForPostalCode: 'This postal code is not valid.',
+  fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
+  genericError: 'Something went wrong on our end.',
+  hostedFieldsTokenizationFailOnDuplicateError: 'This credit card already exists as a saved payment method.',
+  hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
+  hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
+  hostedFieldsTokenizationNetworkErrorError: 'Network error. Please try again.',
+  hostedFieldsFieldsInvalidError: 'Please check your information and try again.',
+  paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
+  paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
+  paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
+  applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
+  applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
+  venmoCanceledError: 'Something went wrong. Ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.',
+  venmoAppFailedError: 'The Venmo app could not be found on your device.',
+  unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
+  // Card form
+  cardholderNameLabel: 'Cardholder Name',
+  cardNumberLabel: 'Card Number',
+  cvvLabel: 'CVV',
+  cvvThreeDigitLabelSubheading: '(3 digits)',
+  cvvFourDigitLabelSubheading: '(4 digits)',
+  expirationDateLabel: 'Expiration Date',
+  expirationDateLabelSubheading: '(MM/YY)',
+  cardholderNamePlaceholder: 'Cardholder Name',
+  expirationDatePlaceholder: 'MM/YY',
+  postalCodeLabel: 'Postal Code',
+  payWithCard: 'Pay with card',
+  // Payment Method descriptions
+  endingIn: 'Ending in ••{{lastTwoCardDigits}}',
+  Card: 'Card',
+  PayPal: 'PayPal',
+  'PayPal Credit': 'PayPal Credit',
+  'Apple Pay': 'Apple Pay',
+  'Google Pay': 'Google Pay',
+  'Venmo': 'Venmo',
+  'American Express': 'American Express',
+  Discover: 'Discover',
+  'Diners Club': 'Diners Club',
+  MasterCard: 'Mastercard',
+  Visa: 'Visa',
+  JCB: 'JCB',
+  Maestro: 'Maestro',
+  UnionPay: 'UnionPay'
+};
+
+
+/***/ }),
+/* 184 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Paying with {{paymentSource}}",
+  "chooseAnotherWayToPay": "Choose another way to pay",
+  "chooseAWayToPay": "Choose a way to pay",
+  "otherWaysToPay": "Other ways to pay",
+  "cardVerification": "Card verification",
+  "fieldEmptyForCvv": "Please fill out a CVV.",
+  "fieldEmptyForExpirationDate": "Please fill out an expiry date.",
+  "fieldEmptyForCardholderName": "Please fill out a cardholder name.",
+  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
+  "fieldEmptyForNumber": "Please fill out a number.",
+  "fieldEmptyForPostalCode": "Please fill out a postcode.",
+  "fieldInvalidForCvv": "This security code is not valid.",
+  "fieldInvalidForExpirationDate": "This expiry date is not valid.",
+  "fieldInvalidForNumber": "This card number is not valid.",
+  "fieldInvalidForPostalCode": "This postcode is not valid.",
+  "genericError": "Something went wrong on our end.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "This credit card already exists as a saved payment method.",
+  "hostedFieldsFailedTokenizationError": "Check your entries and try again.",
+  "hostedFieldsFieldsInvalidError": "Check your entries and try again.",
+  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Check your entries and try again.",
+  "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
+  "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
+  "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
+  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Please ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.",
+  "venmoAppFailedError": "The Venmo app wasn't found on your device.",
+  "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
+  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
+  "applePayActiveCardError": "Link a supported card to your Apple Pay wallet.",
+  "cardholderNameLabel": "Cardholder Name",
+  "cardNumberLabel": "Card Number",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 digits)",
+  "cvvFourDigitLabelSubheading": "(4 digits)",
+  "cardholderNamePlaceholder": "Cardholder Name",
+  "expirationDateLabel": "Expiry date",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "Postcode",
+  "payWithCard": "Pay with credit or debit card",
+  "endingIn": "Ending in ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Card",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 185 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Paying with {{paymentSource}}",
+  "chooseAnotherWayToPay": "Choose another way to pay",
+  "chooseAWayToPay": "Choose a way to pay",
+  "otherWaysToPay": "Other ways to pay",
+  "cardVerification": "Card Verification",
+  "fieldEmptyForCvv": "Please fill in a CSC.",
+  "fieldEmptyForExpirationDate": "Please fill in an expiry date.",
+  "fieldEmptyForCardholderName": "Please fill in a cardholder name.",
+  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
+  "fieldEmptyForNumber": "Please fill in a number.",
+  "fieldEmptyForPostalCode": "Please fill in a postcode.",
+  "fieldInvalidForCvv": "This security code is not valid.",
+  "fieldInvalidForExpirationDate": "This expiry date is not valid.",
+  "fieldInvalidForNumber": "This card number is not valid.",
+  "fieldInvalidForPostalCode": "This postcode is not valid.",
+  "genericError": "Something went wrong on our end.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "This credit card already exists as a saved funding source.",
+  "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
+  "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
+  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
+  "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
+  "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
+  "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
+  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Make sure you have the most recent version of the Venmo app installed on your device and your browser supports the switch to Venmo.",
+  "venmoAppFailedError": "The Venmo app isn't on your device.",
+  "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
+  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
+  "applePayActiveCardError": "Add a supported card to your Apple Pay wallet.",
+  "cardholderNameLabel": "Cardholder Name",
+  "cardNumberLabel": "Card Number",
+  "cvvLabel": "CSC",
+  "cvvThreeDigitLabelSubheading": "(3 digits)",
+  "cvvFourDigitLabelSubheading": "(4 digits)",
+  "cardholderNamePlaceholder": "Cardholder Name",
+  "expirationDateLabel": "Expiry Date",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "Postcode",
+  "payWithCard": "Pay with card",
+  "endingIn": "Ending in ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Card",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 186 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Pago con {{paymentSource}}",
+  "chooseAnotherWayToPay": "Selecciona otra forma de pago.",
+  "chooseAWayToPay": "Selecciona una forma de pago.",
+  "otherWaysToPay": "Otras formas de pago",
+  "cardVerification": "Verificación de tarjeta",
+  "fieldEmptyForCvv": "Escribe el código CVV.",
+  "fieldEmptyForExpirationDate": "Escribe la fecha de vencimiento.",
+  "fieldEmptyForCardholderName": "Escribe el nombre de un titular de la tarjeta.",
+  "fieldTooLongForCardholderName": "El nombre del titular de la tarjeta debe tener menos de 256 caracteres.",
+  "fieldEmptyForNumber": "Escribe un número.",
+  "fieldEmptyForPostalCode": "Escribe el código postal.",
+  "fieldInvalidForCvv": "Este código de seguridad no es válido.",
+  "fieldInvalidForExpirationDate": "Esta fecha de vencimiento no es válida.",
+  "fieldInvalidForNumber": "Este número de tarjeta no es válido.",
+  "fieldInvalidForPostalCode": "Este código postal no es válido.",
+  "genericError": "Hemos tenido algún problema.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Esta tarjeta de crédito ya existe como forma de pago guardada.",
+  "hostedFieldsFailedTokenizationError": "Comprueba la información e inténtalo de nuevo.",
+  "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
+  "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Error de verificación de la tarjeta de crédito. Comprueba la información e inténtalo de nuevo.",
+  "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
+  "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
+  "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
+  "venmoCanceledError": "Ha habido un problema. Asegúrate de que tienes la versión más reciente de la aplicación de Venmo instalada en tu dispositivo y de que tu navegador es compatible con cambiar a Venmo.",
+  "venmoAppFailedError": "No se ha encontrado la aplicación de Venmo en tu dispositivo.",
+  "unsupportedCardTypeError": "No se admite este tipo de tarjeta. Prueba con otra tarjeta.",
+  "applePayTokenizationError": "Se ha producido un error de red al procesar el pago con Apple Pay. Inténtalo de nuevo.",
+  "applePayActiveCardError": "Añade una tarjeta admitida a tu Wallet de Apple Pay.",
+  "cardholderNameLabel": "Nombre del titular de la tarjeta",
+  "cardNumberLabel": "Número de tarjeta",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
+  "cvvFourDigitLabelSubheading": "(4 dígitos)",
+  "cardholderNamePlaceholder": "Nombre del titular de la tarjeta",
+  "expirationDateLabel": "Fecha de vencimiento",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Código postal",
+  "payWithCard": "Pagar con tarjeta",
+  "endingIn": "Terminada en ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Tarjeta",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 187 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Payer avec {{paymentSource}}",
+  "chooseAnotherWayToPay": "Choisir un autre mode de paiement",
+  "chooseAWayToPay": "Choisir le mode de paiement",
+  "otherWaysToPay": "Autres modes de paiement",
+  "cardVerification": "Vérification de la carte",
+  "fieldEmptyForCvv": "Veuillez saisir un cryptogramme visuel.",
+  "fieldEmptyForExpirationDate": "Veuillez saisir une date d'expiration.",
+  "fieldEmptyForCardholderName": "Veuillez saisir un nom de titulaire de la carte.",
+  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
+  "fieldEmptyForNumber": "Veuillez saisir un numéro.",
+  "fieldEmptyForPostalCode": "Veuillez saisir un code postal.",
+  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
+  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
+  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
+  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
+  "genericError": "Une erreur s'est produite de notre côté.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Cette carte de crédit existe déjà comme mode de paiement enregistré.",
+  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations, puis réessayez.",
+  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations, puis réessayez.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Veuillez réessayer.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "La vérification de la carte de crédit a échoué. Vérifiez vos informations, puis réessayez.",
+  "paypalAccountTokenizationFailedError": "Une erreur s'est produite lors de l'enregistrement du compte PayPal. Veuillez réessayer.",
+  "paypalFlowFailedError": "Une erreur s'est produite au cours de la connexion à PayPal. Veuillez réessayer.",
+  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
+  "venmoCanceledError": "Une erreur s'est produite. Assurez-vous que la version la plus récente de l'application Venmo est installée sur votre appareil et que votre navigateur prend Venmo en charge.",
+  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
+  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Veuillez essayer une autre carte.",
+  "applePayTokenizationError": "Une erreur de réseau s'est produite lors du traitement du paiement avec Apple Pay. Veuillez réessayer.",
+  "applePayActiveCardError": "Ajoutez une carte prise en charge à Apple Pay.",
+  "cardholderNameLabel": "Nom du titulaire de la carte",
+  "cardNumberLabel": "Numéro de carte",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
+  "cvvFourDigitLabelSubheading": "(4 chiffres)",
+  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
+  "expirationDateLabel": "Date d'expiration",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Code postal",
+  "payWithCard": "Payer par carte",
+  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Carte",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 188 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Payer avec {{paymentSource}}",
+  "chooseAnotherWayToPay": "Choisissez une autre façon de payer.",
+  "chooseAWayToPay": "Choisissez comment payer.",
+  "otherWaysToPay": "Autres façons de payer",
+  "cardVerification": "Vérification de la carte",
+  "fieldEmptyForCvv": "Entrez un cryptogramme visuel.",
+  "fieldEmptyForExpirationDate": "Entrez une date d'expiration.",
+  "fieldEmptyForCardholderName": "Entrez un nom du titulaire de la carte.",
+  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
+  "fieldEmptyForNumber": "Entrez un numéro.",
+  "fieldEmptyForPostalCode": "Entrez un code postal.",
+  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
+  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
+  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
+  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
+  "genericError": "Une erreur est survenue.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Cette carte bancaire existe déjà comme mode de paiement enregistré.",
+  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations et réessayez.",
+  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Échec de vérification de la carte bancaire. Vérifiez vos informations et réessayez.",
+  "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
+  "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
+  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
+  "venmoCanceledError": "Une erreur est survenue. Vérifiez que vous disposez de la dernière version de l'application Venmo sur votre appareil et que votre navigateur prend en charge la redirection vers Venmo.",
+  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
+  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Essayez une autre carte.",
+  "applePayTokenizationError": "Une erreur réseau s'est produite lors du traitement du paiement Apple Pay. Réessayez.",
+  "applePayActiveCardError": "Enregistrez une carte prise en charge sur Apple Pay.",
+  "cardholderNameLabel": "Nom du titulaire de la carte",
+  "cardNumberLabel": "Nº de carte",
+  "cvvLabel": "Cryptogramme visuel",
+  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
+  "cvvFourDigitLabelSubheading": "(4 chiffres)",
+  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
+  "expirationDateLabel": "Date d'expiration",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Code postal",
+  "payWithCard": "Payer par carte",
+  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Carte",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 189 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Membayar dengan {{paymentSource}}",
+  "chooseAnotherWayToPay": "Pilih metode pembayaran lain",
+  "chooseAWayToPay": "Pilih metode pembayaran",
+  "otherWaysToPay": "Metode pembayaran lain",
+  "cardVerification": "Verifikasi Kartu",
+  "fieldEmptyForCvv": "Masukkan CVV.",
+  "fieldEmptyForExpirationDate": "Masukkan tanggal akhir berlaku.",
+  "fieldEmptyForCardholderName": "Masukkan nama pemegang kartu.",
+  "fieldTooLongForCardholderName": "Nama pemegang kartu harus kurang dari 256 karakter.",
+  "fieldEmptyForNumber": "Masukkan nomor.",
+  "fieldEmptyForPostalCode": "Masukkan kode pos.",
+  "fieldInvalidForCvv": "Kode keamanan ini tidak valid.",
+  "fieldInvalidForExpirationDate": "Tanggal akhir berlaku ini tidak valid.",
+  "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",
+  "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
+  "genericError": "Terjadi kesalahan pada sistem kami.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Kartu kredit ini sudah dimasukkan sebagai metode pembayaran tersimpan.",
+  "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
+  "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
+  "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifikasi kartu kredit gagal. Periksa informasi Anda dan coba lagi.",
+  "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
+  "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
+  "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
+  "venmoCanceledError": "Terdapat kesalahan. Pastikan Anda telah menginstal aplikasi Venmo versi terbaru pada perangkat dan peramban Anda mendukung untuk beralih ke Venmo.",
+  "venmoAppFailedError": "Aplikasi Venmo tidak dapat ditemukan pada perangkat Anda.",
+  "unsupportedCardTypeError": "Jenis kartu ini tidak didukung. Coba kartu lainnya.",
+  "applePayTokenizationError": "Terjadi kesalahan jaringan sewaktu memproses pembayaran melalui Apple Pay. Coba lagi.",
+  "applePayActiveCardError": "Tambahkan kartu yang didukung ke wallet Apple Pay.",
+  "cardholderNameLabel": "Nama Pemegang Kartu",
+  "cardNumberLabel": "Nomor Kartu",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 angka)",
+  "cvvFourDigitLabelSubheading": "(4 angka)",
+  "cardholderNamePlaceholder": "Nama Pemegang Kartu",
+  "expirationDateLabel": "Tanggal Kedaluwarsa",
+  "expirationDateLabelSubheading": "(BB/TT)",
+  "expirationDatePlaceholder": "BB/TT",
+  "postalCodeLabel": "Kode Pos",
+  "payWithCard": "Bayar dengan kartu",
+  "endingIn": "Berakhiran ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Kartu",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 190 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Pagamento con {{paymentSource}}",
+  "chooseAnotherWayToPay": "Scegli di pagare in un altro modo",
+  "chooseAWayToPay": "Scegli come pagare",
+  "otherWaysToPay": "Altri modi di pagare",
+  "cardVerification": "Codice di sicurezza",
+  "fieldEmptyForCvv": "Immetti il codice di sicurezza (CVV).",
+  "fieldEmptyForExpirationDate": "Immetti la data di scadenza.",
+  "fieldEmptyForCardholderName": "Immetti il nome del titolare della carta.",
+  "fieldTooLongForCardholderName": "Il nome del titolare della carta deve avere meno di 256 caratteri.",
+  "fieldEmptyForNumber": "Immetti il numero di carta.",
+  "fieldEmptyForPostalCode": "Immetti il CAP.",
+  "fieldInvalidForCvv": "Il codice di sicurezza non è valido.",
+  "fieldInvalidForExpirationDate": "La data di scadenza non è valida.",
+  "fieldInvalidForNumber": "Il numero di carta non è valido.",
+  "fieldInvalidForPostalCode": "Il CAP non è valido.",
+  "genericError": "Si è verificato un errore nei nostri sistemi.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Questa carta di credito è già registrata come metodo di pagamento salvato.",
+  "hostedFieldsFailedTokenizationError": "Controlla e riprova.",
+  "hostedFieldsFieldsInvalidError": "Controlla e riprova.",
+  "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "La verifica della carta di credito non è andata a buon fine. Controlla i dati e riprova.",
+  "paypalAccountTokenizationFailedError": "Si è verificato un errore nel collegamento del conto PayPal. Riprova.",
+  "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
+  "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
+  "venmoCanceledError": "Si è verificato un errore. Assicurati di avere la versione più recente dell'app Venmo installata sul tuo dispositivo e che il browser supporti l'uso di Venmo.",
+  "venmoAppFailedError": "Impossibile trovare l'app Venmo sul dispositivo in uso.",
+  "unsupportedCardTypeError": "Questo tipo di carta non è supportato. Prova con un'altra carta.",
+  "applePayTokenizationError": "Si è verificato un errore di rete durante l'elaborazione del pagamento con Apple Pay. Riprova.",
+  "applePayActiveCardError": "Collega una carta supportata al tuo Apple Pay Wallet.",
+  "cardholderNameLabel": "Titolare della carta",
+  "cardNumberLabel": "Numero di carta",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 cifre)",
+  "cvvFourDigitLabelSubheading": "(4 cifre)",
+  "cardholderNamePlaceholder": "Titolare della carta",
+  "expirationDateLabel": "Data di scadenza",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "CAP",
+  "payWithCard": "Paga con una carta",
+  "endingIn": "Le cui ultime cifre sono ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Carta",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 191 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "{{paymentSource}}で支払う",
+  "chooseAnotherWayToPay": "別の支払方法を選択する",
+  "chooseAWayToPay": "支払方法を選択する",
+  "otherWaysToPay": "その他の支払方法",
+  "cardVerification": "カード確認",
+  "fieldEmptyForCvv": "カード確認コードを入力してください。",
+  "fieldEmptyForExpirationDate": "有効期限を入力してください。",
+  "fieldEmptyForCardholderName": "カード保有者の名前を入力してください。",
+  "fieldTooLongForCardholderName": "カード保有者の名前は256文字未満にしてください。",
+  "fieldEmptyForNumber": "番号を入力してください。",
+  "fieldEmptyForPostalCode": "郵便番号を入力してください。",
+  "fieldInvalidForCvv": "このセキュリティコードは無効です。",
+  "fieldInvalidForExpirationDate": "この有効期限は無効です。",
+  "fieldInvalidForNumber": "このカード番号は無効です。",
+  "fieldInvalidForPostalCode": "この郵便番号は無効です。",
+  "genericError": "弊社側で問題が発生しました。",
+  "hostedFieldsTokenizationFailOnDuplicateError": "このクレジットカードは、保存済みの支払方法としてすでに登録されています。",
+  "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
+  "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
+  "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "クレジットカードの認証に失敗しました。情報を確認してもう一度お試しください。",
+  "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
+  "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
+  "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
+  "venmoCanceledError": "問題が発生しました。お客さまの端末にインストールされているVenmoアプリが最新のバージョンであること、お使いのブラウザがVenmoへの切り替えをサポートしていることを確認してください。",
+  "venmoAppFailedError": "お客さまの端末でVenmoアプリが見つかりませんでした。",
+  "unsupportedCardTypeError": "このカードタイプはサポートされていません。別のカードをご使用ください。",
+  "applePayTokenizationError": "Apple Payの支払いを処理する際にネットワークエラーが発生しました。もう一度お試しください。",
+  "applePayActiveCardError": "Apple Payウォレットに対応しているカードを追加してください。",
+  "cardholderNameLabel": "カード保有者の名前",
+  "cardNumberLabel": "カード番号",
+  "cvvLabel": "カード確認コード",
+  "cvvThreeDigitLabelSubheading": "(3桁)",
+  "cvvFourDigitLabelSubheading": "(4桁)",
+  "cardholderNamePlaceholder": "カード保有者の名前",
+  "expirationDateLabel": "有効期限",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "郵便番号",
+  "payWithCard": "カードで支払う",
+  "endingIn": "x-{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "カード",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "銀聯(UnionPay)"
+};
+
+
+/***/ }),
+/* 192 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "{{paymentSource}}(으)로 결제",
+  "chooseAnotherWayToPay": "다른 결제수단 선택",
+  "chooseAWayToPay": "결제수단 선택",
+  "otherWaysToPay": "다른 방법으로 결제",
+  "cardVerification": "카드 인증",
+  "fieldEmptyForCvv": "CVV를 입력하세요.",
+  "fieldEmptyForExpirationDate": "만료일을 입력하세요.",
+  "fieldEmptyForCardholderName": "카드 소유자 이름을 입력하세요.",
+  "fieldTooLongForCardholderName": "카드 소유자 이름은 256자 미만이어야 합니다.",
+  "fieldEmptyForNumber": "번호를 입력하세요.",
+  "fieldEmptyForPostalCode": "우편번호를 입력하세요.",
+  "fieldInvalidForCvv": "이 보안 코드가 올바르지 않습니다.",
+  "fieldInvalidForExpirationDate": "이 만료일이 올바르지 않습니다.",
+  "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",
+  "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
+  "genericError": "저희 쪽에 문제가 발생했습니다.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "저장된 결제수단에 이미 이 신용카드가 존재합니다.",
+  "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
+  "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
+  "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
+  "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
+  "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
+  "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
+  "venmoCanceledError": "오류가 발생했습니다. 기기에 최신 버전의 Venmo 앱이 설치되어 있으며 브라우저가 Venmo로 전환 기능을 지원하는지 확인하세요.",
+  "venmoAppFailedError": "기기에서 Venmo 앱을 찾을 수 없습니다.",
+  "unsupportedCardTypeError": "이 카드 형식은 지원되지 않습니다. 다른 카드로 시도해 주세요.",
+  "applePayTokenizationError": "Apple Pay 결제를 처리하는 동안 네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
+  "applePayActiveCardError": "Apple Pay 전자지갑에 지원되는 카드를 추가하세요.",
+  "cardholderNameLabel": "카드 소유자 이름",
+  "cardNumberLabel": "카드 번호",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3자리)",
+  "cvvFourDigitLabelSubheading": "(4자리)",
+  "cardholderNamePlaceholder": "카드 소유자 이름",
+  "expirationDateLabel": "만료일",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "우편번호",
+  "payWithCard": "카드로 결제",
+  "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "카드",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 193 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Betalen met {{paymentSource}}",
+  "chooseAnotherWayToPay": "Kies een andere betaalmethode",
+  "chooseAWayToPay": "Kies een betaalwijze",
+  "otherWaysToPay": "Andere manieren om te betalen",
+  "cardVerification": "Kaartcontrole",
+  "fieldEmptyForCvv": "Vul een CSC in.",
+  "fieldEmptyForExpirationDate": "Vul een vervaldatum in.",
+  "fieldEmptyForCardholderName": "Vul een naam voor de kaarthouder in.",
+  "fieldTooLongForCardholderName": "De naam van de kaarthouder moet korter zijn dan 256 tekens.",
+  "fieldEmptyForNumber": "Vul een nummer in.",
+  "fieldEmptyForPostalCode": "Vul een postcode in.",
+  "fieldInvalidForCvv": "Deze CSC is ongeldig.",
+  "fieldInvalidForExpirationDate": "Deze vervaldatum is ongeldig.",
+  "fieldInvalidForNumber": "Dit creditcardnummer is ongeldig.",
+  "fieldInvalidForPostalCode": "Deze postcode is ongeldig.",
+  "genericError": "Er is iets fout gegaan.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Deze creditcard staat al geregistreerd als een opgeslagen betaalmethode.",
+  "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
+  "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
+  "hostedFieldsTokenizationNetworkErrorError": "Netwerkfout. Probeer het opnieuw.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "De controle van de creditcard is mislukt. Controleer uw gegevens en probeer het opnieuw.",
+  "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
+  "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
+  "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
+  "venmoCanceledError": "Er ging iets fout. Controleer of de meest recente versie van de Venmo-app op je apparaat is geïnstalleerd en dat je browser overschakelen naar Venmo ondersteunt.",
+  "venmoAppFailedError": "De Venmo-app is niet aangetroffen op je apparaat.",
+  "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",
+  "applePayTokenizationError": "Er is een netwerkfout opgetreden bij het verwerken van de Apple Pay-betaling. Probeer het opnieuw.",
+  "applePayActiveCardError": "Voeg een ondersteunde creditcard toe aan je Apple Pay-wallet.",
+  "cardholderNameLabel": "Naam kaarthouder",
+  "cardNumberLabel": "Creditcardnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 cijfers)",
+  "cvvFourDigitLabelSubheading": "(4 cijfers)",
+  "cardholderNamePlaceholder": "Naam kaarthouder",
+  "expirationDateLabel": "VervaldatumB",
+  "expirationDateLabelSubheading": "(MM/JJ)",
+  "expirationDatePlaceholder": "MM/JJ",
+  "postalCodeLabel": "Postcode",
+  "payWithCard": "Betalen met creditcard",
+  "endingIn": "Eindigend op ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Creditcard",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 194 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Betaling med {{paymentSource}}",
+  "chooseAnotherWayToPay": "Velg en annen måte å betale på",
+  "chooseAWayToPay": "Velg betalingsmåte",
+  "otherWaysToPay": "Andre måter å betale på",
+  "cardVerification": "Kortbekreftelse",
+  "fieldEmptyForCvv": "Oppgi en kortsikkerhetskode (CVV).",
+  "fieldEmptyForExpirationDate": "Oppgi en utløpsdato.",
+  "fieldEmptyForCardholderName": "Oppgi et navn for kortinnehaveren.",
+  "fieldTooLongForCardholderName": "Makslengden for kortinnehaverens navn er 256 tegn.",
+  "fieldEmptyForNumber": "Oppgi et nummer.",
+  "fieldEmptyForPostalCode": "Oppgi et postnummer.",
+  "fieldInvalidForCvv": "Denne sikkerhetskoden er ikke gyldig.",
+  "fieldInvalidForExpirationDate": "Denne utløpsdatoen er ikke gyldig.",
+  "fieldInvalidForNumber": "Dette kortnummeret er ikke gyldig.",
+  "fieldInvalidForPostalCode": "Dette postnummeret er ikke gyldig.",
+  "genericError": "Noe gikk galt hos oss.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Dette betalingskortet eksisterer allerede som en lagret betalingsmetode.",
+  "hostedFieldsFailedTokenizationError": "Kontroller informasjonen og prøv på nytt.",
+  "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
+  "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Bekreftelsen av betalingskortet mislyktes. Kontroller informasjonen og prøv på nytt.",
+  "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
+  "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
+  "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
+  "venmoCanceledError": "Noe gikk galt. Kontroller at du har installert den nyeste versjonen av Venmo-appen på enheten og at nettleseren din støtter bytte til Venmo.",
+  "venmoAppFailedError": "Finner ikke Venmo-appen på enheten.",
+  "unsupportedCardTypeError": "Denne korttypen støttes ikke. Prøv med et annet kort.",
+  "applePayTokenizationError": "Det oppsto en nettverksfeil under behandlingen av Apple Pay-betalingen. Prøv på nytt.",
+  "applePayActiveCardError": "Legg til et kort som støttes i Apple Pay-lommeboken din.",
+  "cardholderNameLabel": "Kortinnehaverens navn",
+  "cardNumberLabel": "Kortnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 siffer)",
+  "cvvFourDigitLabelSubheading": "(4 siffer)",
+  "cardholderNamePlaceholder": "Kortinnehaverens navn",
+  "expirationDateLabel": "Utløpsdato",
+  "expirationDateLabelSubheading": "(MM/ÅÅ)",
+  "expirationDatePlaceholder": "MM/ÅÅ",
+  "postalCodeLabel": "Postnummer",
+  "payWithCard": "Betal med kort",
+  "endingIn": "Som slutter på ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Kort",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 195 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Forma płatności: {{paymentSource}}",
+  "chooseAnotherWayToPay": "Wybierz inną formę płatności",
+  "chooseAWayToPay": "Wybierz sposób płatności",
+  "otherWaysToPay": "Inne formy płatności",
+  "cardVerification": "Weryfikacja karty",
+  "fieldEmptyForCvv": "Podaj kod bezpieczeństwa.",
+  "fieldEmptyForExpirationDate": "Podaj datę ważności.",
+  "fieldEmptyForCardholderName": "Podaj imię i nazwisko posiadacza karty.",
+  "fieldTooLongForCardholderName": "Imię i nazwisko posiadacza karty musi mieć mniej niż 256 znaków.",
+  "fieldEmptyForNumber": "Podaj numer.",
+  "fieldEmptyForPostalCode": "Podaj kod pocztowy.",
+  "fieldInvalidForCvv": "Podany kod bezpieczeństwa jest nieprawidłowy.",
+  "fieldInvalidForExpirationDate": "Podana data ważności jest nieprawidłowa.",
+  "fieldInvalidForNumber": "Podany numer karty jest nieprawidłowy.",
+  "fieldInvalidForPostalCode": "Podany kod pocztowy jest nieprawidłowy.",
+  "genericError": "Wystąpił błąd po naszej stronie.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Ta karta kredytowa jest już zapisana jako źródło finansowania płatności.",
+  "hostedFieldsFailedTokenizationError": "Sprawdź swoje informacje i spróbuj ponownie.",
+  "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
+  "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Weryfikacja karty kredytowej nie powiodła się. Sprawdź swoje informacje i spróbuj ponownie.",
+  "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
+  "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
+  "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
+  "venmoCanceledError": "Wystąpił problem. Upewnij się, czy na swoim urządzeniu masz zainstalowaną najnowszą wersję aplikacji Venmo i Twoja przeglądarka ją obsługuje.",
+  "venmoAppFailedError": "Nie można odnaleźć aplikacji Venmo na urządzeniu.",
+  "unsupportedCardTypeError": "Ten typ karty nie jest obsługiwany. Spróbuj użyć innej karty.",
+  "applePayTokenizationError": "Wystąpił błąd sieci podczas przetwarzania płatności Apple Pay. Spróbuj ponownie.",
+  "applePayActiveCardError": "Dodaj obsługiwaną kartę do portfela Apple Pay.",
+  "cardholderNameLabel": "Imię i nazwisko posiadacza karty",
+  "cardNumberLabel": "Numer karty",
+  "cvvLabel": "Kod CVC",
+  "cvvThreeDigitLabelSubheading": "(3 cyfry)",
+  "cvvFourDigitLabelSubheading": "(4 cyfry)",
+  "cardholderNamePlaceholder": "Imię i nazwisko posiadacza karty",
+  "expirationDateLabel": "Data ważności",
+  "expirationDateLabelSubheading": "(MM/RR)",
+  "expirationDatePlaceholder": "MM/RR",
+  "postalCodeLabel": "Kod pocztowy",
+  "payWithCard": "Zapłać kartą",
+  "endingIn": "O numerze zakończonym cyframi ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Karta",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 196 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Pagando com {{paymentSource}}",
+  "chooseAnotherWayToPay": "Escolher outro meio de pagamento",
+  "chooseAWayToPay": "Escolher um meio de pagamento",
+  "otherWaysToPay": "Outro meio de pagamento",
+  "cardVerification": "Verificação do cartão",
+  "fieldEmptyForCvv": "Informe o Código de Segurança.",
+  "fieldEmptyForExpirationDate": "Informe a data de vencimento.",
+  "fieldEmptyForCardholderName": "Informe o nome do titular do cartão.",
+  "fieldTooLongForCardholderName": "O nome do titular do cartão deve ter menos de 256 caracteres.",
+  "fieldEmptyForNumber": "Informe um número.",
+  "fieldEmptyForPostalCode": "Informe um CEP.",
+  "fieldInvalidForCvv": "Este código de segurança não é válido.",
+  "fieldInvalidForExpirationDate": "Esta data de vencimento não é válida.",
+  "fieldInvalidForNumber": "O número do cartão não é válido.",
+  "fieldInvalidForPostalCode": "Este CEP não é válido.",
+  "genericError": "Ocorreu um erro.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Este cartão de crédito já existe como meio de pagamento salvo.",
+  "hostedFieldsFailedTokenizationError": "Verifique as informações e tente novamente.",
+  "hostedFieldsFieldsInvalidError": "Verifique as informações e tente novamente.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Falha ao verificar o cartão de crédito. Verifique as informações e tente novamente.",
+  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
+  "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
+  "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
+  "venmoCanceledError": "Ocorreu um erro. Certifique-se de ter a versão mais recente do aplicativo Venmo instalado no seu dispositivo e que o seu navegador suporte a mudança para o Venmo.",
+  "venmoAppFailedError": "Não foi possível encontrar o aplicativo Venmo no seu dispositivo.",
+  "unsupportedCardTypeError": "Este tipo de cartão não é aceito. Experimente outro cartão.",
+  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
+  "applePayActiveCardError": "Adicione cartão suportado à sua carteira do Apple Pay.",
+  "cardholderNameLabel": "Nome do titular do cartão",
+  "cardNumberLabel": "Número do cartão",
+  "cvvLabel": "CSC",
+  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
+  "cvvFourDigitLabelSubheading": "(4 dígitos)",
+  "cardholderNamePlaceholder": "Nome do titular do cartão",
+  "expirationDateLabel": "Data de vencimento",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "CEP",
+  "payWithCard": "Pague com seu cartão",
+  "endingIn": "Com final ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Cartão",
+  "PayPal": "PayPal",
+  "PayPal Credit": "Crédito do PayPal",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 197 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Pagar com {{paymentSource}}",
+  "chooseAnotherWayToPay": "Escolher outra forma de pagamento",
+  "chooseAWayToPay": "Escolha um meio de pagamento",
+  "otherWaysToPay": "Outras formas de pagamento",
+  "cardVerification": "Verificação de cartão",
+  "fieldEmptyForCvv": "Introduza o código CVV.",
+  "fieldEmptyForExpirationDate": "Introduza a data de validade.",
+  "fieldEmptyForCardholderName": "Introduza um nome do titular do cartão.",
+  "fieldTooLongForCardholderName": "O nome do titular do cartão tem de ter menos de 256 carateres.",
+  "fieldEmptyForNumber": "Introduza um número.",
+  "fieldEmptyForPostalCode": "Introduza o código postal.",
+  "fieldInvalidForCvv": "Este código de segurança não é válido.",
+  "fieldInvalidForExpirationDate": "Esta data de validade não é correta.",
+  "fieldInvalidForNumber": "Este número de cartão não é válido.",
+  "fieldInvalidForPostalCode": "Este código postal não é válido.",
+  "genericError": "Tudo indica que ocorreu um problema.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Este cartão de crédito já está registado como um meio de pagamento guardado.",
+  "hostedFieldsFailedTokenizationError": "Verifique os dados e tente novamente.",
+  "hostedFieldsFieldsInvalidError": "Verifique os dados e tente novamente.",
+  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "A verificação do cartão de crédito falhou. Verifique os dados e tente novamente.",
+  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
+  "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
+  "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
+  "venmoCanceledError": "Ocorreu um erro. Certifique-se de que tem a versão mais recente da aplicação Venmo instalada no seu dispositivo e que o navegador suporta a mudança para o Venmo.",
+  "venmoAppFailedError": "Não foi possível encontrar a aplicação Venmo no dispositivo.",
+  "unsupportedCardTypeError": "Este tipo de cartão não é suportado. Tente usar outro cartão.",
+  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
+  "applePayActiveCardError": "Adicione um cartão suportado à sua carteira Apple Pay.",
+  "cardholderNameLabel": "Nome do titular do cartão",
+  "cardNumberLabel": "Número do cartão",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
+  "cvvFourDigitLabelSubheading": "(4 dígitos)",
+  "cardholderNamePlaceholder": "Nome do titular do cartão",
+  "expirationDateLabel": "Data de validade",
+  "expirationDateLabelSubheading": "(MM/AA)",
+  "expirationDatePlaceholder": "MM/AA",
+  "postalCodeLabel": "Código postal",
+  "payWithCard": "Pagar com cartão",
+  "endingIn": "Terminação em ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Cartão",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 198 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Способы оплаты: {{paymentSource}}",
+  "chooseAnotherWayToPay": "Выберите другой способ оплаты",
+  "chooseAWayToPay": "Выберите способ оплаты",
+  "otherWaysToPay": "Другие способы оплаты",
+  "cardVerification": "Проверка карты",
+  "fieldEmptyForCvv": "Укажите код безопасности.",
+  "fieldEmptyForExpirationDate": "Укажите дату окончания срока действия.",
+  "fieldEmptyForCardholderName": "Введите имя и фамилию владельца карты.",
+  "fieldTooLongForCardholderName": "Имя владельца карты должно содержать не более 256 символов.",
+  "fieldEmptyForNumber": "Введите номер.",
+  "fieldEmptyForPostalCode": "Укажите почтовый индекс.",
+  "fieldInvalidForCvv": "Этот код безопасности недействителен.",
+  "fieldInvalidForExpirationDate": "Эта дата окончания срока действия недействительна.",
+  "fieldInvalidForNumber": "Этот номер карты недействителен.",
+  "fieldInvalidForPostalCode": "Этот почтовый индекс недействителен.",
+  "genericError": "Возникла проблема с нашей стороны.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Эта кредитная карта уже указана как сохраненный источник средств.",
+  "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
+  "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
+  "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Проверка банковской карты не выполнена. Проверьте правильность ввода данных и повторите попытку.",
+  "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
+  "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
+  "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
+  "venmoCanceledError": "Возникла ошибка. Просим вас убедиться, что у вас установлена новейшая версия приложения Venmo и ваш браузер поддерживает переключение к Venmo.",
+  "venmoAppFailedError": "Приложение Venmo не обнаружено на вашем устройстве.",
+  "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",
+  "applePayTokenizationError": "При обработке платежа через Apple Pay возникла сетевая ошибка. Повторите попытку.",
+  "applePayActiveCardError": "Добавьте поддерживаемую карту к своему счету Apple Pay.",
+  "cardholderNameLabel": "Имя и фамилия владельца",
+  "cardNumberLabel": "Номер карты",
+  "cvvLabel": "Код безопасности",
+  "cvvThreeDigitLabelSubheading": "(3 цифры)",
+  "cvvFourDigitLabelSubheading": "(4 цифры)",
+  "cardholderNamePlaceholder": "Имя и фамилия владельца",
+  "expirationDateLabel": "Срок действия",
+  "expirationDateLabelSubheading": "(ММ/ГГ)",
+  "expirationDatePlaceholder": "ММ/ГГ",
+  "postalCodeLabel": "Индекс",
+  "payWithCard": "Оплатить картой",
+  "endingIn": "Последние две цифры номера карты: ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Карта",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 199 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "Betalas med {{paymentSource}}",
+  "chooseAnotherWayToPay": "Välj ett annat sätt att betala",
+  "chooseAWayToPay": "Välj hur du vill betala",
+  "otherWaysToPay": "Andra sätt att betala",
+  "cardVerification": "Kortverifiering",
+  "fieldEmptyForCvv": "Fyll i en CVV-kod.",
+  "fieldEmptyForExpirationDate": "Fyll i ett utgångsdatum.",
+  "fieldEmptyForCardholderName": "Fyll i kortinnehavarens namn.",
+  "fieldTooLongForCardholderName": "Kortinnehavarens namn måste vara kortare än 256 tecken.",
+  "fieldEmptyForNumber": "Fyll i ett nummer.",
+  "fieldEmptyForPostalCode": "Fyll i ett postnummer.",
+  "fieldInvalidForCvv": "Den här säkerhetskoden är inte giltig.",
+  "fieldInvalidForExpirationDate": "Det här utgångsdatumet är inte giltigt.",
+  "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
+  "fieldInvalidForPostalCode": "Det här postnumret är inte giltigt.",
+  "genericError": "Ett fel uppstod.",
+  "hostedFieldsTokenizationFailOnDuplicateError": "Det här betalkortet finns redan som en sparad betalningsmetod.",
+  "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
+  "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
+  "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifieringen av betalkort misslyckades. Kontrollera uppgifterna och försök igen.",
+  "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
+  "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
+  "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
+  "venmoCanceledError": "Något gick fel. Se till att du har den senaste versionen av Venmo-appen installerad på din enhet och att webbläsaren stöder att gå över till Venmo.",
+  "venmoAppFailedError": "Venmo-appen kunde inte hittas på din enhet.",
+  "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",
+  "applePayTokenizationError": "Ett nätverksfel inträffade när Apple Pay-betalningen skulle behandlas. Försök igen.",
+  "applePayActiveCardError": "Lägg till ett kort som stöds i Apple Pay-e-plånboken.",
+  "cardholderNameLabel": "Kortinnehavarens namn",
+  "cardNumberLabel": "Kortnummer",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 siffror)",
+  "cvvFourDigitLabelSubheading": "(4 siffror)",
+  "cardholderNamePlaceholder": "Kortinnehavarens namn",
+  "expirationDateLabel": "Utgångsdatum",
+  "expirationDateLabelSubheading": "(MM/ÅÅ)",
+  "expirationDatePlaceholder": "MM/ÅÅ",
+  "postalCodeLabel": "Postnummer",
+  "payWithCard": "Betala med kort",
+  "endingIn": "Slutar på ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "Kort",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 200 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "การชำระเงินด้วย {{paymentSource}}",
+  "chooseAnotherWayToPay": "เลือกวิธีอื่นเพื่อชำระเงิน",
+  "chooseAWayToPay": "เลือกวิธีชำระเงิน",
+  "otherWaysToPay": "วิธีอื่นๆ ในการชำระเงิน",
+  "cardVerification": "การตรวจสอบยืนยันบัตร",
+  "fieldEmptyForCvv": "โปรดกรอก CVV (รหัสการตรวจสอบยืนยันบัตร)",
+  "fieldEmptyForExpirationDate": "โปรดกรอกวันที่หมดอายุ",
+  "fieldEmptyForCardholderName": "โปรดกรอกชื่อเจ้าของบัตร",
+  "fieldTooLongForCardholderName": "ชื่อผู้ถือบัตรจะต้องไม่เกิน 256 อักขระ",
+  "fieldEmptyForNumber": "โปรดกรอกหมายเลข",
+  "fieldEmptyForPostalCode": "โปรดกรอกรหัสไปรษณีย์",
+  "fieldInvalidForCvv": "รหัสความปลอดภัยนี้ไม่ถูกต้อง",
+  "fieldInvalidForExpirationDate": "วันที่หมดอายุนี้ไม่ถูกต้อง",
+  "fieldInvalidForNumber": "หมายเลขบัตรนี้ไม่ถูกต้อง",
+  "fieldInvalidForPostalCode": "รหัสไปรษณีย์นี้ไม่ถูกต้อง",
+  "genericError": "เกิดข้อผิดพลาดขึ้นในระบบของเรา",
+  "hostedFieldsTokenizationFailOnDuplicateError": "บัตรเครดิตนี้ถูกบันทึกไว้เป็นวิธีการชำระเงิน",
+  "hostedFieldsFailedTokenizationError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "hostedFieldsFieldsInvalidError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "hostedFieldsTokenizationNetworkErrorError": "ข้อผิดพลาดด้านเครือข่าย โปรดลองอีกครั้ง",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "การตรวจสอบยืนยันบัตรเครดิตล้มเหลว โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
+  "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
+  "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
+  "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
+  "venmoCanceledError": "เกิดข้อผิดพลาดบางประการ ตรวจสอบว่าคุณมีแอป Venmo เวอร์ชันล่าสุดติดตั้งในอุปกรณ์ของคุณ และมีเบราเซอร์ที่รองรับ Venmo",
+  "venmoAppFailedError": "ไม่พบแอป Venmo บนอุปกรณ์ของคุณ",
+  "unsupportedCardTypeError": "ไม่รองรับบัตรประเภทนี้ โปรดลองใช้บัตรใบอื่น",
+  "applePayTokenizationError": "เกิดข้อผิดพลาดด้านเครือข่ายขึ้นขณะดำเนินการชำระเงินด้วย Apple Pay โปรดลองอีกครั้ง",
+  "applePayActiveCardError": "เพิ่มบัตรที่รองรับในกระเป๋าสตางค์ Apple Pay ของคุณ",
+  "cardholderNameLabel": "ชื่อเจ้าของบัตร",
+  "cardNumberLabel": "หมายเลขบัตร",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "(3 หลัก)",
+  "cvvFourDigitLabelSubheading": "(4 หลัก)",
+  "cardholderNamePlaceholder": "ชื่อเจ้าของบัตร",
+  "expirationDateLabel": "วันหมดอายุ",
+  "expirationDateLabelSubheading": "(ดด/ปป)",
+  "expirationDatePlaceholder": "ดด/ปป",
+  "postalCodeLabel": "รหัสไปรษณีย์",
+  "payWithCard": "ชำระเงินด้วยบัตร",
+  "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "บัตร",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 201 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "正在使用{{paymentSource}}付款",
+  "chooseAnotherWayToPay": "选择其他付款方式",
+  "chooseAWayToPay": "选择付款方式",
+  "otherWaysToPay": "其他付款方式",
+  "cardVerification": "卡验证",
+  "fieldEmptyForCvv": "请填写CVV。",
+  "fieldEmptyForExpirationDate": "请填写有效期限。",
+  "fieldEmptyForCardholderName": "请填写持卡人的姓名。",
+  "fieldTooLongForCardholderName": "持卡人姓名必须少于256个字符。",
+  "fieldEmptyForNumber": "请填写一个号码。",
+  "fieldEmptyForPostalCode": "请填写邮政编码。",
+  "fieldInvalidForCvv": "此安全代码无效。",
+  "fieldInvalidForExpirationDate": "此有效期限无效。",
+  "fieldInvalidForNumber": "此卡号无效。",
+  "fieldInvalidForPostalCode": "此邮政编码无效。",
+  "genericError": "我们遇到了一些问题",
+  "hostedFieldsTokenizationFailOnDuplicateError": "此信用卡已作为保存后的付款方式存在。",
+  "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
+  "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
+  "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡验证失败。请检查您的信息，然后重试。",
+  "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
+  "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
+  "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
+  "venmoCanceledError": "我们遇到了问题。请确保您的设备上已安装最新版本的Venmo应用，并且您的浏览器支持切换到Venmo。",
+  "venmoAppFailedError": "在您的设备上找不到Venmo应用。",
+  "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",
+  "applePayTokenizationError": "处理Apple Pay付款时出现网络错误。请重试。",
+  "applePayActiveCardError": "请添加受支持的卡到您的Apple Pay钱包。",
+  "cardholderNameLabel": "持卡人姓名",
+  "cardNumberLabel": "卡号",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "（3位数）",
+  "cvvFourDigitLabelSubheading": "（4位数）",
+  "cardholderNamePlaceholder": "持卡人姓名",
+  "expirationDateLabel": "有效期限",
+  "expirationDateLabelSubheading": "（MM/YY）",
+  "expirationDatePlaceholder": "MM/YY",
+  "postalCodeLabel": "邮政编码",
+  "payWithCard": "用卡付款",
+  "endingIn": "尾号为{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "卡",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "银联"
+};
+
+
+/***/ }),
+/* 202 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "付款方式為 {{paymentSource}}",
+  "chooseAnotherWayToPay": "選擇其他付款方式",
+  "chooseAWayToPay": "選擇付款方式",
+  "otherWaysToPay": "其他付款方式",
+  "cardVerification": "信用卡認證",
+  "fieldEmptyForCvv": "請填寫信用卡認證碼。",
+  "fieldEmptyForExpirationDate": "請填寫到期日。",
+  "fieldEmptyForCardholderName": "請填寫持卡人的名字。",
+  "fieldTooLongForCardholderName": "持卡人姓名必須少於 256 個字元。",
+  "fieldEmptyForNumber": "請填寫號碼。",
+  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
+  "fieldInvalidForCvv": "此安全代碼無效。",
+  "fieldInvalidForExpirationDate": "此到期日無效。",
+  "fieldInvalidForNumber": "此卡號無效。",
+  "fieldInvalidForPostalCode": "此郵遞區號無效。",
+  "genericError": "系統發生錯誤。",
+  "hostedFieldsTokenizationFailOnDuplicateError": "此信用卡已存在，為已儲存的付款方式。",
+  "hostedFieldsFailedTokenizationError": "請檢查你的資料並再試一次。",
+  "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
+  "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。請重試。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並再試一次。",
+  "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。請重試。",
+  "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",
+  "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
+  "venmoCanceledError": "系統發生錯誤，請確保你已在裝置上安裝最新版本的 Venmo 應用程式，而且你的瀏覽器支援切換至 Venmo。",
+  "venmoAppFailedError": "在你的裝置上找不到 Venmo 應用程式。",
+  "unsupportedCardTypeError": "不可使用此信用卡類型。請改用其他信用卡。",
+  "applePayTokenizationError": "處理 Apple Pay 付款時發生網絡錯誤。請重試。",
+  "applePayActiveCardError": "在 Apple Pay 錢包中加入支援的信用卡。",
+  "cardholderNameLabel": "持卡人名字",
+  "cardNumberLabel": "卡號",
+  "cvvLabel": "信用卡認證碼",
+  "cvvThreeDigitLabelSubheading": "（3 位數）",
+  "cvvFourDigitLabelSubheading": "（4 位數）",
+  "cardholderNamePlaceholder": "持卡人名字",
+  "expirationDateLabel": "到期日",
+  "expirationDateLabelSubheading": "(MM/YY)",
+  "expirationDatePlaceholder": "月 / 年",
+  "postalCodeLabel": "郵遞區號",
+  "payWithCard": "使用信用卡付款",
+  "endingIn": "最後兩位數為••{{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "信用卡",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "American Express",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 203 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = {
+  "payingWith": "以 {{paymentSource}} 付款",
+  "chooseAnotherWayToPay": "選擇支付款項的以其他方式付款",
+  "chooseAWayToPay": "選擇支付款項的方式",
+  "otherWaysToPay": "其他付款方式",
+  "cardVerification": "信用卡認證",
+  "fieldEmptyForCvv": "請填妥信用卡驗證碼。",
+  "fieldEmptyForExpirationDate": "請填妥到期日。",
+  "fieldEmptyForCardholderName": "請填妥持卡人姓名。",
+  "fieldTooLongForCardholderName": "持卡人姓名不能超過 256 個字元。",
+  "fieldEmptyForNumber": "請填妥號碼。",
+  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
+  "fieldInvalidForCvv": "這組安全代碼無效。",
+  "fieldInvalidForExpirationDate": "此到期日無效。",
+  "fieldInvalidForNumber": "此卡號無效。",
+  "fieldInvalidForPostalCode": "此郵遞區號無效。",
+  "genericError": "我們的系統發生問題。",
+  "hostedFieldsTokenizationFailOnDuplicateError": "此信用卡已存在，為已儲存的付款方式。",
+  "hostedFieldsFailedTokenizationError": "請檢查你的資料並重試。",
+  "hostedFieldsFieldsInvalidError": "請檢查你的資料並重試。",
+  "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
+  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並重試。",
+  "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
+  "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
+  "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
+  "venmoCanceledError": "系統發生錯誤。確認你的裝置上裝有最新版本的 Venmo 應用程式，而且瀏覽器支援切換至 Venmo。",
+  "venmoAppFailedError": "你的裝置上找不到 Venmo 應用程式。",
+  "unsupportedCardTypeError": "不支援此卡片類型。請改用其他卡片。",
+  "applePayTokenizationError": "在處理 Apple Pay 付款時發生網路錯誤。請重試。",
+  "applePayActiveCardError": "新增支援的卡片至你的 Apple Pay 錢包。",
+  "cardholderNameLabel": "持卡人姓名",
+  "cardNumberLabel": "卡號",
+  "cvvLabel": "CVV",
+  "cvvThreeDigitLabelSubheading": "（3 位數）",
+  "cvvFourDigitLabelSubheading": "（4 位數）",
+  "cardholderNamePlaceholder": "持卡人姓名",
+  "expirationDateLabel": "到期日",
+  "expirationDateLabelSubheading": "（月 / 年）",
+  "expirationDatePlaceholder": "月 / 年",
+  "postalCodeLabel": "郵遞區號",
+  "payWithCard": "使用信用卡 / 扣帳卡付款",
+  "endingIn": "你的末兩碼為 •• {{lastTwoCardDigits}}",
+  "Apple Pay": "Apple Pay",
+  "Venmo": "Venmo",
+  "Card": "信用卡或扣帳卡",
+  "PayPal": "PayPal",
+  "PayPal Credit": "PayPal Credit",
+  "Google Pay": "Google Pay",
+  "American Express": "美國運通",
+  "Discover": "Discover",
+  "Diners Club": "Diners Club",
+  "MasterCard": "Mastercard",
+  "Visa": "Visa",
+  "JCB": "JCB",
+  "Maestro": "Maestro",
+  "UnionPay": "UnionPay"
+};
+
+
+/***/ }),
+/* 204 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-var BasePayPalView = __webpack_require__(61);
+var BasePayPalView = __webpack_require__(64);
 
 function PayPalCreditView() {
   BasePayPalView.apply(this, arguments);
@@ -25489,15 +27903,17 @@ PayPalCreditView.prototype.constructor = PayPalCreditView;
 PayPalCreditView.ID = PayPalCreditView.prototype.ID = paymentOptionIDs.paypalCredit;
 
 PayPalCreditView.isEnabled = function (options) {
-  return BasePayPalView.isEnabled(options).then(function (enabled) {
-    return enabled && Boolean(options.merchantConfiguration.paypalCredit);
-  });
+  if (!options.merchantConfiguration.paypalCredit) {
+    return Promise.resolve(false);
+  }
+
+  return BasePayPalView.isEnabled(options);
 };
 module.exports = PayPalCreditView;
 
 
 /***/ }),
-/* 176 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25505,8 +27921,7 @@ module.exports = PayPalCreditView;
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btVenmo = __webpack_require__(177);
-var classlist = __webpack_require__(13);
+var btVenmo = __webpack_require__(206);
 var DropinError = __webpack_require__(8);
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
@@ -25546,7 +27961,7 @@ VenmoView.prototype.initialize = function () {
     button.addEventListener('click', function (event) {
       event.preventDefault();
 
-      classlist.add(self.element, 'braintree-sheet--loading');
+      self.preventUserAction();
 
       return self.venmoInstance.tokenize().then(function (payload) {
         self.model.addPaymentMethod(payload);
@@ -25557,7 +27972,7 @@ VenmoView.prototype.initialize = function () {
 
         self.model.reportError(tokenizeErr);
       }).then(function () {
-        classlist.remove(self.element, 'braintree-sheet--loading');
+        self.allowUserAction();
       });
     });
 
@@ -25592,7 +28007,7 @@ module.exports = VenmoView;
 
 
 /***/ }),
-/* 177 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25601,13 +28016,13 @@ module.exports = VenmoView;
 
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(63);
+var errors = __webpack_require__(67);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
-var Venmo = __webpack_require__(178);
+var Venmo = __webpack_require__(207);
 var Promise = __webpack_require__(4);
-var supportsVenmo = __webpack_require__(64);
-var VERSION = "3.31.0";
+var supportsVenmo = __webpack_require__(68);
+var VERSION = "3.34.0";
 
 /**
  * @static
@@ -25615,6 +28030,7 @@ var VERSION = "3.31.0";
  * @param {object} options Creation options:
  * @param {Client} options.client A {@link Client} instance.
  * @param {boolean} [options.allowNewBrowserTab=true] This should be set to false if your payment flow requires returning to the same tab, e.g. single page applications. Doing so causes {@link Venmo#isBrowserSupported|isBrowserSupported} to return true only for mobile web browsers that support returning from the Venmo app to the same tab.
+ * @param {string} [options.profileId] The Venmo profile ID to be used during payment authorization. Customers will see the business name and logo associated with this Venmo profile, and it will show up in the Venmo app as a "Connected Merchant". Venmo profile IDs can be found in the Braintree Control Panel. Omitting this value will use the default Venmo profile.
  * @param {callback} [callback] The second argument, `data`, is the {@link Venmo} instance. If no callback is provided, `create` returns a promise that resolves with the {@link Venmo} instance.
  * @example
  * braintree.venmo.create({
@@ -25679,23 +28095,23 @@ module.exports = {
 
 
 /***/ }),
-/* 178 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var analytics = __webpack_require__(7);
-var isBrowserSupported = __webpack_require__(64);
-var constants = __webpack_require__(183);
-var errors = __webpack_require__(63);
-var querystring = __webpack_require__(27);
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
+var isBrowserSupported = __webpack_require__(68);
+var constants = __webpack_require__(212);
+var errors = __webpack_require__(67);
+var querystring = __webpack_require__(29);
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
-var VERSION = "3.31.0";
+var VERSION = "3.34.0";
 
 /**
  * Venmo tokenize payload.
@@ -25720,6 +28136,7 @@ function Venmo(options) {
   this._isDebug = configuration.isDebug;
   this._assetsUrl = configuration.gatewayConfiguration.assetsUrl + '/web/' + VERSION;
   this._allowNewBrowserTab = options.allowNewBrowserTab !== false;
+  this._profileId = options.profileId;
 }
 
 Venmo.prototype._initialize = function () {
@@ -25742,7 +28159,7 @@ Venmo.prototype._initialize = function () {
   params['x-error'] = currentUrl + '#venmoError=1';
   params.ua = global.navigator.userAgent;
   /* eslint-disable camelcase */
-  params.braintree_merchant_id = venmoConfiguration.merchantId;
+  params.braintree_merchant_id = this._profileId || venmoConfiguration.merchantId;
   params.braintree_access_token = venmoConfiguration.accessToken;
   params.braintree_environment = venmoConfiguration.environment;
   params.braintree_sdk_data = btoa(JSON.stringify(braintreeData));
@@ -25963,18 +28380,18 @@ module.exports = wrapPromise.wrapPrototype(Venmo);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 179 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isAndroid = __webpack_require__(55);
-var isChrome = __webpack_require__(56);
+var isAndroid = __webpack_require__(59);
+var isChrome = __webpack_require__(60);
 var isIos = __webpack_require__(19);
-var isIosSafari = __webpack_require__(180);
-var isSamsungBrowser = __webpack_require__(57);
-var isMobileFirefox = __webpack_require__(181);
+var isIosSafari = __webpack_require__(209);
+var isSamsungBrowser = __webpack_require__(61);
+var isMobileFirefox = __webpack_require__(210);
 
 module.exports = {
   isAndroid: isAndroid,
@@ -25987,7 +28404,7 @@ module.exports = {
 
 
 /***/ }),
-/* 180 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26008,13 +28425,13 @@ module.exports = function isIosSafari(ua) {
 
 
 /***/ }),
-/* 181 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var isIosFirefox = __webpack_require__(182);
+var isIosFirefox = __webpack_require__(211);
 
 module.exports = function isMobileFirefox(ua) {
   ua = ua || global.navigator.userAgent;
@@ -26024,7 +28441,7 @@ module.exports = function isMobileFirefox(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 182 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26039,7 +28456,7 @@ module.exports = function isIosFirefox(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 183 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26053,7 +28470,7 @@ module.exports = {
 
 
 /***/ }),
-/* 184 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26062,17 +28479,17 @@ module.exports = {
 var analytics = __webpack_require__(14);
 var analyticsKinds = __webpack_require__(2).analyticsKinds;
 var BaseView = __webpack_require__(9);
-var classlist = __webpack_require__(13);
-var sheetViews = __webpack_require__(50);
-var PaymentMethodsView = __webpack_require__(65);
-var PaymentOptionsView = __webpack_require__(66);
-var addSelectionEventHandler = __webpack_require__(29);
+var classlist = __webpack_require__(15);
+var sheetViews = __webpack_require__(54);
+var PaymentMethodsView = __webpack_require__(69);
+var PaymentOptionsView = __webpack_require__(70);
+var addSelectionEventHandler = __webpack_require__(31);
 var Promise = __webpack_require__(5);
-var supportsFlexbox = __webpack_require__(186);
-var transitionHelper = __webpack_require__(59);
+var supportsFlexbox = __webpack_require__(215);
+var transitionHelper = __webpack_require__(63);
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = __webpack_require__(2).CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
-var DEVELOPER_MISCONFIGURATION_MESSAGE = 'Developer Error: Something went wrong. Check the console for details.';
+var DEVELOPER_MISCONFIGURATION_MESSAGE = __webpack_require__(2).errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
 
 function MainView() {
   BaseView.apply(this, arguments);
@@ -26097,6 +28514,7 @@ MainView.prototype._initialize = function () {
   this.sheetErrorText = this.getElementById('sheet-error-text');
 
   this.toggle = this.getElementById('toggle');
+  this.disableWrapper = this.getElementById('disable-wrapper');
   this.lowerContainer = this.getElementById('lower-container');
 
   this.loadingContainer = this.getElementById('loading-container');
@@ -26109,6 +28527,8 @@ MainView.prototype._initialize = function () {
 
   this.model.on('errorOccurred', this.showSheetError.bind(this));
   this.model.on('errorCleared', this.hideSheetError.bind(this));
+  this.model.on('preventUserAction', this.preventUserAction.bind(this));
+  this.model.on('allowUserAction', this.allowUserAction.bind(this));
 
   this.paymentSheetViewIDs = Object.keys(sheetViews).reduce(function (ids, sheetViewKey) {
     var PaymentSheetView, paymentSheetView;
@@ -26260,6 +28680,7 @@ MainView.prototype.requestPaymentMethod = function () {
     return payload;
   }.bind(this)).catch(function (err) {
     analytics.sendEvent(this.client, 'request-payment-method.error');
+
     return Promise.reject(err);
   }.bind(this));
 };
@@ -26331,6 +28752,14 @@ MainView.prototype.getOptionsElements = function () {
   return this._views.options.elements;
 };
 
+MainView.prototype.preventUserAction = function () {
+  classlist.remove(this.disableWrapper, 'braintree-hidden');
+};
+
+MainView.prototype.allowUserAction = function () {
+  classlist.add(this.disableWrapper, 'braintree-hidden');
+};
+
 MainView.prototype.teardown = function () {
   var error;
   var viewNames = Object.keys(this._views);
@@ -26363,17 +28792,17 @@ module.exports = MainView;
 
 
 /***/ }),
-/* 185 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BaseView = __webpack_require__(9);
-var classlist = __webpack_require__(13);
+var classlist = __webpack_require__(15);
 var constants = __webpack_require__(2);
 
-var addSelectionEventHandler = __webpack_require__(29);
+var addSelectionEventHandler = __webpack_require__(31);
 
 var paymentMethodHTML = "<div class=\"braintree-method__logo\">\n  <svg width=\"40\" height=\"24\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-method__label\">@TITLE<br><div class=\"braintree-method__label--small\">@SUBTITLE</div></div>\n\n<div class=\"braintree-method__check-container\">\n  <div class=\"braintree-method__check\">\n    <svg height=\"100%\" width=\"100%\">\n      <use xlink:href=\"#iconCheck\"></use>\n    </svg>\n  </div>\n</div>\n";
 
@@ -26450,7 +28879,7 @@ module.exports = PaymentMethodView;
 
 
 /***/ }),
-/* 186 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26476,1541 +28905,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 187 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* eslint-disable camelcase */
-
-
-module.exports = {
-  da: __webpack_require__(188),
-  de: __webpack_require__(189),
-  en: __webpack_require__(190),
-  en_AU: __webpack_require__(191),
-  en_GB: __webpack_require__(192),
-  es: __webpack_require__(193),
-  fr_CA: __webpack_require__(194),
-  fr: __webpack_require__(195),
-  id: __webpack_require__(196),
-  it: __webpack_require__(197),
-  ja: __webpack_require__(198),
-  ko: __webpack_require__(199),
-  nl: __webpack_require__(200),
-  no: __webpack_require__(201),
-  pl: __webpack_require__(202),
-  pt_BR: __webpack_require__(203),
-  pt: __webpack_require__(204),
-  ru: __webpack_require__(205),
-  sv: __webpack_require__(206),
-  th: __webpack_require__(207),
-  zh: __webpack_require__(208),
-  zh_HK: __webpack_require__(209),
-  zh_TW: __webpack_require__(210)
-};
-/* eslint-enable camelcase */
-
-
-/***/ }),
-/* 188 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Betaler med {{paymentSource}}",
-  "chooseAnotherWayToPay": "Vælg en anden betalingsmetode",
-  "chooseAWayToPay": "Vælg, hvordan du vil betale",
-  "otherWaysToPay": "Andre betalingsmetoder",
-  "cardVerification": "Bekræftelse af kort",
-  "fieldEmptyForCvv": "Du skal angive kontrolcifrene.",
-  "fieldEmptyForExpirationDate": "Du skal angive udløbsdatoen.",
-  "fieldEmptyForCardholderName": "Du skal angive kortindehaverens navn.",
-  "fieldTooLongForCardholderName": "Kortejerens navn skal være mindre end 256 tegn.",
-  "fieldEmptyForNumber": "Du skal angive et nummer.",
-  "fieldEmptyForPostalCode": "Du skal angive et postnummer.",
-  "fieldInvalidForCvv": "Sikkerhedskoden er ugyldig.",
-  "fieldInvalidForExpirationDate": "Udløbsdatoen er ugyldig.",
-  "fieldInvalidForNumber": "Kortnummeret er ugyldigt.",
-  "fieldInvalidForPostalCode": "Postnummeret er ugyldigt.",
-  "genericError": "Der opstod fejl i vores system.",
-  "hostedFieldsFailedTokenizationError": "Kontroller oplysningerne, og prøv igen.",
-  "hostedFieldsFieldsInvalidError": "Kontroller oplysningerne, og prøv igen.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netværksfejl. Prøv igen.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Betalingskortet blev ikke bekræftet. Kontrollér oplysningerne, og prøv igen.",
-  "paypalAccountTokenizationFailedError": "PayPal-kontoen blev ikke tilføjet. Prøv igen.",
-  "paypalFlowFailedError": "Der kunne ikke oprettes forbindelse til PayPal. Prøv igen.",
-  "paypalTokenizationRequestActiveError": "PayPal-betalingen er i gang med at blive autoriseret.",
-  "venmoCanceledError": "Der opstod en fejl. Sørg for, at du har den seneste version af Venmo-appen installeret på din enhed, og at din browser understøtter skift til Venmo.",
-  "venmoAppFailedError": "Venmo-appen blev ikke fundet på din enhed.",
-  "unsupportedCardTypeError": "Korttypen understøttes ikke. Prøv et andet kort.",
-  "applePayTokenizationError": "Der opstod en netværksfejl under behandlingen af betalingen med Apple Pay. Prøv igen.",
-  "applePayActiveCardError": "Knyt et understøttet kort til din Apple Pay-e-pung.",
-  "cardholderNameLabel": "Kortindehaverens navn",
-  "cardNumberLabel": "Kortnummer",
-  "cvvLabel": "Kontrolcifre",
-  "cvvThreeDigitLabelSubheading": "(3 cifre)",
-  "cvvFourDigitLabelSubheading": "(4 cifre)",
-  "cardholderNamePlaceholder": "Kortindehaverens navn",
-  "expirationDateLabel": "Udløbsdato",
-  "expirationDateLabelSubheading": "(MM/ÅÅ)",
-  "expirationDatePlaceholder": "MM/ÅÅ",
-  "postalCodeLabel": "Postnummer",
-  "payWithCard": "Betal med kort",
-  "endingIn": "Slutter med ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Kort",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 189 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Zahlen mit {{paymentSource}}",
-  "chooseAnotherWayToPay": "Andere Zahlungsmethode wählen",
-  "chooseAWayToPay": "Wie möchten Sie bezahlen?",
-  "otherWaysToPay": "Andere Zahlungsmethoden",
-  "cardVerification": "Kartenbestätigung",
-  "fieldEmptyForCvv": "Geben Sie die Kartenprüfnummer ein.",
-  "fieldEmptyForExpirationDate": "Geben Sie das Ablaufdatum ein.",
-  "fieldEmptyForCardholderName": "Geben Sie den Namen des Karteninhabers ein.",
-  "fieldTooLongForCardholderName": "Der Name des Karteninhabers darf 255 Zeichen nicht übersteigen.",
-  "fieldEmptyForNumber": "Geben Sie die Nummer ein.",
-  "fieldEmptyForPostalCode": "Geben Sie die PLZ ein.",
-  "fieldInvalidForCvv": "Die Kartenprüfnummer ist ungültig.",
-  "fieldInvalidForExpirationDate": "Das Ablaufdatum ist ungültig.",
-  "fieldInvalidForNumber": "Die Kreditkartennummer ist ungültig.",
-  "fieldInvalidForPostalCode": "Die PLZ ist ungültig.",
-  "genericError": "Bei uns ist ein Problem aufgetreten.",
-  "hostedFieldsFailedTokenizationError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
-  "hostedFieldsFieldsInvalidError": "Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
-  "hostedFieldsTokenizationNetworkErrorError": "Netzwerkfehler. Versuchen Sie es erneut.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Überprüfung der Karte fehlgeschlagen. Überprüfen Sie Ihre Eingabe und versuchen Sie es erneut.",
-  "paypalAccountTokenizationFailedError": "Beim Hinzufügen des PayPal-Kontos ist ein Problem aufgetreten. Versuchen Sie es erneut.",
-  "paypalFlowFailedError": "Beim Verbinden mit PayPal ist ein Problem aufgetreten. Versuchen Sie es erneut.",
-  "paypalTokenizationRequestActiveError": "Die PayPal-Zahlung wird bereits autorisiert.",
-  "venmoCanceledError": "Etwas ist schief gelaufen. Vergewissern Sie sich, dass Sie die neueste Version der Venmo-App auf Ihrem Gerät installiert haben und Ihr Browser den Wechsel zu Venmo unterstützt.",
-  "venmoAppFailedError": "Die Venmo-App wurde auf Ihrem Gerät nicht gefunden.",
-  "unsupportedCardTypeError": "Dieser Kreditkartentyp wird nicht unterstützt. Versuchen Sie es mit einer anderen Karte.",
-  "applePayTokenizationError": "Netzwerkfehler bei der Zahlungsabwicklung mit Apple Pay. Versuchen Sie es erneut.",
-  "applePayActiveCardError": "Fügen Sie der Apple-Pay-Börse eine unterstützte Kreditkarte hinzu.",
-  "cardholderNameLabel": "Name des Karteninhabers",
-  "cardNumberLabel": "Kartennummer",
-  "cvvLabel": "Prüfnr.",
-  "cvvThreeDigitLabelSubheading": "(3-stellig)",
-  "cvvFourDigitLabelSubheading": "(4-stellig)",
-  "cardholderNamePlaceholder": "Name des Karteninhabers",
-  "expirationDateLabel": "Gültig bis",
-  "expirationDateLabelSubheading": "(MM/JJ)",
-  "expirationDatePlaceholder": "MM/JJ",
-  "postalCodeLabel": "PLZ",
-  "payWithCard": "Mit Kreditkarte zahlen",
-  "endingIn": "Mit den Endziffern ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Kreditkarte",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 190 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  payingWith: 'Paying with {{paymentSource}}',
-  chooseAnotherWayToPay: 'Choose another way to pay',
-  chooseAWayToPay: 'Choose a way to pay',
-  otherWaysToPay: 'Other ways to pay',
-  cardVerification: 'Card Verification',
-  // Errors
-  fieldEmptyForCvv: 'Please fill out a CVV.',
-  fieldEmptyForExpirationDate: 'Please fill out an expiration date.',
-  fieldEmptyForCardholderName: 'Please fill out a cardholder name.',
-  fieldEmptyForNumber: 'Please fill out a card number.',
-  fieldEmptyForPostalCode: 'Please fill out a postal code.',
-  fieldInvalidForCvv: 'This security code is not valid.',
-  fieldInvalidForExpirationDate: 'This expiration date is not valid.',
-  fieldInvalidForNumber: 'This card number is not valid.',
-  fieldInvalidForPostalCode: 'This postal code is not valid.',
-  fieldTooLongForCardholderName: 'Cardholder name must be less than 256 characters.',
-  genericError: 'Something went wrong on our end.',
-  hostedFieldsFailedTokenizationError: 'Please check your information and try again.',
-  hostedFieldsTokenizationCvvVerificationFailedError: 'Credit card verification failed. Please check your information and try again.',
-  hostedFieldsTokenizationNetworkErrorError: 'Network error. Please try again.',
-  hostedFieldsFieldsInvalidError: 'Please check your information and try again.',
-  paypalAccountTokenizationFailedError: 'Something went wrong adding the PayPal account. Please try again.',
-  paypalFlowFailedError: 'Something went wrong connecting to PayPal. Please try again.',
-  paypalTokenizationRequestActiveError: 'PayPal payment authorization is already in progress.',
-  applePayTokenizationError: 'A network error occurred while processing the Apple Pay payment. Please try again.',
-  applePayActiveCardError: 'Add a supported card to your Apple Pay wallet.',
-  venmoCanceledError: 'Something went wrong. Ensure you have the most recent version of the Venmo app installed on your device and your browser supports switching to Venmo.',
-  venmoAppFailedError: 'The Venmo app could not be found on your device.',
-  unsupportedCardTypeError: 'This card type is not supported. Please try another card.',
-  // Card form
-  cardholderNameLabel: 'Cardholder Name',
-  cardNumberLabel: 'Card Number',
-  cvvLabel: 'CVV',
-  cvvThreeDigitLabelSubheading: '(3 digits)',
-  cvvFourDigitLabelSubheading: '(4 digits)',
-  expirationDateLabel: 'Expiration Date',
-  expirationDateLabelSubheading: '(MM/YY)',
-  cardholderNamePlaceholder: 'Cardholder Name',
-  expirationDatePlaceholder: 'MM/YY',
-  postalCodeLabel: 'Postal Code',
-  payWithCard: 'Pay with card',
-  // Payment Method descriptions
-  endingIn: 'Ending in ••{{lastTwoCardDigits}}',
-  Card: 'Card',
-  PayPal: 'PayPal',
-  'PayPal Credit': 'PayPal Credit',
-  'Apple Pay': 'Apple Pay',
-  'Google Pay': 'Google Pay',
-  'Venmo': 'Venmo',
-  'American Express': 'American Express',
-  Discover: 'Discover',
-  'Diners Club': 'Diners Club',
-  MasterCard: 'MasterCard',
-  Visa: 'Visa',
-  JCB: 'JCB',
-  Maestro: 'Maestro',
-  UnionPay: 'UnionPay'
-};
-
-
-/***/ }),
-/* 191 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Paying with {{paymentSource}}",
-  "chooseAnotherWayToPay": "Choose another way to pay",
-  "chooseAWayToPay": "Choose a way to pay",
-  "otherWaysToPay": "Other ways to pay",
-  "cardVerification": "Card verification",
-  "fieldEmptyForCvv": "Please fill out a CVV.",
-  "fieldEmptyForExpirationDate": "Please fill out an expiry date.",
-  "fieldEmptyForCardholderName": "Please fill out a cardholder name.",
-  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
-  "fieldEmptyForNumber": "Please fill out a number.",
-  "fieldEmptyForPostalCode": "Please fill out a postcode.",
-  "fieldInvalidForCvv": "This security code is not valid.",
-  "fieldInvalidForExpirationDate": "This expiry date is not valid.",
-  "fieldInvalidForNumber": "This card number is not valid.",
-  "fieldInvalidForPostalCode": "This postcode is not valid.",
-  "genericError": "Something went wrong on our end.",
-  "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
-  "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
-  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your entries and try again.",
-  "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
-  "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
-  "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
-  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Please ensure you have the most recent version of the Venmo app installed on your device and your browser supports the switch to Venmo.",
-  "venmoAppFailedError": "The Venmo app wasn't found on your device.",
-  "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
-  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
-  "applePayActiveCardError": "Link a supported card to your Apple Pay wallet.",
-  "cardholderNameLabel": "Cardholder Name",
-  "cardNumberLabel": "Card Number",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 digits)",
-  "cvvFourDigitLabelSubheading": "(4 digits)",
-  "cardholderNamePlaceholder": "Cardholder Name",
-  "expirationDateLabel": "Expiry date",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "Postcode",
-  "payWithCard": "Pay with credit or debit card",
-  "endingIn": "Ending in ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Card",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 192 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Paying with {{paymentSource}}",
-  "chooseAnotherWayToPay": "Choose another way to pay",
-  "chooseAWayToPay": "Choose a way to pay",
-  "otherWaysToPay": "Other ways to pay",
-  "cardVerification": "Card Verification",
-  "fieldEmptyForCvv": "Please fill in a CSC.",
-  "fieldEmptyForExpirationDate": "Please fill in an expiry date.",
-  "fieldEmptyForCardholderName": "Please fill in a cardholder name.",
-  "fieldTooLongForCardholderName": "Cardholder name must be less than 256 characters.",
-  "fieldEmptyForNumber": "Please fill in a number.",
-  "fieldEmptyForPostalCode": "Please fill in a postcode.",
-  "fieldInvalidForCvv": "This security code is not valid.",
-  "fieldInvalidForExpirationDate": "This expiry date is not valid.",
-  "fieldInvalidForNumber": "This card number is not valid.",
-  "fieldInvalidForPostalCode": "This postcode is not valid.",
-  "genericError": "Something went wrong on our end.",
-  "hostedFieldsFailedTokenizationError": "Please check your information and try again.",
-  "hostedFieldsFieldsInvalidError": "Please check your information and try again.",
-  "hostedFieldsTokenizationNetworkErrorError": "Network error. Please try again.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Credit card verification failed. Please check your information and try again.",
-  "paypalAccountTokenizationFailedError": "Something went wrong while adding the PayPal account. Please try again.",
-  "paypalFlowFailedError": "Something went wrong while connecting to PayPal. Please try again.",
-  "paypalTokenizationRequestActiveError": "PayPal payment authorisation is already in progress.",
-  "venmoCanceledError": "We're sorry, something seems to have gone wrong. Make sure you have the most recent version of the Venmo app installed on your device and your browser supports the switch to Venmo.",
-  "venmoAppFailedError": "The Venmo app isn't on your device.",
-  "unsupportedCardTypeError": "This card type is not supported. Please try another card.",
-  "applePayTokenizationError": "A network error occurred while processing the Apple Pay payment. Please try again.",
-  "applePayActiveCardError": "Add a supported card to your Apple Pay wallet.",
-  "cardholderNameLabel": "Cardholder Name",
-  "cardNumberLabel": "Card Number",
-  "cvvLabel": "CSC",
-  "cvvThreeDigitLabelSubheading": "(3 digits)",
-  "cvvFourDigitLabelSubheading": "(4 digits)",
-  "cardholderNamePlaceholder": "Cardholder Name",
-  "expirationDateLabel": "Expiry Date",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "Postcode",
-  "payWithCard": "Pay with card",
-  "endingIn": "Ending in ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Card",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 193 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Pago con {{paymentSource}}",
-  "chooseAnotherWayToPay": "Selecciona otra forma de pago.",
-  "chooseAWayToPay": "Selecciona una forma de pago.",
-  "otherWaysToPay": "Otras formas de pago",
-  "cardVerification": "Verificación de tarjeta",
-  "fieldEmptyForCvv": "Escribe el código CVV.",
-  "fieldEmptyForExpirationDate": "Escribe la fecha de vencimiento.",
-  "fieldEmptyForCardholderName": "Escribe el nombre de un titular de la tarjeta.",
-  "fieldTooLongForCardholderName": "El nombre del titular de la tarjeta debe tener menos de 256 caracteres.",
-  "fieldEmptyForNumber": "Escribe un número.",
-  "fieldEmptyForPostalCode": "Escribe el código postal.",
-  "fieldInvalidForCvv": "Este código de seguridad no es válido.",
-  "fieldInvalidForExpirationDate": "Esta fecha de vencimiento no es válida.",
-  "fieldInvalidForNumber": "Este número de tarjeta no es válido.",
-  "fieldInvalidForPostalCode": "Este código postal no es válido.",
-  "genericError": "Hemos tenido algún problema.",
-  "hostedFieldsFailedTokenizationError": "Comprueba la información e inténtalo de nuevo.",
-  "hostedFieldsFieldsInvalidError": "Comprueba la información e inténtalo de nuevo.",
-  "hostedFieldsTokenizationNetworkErrorError": "Error de red. Inténtalo de nuevo.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Error de verificación de la tarjeta de crédito. Comprueba la información e inténtalo de nuevo.",
-  "paypalAccountTokenizationFailedError": "Se ha producido un error al vincular la cuenta PayPal. Inténtalo de nuevo.",
-  "paypalFlowFailedError": "Se ha producido un error al conectarse a PayPal. Inténtalo de nuevo.",
-  "paypalTokenizationRequestActiveError": "Ya hay una autorización de pago de PayPal en curso.",
-  "venmoCanceledError": "Ha habido un problema. Asegúrate de que tienes la versión más reciente de la aplicación de Venmo instalada en tu dispositivo y de que tu navegador es compatible con cambiar a Venmo.",
-  "venmoAppFailedError": "No se ha encontrado la aplicación de Venmo en tu dispositivo.",
-  "unsupportedCardTypeError": "No se admite este tipo de tarjeta. Prueba con otra tarjeta.",
-  "applePayTokenizationError": "Se ha producido un error de red al procesar el pago con Apple Pay. Inténtalo de nuevo.",
-  "applePayActiveCardError": "Añade una tarjeta admitida a tu Wallet de Apple Pay.",
-  "cardholderNameLabel": "Nombre del titular de la tarjeta",
-  "cardNumberLabel": "Número de tarjeta",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
-  "cvvFourDigitLabelSubheading": "(4 dígitos)",
-  "cardholderNamePlaceholder": "Nombre del titular de la tarjeta",
-  "expirationDateLabel": "Fecha de vencimiento",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Código postal",
-  "payWithCard": "Pagar con tarjeta",
-  "endingIn": "Terminada en ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Tarjeta",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 194 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Payer avec {{paymentSource}}",
-  "chooseAnotherWayToPay": "Choisir un autre mode de paiement",
-  "chooseAWayToPay": "Choisir le mode de paiement",
-  "otherWaysToPay": "Autres modes de paiement",
-  "cardVerification": "Vérification de la carte",
-  "fieldEmptyForCvv": "Veuillez saisir un cryptogramme visuel.",
-  "fieldEmptyForExpirationDate": "Veuillez saisir une date d'expiration.",
-  "fieldEmptyForCardholderName": "Veuillez saisir un nom de titulaire de la carte.",
-  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
-  "fieldEmptyForNumber": "Veuillez saisir un numéro.",
-  "fieldEmptyForPostalCode": "Veuillez saisir un code postal.",
-  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
-  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
-  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
-  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
-  "genericError": "Une erreur s'est produite de notre côté.",
-  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations, puis réessayez.",
-  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations, puis réessayez.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Veuillez réessayer.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "La vérification de la carte de crédit a échoué. Vérifiez vos informations, puis réessayez.",
-  "paypalAccountTokenizationFailedError": "Une erreur s'est produite lors de l'enregistrement du compte PayPal. Veuillez réessayer.",
-  "paypalFlowFailedError": "Une erreur s'est produite au cours de la connexion à PayPal. Veuillez réessayer.",
-  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
-  "venmoCanceledError": "Une erreur s'est produite. Assurez-vous que la version la plus récente de l'application Venmo est installée sur votre appareil et que votre navigateur prend Venmo en charge.",
-  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
-  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Veuillez essayer une autre carte.",
-  "applePayTokenizationError": "Une erreur de réseau s'est produite lors du traitement du paiement avec Apple Pay. Veuillez réessayer.",
-  "applePayActiveCardError": "Ajoutez une carte prise en charge à Apple Pay.",
-  "cardholderNameLabel": "Nom du titulaire de la carte",
-  "cardNumberLabel": "Numéro de carte",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
-  "cvvFourDigitLabelSubheading": "(4 chiffres)",
-  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
-  "expirationDateLabel": "Date d'expiration",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Code postal",
-  "payWithCard": "Payer par carte",
-  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Carte",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 195 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Payer avec {{paymentSource}}",
-  "chooseAnotherWayToPay": "Choisissez une autre façon de payer.",
-  "chooseAWayToPay": "Choisissez comment payer.",
-  "otherWaysToPay": "Autres façons de payer",
-  "cardVerification": "Vérification de la carte",
-  "fieldEmptyForCvv": "Entrez un cryptogramme visuel.",
-  "fieldEmptyForExpirationDate": "Entrez une date d'expiration.",
-  "fieldEmptyForCardholderName": "Entrez un nom du titulaire de la carte.",
-  "fieldTooLongForCardholderName": "Le nom du titulaire de la carte doit contenir moins de 256 caractères.",
-  "fieldEmptyForNumber": "Entrez un numéro.",
-  "fieldEmptyForPostalCode": "Entrez un code postal.",
-  "fieldInvalidForCvv": "Ce cryptogramme visuel n'est pas valide.",
-  "fieldInvalidForExpirationDate": "Cette date d'expiration n'est pas valide.",
-  "fieldInvalidForNumber": "Ce numéro de carte n'est pas valide.",
-  "fieldInvalidForPostalCode": "Ce code postal n'est pas valide.",
-  "genericError": "Une erreur est survenue.",
-  "hostedFieldsFailedTokenizationError": "Vérifiez vos informations et réessayez.",
-  "hostedFieldsFieldsInvalidError": "Vérifiez vos informations et réessayez.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erreur réseau. Réessayez.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Échec de vérification de la carte bancaire. Vérifiez vos informations et réessayez.",
-  "paypalAccountTokenizationFailedError": "Une erreur est survenue lors de l'ajout du compte PayPal. Réessayez.",
-  "paypalFlowFailedError": "Une erreur est survenue lors de la connexion à PayPal. Réessayez.",
-  "paypalTokenizationRequestActiveError": "L'autorisation de paiement PayPal est déjà en cours.",
-  "venmoCanceledError": "Une erreur est survenue. Vérifiez que vous disposez de la dernière version de l'application Venmo sur votre appareil et que votre navigateur prend en charge la redirection vers Venmo.",
-  "venmoAppFailedError": "L'application Venmo est introuvable sur votre appareil.",
-  "unsupportedCardTypeError": "Ce type de carte n'est pas pris en charge. Essayez une autre carte.",
-  "applePayTokenizationError": "Une erreur réseau s'est produite lors du traitement du paiement Apple Pay. Réessayez.",
-  "applePayActiveCardError": "Enregistrez une carte prise en charge sur Apple Pay.",
-  "cardholderNameLabel": "Nom du titulaire de la carte",
-  "cardNumberLabel": "Nº de carte",
-  "cvvLabel": "Cryptogramme visuel",
-  "cvvThreeDigitLabelSubheading": "(3 chiffres)",
-  "cvvFourDigitLabelSubheading": "(4 chiffres)",
-  "cardholderNamePlaceholder": "Nom du titulaire de la carte",
-  "expirationDateLabel": "Date d'expiration",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Code postal",
-  "payWithCard": "Payer par carte",
-  "endingIn": "Se terminant par ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Carte",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 196 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Membayar dengan {{paymentSource}}",
-  "chooseAnotherWayToPay": "Pilih metode pembayaran lain",
-  "chooseAWayToPay": "Pilih metode pembayaran",
-  "otherWaysToPay": "Metode pembayaran lain",
-  "cardVerification": "Verifikasi Kartu",
-  "fieldEmptyForCvv": "Masukkan CVV.",
-  "fieldEmptyForExpirationDate": "Masukkan tanggal akhir berlaku.",
-  "fieldEmptyForCardholderName": "Masukkan nama pemegang kartu.",
-  "fieldTooLongForCardholderName": "Nama pemegang kartu harus kurang dari 256 karakter.",
-  "fieldEmptyForNumber": "Masukkan nomor.",
-  "fieldEmptyForPostalCode": "Masukkan kode pos.",
-  "fieldInvalidForCvv": "Kode keamanan ini tidak valid.",
-  "fieldInvalidForExpirationDate": "Tanggal akhir berlaku ini tidak valid.",
-  "fieldInvalidForNumber": "Nomor kartu ini tidak valid.",
-  "fieldInvalidForPostalCode": "Kode pos ini tidak valid.",
-  "genericError": "Terjadi kesalahan pada sistem kami.",
-  "hostedFieldsFailedTokenizationError": "Periksa informasi Anda dan coba lagi.",
-  "hostedFieldsFieldsInvalidError": "Periksa informasi Anda dan coba lagi.",
-  "hostedFieldsTokenizationNetworkErrorError": "Masalah jaringan. Coba lagi.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifikasi kartu kredit gagal. Periksa informasi Anda dan coba lagi.",
-  "paypalAccountTokenizationFailedError": "Terjadi kesalahan saat menambahkan rekening PayPal. Coba lagi.",
-  "paypalFlowFailedError": "Terjadi kesalahan saat menyambung ke PayPal. Coba lagi.",
-  "paypalTokenizationRequestActiveError": "Otorisasi pembayaran PayPal sedang diproses.",
-  "venmoCanceledError": "Terdapat kesalahan. Pastikan Anda telah menginstal aplikasi Venmo versi terbaru pada perangkat dan peramban Anda mendukung untuk beralih ke Venmo.",
-  "venmoAppFailedError": "Aplikasi Venmo tidak dapat ditemukan pada perangkat Anda.",
-  "unsupportedCardTypeError": "Jenis kartu ini tidak didukung. Coba kartu lainnya.",
-  "applePayTokenizationError": "Terjadi kesalahan jaringan sewaktu memproses pembayaran melalui Apple Pay. Coba lagi.",
-  "applePayActiveCardError": "Tambahkan kartu yang didukung ke wallet Apple Pay.",
-  "cardholderNameLabel": "Nama Pemegang Kartu",
-  "cardNumberLabel": "Nomor Kartu",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 angka)",
-  "cvvFourDigitLabelSubheading": "(4 angka)",
-  "cardholderNamePlaceholder": "Nama Pemegang Kartu",
-  "expirationDateLabel": "Tanggal Kedaluwarsa",
-  "expirationDateLabelSubheading": "(BB/TT)",
-  "expirationDatePlaceholder": "BB/TT",
-  "postalCodeLabel": "Kode Pos",
-  "payWithCard": "Bayar dengan kartu",
-  "endingIn": "Berakhiran ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Kartu",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 197 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Pagamento con {{paymentSource}}",
-  "chooseAnotherWayToPay": "Scegli di pagare in un altro modo",
-  "chooseAWayToPay": "Scegli come pagare",
-  "otherWaysToPay": "Altri modi di pagare",
-  "cardVerification": "Codice di sicurezza",
-  "fieldEmptyForCvv": "Immetti il codice di sicurezza (CVV).",
-  "fieldEmptyForExpirationDate": "Immetti la data di scadenza.",
-  "fieldEmptyForCardholderName": "Immetti il nome del titolare della carta.",
-  "fieldTooLongForCardholderName": "Il nome del titolare della carta deve avere meno di 256 caratteri.",
-  "fieldEmptyForNumber": "Immetti il numero di carta.",
-  "fieldEmptyForPostalCode": "Immetti il CAP.",
-  "fieldInvalidForCvv": "Il codice di sicurezza non è valido.",
-  "fieldInvalidForExpirationDate": "La data di scadenza non è valida.",
-  "fieldInvalidForNumber": "Il numero di carta non è valido.",
-  "fieldInvalidForPostalCode": "Il CAP non è valido.",
-  "genericError": "Si è verificato un errore nei nostri sistemi.",
-  "hostedFieldsFailedTokenizationError": "Controlla e riprova.",
-  "hostedFieldsFieldsInvalidError": "Controlla e riprova.",
-  "hostedFieldsTokenizationNetworkErrorError": "Errore di rete. Riprova.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "La verifica della carta di credito non è andata a buon fine. Controlla i dati e riprova.",
-  "paypalAccountTokenizationFailedError": "Si è verificato un errore nel collegamento del conto PayPal. Riprova.",
-  "paypalFlowFailedError": "Si è verificato un errore di connessione a PayPal. Riprova.",
-  "paypalTokenizationRequestActiveError": "L'autorizzazione di pagamento PayPal è già in corso.",
-  "venmoCanceledError": "Si è verificato un errore. Assicurati di avere la versione più recente dell'app Venmo installata sul tuo dispositivo e che il browser supporti l'uso di Venmo.",
-  "venmoAppFailedError": "Impossibile trovare l'app Venmo sul dispositivo in uso.",
-  "unsupportedCardTypeError": "Questo tipo di carta non è supportato. Prova con un'altra carta.",
-  "applePayTokenizationError": "Si è verificato un errore di rete durante l'elaborazione del pagamento con Apple Pay. Riprova.",
-  "applePayActiveCardError": "Collega una carta supportata al tuo Apple Pay Wallet.",
-  "cardholderNameLabel": "Titolare della carta",
-  "cardNumberLabel": "Numero di carta",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 cifre)",
-  "cvvFourDigitLabelSubheading": "(4 cifre)",
-  "cardholderNamePlaceholder": "Titolare della carta",
-  "expirationDateLabel": "Data di scadenza",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "CAP",
-  "payWithCard": "Paga con una carta",
-  "endingIn": "Le cui ultime cifre sono ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Carta",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 198 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "{{paymentSource}}で支払う",
-  "chooseAnotherWayToPay": "別の支払方法を選択する",
-  "chooseAWayToPay": "支払方法を選択する",
-  "otherWaysToPay": "その他の支払方法",
-  "cardVerification": "カード確認",
-  "fieldEmptyForCvv": "カード確認コードを入力してください。",
-  "fieldEmptyForExpirationDate": "有効期限を入力してください。",
-  "fieldEmptyForCardholderName": "カード保有者の名前を入力してください。",
-  "fieldTooLongForCardholderName": "カード保有者の名前は256文字未満にしてください。",
-  "fieldEmptyForNumber": "番号を入力してください。",
-  "fieldEmptyForPostalCode": "郵便番号を入力してください。",
-  "fieldInvalidForCvv": "このセキュリティコードは無効です。",
-  "fieldInvalidForExpirationDate": "この有効期限は無効です。",
-  "fieldInvalidForNumber": "このカード番号は無効です。",
-  "fieldInvalidForPostalCode": "この郵便番号は無効です。",
-  "genericError": "弊社側で問題が発生しました。",
-  "hostedFieldsFailedTokenizationError": "情報を確認してもう一度お試しください。",
-  "hostedFieldsFieldsInvalidError": "情報を確認してもう一度お試しください。",
-  "hostedFieldsTokenizationNetworkErrorError": "ネットワークエラーです。もう一度お試しください。",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "クレジットカードの認証に失敗しました。情報を確認してもう一度お試しください。",
-  "paypalAccountTokenizationFailedError": "PayPalアカウントの追加で問題が発生しました。もう一度お試しください。",
-  "paypalFlowFailedError": "PayPalへの接続に問題が発生しました。もう一度お試しください。",
-  "paypalTokenizationRequestActiveError": "PayPal支払いの承認はすでに処理中です。",
-  "venmoCanceledError": "問題が発生しました。お客さまの端末にインストールされているVenmoアプリが最新のバージョンであること、お使いのブラウザがVenmoへの切り替えをサポートしていることを確認してください。",
-  "venmoAppFailedError": "お客さまの端末でVenmoアプリが見つかりませんでした。",
-  "unsupportedCardTypeError": "このカードタイプはサポートされていません。別のカードをご使用ください。",
-  "applePayTokenizationError": "Apple Payの支払いを処理する際にネットワークエラーが発生しました。もう一度お試しください。",
-  "applePayActiveCardError": "Apple Payウォレットに対応しているカードを追加してください。",
-  "cardholderNameLabel": "カード保有者の名前",
-  "cardNumberLabel": "カード番号",
-  "cvvLabel": "カード確認コード",
-  "cvvThreeDigitLabelSubheading": "(3桁)",
-  "cvvFourDigitLabelSubheading": "(4桁)",
-  "cardholderNamePlaceholder": "カード保有者の名前",
-  "expirationDateLabel": "有効期限",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "郵便番号",
-  "payWithCard": "カードで支払う",
-  "endingIn": "x-{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "カード",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "銀聯(UnionPay)"
-};
-
-
-/***/ }),
-/* 199 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "{{paymentSource}}(으)로 결제",
-  "chooseAnotherWayToPay": "다른 결제수단 선택",
-  "chooseAWayToPay": "결제수단 선택",
-  "otherWaysToPay": "다른 방법으로 결제",
-  "cardVerification": "카드 인증",
-  "fieldEmptyForCvv": "CVV를 입력하세요.",
-  "fieldEmptyForExpirationDate": "만료일을 입력하세요.",
-  "fieldEmptyForCardholderName": "카드 소유자 이름을 입력하세요.",
-  "fieldTooLongForCardholderName": "카드 소유자 이름은 256자 미만이어야 합니다.",
-  "fieldEmptyForNumber": "번호를 입력하세요.",
-  "fieldEmptyForPostalCode": "우편번호를 입력하세요.",
-  "fieldInvalidForCvv": "이 보안 코드가 올바르지 않습니다.",
-  "fieldInvalidForExpirationDate": "이 만료일이 올바르지 않습니다.",
-  "fieldInvalidForNumber": "이 카드 번호가 올바르지 않습니다.",
-  "fieldInvalidForPostalCode": "이 우편번호가 올바르지 않습니다.",
-  "genericError": "저희 쪽에 문제가 발생했습니다.",
-  "hostedFieldsFailedTokenizationError": "정보를 확인하고 다시 시도해 주세요.",
-  "hostedFieldsFieldsInvalidError": "정보를 확인하고 다시 시도해 주세요.",
-  "hostedFieldsTokenizationNetworkErrorError": "네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "신용카드 인증에 실패했습니다. 정보를 확인하고 다시 시도해 주세요.",
-  "paypalAccountTokenizationFailedError": "PayPal 계정을 추가하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
-  "paypalFlowFailedError": "PayPal 계정을 연결하는 동안 문제가 발생했습니다. 다시 시도해 주세요.",
-  "paypalTokenizationRequestActiveError": "PayPal 결제 승인이 이미 진행 중입니다.",
-  "venmoCanceledError": "오류가 발생했습니다. 기기에 최신 버전의 Venmo 앱이 설치되어 있으며 브라우저가 Venmo로 전환 기능을 지원하는지 확인하세요.",
-  "venmoAppFailedError": "기기에서 Venmo 앱을 찾을 수 없습니다.",
-  "unsupportedCardTypeError": "이 카드 형식은 지원되지 않습니다. 다른 카드로 시도해 주세요.",
-  "applePayTokenizationError": "Apple Pay 결제를 처리하는 동안 네트워크 오류가 발생했습니다. 다시 시도해 주세요.",
-  "applePayActiveCardError": "Apple Pay 전자지갑에 지원되는 카드를 추가하세요.",
-  "cardholderNameLabel": "카드 소유자 이름",
-  "cardNumberLabel": "카드 번호",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3자리)",
-  "cvvFourDigitLabelSubheading": "(4자리)",
-  "cardholderNamePlaceholder": "카드 소유자 이름",
-  "expirationDateLabel": "만료일",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "우편번호",
-  "payWithCard": "카드로 결제",
-  "endingIn": "끝 번호: ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "카드",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 200 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Betalen met {{paymentSource}}",
-  "chooseAnotherWayToPay": "Kies een andere betaalmethode",
-  "chooseAWayToPay": "Kies een betaalwijze",
-  "otherWaysToPay": "Andere manieren om te betalen",
-  "cardVerification": "Kaartcontrole",
-  "fieldEmptyForCvv": "Vul een CSC in.",
-  "fieldEmptyForExpirationDate": "Vul een vervaldatum in.",
-  "fieldEmptyForCardholderName": "Vul een naam voor de kaarthouder in.",
-  "fieldTooLongForCardholderName": "De naam van de kaarthouder moet korter zijn dan 256 tekens.",
-  "fieldEmptyForNumber": "Vul een nummer in.",
-  "fieldEmptyForPostalCode": "Vul een postcode in.",
-  "fieldInvalidForCvv": "Deze CSC is ongeldig.",
-  "fieldInvalidForExpirationDate": "Deze vervaldatum is ongeldig.",
-  "fieldInvalidForNumber": "Dit creditcardnummer is ongeldig.",
-  "fieldInvalidForPostalCode": "Deze postcode is ongeldig.",
-  "genericError": "Er is iets fout gegaan.",
-  "hostedFieldsFailedTokenizationError": "Controleer uw gegevens en probeer het opnieuw.",
-  "hostedFieldsFieldsInvalidError": "Controleer uw gegevens en probeer het opnieuw.",
-  "hostedFieldsTokenizationNetworkErrorError": "'Netwerkfout. Probeer het opnieuw.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "De controle van de creditcard is mislukt. Controleer uw gegevens en probeer het opnieuw.",
-  "paypalAccountTokenizationFailedError": "Er is iets misgegaan bij het toevoegen van de PayPal-rekening. Probeer het opnieuw.",
-  "paypalFlowFailedError": "Er is iets misgegaan bij de verbinding met PayPal. Probeer het opnieuw.",
-  "paypalTokenizationRequestActiveError": "De autorisatie van de PayPal-betaling is al in behandeling.",
-  "venmoCanceledError": "Er ging iets fout. Controleer of de meest recente versie van de Venmo-app op je apparaat is geïnstalleerd en dat je browser overschakelen naar Venmo ondersteunt.",
-  "venmoAppFailedError": "De Venmo-app is niet aangetroffen op je apparaat.",
-  "unsupportedCardTypeError": "Dit type creditcard wordt niet ondersteund. Gebruik een andere creditcard.",
-  "applePayTokenizationError": "Er is een netwerkfout opgetreden bij het verwerken van de Apple Pay-betaling. Probeer het opnieuw.",
-  "applePayActiveCardError": "Voeg een ondersteunde creditcard toe aan je Apple Pay-wallet.",
-  "cardholderNameLabel": "Naam kaarthouder",
-  "cardNumberLabel": "Creditcardnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 cijfers)",
-  "cvvFourDigitLabelSubheading": "(4 cijfers)",
-  "cardholderNamePlaceholder": "Naam kaarthouder",
-  "expirationDateLabel": "VervaldatumB",
-  "expirationDateLabelSubheading": "(MM/JJ)",
-  "expirationDatePlaceholder": "MM/JJ",
-  "postalCodeLabel": "Postcode",
-  "payWithCard": "Betalen met creditcard",
-  "endingIn": "Eindigend op ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Creditcard",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 201 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Betaling med {{paymentSource}}",
-  "chooseAnotherWayToPay": "Velg en annen måte å betale på",
-  "chooseAWayToPay": "Velg betalingsmåte",
-  "otherWaysToPay": "Andre måter å betale på",
-  "cardVerification": "Kortbekreftelse",
-  "fieldEmptyForCvv": "Oppgi en kortsikkerhetskode (CVV).",
-  "fieldEmptyForExpirationDate": "Oppgi en utløpsdato.",
-  "fieldEmptyForCardholderName": "Oppgi et navn for kortinnehaveren.",
-  "fieldTooLongForCardholderName": "Makslengden for kortinnehaverens navn er 256 tegn.",
-  "fieldEmptyForNumber": "Oppgi et nummer.",
-  "fieldEmptyForPostalCode": "Oppgi et postnummer.",
-  "fieldInvalidForCvv": "Denne sikkerhetskoden er ikke gyldig.",
-  "fieldInvalidForExpirationDate": "Denne utløpsdatoen er ikke gyldig.",
-  "fieldInvalidForNumber": "Dette kortnummeret er ikke gyldig.",
-  "fieldInvalidForPostalCode": "Dette postnummeret er ikke gyldig.",
-  "genericError": "Noe gikk galt hos oss.",
-  "hostedFieldsFailedTokenizationError": "Kontroller informasjonen og prøv på nytt.",
-  "hostedFieldsFieldsInvalidError": "Kontroller informasjonen og prøv på nytt.",
-  "hostedFieldsTokenizationNetworkErrorError": "Nettverksfeil. Prøv på nytt.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Bekreftelsen av betalingskortet mislyktes. Kontroller informasjonen og prøv på nytt.",
-  "paypalAccountTokenizationFailedError": "Noe gikk galt da PayPal-kontoen ble lagt til. Prøv på nytt.",
-  "paypalFlowFailedError": "Det oppsto et problem med tilkoblingen til PayPal. Prøv på nytt.",
-  "paypalTokenizationRequestActiveError": "Godkjenning av PayPal-betalingen pågår allerede",
-  "venmoCanceledError": "Noe gikk galt. Kontroller at du har installert den nyeste versjonen av Venmo-appen på enheten og at nettleseren din støtter bytte til Venmo.",
-  "venmoAppFailedError": "Finner ikke Venmo-appen på enheten.",
-  "unsupportedCardTypeError": "Denne korttypen støttes ikke. Prøv med et annet kort.",
-  "applePayTokenizationError": "Det oppsto en nettverksfeil under behandlingen av Apple Pay-betalingen. Prøv på nytt.",
-  "applePayActiveCardError": "Legg til et kort som støttes i Apple Pay-lommeboken din.",
-  "cardholderNameLabel": "Kortinnehaverens navn",
-  "cardNumberLabel": "Kortnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 siffer)",
-  "cvvFourDigitLabelSubheading": "(4 siffer)",
-  "cardholderNamePlaceholder": "Kortinnehaverens navn",
-  "expirationDateLabel": "Utløpsdato",
-  "expirationDateLabelSubheading": "(MM/ÅÅ)",
-  "expirationDatePlaceholder": "MM/ÅÅ",
-  "postalCodeLabel": "Postnummer",
-  "payWithCard": "Betal med kort",
-  "endingIn": "Som slutter på ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Kort",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 202 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Forma płatności: {{paymentSource}}",
-  "chooseAnotherWayToPay": "Wybierz inną formę płatności",
-  "chooseAWayToPay": "Wybierz sposób płatności",
-  "otherWaysToPay": "Inne formy płatności",
-  "cardVerification": "Weryfikacja karty",
-  "fieldEmptyForCvv": "Podaj kod bezpieczeństwa.",
-  "fieldEmptyForExpirationDate": "Podaj datę ważności.",
-  "fieldEmptyForCardholderName": "Podaj imię i nazwisko posiadacza karty.",
-  "fieldTooLongForCardholderName": "Imię i nazwisko posiadacza karty musi mieć mniej niż 256 znaków.",
-  "fieldEmptyForNumber": "Podaj numer.",
-  "fieldEmptyForPostalCode": "Podaj kod pocztowy.",
-  "fieldInvalidForCvv": "Podany kod bezpieczeństwa jest nieprawidłowy.",
-  "fieldInvalidForExpirationDate": "Podana data ważności jest nieprawidłowa.",
-  "fieldInvalidForNumber": "Podany numer karty jest nieprawidłowy.",
-  "fieldInvalidForPostalCode": "Podany kod pocztowy jest nieprawidłowy.",
-  "genericError": "Wystąpił błąd po naszej stronie.",
-  "hostedFieldsFailedTokenizationError": "Sprawdź swoje informacje i spróbuj ponownie.",
-  "hostedFieldsFieldsInvalidError": "Sprawdź swoje informacje i spróbuj ponownie.",
-  "hostedFieldsTokenizationNetworkErrorError": "Błąd sieci. Spróbuj ponownie.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Weryfikacja karty kredytowej nie powiodła się. Sprawdź swoje informacje i spróbuj ponownie.",
-  "paypalAccountTokenizationFailedError": "Coś poszło nie tak podczas dodawania konta PayPal. Spróbuj ponownie.",
-  "paypalFlowFailedError": "Coś poszło nie tak podczas łączenia z systemem PayPal. Spróbuj ponownie.",
-  "paypalTokenizationRequestActiveError": "Autoryzacja płatności PayPal jest już w trakcie realizacji.",
-  "venmoCanceledError": "Wystąpił problem. Upewnij się, czy na swoim urządzeniu masz zainstalowaną najnowszą wersję aplikacji Venmo i Twoja przeglądarka ją obsługuje.",
-  "venmoAppFailedError": "Nie można odnaleźć aplikacji Venmo na urządzeniu.",
-  "unsupportedCardTypeError": "Ten typ karty nie jest obsługiwany. Spróbuj użyć innej karty.",
-  "applePayTokenizationError": "Wystąpił błąd sieci podczas przetwarzania płatności Apple Pay. Spróbuj ponownie.",
-  "applePayActiveCardError": "Dodaj obsługiwaną kartę do portfela Apple Pay.",
-  "cardholderNameLabel": "Imię i nazwisko posiadacza karty",
-  "cardNumberLabel": "Numer karty",
-  "cvvLabel": "Kod CVC",
-  "cvvThreeDigitLabelSubheading": "(3 cyfry)",
-  "cvvFourDigitLabelSubheading": "(4 cyfry)",
-  "cardholderNamePlaceholder": "Imię i nazwisko posiadacza karty",
-  "expirationDateLabel": "Data ważności",
-  "expirationDateLabelSubheading": "(MM/RR)",
-  "expirationDatePlaceholder": "MM/RR",
-  "postalCodeLabel": "Kod pocztowy",
-  "payWithCard": "Zapłać kartą",
-  "endingIn": "O numerze zakończonym cyframi ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Karta",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 203 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Pagando com {{paymentSource}}",
-  "chooseAnotherWayToPay": "Escolher outro meio de pagamento",
-  "chooseAWayToPay": "Escolher um meio de pagamento",
-  "otherWaysToPay": "Outro meio de pagamento",
-  "cardVerification": "Verificação do cartão",
-  "fieldEmptyForCvv": "Informe o Código de Segurança.",
-  "fieldEmptyForExpirationDate": "Informe a data de vencimento.",
-  "fieldEmptyForCardholderName": "Informe o nome do titular do cartão.",
-  "fieldTooLongForCardholderName": "O nome do titular do cartão deve ter menos de 256 caracteres.",
-  "fieldEmptyForNumber": "Informe um número.",
-  "fieldEmptyForPostalCode": "Informe um CEP.",
-  "fieldInvalidForCvv": "Este código de segurança não é válido.",
-  "fieldInvalidForExpirationDate": "Esta data de vencimento não é válida.",
-  "fieldInvalidForNumber": "O número do cartão não é válido.",
-  "fieldInvalidForPostalCode": "Este CEP não é válido.",
-  "genericError": "Ocorreu um erro.",
-  "hostedFieldsFailedTokenizationError": "Verifique as informações e tente novamente.",
-  "hostedFieldsFieldsInvalidError": "Verifique as informações e tente novamente.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Falha ao verificar o cartão de crédito. Verifique as informações e tente novamente.",
-  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao adicionar a conta do PayPal. Tente novamente.",
-  "paypalFlowFailedError": "Ocorreu um erro de conexão com o PayPal. Tente novamente.",
-  "paypalTokenizationRequestActiveError": "A autorização de pagamento do PayPal já está em andamento.",
-  "venmoCanceledError": "Ocorreu um erro. Certifique-se de ter a versão mais recente do aplicativo Venmo instalado no seu dispositivo e que o seu navegador suporte a mudança para o Venmo.",
-  "venmoAppFailedError": "Não foi possível encontrar o aplicativo Venmo no seu dispositivo.",
-  "unsupportedCardTypeError": "Este tipo de cartão não é aceito. Experimente outro cartão.",
-  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
-  "applePayActiveCardError": "Adicione cartão suportado à sua carteira do Apple Pay.",
-  "cardholderNameLabel": "Nome do titular do cartão",
-  "cardNumberLabel": "Número do cartão",
-  "cvvLabel": "Cód. Seg.",
-  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
-  "cvvFourDigitLabelSubheading": "(4 dígitos)",
-  "cardholderNamePlaceholder": "Nome do titular do cartão",
-  "expirationDateLabel": "Data de vencimento",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "CEP",
-  "payWithCard": "Pague com seu cartão",
-  "endingIn": "Com final ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Cartão",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 204 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Pagar com {{paymentSource}}",
-  "chooseAnotherWayToPay": "Escolher outra forma de pagamento",
-  "chooseAWayToPay": "Escolha um meio de pagamento",
-  "otherWaysToPay": "Outras formas de pagamento",
-  "cardVerification": "Verificação de cartão",
-  "fieldEmptyForCvv": "Introduza o código CVV.",
-  "fieldEmptyForExpirationDate": "Introduza a data de validade.",
-  "fieldEmptyForCardholderName": "Introduza um nome do titular do cartão.",
-  "fieldTooLongForCardholderName": "O nome do titular do cartão tem de ter menos de 256 carateres.",
-  "fieldEmptyForNumber": "Introduza um número.",
-  "fieldEmptyForPostalCode": "Introduza o código postal.",
-  "fieldInvalidForCvv": "Este código de segurança não é válido.",
-  "fieldInvalidForExpirationDate": "Esta data de validade não é correta.",
-  "fieldInvalidForNumber": "Este número de cartão não é válido.",
-  "fieldInvalidForPostalCode": "Este código postal não é válido.",
-  "genericError": "Tudo indica que ocorreu um problema.",
-  "hostedFieldsFailedTokenizationError": "Verifique os dados e tente novamente.",
-  "hostedFieldsFieldsInvalidError": "Verifique os dados e tente novamente.",
-  "hostedFieldsTokenizationNetworkErrorError": "Erro de rede. Tente novamente.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "A verificação do cartão de crédito falhou. Verifique os dados e tente novamente.",
-  "paypalAccountTokenizationFailedError": "Ocorreu um erro ao associar a conta PayPal. Tente novamente.",
-  "paypalFlowFailedError": "Ocorreu um erro na ligação com PayPal. Tente novamente.",
-  "paypalTokenizationRequestActiveError": "Já há uma autorização de pagamento PayPal em curso.",
-  "venmoCanceledError": "Ocorreu um erro. Certifique-se de que tem a versão mais recente da aplicação Venmo instalada no seu dispositivo e que o navegador suporta a mudança para o Venmo.",
-  "venmoAppFailedError": "Não foi possível encontrar a aplicação Venmo no dispositivo.",
-  "unsupportedCardTypeError": "Este tipo de cartão não é suportado. Tente usar outro cartão.",
-  "applePayTokenizationError": "Ocorreu um erro de rede ao processar o pagamento com Apple Pay. Tente novamente.",
-  "applePayActiveCardError": "Adicione um cartão suportado à sua carteira Apple Pay.",
-  "cardholderNameLabel": "Nome do titular do cartão",
-  "cardNumberLabel": "Número do cartão",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 dígitos)",
-  "cvvFourDigitLabelSubheading": "(4 dígitos)",
-  "cardholderNamePlaceholder": "Nome do titular do cartão",
-  "expirationDateLabel": "Data de validade",
-  "expirationDateLabelSubheading": "(MM/AA)",
-  "expirationDatePlaceholder": "MM/AA",
-  "postalCodeLabel": "Código postal",
-  "payWithCard": "Pagar com cartão",
-  "endingIn": "Que termina em ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Cartão",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 205 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Способы оплаты: {{paymentSource}}",
-  "chooseAnotherWayToPay": "Выберите другой способ оплаты",
-  "chooseAWayToPay": "Выберите способ оплаты",
-  "otherWaysToPay": "Другие способы оплаты",
-  "cardVerification": "Проверка карты",
-  "fieldEmptyForCvv": "Укажите код безопасности.",
-  "fieldEmptyForExpirationDate": "Укажите дату окончания срока действия.",
-  "fieldEmptyForCardholderName": "Введите имя и фамилию владельца карты.",
-  "fieldTooLongForCardholderName": "Имя владельца карты должно содержать не более 256 символов.",
-  "fieldEmptyForNumber": "Введите номер.",
-  "fieldEmptyForPostalCode": "Укажите почтовый индекс.",
-  "fieldInvalidForCvv": "Этот код безопасности недействителен.",
-  "fieldInvalidForExpirationDate": "Эта дата окончания срока действия недействительна.",
-  "fieldInvalidForNumber": "Этот номер карты недействителен.",
-  "fieldInvalidForPostalCode": "Этот почтовый индекс недействителен.",
-  "genericError": "Возникла проблема с нашей стороны.",
-  "hostedFieldsFailedTokenizationError": "Проверьте правильность ввода данных и повторите попытку.",
-  "hostedFieldsFieldsInvalidError": "Проверьте правильность ввода данных и повторите попытку.",
-  "hostedFieldsTokenizationNetworkErrorError": "Ошибка сети. Повторите попытку.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Проверка банковской карты не выполнена. Проверьте правильность ввода данных и повторите попытку.",
-  "paypalAccountTokenizationFailedError": "Что-то пошло не так — не удалось добавить учетную запись PayPal. Повторите попытку.",
-  "paypalFlowFailedError": "Что-то пошло не так — не удалось подключиться к системе PayPal. Повторите попытку.",
-  "paypalTokenizationRequestActiveError": "Выполняется авторизация платежа PayPal.",
-  "venmoCanceledError": "Возникла ошибка. Просим вас убедиться, что у вас установлена новейшая версия приложения Venmo и ваш браузер поддерживает переключение к Venmo.",
-  "venmoAppFailedError": "Приложение Venmo не обнаружено на вашем устройстве.",
-  "unsupportedCardTypeError": "Этот тип карты не поддерживается. Попробуйте воспользоваться другой картой.",
-  "applePayTokenizationError": "При обработке платежа через Apple Pay возникла сетевая ошибка. Повторите попытку.",
-  "applePayActiveCardError": "Добавьте поддерживаемую карту к своему счету Apple Pay.",
-  "cardholderNameLabel": "Имя и фамилия владельца",
-  "cardNumberLabel": "Номер карты",
-  "cvvLabel": "Код безопасности",
-  "cvvThreeDigitLabelSubheading": "(3 цифры)",
-  "cvvFourDigitLabelSubheading": "(4 цифры)",
-  "cardholderNamePlaceholder": "Имя и фамилия владельца",
-  "expirationDateLabel": "Действует до",
-  "expirationDateLabelSubheading": "(ММ/ГГ)",
-  "expirationDatePlaceholder": "ММ/ГГ",
-  "postalCodeLabel": "Индекс",
-  "payWithCard": "Оплатить картой",
-  "endingIn": "Заканчивается на ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Карта",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 206 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "Betalas med {{paymentSource}}",
-  "chooseAnotherWayToPay": "Välj ett annat sätt att betala",
-  "chooseAWayToPay": "Välj hur du vill betala",
-  "otherWaysToPay": "Andra sätt att betala",
-  "cardVerification": "Kortverifiering",
-  "fieldEmptyForCvv": "Fyll i en CVV-kod.",
-  "fieldEmptyForExpirationDate": "Fyll i ett utgångsdatum.",
-  "fieldEmptyForCardholderName": "Fyll i kortinnehavarens namn.",
-  "fieldTooLongForCardholderName": "Kortinnehavarens namn måste vara kortare än 256 tecken.",
-  "fieldEmptyForNumber": "Fyll i ett nummer.",
-  "fieldEmptyForPostalCode": "Fyll i ett postnummer.",
-  "fieldInvalidForCvv": "Den här säkerhetskoden är inte giltig.",
-  "fieldInvalidForExpirationDate": "Det här utgångsdatumet är inte giltigt.",
-  "fieldInvalidForNumber": "Det här kortnumret är inte giltigt.",
-  "fieldInvalidForPostalCode": "Det här postnumret är inte giltigt.",
-  "genericError": "Ett fel uppstod.",
-  "hostedFieldsFailedTokenizationError": "Kontrollera uppgifterna och försök igen.",
-  "hostedFieldsFieldsInvalidError": "Kontrollera uppgifterna och försök igen.",
-  "hostedFieldsTokenizationNetworkErrorError": "Nätverksfel. Försök igen.",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "Verifieringen av betalkort misslyckades. Kontrollera uppgifterna och försök igen.",
-  "paypalAccountTokenizationFailedError": "Ett fel uppstod när PayPal-kontot skulle läggas till. Försök igen.",
-  "paypalFlowFailedError": "Ett fel uppstod när anslutningen till PayPal skulle upprättas. Försök igen.",
-  "paypalTokenizationRequestActiveError": "Betalningsgodkännandet för PayPal behandlas redan.",
-  "venmoCanceledError": "Något gick fel. Se till att du har den senaste versionen av Venmo-appen installerad på din enhet och att webbläsaren stöder att gå över till Venmo.",
-  "venmoAppFailedError": "Venmo-appen kunde inte hittas på din enhet.",
-  "unsupportedCardTypeError": "Den här korttypen stöds inte. Pröva med ett annat kort.",
-  "applePayTokenizationError": "Ett nätverksfel inträffade när Apple Pay-betalningen skulle behandlas. Försök igen.",
-  "applePayActiveCardError": "Lägg till ett kort som stöds i Apple Pay-e-plånboken.",
-  "cardholderNameLabel": "Kortinnehavarens namn",
-  "cardNumberLabel": "Kortnummer",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 siffror)",
-  "cvvFourDigitLabelSubheading": "(4 siffror)",
-  "cardholderNamePlaceholder": "Kortinnehavarens namn",
-  "expirationDateLabel": "Utgångsdatum",
-  "expirationDateLabelSubheading": "(MM/ÅÅ)",
-  "expirationDatePlaceholder": "MM/ÅÅ",
-  "postalCodeLabel": "Postnummer",
-  "payWithCard": "Betala med kort",
-  "endingIn": "Slutar på ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "Kort",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 207 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "การชำระเงินด้วย {{paymentSource}}",
-  "chooseAnotherWayToPay": "เลือกวิธีอื่นเพื่อชำระเงิน",
-  "chooseAWayToPay": "เลือกวิธีชำระเงิน",
-  "otherWaysToPay": "วิธีอื่นๆ ในการชำระเงิน",
-  "cardVerification": "การตรวจสอบยืนยันบัตร",
-  "fieldEmptyForCvv": "โปรดกรอก CVV (รหัสการตรวจสอบยืนยันบัตร)",
-  "fieldEmptyForExpirationDate": "โปรดกรอกวันที่หมดอายุ",
-  "fieldEmptyForCardholderName": "โปรดกรอกชื่อเจ้าของบัตร",
-  "fieldTooLongForCardholderName": "ชื่อผู้ถือบัตรจะต้องไม่เกิน 256 อักขระ",
-  "fieldEmptyForNumber": "โปรดกรอกหมายเลข",
-  "fieldEmptyForPostalCode": "โปรดกรอกรหัสไปรษณีย์",
-  "fieldInvalidForCvv": "รหัสความปลอดภัยนี้ไม่ถูกต้อง",
-  "fieldInvalidForExpirationDate": "วันที่หมดอายุนี้ไม่ถูกต้อง",
-  "fieldInvalidForNumber": "หมายเลขบัตรนี้ไม่ถูกต้อง",
-  "fieldInvalidForPostalCode": "รหัสไปรษณีย์นี้ไม่ถูกต้อง",
-  "genericError": "เกิดข้อผิดพลาดขึ้นในระบบของเรา",
-  "hostedFieldsFailedTokenizationError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
-  "hostedFieldsFieldsInvalidError": "โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
-  "hostedFieldsTokenizationNetworkErrorError": "ข้อผิดพลาดด้านเครือข่าย โปรดลองอีกครั้ง",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "การตรวจสอบยืนยันบัตรเครดิตล้มเหลว โปรดตรวจสอบข้อมูลของคุณ แล้วลองอีกครั้ง",
-  "paypalAccountTokenizationFailedError": "เกิดข้อผิดพลาดในการเพิ่มบัญชี PayPal โปรดลองอีกครั้ง",
-  "paypalFlowFailedError": "เกิดข้อผิดพลาดในการเชื่อมต่อกับ PayPal โปรดลองอีกครั้ง",
-  "paypalTokenizationRequestActiveError": "การอนุญาตการชำระเงินของ PayPal อยู่ในระหว่างดำเนินการ",
-  "venmoCanceledError": "เกิดข้อผิดพลาดบางประการ ตรวจสอบว่าคุณมีแอป Venmo เวอร์ชันล่าสุดติดตั้งในอุปกรณ์ของคุณ และมีเบราเซอร์ที่รองรับ Venmo",
-  "venmoAppFailedError": "ไม่พบแอป Venmo บนอุปกรณ์ของคุณ",
-  "unsupportedCardTypeError": "ไม่รองรับบัตรประเภทนี้ โปรดลองใช้บัตรใบอื่น",
-  "applePayTokenizationError": "เกิดข้อผิดพลาดด้านเครือข่ายขึ้นขณะดำเนินการชำระเงินด้วย Apple Pay โปรดลองอีกครั้ง",
-  "applePayActiveCardError": "เพิ่มบัตรที่รองรับในกระเป๋าสตางค์ Apple Pay ของคุณ",
-  "cardholderNameLabel": "ชื่อเจ้าของบัตร",
-  "cardNumberLabel": "หมายเลขบัตร",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "(3 หลัก)",
-  "cvvFourDigitLabelSubheading": "(4 หลัก)",
-  "cardholderNamePlaceholder": "ชื่อเจ้าของบัตร",
-  "expirationDateLabel": "วันหมดอายุ",
-  "expirationDateLabelSubheading": "(ดด/ปป)",
-  "expirationDatePlaceholder": "ดด/ปป",
-  "postalCodeLabel": "รหัสไปรษณีย์",
-  "payWithCard": "ชำระเงินด้วยบัตร",
-  "endingIn": "ลงท้ายด้วย ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "บัตร",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 208 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "正在使用{{paymentSource}}付款",
-  "chooseAnotherWayToPay": "选择其他付款方式",
-  "chooseAWayToPay": "选择付款方式",
-  "otherWaysToPay": "其他付款方式",
-  "cardVerification": "卡验证",
-  "fieldEmptyForCvv": "请填写CVV。",
-  "fieldEmptyForExpirationDate": "请填写有效期限。",
-  "fieldEmptyForCardholderName": "请填写持卡人的姓名。",
-  "fieldTooLongForCardholderName": "持卡人姓名必须少于256个字符。",
-  "fieldEmptyForNumber": "请填写一个号码。",
-  "fieldEmptyForPostalCode": "请填写邮政编码。",
-  "fieldInvalidForCvv": "此安全代码无效。",
-  "fieldInvalidForExpirationDate": "此有效期限无效。",
-  "fieldInvalidForNumber": "此卡号无效。",
-  "fieldInvalidForPostalCode": "此邮政编码无效。",
-  "genericError": "我们遇到了一些问题",
-  "hostedFieldsFailedTokenizationError": "请检查您的信息，然后重试。",
-  "hostedFieldsFieldsInvalidError": "请检查您的信息，然后重试。",
-  "hostedFieldsTokenizationNetworkErrorError": "网络错误。请重试。",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡验证失败。请检查您的信息，然后重试。",
-  "paypalAccountTokenizationFailedError": "添加PayPal账户时出错。请重试。",
-  "paypalFlowFailedError": "连接到PayPal时出错。请重试。",
-  "paypalTokenizationRequestActiveError": "PayPal付款授权已在进行中。",
-  "venmoCanceledError": "我们遇到了问题。请确保您的设备上已安装最新版本的Venmo应用，并且您的浏览器支持切换到Venmo。",
-  "venmoAppFailedError": "在您的设备上找不到Venmo应用。",
-  "unsupportedCardTypeError": "不支持该卡类型。请尝试其他卡。",
-  "applePayTokenizationError": "处理Apple Pay付款时出现网络错误。请重试。",
-  "applePayActiveCardError": "请添加受支持的卡到您的Apple Pay钱包。",
-  "cardholderNameLabel": "持卡人姓名",
-  "cardNumberLabel": "卡号",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "（3位数）",
-  "cvvFourDigitLabelSubheading": "（4位数）",
-  "cardholderNamePlaceholder": "持卡人姓名",
-  "expirationDateLabel": "有效期限",
-  "expirationDateLabelSubheading": "（MM/YY）",
-  "expirationDatePlaceholder": "MM/YY",
-  "postalCodeLabel": "邮政编码",
-  "payWithCard": "用卡付款",
-  "endingIn": "尾号为{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "卡",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "银联"
-};
-
-
-/***/ }),
-/* 209 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "付款方式為 {{paymentSource}}",
-  "chooseAnotherWayToPay": "選擇其他付款方式",
-  "chooseAWayToPay": "選擇付款方式",
-  "otherWaysToPay": "其他付款方式",
-  "cardVerification": "信用卡認證",
-  "fieldEmptyForCvv": "請填寫信用卡認證碼。",
-  "fieldEmptyForExpirationDate": "請填寫到期日。",
-  "fieldEmptyForCardholderName": "請填寫持卡人的名字。",
-  "fieldTooLongForCardholderName": "持卡人姓名必須少於 256 個字元。",
-  "fieldEmptyForNumber": "請填寫號碼。",
-  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
-  "fieldInvalidForCvv": "此安全代碼無效。",
-  "fieldInvalidForExpirationDate": "此到期日無效。",
-  "fieldInvalidForNumber": "此卡號無效。",
-  "fieldInvalidForPostalCode": "此郵遞區號無效。",
-  "genericError": "系統發生錯誤。",
-  "hostedFieldsFailedTokenizationError": "請檢查你的資料並再試一次。",
-  "hostedFieldsFieldsInvalidError": "請檢查你的資料並再試一次。",
-  "hostedFieldsTokenizationNetworkErrorError": "網絡錯誤。請重試。",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並再試一次。",
-  "paypalAccountTokenizationFailedError": "加入 PayPal 帳戶時發生錯誤。請重試。",
-  "paypalFlowFailedError": "連接 PayPal 時發生錯誤。請重試。",
-  "paypalTokenizationRequestActiveError": "PayPal 付款授權已在處理中。",
-  "venmoCanceledError": "系統發生錯誤，請確保你已在裝置上安裝最新版本的 Venmo 應用程式，而且你的瀏覽器支援切換至 Venmo。",
-  "venmoAppFailedError": "在你的裝置上找不到 Venmo 應用程式。",
-  "unsupportedCardTypeError": "不可使用此信用卡類型。請改用其他信用卡。",
-  "applePayTokenizationError": "處理 Apple Pay 付款時發生網絡錯誤。請重試。",
-  "applePayActiveCardError": "在 Apple Pay 錢包中加入支援的信用卡。",
-  "cardholderNameLabel": "持卡人名字",
-  "cardNumberLabel": "卡號",
-  "cvvLabel": "信用卡認證碼",
-  "cvvThreeDigitLabelSubheading": "（3 位數）",
-  "cvvFourDigitLabelSubheading": "（4 位數）",
-  "cardholderNamePlaceholder": "持卡人名字",
-  "expirationDateLabel": "到期日",
-  "expirationDateLabelSubheading": "(MM/YY)",
-  "expirationDatePlaceholder": "月 / 年",
-  "postalCodeLabel": "郵遞區號",
-  "payWithCard": "使用信用卡付款",
-  "endingIn": "最後兩位數為 ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "信用卡",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal Credit",
-  "Google Pay": "Google Pay",
-  "American Express": "American Express",
-  "Discover": "Discover",
-  "Diners Club": "Diners Club",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 210 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = {
-  "payingWith": "以 {{paymentSource}} 付款",
-  "chooseAnotherWayToPay": "選擇支付款項的以其他方式付款",
-  "chooseAWayToPay": "選擇支付款項的方式",
-  "otherWaysToPay": "其他付款方式",
-  "cardVerification": "信用卡認證",
-  "fieldEmptyForCvv": "請填妥信用卡驗證碼。",
-  "fieldEmptyForExpirationDate": "請填妥到期日。",
-  "fieldEmptyForCardholderName": "請填妥持卡人姓名。",
-  "fieldTooLongForCardholderName": "持卡人姓名不能超過 256 個字元。",
-  "fieldEmptyForNumber": "請填妥號碼。",
-  "fieldEmptyForPostalCode": "請填寫郵遞區號。",
-  "fieldInvalidForCvv": "這組安全代碼無效。",
-  "fieldInvalidForExpirationDate": "此到期日無效。",
-  "fieldInvalidForNumber": "此卡號無效。",
-  "fieldInvalidForPostalCode": "此郵遞區號無效。",
-  "genericError": "我們的系統發生問題。",
-  "hostedFieldsFailedTokenizationError": "請檢查你的資料並重試。",
-  "hostedFieldsFieldsInvalidError": "請檢查你的資料並重試。",
-  "hostedFieldsTokenizationNetworkErrorError": "網路錯誤。請重試。",
-  "hostedFieldsTokenizationCvvVerificationFailedError": "信用卡認證失敗。請檢查你的資料並重試。",
-  "paypalAccountTokenizationFailedError": "新增 PayPal 帳戶時，系統發生錯誤。請重試。",
-  "paypalFlowFailedError": "連結至 PayPal 時，系統發生錯誤。請重試。",
-  "paypalTokenizationRequestActiveError": "PayPal 支付款項的授權已在處理中。",
-  "venmoCanceledError": "系統發生錯誤。確認你的裝置上裝有最新版本的 Venmo 應用程式，而且瀏覽器支援切換至 Venmo。",
-  "venmoAppFailedError": "你的裝置上找不到 Venmo 應用程式。",
-  "unsupportedCardTypeError": "不支援此卡片類型。請嘗試其他卡片。",
-  "applePayTokenizationError": "在處理 Apple Pay 付款時發生網路錯誤。請重試。",
-  "applePayActiveCardError": "新增支援的卡片至你的 Apple Pay 錢包。",
-  "cardholderNameLabel": "持卡人姓名",
-  "cardNumberLabel": "卡號",
-  "cvvLabel": "CVV",
-  "cvvThreeDigitLabelSubheading": "（3 位數）",
-  "cvvFourDigitLabelSubheading": "（4 位數）",
-  "cardholderNamePlaceholder": "持卡人姓名",
-  "expirationDateLabel": "到期日",
-  "expirationDateLabelSubheading": "（月 / 年）",
-  "expirationDatePlaceholder": "月 / 年",
-  "postalCodeLabel": "郵遞區號",
-  "payWithCard": "使用信用卡 / 扣帳卡付款",
-  "endingIn": "你的末兩碼為 ••{{lastTwoCardDigits}}",
-  "Apple Pay": "Apple Pay",
-  "Venmo": "Venmo",
-  "Card": "信用卡或扣帳卡",
-  "PayPal": "PayPal",
-  "PayPal Credit": "PayPal 信貸",
-  "Google Pay": "Google Pay",
-  "American Express": "美國運通 (American Express)",
-  "Discover": "Discover",
-  "Diners Club": "大來國際 (Diners Club)",
-  "MasterCard": "Mastercard",
-  "Visa": "Visa",
-  "JCB": "JCB",
-  "Maestro": "Maestro",
-  "UnionPay": "UnionPay"
-};
-
-
-/***/ }),
-/* 211 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28028,15 +28923,65 @@ module.exports = function (string) {
 
 
 /***/ }),
-/* 212 */
+/* 217 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var constants = __webpack_require__(2);
+var assets = __webpack_require__(26);
+var Promise = __webpack_require__(5);
+
+function DataCollector(config) {
+  this._config = config;
+}
+
+DataCollector.prototype.initialize = function () {
+  var self = this;
+
+  return Promise.resolve().then(function () {
+    var braintreeWebVersion;
+
+    if (global.braintree && global.braintree.dataCollector) {
+      return Promise.resolve();
+    }
+
+    braintreeWebVersion = self._config.client.getVersion();
+
+    return assets.loadScript({
+      src: 'https://js.braintreegateway.com/web/' + braintreeWebVersion + '/js/data-collector.min.js',
+      id: constants.DATA_COLLECTOR_SCRIPT_ID
+    });
+  }).then(function () {
+    return global.braintree.dataCollector.create(self._config);
+  }).then(function (instance) {
+    self._instance = instance;
+  });
+};
+
+DataCollector.prototype.getDeviceData = function () {
+  return this._instance.deviceData;
+};
+
+DataCollector.prototype.teardown = function () {
+  return this._instance.teardown();
+};
+
+module.exports = DataCollector;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 
-var classlist = __webpack_require__(13);
-var threeDSecure = __webpack_require__(213);
+var classlist = __webpack_require__(15);
+var threeDSecure = __webpack_require__(219);
 var Promise = __webpack_require__(5);
 
 function ThreeDSecure(client, merchantConfiguration, cardVerificationString) {
@@ -28178,20 +29123,20 @@ module.exports = ThreeDSecure;
 
 
 /***/ }),
-/* 213 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /** @module braintree-web/three-d-secure */
 
-var ThreeDSecure = __webpack_require__(214);
-var isHTTPS = __webpack_require__(217).isHTTPS;
+var ThreeDSecure = __webpack_require__(220);
+var isHTTPS = __webpack_require__(223).isHTTPS;
 var basicComponentVerification = __webpack_require__(16);
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
-var errors = __webpack_require__(68);
-var VERSION = "3.31.0";
+var errors = __webpack_require__(72);
+var VERSION = "3.34.0";
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -28246,7 +29191,7 @@ module.exports = {
 
 
 /***/ }),
-/* 214 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28254,18 +29199,18 @@ module.exports = {
 
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
-var assign = __webpack_require__(15).assign;
-var methods = __webpack_require__(11);
-var convertMethodsToError = __webpack_require__(12);
-var constants = __webpack_require__(215);
-var useMin = __webpack_require__(54);
-var Bus = __webpack_require__(53);
+var assign = __webpack_require__(11).assign;
+var methods = __webpack_require__(12);
+var convertMethodsToError = __webpack_require__(13);
+var constants = __webpack_require__(221);
+var useMin = __webpack_require__(58);
+var Bus = __webpack_require__(57);
 var uuid = __webpack_require__(23);
-var deferred = __webpack_require__(46);
-var errors = __webpack_require__(68);
-var events = __webpack_require__(216);
-var VERSION = "3.31.0";
-var iFramer = __webpack_require__(52);
+var deferred = __webpack_require__(50);
+var errors = __webpack_require__(72);
+var events = __webpack_require__(222);
+var VERSION = "3.34.0";
+var iFramer = __webpack_require__(56);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -28280,6 +29225,16 @@ var IFRAME_WIDTH = 400;
  * @property {string} details.lastFour Last four digits of card number.
  * @property {string} details.lastTwo Last two digits of card number.
  * @property {string} description A human-readable description.
+ * @property {object} binData Information about the card based on the bin.
+ * @property {string} binData.commercial Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.countryOfIssuance The country of issuance.
+ * @property {string} binData.debit Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.durbinRegulated Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.healthcare Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.issuingBank The issuing bank.
+ * @property {string} binData.payroll Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.prepaid Possible values: 'Yes', 'No', 'Unknown'.
+ * @property {string} binData.productId The product id.
  * @property {boolean} liabilityShiftPossible Indicates whether the card was eligible for 3D Secure.
  * @property {boolean} liabilityShifted Indicates whether the liability for fraud has been shifted away from the merchant.
  */
@@ -28319,6 +29274,18 @@ function ThreeDSecure(options) {
  * @param {number} options.amount The amount of the transaction in the current merchant account's currency. For example, if you are running a transaction of $123.45 US dollars, `amount` would be 123.45.
  * @param {callback} options.addFrame This {@link ThreeDSecure~addFrameCallback|addFrameCallback} will be called when the bank frame needs to be added to your page.
  * @param {callback} options.removeFrame This {@link ThreeDSecure~removeFrameCallback|removeFrameCallback} will be called when the bank frame needs to be removed from your page.
+ * @param {string} [options.customer.mobilePhoneNumber] The mobile phone number used for verification. Only numbers; remove dashes, paranthesis and other characters.
+ * @param {string} [options.customer.email] The email used for verification.
+ * @param {string} [options.customer.shippingMethod] The 2-digit string indicating the shipping method chosen for the transaction.
+ * @param {string} [options.customer.billingAddress.firstName] The first name associated with the address.
+ * @param {string} [options.customer.billingAddress.lastName] The last name associated with the address.
+ * @param {string} [options.customer.billingAddress.streetAddress] Line 1 of the Address (eg. number, street, etc).
+ * @param {string} [options.customer.billingAddress.extendedAddress] Line 2 of the Address (eg. suite, apt #, etc.).
+ * @param {string} [options.customer.billingAddress.locality] The locality (city) name associated with the address.
+ * @param {string} [options.customer.billingAddress.region] The 2 letter code for US states, and the equivalent for other countries.
+ * @param {string} [options.customer.billingAddress.postalCode] The zip code or equivalent for countries that have them.
+ * @param {string} [options.customer.billingAddress.countryCodeAlpha2] The 2 character country code.
+ * @param {string} [options.customer.billingAddress.phoneNumber] The phone number associated with the address. Only numbers; remove dashes, paranthesis and other characters.
  * @param {boolean} [options.showLoader=true] Whether to show the loader icon while the bank frame is loading.
  * @param {callback} [callback] The second argument, <code>data</code>, is a {@link ThreeDSecure~verifyPayload|verifyPayload}. If no callback is provided, it will return a promise that resolves {@link ThreeDSecure~verifyPayload|verifyPayload}.
 
@@ -28362,7 +29329,21 @@ ThreeDSecure.prototype.verifyCard = function (options) {
   var url, showLoader, addFrame, removeFrame, error, errorOption;
   var self = this;
 
-  options = options || {};
+  options = assign({}, options);
+
+  if (options.customer && options.customer.billingAddress) {
+    // map from public API to the API that the Gateway expects
+    options.customer.billingAddress.line1 = options.customer.billingAddress.streetAddress;
+    options.customer.billingAddress.line2 = options.customer.billingAddress.extendedAddress;
+    options.customer.billingAddress.city = options.customer.billingAddress.locality;
+    options.customer.billingAddress.state = options.customer.billingAddress.region;
+    options.customer.billingAddress.countryCode = options.customer.billingAddress.countryCodeAlpha2;
+    delete options.customer.billingAddress.streetAddress;
+    delete options.customer.billingAddress.extendedAddress;
+    delete options.customer.billingAddress.locality;
+    delete options.customer.billingAddress.region;
+    delete options.customer.billingAddress.countryCodeAlpha2;
+  }
 
   if (this._verifyCardInProgress === true) {
     error = errors.THREEDS_AUTHENTICATION_IN_PROGRESS;
@@ -28400,7 +29381,7 @@ ThreeDSecure.prototype.verifyCard = function (options) {
   return this._client.request({
     endpoint: url,
     method: 'post',
-    data: {amount: options.amount}
+    data: {amount: options.amount, customer: options.customer}
   }).then(function (response) {
     self._lookupPaymentMethod = response.paymentMethod;
 
@@ -28466,6 +29447,7 @@ ThreeDSecure.prototype.cancelVerifyCard = function () {
 };
 
 ThreeDSecure.prototype._handleLookupResponse = function (options) {
+  var details;
   var lookupResponse = options.lookupResponse;
 
   if (lookupResponse.lookup && lookupResponse.lookup.acsUrl && lookupResponse.lookup.acsUrl.length > 0) {
@@ -28475,12 +29457,10 @@ ThreeDSecure.prototype._handleLookupResponse = function (options) {
       removeFrame: options.removeFrame
     }));
   } else {
-    this._verifyCardCallback(null, {
-      nonce: lookupResponse.paymentMethod.nonce,
-      liabilityShiftPossible: lookupResponse.threeDSecureInfo.liabilityShiftPossible,
-      liabilityShifted: lookupResponse.threeDSecureInfo.liabilityShifted,
-      verificationDetails: lookupResponse.threeDSecureInfo
-    });
+    details = this._formatAuthResponse(lookupResponse.paymentMethod, lookupResponse.threeDSecureInfo);
+    details.verificationDetails = lookupResponse.threeDSecureInfo;
+
+    this._verifyCardCallback(null, details);
   }
 };
 
@@ -28552,8 +29532,9 @@ ThreeDSecure.prototype._handleAuthResponse = function (data, options) {
 ThreeDSecure.prototype._formatAuthResponse = function (paymentMethod, threeDSecureInfo) {
   return {
     nonce: paymentMethod.nonce,
+    binData: paymentMethod.binData,
     details: paymentMethod.details,
-    description: paymentMethod.description,
+    description: paymentMethod.description && paymentMethod.description.replace(/\+/g, ' '),
     liabilityShifted: threeDSecureInfo.liabilityShifted,
     liabilityShiftPossible: threeDSecureInfo.liabilityShiftPossible
   };
@@ -28597,7 +29578,7 @@ module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
 
 
 /***/ }),
-/* 215 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28609,7 +29590,7 @@ module.exports = {
 
 
 /***/ }),
-/* 216 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28623,7 +29604,7 @@ module.exports = enumerate([
 
 
 /***/ }),
-/* 217 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28642,17 +29623,17 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 218 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var analytics = __webpack_require__(14);
-var find = __webpack_require__(219);
-var uuid = __webpack_require__(67);
+var find = __webpack_require__(225);
+var uuid = __webpack_require__(71);
 var DropinError = __webpack_require__(8);
-var kebabCaseToCamelCase = __webpack_require__(220);
+var kebabCaseToCamelCase = __webpack_require__(226);
 var WHITELISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
@@ -28671,10 +29652,12 @@ var WHITELISTED_DATA_ATTRIBUTES = [
   'paypal.amount',
   'paypal.currency',
   'paypal.flow',
+  'paypal.landing-page-type',
 
   'paypal-credit.amount',
   'paypal-credit.currency',
-  'paypal-credit.flow'
+  'paypal-credit.flow',
+  'paypal-credit.landing-page-type'
 ];
 
 function injectHiddenInput(name, value, form) {
@@ -28777,7 +29760,7 @@ module.exports = createFromScriptTag;
 
 
 /***/ }),
-/* 219 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28799,7 +29782,7 @@ module.exports = {
 
 
 /***/ }),
-/* 220 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28819,7 +29802,7 @@ module.exports = kebabCaseToCamelCase;
 
 
 /***/ }),
-/* 221 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -28847,7 +29830,7 @@ if (false) {
 }
 
 /***/ }),
-/* 222 */
+/* 228 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin

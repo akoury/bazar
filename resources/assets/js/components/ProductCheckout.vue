@@ -80,7 +80,7 @@ export default {
             if (matchingCombination == null || !matchingCombination.available) {
                 let similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id) && combination.available)
 
-                if (! similarCombinations.length) {
+                if (!similarCombinations.length) {
                     similarCombinations = this.combinations.filter(combination => Object.values(combination.values).includes(selectedValue.id))
                 }
 

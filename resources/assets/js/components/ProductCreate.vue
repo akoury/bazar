@@ -91,7 +91,7 @@ export default {
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
-            products: [{ price: 1, item_quantity: 1, isActive: true }],
+            products: [{ price: 1, item_quantity: 1, isActive: true }]
         }
     },
     methods: {
@@ -113,19 +113,19 @@ export default {
             formData.append('published', this.published ? 1 : 0)
 
             let products = this.products
-            if(products.length === 1){
+            if (products.length === 1) {
                 products[0].isActive = true
             }
 
-            if(this.combinations[0].length) {
-                products = products.map((product, index) => { 
-                    product.attributes = Object.assign(...this.combinations[index].map(value => value.hasOwnProperty('attribute_id') ? {[this.attributes.find(attribute => attribute.id == value.attribute_id).name]:value.name} : {[value.attribute]: value.name } ))
-                    return product
-                }).filter(product => product.isActive).map(product => { 
-                    return product
-                })
+            if (this.combinations[0].length) {
+                products = products
+                    .map((product, index) => {
+                        product.attributes = Object.assign(...this.combinations[index].map(value => (value.hasOwnProperty('attribute_id') ? { [this.attributes.find(attribute => attribute.id == value.attribute_id).name]: value.name } : { [value.attribute]: value.name })))
+                        return product
+                    })
+                    .filter(product => product.isActive)
             }
-            
+
             formData.append('products', JSON.stringify(products))
             return formData
         },
@@ -142,8 +142,8 @@ export default {
         },
         addAttribute(newAttribute, index) {
             newAttribute = newAttribute.toLowerCase()
-            if(!this.selectedAttributes.some(attribute => attribute.name == newAttribute)){
-                Vue.set(this.selectedAttributes, index, { name: newAttribute, values:[] })
+            if (!this.selectedAttributes.some(attribute => attribute.name == newAttribute)) {
+                Vue.set(this.selectedAttributes, index, { name: newAttribute, values: [] })
                 Vue.set(this.selectedValues, index, [])
             }
         },
@@ -176,11 +176,11 @@ export default {
                 this.products.push({ price: 0, item_quantity: 0, isActive: true })
                 diff++
             }
-            
-            if(diff > 0) {
+
+            if (diff > 0) {
                 this.products.length -= diff
             }
-            
+
             return combinations
         }
     }
