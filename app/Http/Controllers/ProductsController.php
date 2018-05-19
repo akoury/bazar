@@ -21,7 +21,7 @@ class ProductsController extends Controller
 
         $model->products->transform(function ($product) {
             $product->setAttribute('item_count', $product->items->count());
-            $product->setRelation('items', null);
+            unset($product->items);
             return $product;
         });
 
@@ -54,7 +54,7 @@ class ProductsController extends Controller
         request()->validate([
             'name'                     => 'required',
             'description'              => 'required',
-            'published'                => 'boolean',
+            'published'                => 'boolean|required',
             'product_image'            => 'required|image',
             'products'                 => 'required|json',
             'products.*.price'         => 'required|numeric|min:0',
@@ -64,7 +64,7 @@ class ProductsController extends Controller
         $model = ProductModel::create([
             'name'        => request('name'),
             'description' => request('description'),
-            'published'   => request()->filled('published'),
+            'published'   => request('published'),
             'brand_id'    => $brand->id,
             'image_path'  => request('product_image')->store('products', 'public'),
         ]);
@@ -118,36 +118,49 @@ class ProductsController extends Controller
 
     public function edit($id)
     {
-        $product = Product::with('model')->findOrFail($id);
+        $model = ProductModel::with(['products.items' => function ($query) {
+            $query->available();
+        }, 'products.values.attribute'])->findOrFail($id);
 
-        auth()->user()->brands()->findOrFail($product->brand_id);
+        auth()->user()->brands()->findOrFail($model->brand_id);
 
-        return view('products.edit', compact('product'));
+        $model->products->transform(function ($product) {
+            $product->setAttribute('item_quantity', $product->items->count());
+            unset($product->items);
+            return $product;
+        });
+
+        return view('products.edit', compact('model'));
     }
 
     public function update($id)
     {
-        $product = Product::findOrFail($id);
+        $model = ProductModel::findOrFail($id);
 
-        auth()->user()->brands()->findOrFail($product->brand_id);
+        auth()->user()->brands()->findOrFail($model->brand_id);
 
         request()->validate([
-            'name'        => 'required',
-            'description' => 'required',
-            'price'       => 'required|numeric|min:0',
-            'published'   => 'sometimes|accepted',
+            'name'             => 'required',
+            'description'      => 'required',
+            'published'        => 'boolean|required',
+            'products'         => 'required|json',
+            'products.*.price' => 'required|numeric|min:0',
         ]);
 
-        $product->model->update([
+        $model->update([
             'name'        => request('name'),
             'description' => request('description'),
-            'published'   => request()->filled('published'),
+            'published'   => request('published'),
         ]);
 
-        $product->update([
-            'price' => request('price') * 100,
-        ]);
+        $products = json_decode(request('products'), true);
 
-        return redirect($product->url());
+        foreach ($products as $product) {
+            Product::findOrFail($product['id'])->update([
+                'price' => $product['price'] * 100,
+            ]);
+        }
+
+        return response()->json($model->url(), 201);
     }
 }

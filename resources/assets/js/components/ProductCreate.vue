@@ -14,9 +14,9 @@
                 <input type="checkbox" v-model="published">Publish
             </label>
 
-            <label for="product_image" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Image
-                <input type="file" @change="onImageChange" class="mb-6">
-            </label>
+            <label for="product_image" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Image</label>
+            <input type="file" @change="onImageChange" id="product_image" class="mb-6">
+            
 
             <div class="mb-6">    
                 <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Attributes</h4>

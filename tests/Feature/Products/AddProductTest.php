@@ -263,6 +263,19 @@ class AddProductTest extends TestCase
     }
 
     /** @test */
+    public function published_is_required_to_create_a_product()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+            'published' => ''
+        ]));
+
+        $this->assertValidationError($response, 'published', route('products.create', $brand));
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
     public function published_must_be_boolean_to_create_a_product()
     {
         $brand = $this->brandForSignedInUser();

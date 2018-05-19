@@ -12,6 +12,7 @@ require('./bootstrap')
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
+Vue.component('product-edit', require('./components/ProductEdit.vue'))
 Vue.component('cart-checkout', require('./components/CartCheckout.vue'))
 Vue.component('product-create', require('./components/ProductCreate.vue'))
 Vue.component('product-checkout', require('./components/ProductCheckout.vue'))
