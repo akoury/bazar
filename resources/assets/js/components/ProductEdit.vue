@@ -43,7 +43,7 @@
                     <td v-for="value in product.values" :key="value.id">
                         <input type="text" v-model="value.name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
                     </td>
-                    <button type="button" @click="removeProduct(product.id)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+                    <button v-if="model.products.length > 1" type="button" @click="removeProduct(product.id)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
                 </tr>
                 <tr v-for="(product, index) in newProducts" :key="index">
                     <td>
@@ -79,7 +79,7 @@ export default {
     methods: {
         updateProduct() {
             axios
-                .post('/products/' + this.model.brand_id, this.formData())
+                .post('/products/' + this.model.id, this.formData())
                 .then(response => {
                     Turbolinks.visit(response.data)
                 })

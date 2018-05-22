@@ -50,4 +50,17 @@ class RemoveProductTest extends TestCase
         $this->assertTrue($product->fresh()->trashed());
         $this->assertEquals(0, Product::withTrashed()->findOrFail($product->id)->itemsRemaining());
     }
+
+    /** @test */
+    public function if_a_model_has_all_of_its_products_removed_it_gets_unpublished()
+    {
+        $brand = $this->brandForSignedInUser();
+        $product = $this->createProductsForModel([
+            'brand_id' => $brand->id
+        ]);
+
+        $response = $this->delete(route('products.destroy', $product->id));
+
+        $this->assertFalse($product->model->published);
+    }
 }

@@ -183,6 +183,10 @@ class ProductsController extends Controller
 
         $product->setItemsRemaining(0)->delete();
 
+        if ($product->model->products->count() === 0) {
+            $product->model->update(['published' => false]);
+        }
+
         return response(200);
     }
 }

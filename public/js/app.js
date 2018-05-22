@@ -16498,7 +16498,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 
     methods: {
         updateProduct: function updateProduct() {
-            axios.post('/products/' + this.model.brand_id, this.formData()).then(function (response) {
+            axios.post('/products/' + this.model.id, this.formData()).then(function (response) {
                 Turbolinks.visit(response.data);
             }).catch(function (error) {
                 console.log(error.response.data);
@@ -16851,20 +16851,22 @@ var render = function() {
                     ])
                   }),
                   _vm._v(" "),
-                  _c(
-                    "button",
-                    {
-                      staticClass:
-                        "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
-                      attrs: { type: "button" },
-                      on: {
-                        click: function($event) {
-                          _vm.removeProduct(product.id)
-                        }
-                      }
-                    },
-                    [_vm._v("×")]
-                  )
+                  _vm.model.products.length > 1
+                    ? _c(
+                        "button",
+                        {
+                          staticClass:
+                            "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              _vm.removeProduct(product.id)
+                            }
+                          }
+                        },
+                        [_vm._v("×")]
+                      )
+                    : _vm._e()
                 ],
                 2
               )
