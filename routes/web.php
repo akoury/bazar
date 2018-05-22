@@ -14,6 +14,7 @@ Route::post('brands/{id}/products', 'ProductsController@store')->name('products.
 Route::get('brands/{brandId}/products/{id}', 'ProductsController@show')->name('products.show');
 Route::get('products/{id}/edit', 'ProductsController@edit')->name('products.edit')->middleware('auth');
 Route::patch('products/{id}', 'ProductsController@update')->name('products.update')->middleware('auth');
+Route::delete('products/{id}', 'ProductsController@destroy')->name('products.destroy')->middleware('auth');
 
 Route::get('cart', 'CartsController@show')->name('carts.show');
 Route::post('products/{id}/add', 'CartsController@store')->name('carts.store');

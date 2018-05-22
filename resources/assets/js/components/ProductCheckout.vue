@@ -43,7 +43,9 @@
             <button @click="addToCart" :disabled="processing" :class="{'cursor-not-allowed': processing }" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded">Add {{ quantity }} to Cart</button>
         </div>
         <div v-else>
-            <h3 class="text-red text-center font-normal mt-6 p-3 bg-red-lightest rounded">Temporarily out of stock</h3>
+            <h3 class="text-red text-center font-normal mt-6 p-3 bg-red-lightest rounded">
+                {{ selectedProduct.deleted_at != null ? 'Product Unavailable' : 'Temporarily out of stock' }}
+            </h3>
         </div>
     </div>
 </template>

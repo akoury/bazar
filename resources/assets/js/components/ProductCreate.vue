@@ -120,7 +120,7 @@ export default {
             if (this.combinations[0].length) {
                 products = products
                     .map((product, index) => {
-                        product.attributes = Object.assign(...this.combinations[index].map(value => (value.hasOwnProperty('attribute_id') ? { [this.attributes.find(attribute => attribute.id == value.attribute_id).name]: value.name } : { [value.attribute]: value.name })))
+                        product.attributes = Object.assign(...this.combinations[index].map(value => (value.hasOwnProperty('attribute_id') ? { [this.attributes.find(attribute => attribute.id === value.attribute_id).name]: value.name } : { [value.attribute]: value.name })))
                         return product
                     })
                     .filter(product => product.isActive)
@@ -142,7 +142,7 @@ export default {
         },
         addAttribute(newAttribute, index) {
             newAttribute = newAttribute.toLowerCase()
-            if (!this.selectedAttributes.some(attribute => attribute.name == newAttribute)) {
+            if (!this.selectedAttributes.some(attribute => attribute.name === newAttribute)) {
                 Vue.set(this.selectedAttributes, index, { name: newAttribute, values: [] })
                 Vue.set(this.selectedValues, index, [])
             }

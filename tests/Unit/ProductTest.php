@@ -53,6 +53,22 @@ class ProductTest extends TestCase
     }
 
     /** @test */
+    public function can_set_items_remaining()
+    {
+        $product = $this->create('Product')->addItems(6);
+        $product->reserveItems(2);
+        $product->setItemsRemaining(3);
+
+        $this->assertEquals(3, $product->itemsRemaining());
+        $this->assertEquals(5, $product->items->count());
+
+        $product->setItemsRemaining(10);
+
+        $this->assertEquals(10, $product->fresh()->itemsRemaining());
+        $this->assertEquals(12, $product->fresh()->items->count());
+    }
+
+    /** @test */
     public function items_remaining_does_not_include_items_associated_with_an_order()
     {
         $product = $this->create('Product');

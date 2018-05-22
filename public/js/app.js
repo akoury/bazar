@@ -16451,17 +16451,48 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['dataModel'],
     data: function data() {
         return {
-            model: this.dataModel
+            model: this.dataModel,
+            attributes: [],
+            newProducts: []
         };
     },
     created: function created() {
         this.model.products.map(function (product) {
             return product.price = (product.price / 100).toFixed(2);
+        });
+        this.attributes = this.dataModel.products[0].values.map(function (value) {
+            return value.attribute;
         });
     },
 
@@ -16484,6 +16515,23 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
         },
         onImageChange: function onImageChange(e) {
             this.model.image_path = e.target.files[0];
+        },
+        addAttribute: function addAttribute() {
+            this.attributes.push({ name: '' });
+        },
+        addProduct: function addProduct() {
+            this.newProducts.push({ price: 0, item_quantity: 0 });
+        },
+        removeProduct: function removeProduct(id) {
+            var _this = this;
+
+            axios.delete('/products/' + id).then(function (response) {
+                _this.model.products.splice(_this.model.products.findIndex(function (product) {
+                    return product.id === id;
+                }), 1);
+            }).catch(function (error) {
+                console.log(error.response.data);
+            });
         }
     }
 });
@@ -16502,7 +16550,6 @@ var render = function() {
     _c(
       "form",
       {
-        staticClass: "flex flex-col",
         on: {
           submit: function($event) {
             $event.preventDefault()
@@ -16511,171 +16558,321 @@ var render = function() {
         }
       },
       [
-        _c(
-          "label",
-          {
-            staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
-          },
-          [
-            _vm._v("Name\n            "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.model.name,
-                  expression: "model.name"
-                }
-              ],
-              staticClass:
-                "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-              attrs: { type: "text", required: "", autofocus: "" },
-              domProps: { value: _vm.model.name },
-              on: {
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.model, "name", $event.target.value)
-                }
-              }
-            })
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
-          },
-          [
-            _vm._v("Description\n            "),
-            _c("textarea", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.model.description,
-                  expression: "model.description"
-                }
-              ],
-              staticClass:
-                "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-              attrs: { rows: "3", required: "" },
-              domProps: { value: _vm.model.description },
-              on: {
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.model, "description", $event.target.value)
-                }
-              }
-            })
-          ]
-        ),
-        _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-6"
-          },
-          [
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.model.published,
-                  expression: "model.published"
-                }
-              ],
-              attrs: { type: "checkbox" },
-              domProps: {
-                checked: Array.isArray(_vm.model.published)
-                  ? _vm._i(_vm.model.published, null) > -1
-                  : _vm.model.published
+        _c("div", { staticClass: "flex" }, [
+          _c("div", [
+            _c(
+              "label",
+              {
+                staticClass:
+                  "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
               },
-              on: {
-                change: function($event) {
-                  var $$a = _vm.model.published,
-                    $$el = $event.target,
-                    $$c = $$el.checked ? true : false
-                  if (Array.isArray($$a)) {
-                    var $$v = null,
-                      $$i = _vm._i($$a, $$v)
-                    if ($$el.checked) {
-                      $$i < 0 &&
-                        _vm.$set(_vm.model, "published", $$a.concat([$$v]))
-                    } else {
-                      $$i > -1 &&
-                        _vm.$set(
-                          _vm.model,
-                          "published",
-                          $$a.slice(0, $$i).concat($$a.slice($$i + 1))
-                        )
+              [
+                _vm._v("Name\n                    "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.model.name,
+                      expression: "model.name"
                     }
-                  } else {
-                    _vm.$set(_vm.model, "published", $$c)
+                  ],
+                  staticClass:
+                    "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                  attrs: { type: "text", required: "", autofocus: "" },
+                  domProps: { value: _vm.model.name },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.model, "name", $event.target.value)
+                    }
                   }
-                }
+                })
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "label",
+              {
+                staticClass:
+                  "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
+              },
+              [
+                _vm._v("Description\n                    "),
+                _c("textarea", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.model.description,
+                      expression: "model.description"
+                    }
+                  ],
+                  staticClass:
+                    "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                  attrs: { rows: "3", required: "" },
+                  domProps: { value: _vm.model.description },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.$set(_vm.model, "description", $event.target.value)
+                    }
+                  }
+                })
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "label",
+              {
+                staticClass:
+                  "uppercase tracking-wide text-teal-light text-sm font-bold mb-6"
+              },
+              [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.model.published,
+                      expression: "model.published"
+                    }
+                  ],
+                  attrs: { type: "checkbox" },
+                  domProps: {
+                    checked: Array.isArray(_vm.model.published)
+                      ? _vm._i(_vm.model.published, null) > -1
+                      : _vm.model.published
+                  },
+                  on: {
+                    change: function($event) {
+                      var $$a = _vm.model.published,
+                        $$el = $event.target,
+                        $$c = $$el.checked ? true : false
+                      if (Array.isArray($$a)) {
+                        var $$v = null,
+                          $$i = _vm._i($$a, $$v)
+                        if ($$el.checked) {
+                          $$i < 0 &&
+                            _vm.$set(_vm.model, "published", $$a.concat([$$v]))
+                        } else {
+                          $$i > -1 &&
+                            _vm.$set(
+                              _vm.model,
+                              "published",
+                              $$a.slice(0, $$i).concat($$a.slice($$i + 1))
+                            )
+                        }
+                      } else {
+                        _vm.$set(_vm.model, "published", $$c)
+                      }
+                    }
+                  }
+                }),
+                _vm._v("Publish\n                ")
+              ]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "ml-4" }, [
+            _c(
+              "label",
+              {
+                staticClass:
+                  "uppercase tracking-wide text-teal-light text-sm font-bold mb-2 block",
+                attrs: { for: "product_image" }
+              },
+              [_vm._v("Product Image")]
+            ),
+            _vm._v(" "),
+            _c("img", {
+              attrs: {
+                src: "http://bazar.test/" + _vm.model.image_path,
+                alt: "product_image",
+                width: "100"
               }
             }),
-            _vm._v("Publish\n        ")
-          ]
+            _vm._v(" "),
+            _c("input", {
+              staticClass: "mb-6",
+              attrs: { type: "file", id: "product_image" },
+              on: { change: _vm.onImageChange }
+            })
+          ])
+        ]),
+        _vm._v(" "),
+        _c(
+          "h4",
+          {
+            staticClass:
+              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
+          },
+          [_vm._v("Products")]
         ),
         _vm._v(" "),
         _c(
-          "label",
-          {
-            staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
-            attrs: { for: "product_image" }
-          },
-          [_vm._v("Product Image")]
-        ),
-        _vm._v(" "),
-        _c("img", {
-          attrs: {
-            src: "http://bazar.test/" + _vm.model.image_path,
-            alt: "product_image",
-            width: "100"
-          }
-        }),
-        _vm._v(" "),
-        _c("input", {
-          staticClass: "mb-6",
-          attrs: { type: "file", id: "product_image" },
-          on: { change: _vm.onImageChange }
-        }),
-        _vm._v(" "),
-        _vm._l(_vm.model.products, function(product) {
-          return _c("div", { key: product.id }, [
-            _c("h4", [
-              _vm._v(
-                "Product " +
-                  _vm._s(
-                    product.values
-                      .map(function(value) {
-                        return value.name
-                      })
-                      .join(", ")
-                  )
-              )
-            ]),
+          "table",
+          [
+            _c(
+              "tr",
+              [
+                _c("th", [_vm._v("Price")]),
+                _vm._v(" "),
+                _c("th", [_vm._v("Item Quantity")]),
+                _vm._v(" "),
+                _vm._l(_vm.attributes, function(attribute, index) {
+                  return _c("th", { key: index }, [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: attribute.name,
+                          expression: "attribute.name"
+                        }
+                      ],
+                      staticClass:
+                        "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                      attrs: { type: "text", required: "" },
+                      domProps: { value: attribute.name },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(attribute, "name", $event.target.value)
+                        }
+                      }
+                    })
+                  ])
+                }),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass:
+                      "border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10",
+                    attrs: { type: "button" },
+                    on: { click: _vm.addAttribute }
+                  },
+                  [_vm._v("+")]
+                )
+              ],
+              2
+            ),
             _vm._v(" "),
-            _c("div", { staticClass: "flex" }, [
-              _c(
-                "label",
-                {
-                  staticClass:
-                    "uppercase tracking-wide text-teal-light text-sm font-bold mb-2 mr-2"
-                },
+            _vm._l(_vm.model.products, function(product) {
+              return _c(
+                "tr",
+                { key: product.id },
                 [
-                  _vm._v("Price\n                    "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: product.price,
+                          expression: "product.price"
+                        }
+                      ],
+                      staticClass:
+                        "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                      attrs: { type: "number", step: "0.01", required: "" },
+                      domProps: { value: product.price },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(product, "price", $event.target.value)
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: product.item_quantity,
+                          expression: "product.item_quantity"
+                        }
+                      ],
+                      staticClass:
+                        "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                      attrs: { type: "number", required: "" },
+                      domProps: { value: product.item_quantity },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.$set(
+                            product,
+                            "item_quantity",
+                            $event.target.value
+                          )
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _vm._l(product.values, function(value) {
+                    return _c("td", { key: value.id }, [
+                      _c("input", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: value.name,
+                            expression: "value.name"
+                          }
+                        ],
+                        staticClass:
+                          "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
+                        attrs: { type: "text", required: "" },
+                        domProps: { value: value.name },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(value, "name", $event.target.value)
+                          }
+                        }
+                      })
+                    ])
+                  }),
+                  _vm._v(" "),
+                  _c(
+                    "button",
+                    {
+                      staticClass:
+                        "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          _vm.removeProduct(product.id)
+                        }
+                      }
+                    },
+                    [_vm._v("×")]
+                  )
+                ],
+                2
+              )
+            }),
+            _vm._v(" "),
+            _vm._l(_vm.newProducts, function(product, index) {
+              return _c("tr", { key: index }, [
+                _c("td", [
                   _c("input", {
                     directives: [
                       {
@@ -16698,17 +16895,9 @@ var render = function() {
                       }
                     }
                   })
-                ]
-              ),
-              _vm._v(" "),
-              _c(
-                "label",
-                {
-                  staticClass:
-                    "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
-                },
-                [
-                  _vm._v("Item Quantity\n                    "),
+                ]),
+                _vm._v(" "),
+                _c("td", [
                   _c("input", {
                     directives: [
                       {
@@ -16731,11 +16920,33 @@ var render = function() {
                       }
                     }
                   })
-                ]
-              )
-            ])
-          ])
-        }),
+                ]),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass:
+                      "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                    attrs: { type: "button" }
+                  },
+                  [_vm._v("×")]
+                )
+              ])
+            })
+          ],
+          2
+        ),
+        _vm._v(" "),
+        _c(
+          "button",
+          {
+            staticClass:
+              "bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4",
+            attrs: { type: "button" },
+            on: { click: _vm.addProduct }
+          },
+          [_vm._v("Add Product")]
+        ),
         _vm._v(" "),
         _c(
           "button",
@@ -16746,8 +16957,7 @@ var render = function() {
           },
           [_vm._v("Edit")]
         )
-      ],
-      2
+      ]
     )
   ])
 }
@@ -17484,7 +17694,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 products = products.map(function (product, index) {
                     product.attributes = Object.assign.apply(Object, _toConsumableArray(_this.combinations[index].map(function (value) {
                         return value.hasOwnProperty('attribute_id') ? _defineProperty({}, _this.attributes.find(function (attribute) {
-                            return attribute.id == value.attribute_id;
+                            return attribute.id === value.attribute_id;
                         }).name, value.name) : _defineProperty({}, value.attribute, value.name);
                     })));
                     return product;
@@ -17510,7 +17720,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         addAttribute: function addAttribute(newAttribute, index) {
             newAttribute = newAttribute.toLowerCase();
             if (!this.selectedAttributes.some(function (attribute) {
-                return attribute.name == newAttribute;
+                return attribute.name === newAttribute;
             })) {
                 Vue.set(this.selectedAttributes, index, { name: newAttribute, values: [] });
                 Vue.set(this.selectedValues, index, []);
@@ -18130,6 +18340,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
     props: ['model', 'attributes', 'productId', 'userEmail'],
@@ -18501,7 +18713,17 @@ var render = function() {
                 staticClass:
                   "text-red text-center font-normal mt-6 p-3 bg-red-lightest rounded"
               },
-              [_vm._v("Temporarily out of stock")]
+              [
+                _vm._v(
+                  "\n            " +
+                    _vm._s(
+                      _vm.selectedProduct.deleted_at != null
+                        ? "Product Unavailable"
+                        : "Temporarily out of stock"
+                    ) +
+                    "\n        "
+                )
+              ]
             )
           ])
     ],

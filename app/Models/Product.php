@@ -8,13 +8,16 @@ use App\Traits\ProductInformation;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Exceptions\UnpublishedProductException;
 
 class Product extends Model
 {
-    use ProductInformation;
+    use ProductInformation, SoftDeletes;
 
     protected $guarded = [];
+
+    protected $dates = ['deleted_at'];
 
     public function orders()
     {
@@ -97,6 +100,20 @@ class Product extends Model
     public function itemsRemaining()
     {
         return $this->items()->available()->count();
+    }
+
+    public function setItemsRemaining($quantity)
+    {
+        $availableItems = $this->items()->available();
+        $availableCount = $availableItems->count();
+
+        if ($availableCount <= $quantity) {
+            $this->addItems($quantity - $availableCount);
+        } else {
+            $availableItems->take($availableCount - $quantity)->delete();
+        }
+
+        return $this;
     }
 
     public function itemsSold()

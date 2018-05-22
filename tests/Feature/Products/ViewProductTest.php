@@ -70,4 +70,16 @@ class ViewProductTest extends TestCase
             ->assertSee('iPhone X')
             ->assertDontSee('iPhone 8');
     }
+
+    /** @test */
+    public function a_customer_can_view_a_deleted_product_even_if_its_model_is_not_published()
+    {
+        $product = $this->create('Product');
+        $product->delete();
+        $product->model->published = false;
+        $product->model->save();
+
+        $this->get(route('products.show', [$product->brand_id, $product]))
+            ->assertStatus(200);
+    }
 }

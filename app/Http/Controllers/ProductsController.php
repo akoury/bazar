@@ -13,11 +13,19 @@ class ProductsController extends Controller
 {
     public function show($brandId, $id)
     {
-        $model = Product::with(['model.products.items' => function ($query) {
-            $query->available();
-        }, 'model.products.values.attribute'])->findOrFail($id)->model;
+        $product = Product::withTrashed()->findOrFail($id);
 
-        abort_if(! $model->published, 404);
+        if ($product->trashed()) {
+            $model = ProductModel::with(['products' => function ($query) use ($product) {
+                $query->withTrashed()->where('id', $product->id);
+            }, 'products.items' => function ($query) {
+                $query->available();
+            }, 'products.values.attribute'])->findOrFail($product->product_model_id);
+        } else {
+            $model = ProductModel::with(['products.items' => function ($query) {
+                $query->available();
+            }, 'products.values.attribute'])->wherePublished(true)->findOrFail($product->product_model_id);
+        }
 
         $model->products->transform(function ($product) {
             $product->setAttribute('item_count', $product->items->count());
@@ -140,11 +148,12 @@ class ProductsController extends Controller
         auth()->user()->brands()->findOrFail($model->brand_id);
 
         request()->validate([
-            'name'             => 'required',
-            'description'      => 'required',
-            'published'        => 'boolean|required',
-            'products'         => 'required|json',
-            'products.*.price' => 'required|numeric|min:0',
+            'name'                     => 'required',
+            'description'              => 'required',
+            'published'                => 'boolean|required',
+            'products'                 => 'required|json',
+            'products.*.price'         => 'required|numeric|min:0',
+            'products.*.item_quantity' => 'required|integer|min:0',
         ]);
 
         $model->update([
@@ -156,11 +165,24 @@ class ProductsController extends Controller
         $products = json_decode(request('products'), true);
 
         foreach ($products as $product) {
-            Product::findOrFail($product['id'])->update([
-                'price' => $product['price'] * 100,
-            ]);
+            Product::findOrFail($product['id'])
+                ->setItemsRemaining($product['item_quantity'])
+                ->update([
+                    'price' => $product['price'] * 100,
+                ]);
         }
 
-        return response()->json($model->url(), 201);
+        return response()->json($model->url(), 200);
+    }
+
+    public function destroy($id)
+    {
+        $product = Product::findOrFail($id);
+
+        auth()->user()->brands()->findOrFail($product->brand_id);
+
+        $product->setItemsRemaining(0)->delete();
+
+        return response(200);
     }
 }

@@ -18,6 +18,7 @@ class CreateProductsTable extends Migration
             $table->unsignedInteger('product_model_id');
             $table->integer('price');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
