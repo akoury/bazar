@@ -17,7 +17,7 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product')->addItems(1);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->signIn($user->fresh());
         $this->assertEquals(1, cart()->findProduct($product)['quantity']);
@@ -32,8 +32,8 @@ class AddProductsToCartTest extends TestCase
         $productA = $this->create('Product')->addItems(3);
         $productB = $this->create('Product')->addItems(1);
 
-        $this->actingAs($user)->post(route('carts.store', $productA), ['quantity' => 3]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->actingAs($user)->json('POST', route('carts.store', $productA), ['quantity' => 3]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $productB), ['quantity' => 1]);
 
         $this->signIn($user->fresh());
         $this->assertCount(2, cart()->products);
@@ -50,9 +50,9 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product')->addItems(3);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->signIn($user->fresh());
         $this->assertCount(1, cart()->products);
@@ -67,7 +67,7 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product');
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->assertNull($user->fresh()->cart);
     }
@@ -79,8 +79,8 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 2]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->signIn($user->fresh());
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -94,7 +94,7 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 3]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
 
         $this->signIn($user->fresh());
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -108,8 +108,8 @@ class AddProductsToCartTest extends TestCase
         $this->signIn($user);
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $product), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $product), ['quantity' => 2]);
 
         $this->signIn($user->fresh());
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -121,7 +121,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(1);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
         $this->assertEquals(1, cart()->findProduct($product)['quantity']);
@@ -133,8 +133,8 @@ class AddProductsToCartTest extends TestCase
         $productA = $this->create('Product')->addItems(2);
         $productB = $this->create('Product')->addItems(1);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 2]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
 
         $this->assertTrue(cart()->findProduct($productA)['id'] === $productA->id);
         $this->assertEquals(2, cart()->findProduct($productA)['quantity']);
@@ -147,9 +147,9 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(3);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->assertCount(1, cart()->products);
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
@@ -161,7 +161,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product');
 
-        $this->post(route('carts.store', $product), ['quantity' => 3]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
 
         $this->assertFalse(session()->has('cart'));
     }
@@ -171,8 +171,8 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 2]);
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -183,7 +183,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 3]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
 
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -194,8 +194,8 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(2);
 
-        $this->post(route('carts.store', $product), ['quantity' => 1]);
-        $this->post(route('carts.store', $product), ['quantity' => 3]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
 
         $this->assertTrue(cart()->findProduct($product)['id'] === $product->id);
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
@@ -206,8 +206,8 @@ class AddProductsToCartTest extends TestCase
     {
         $productA = $this->create('Product')->addItems(2);
         $productB = $this->create('Product')->addItems(1);
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
         $user = $this->create('User', 1, ['password' => bcrypt($password = 'my-password')]);
         $this->assertNull($user->cart);
 
@@ -231,13 +231,13 @@ class AddProductsToCartTest extends TestCase
 
         $user = $this->create('User', 1, ['password' => bcrypt($password = 'my-password')]);
         $this->signIn($user);
-        $this->post(route('carts.store', $productA), ['quantity' => 3]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 3]);
         $this->signIn($user->fresh());
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
         auth()->logout();
 
-        $this->post(route('carts.store', $productA), ['quantity' => 2]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
 
         $this->post(route('login'), [
             'email'    => $user->email,
@@ -256,8 +256,8 @@ class AddProductsToCartTest extends TestCase
     {
         $productA = $this->create('Product')->addItems(2);
         $productB = $this->create('Product')->addItems(1);
-        $this->post(route('carts.store', $productA), ['quantity' => 2]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
 
         $this->post(route('register'), [
             'email'    => 'user@example.com',
@@ -276,7 +276,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(1);
 
-        $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => '']);
+        $response = $this->from(route('products.show', [$product->brand_id, $product]))->json('POST', route('carts.store', $product), ['quantity' => '']);
 
         $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));
@@ -287,7 +287,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(1);
 
-        $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => 1.3]);
+        $response = $this->from(route('products.show', [$product->brand_id, $product]))->json('POST', route('carts.store', $product), ['quantity' => 1.3]);
 
         $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));
@@ -298,7 +298,7 @@ class AddProductsToCartTest extends TestCase
     {
         $product = $this->create('Product')->addItems(1);
 
-        $response = $this->from(route('products.show', [$product->brand_id, $product]))->post(route('carts.store', $product), ['quantity' => 0]);
+        $response = $this->from(route('products.show', [$product->brand_id, $product]))->json('POST', route('carts.store', $product), ['quantity' => 0]);
 
         $this->assertValidationError($response, 'quantity', route('products.show', [$product->brand_id, $product]));
         $this->assertFalse(session()->has('cart'));

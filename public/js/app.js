@@ -16413,15 +16413,10 @@ module.exports = Component.exports
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-//
-//
-//
-//
-//
-//
-//
-//
-//
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 //
 //
 //
@@ -16483,8 +16478,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
     data: function data() {
         return {
             model: this.dataModel,
-            attributes: [],
-            newProducts: []
+            attributes: []
         };
     },
     created: function created() {
@@ -16501,15 +16495,34 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             axios.post('/products/' + this.model.id, this.formData()).then(function (response) {
                 Turbolinks.visit(response.data);
             }).catch(function (error) {
+                if (error.response.status === 401 || error.response.status === 419) {
+                    Turbolinks.visit(window.location);
+                }
                 console.log(error.response.data);
             });
         },
         formData: function formData() {
+            var _this = this;
+
             var formData = new FormData();
             formData.append('name', this.model.name);
             formData.append('description', this.model.description);
             formData.append('published', this.model.published ? 1 : 0);
-            formData.append('products', JSON.stringify(this.model.products));
+
+            var products = [];
+
+            this.model.products.map(function (product) {
+                return products.push({
+                    id: product.hasOwnProperty('id') ? product.id : null,
+                    price: product.price,
+                    item_quantity: product.item_quantity,
+                    attributes: _this.attributes.length ? Object.assign.apply(Object, _toConsumableArray(_this.attributes.map(function (attribute, index) {
+                        return _defineProperty({}, attribute.name, product.values[index].name);
+                    }))) : []
+                });
+            });
+
+            formData.append('products', JSON.stringify(products));
             formData.append('_method', 'PATCH');
             return formData;
         },
@@ -16517,21 +16530,33 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
             this.model.image_path = e.target.files[0];
         },
         addAttribute: function addAttribute() {
-            this.attributes.push({ name: '' });
+            if (this.attributes.length < 4) {
+                this.attributes.push({ name: '' });
+                this.model.products.map(function (product) {
+                    return product.values.push({ name: '' });
+                });
+            }
         },
         addProduct: function addProduct() {
-            this.newProducts.push({ price: 0, item_quantity: 0 });
+            this.model.products.push({ price: 0, item_quantity: 0, values: this.attributes.map(function (attribute) {
+                    return { name: '' };
+                }) });
         },
-        removeProduct: function removeProduct(id) {
-            var _this = this;
+        removeProduct: function removeProduct(id, index) {
+            var _this2 = this;
 
-            axios.delete('/products/' + id).then(function (response) {
-                _this.model.products.splice(_this.model.products.findIndex(function (product) {
-                    return product.id === id;
-                }), 1);
-            }).catch(function (error) {
-                console.log(error.response.data);
-            });
+            if (id) {
+                axios.delete('/products/' + id).then(function (response) {
+                    _this2.model.products.splice(index, 1);
+                }).catch(function (error) {
+                    if (error.response.status === 401 || error.response.status === 419) {
+                        Turbolinks.visit(window.location);
+                    }
+                    console.log(error.response.data);
+                });
+            } else {
+                this.model.products.splice(index, 1);
+            }
         }
     }
 });
@@ -16754,6 +16779,14 @@ var render = function() {
                 _c(
                   "button",
                   {
+                    directives: [
+                      {
+                        name: "show",
+                        rawName: "v-show",
+                        value: _vm.attributes.length < 4,
+                        expression: "attributes.length < 4"
+                      }
+                    ],
                     staticClass:
                       "border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10",
                     attrs: { type: "button" },
@@ -16765,10 +16798,10 @@ var render = function() {
               2
             ),
             _vm._v(" "),
-            _vm._l(_vm.model.products, function(product) {
+            _vm._l(_vm.model.products, function(product, index) {
               return _c(
                 "tr",
-                { key: product.id },
+                { key: index },
                 [
                   _c("td", [
                     _c("input", {
@@ -16824,8 +16857,8 @@ var render = function() {
                     })
                   ]),
                   _vm._v(" "),
-                  _vm._l(product.values, function(value) {
-                    return _c("td", { key: value.id }, [
+                  _vm._l(product.values, function(value, valIndex) {
+                    return _c("td", { key: valIndex }, [
                       _c("input", {
                         directives: [
                           {
@@ -16851,89 +16884,31 @@ var render = function() {
                     ])
                   }),
                   _vm._v(" "),
-                  _vm.model.products.length > 1
-                    ? _c(
-                        "button",
+                  _c(
+                    "button",
+                    {
+                      directives: [
                         {
-                          staticClass:
-                            "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
-                          attrs: { type: "button" },
-                          on: {
-                            click: function($event) {
-                              _vm.removeProduct(product.id)
-                            }
-                          }
-                        },
-                        [_vm._v("×")]
-                      )
-                    : _vm._e()
+                          name: "show",
+                          rawName: "v-show",
+                          value: _vm.model.products.length > 1,
+                          expression: "model.products.length > 1"
+                        }
+                      ],
+                      staticClass:
+                        "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                      attrs: { type: "button" },
+                      on: {
+                        click: function($event) {
+                          _vm.removeProduct(product.id, index)
+                        }
+                      }
+                    },
+                    [_vm._v("×")]
+                  )
                 ],
                 2
               )
-            }),
-            _vm._v(" "),
-            _vm._l(_vm.newProducts, function(product, index) {
-              return _c("tr", { key: index }, [
-                _c("td", [
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: product.price,
-                        expression: "product.price"
-                      }
-                    ],
-                    staticClass:
-                      "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-                    attrs: { type: "number", step: "0.01", required: "" },
-                    domProps: { value: product.price },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(product, "price", $event.target.value)
-                      }
-                    }
-                  })
-                ]),
-                _vm._v(" "),
-                _c("td", [
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: product.item_quantity,
-                        expression: "product.item_quantity"
-                      }
-                    ],
-                    staticClass:
-                      "appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6",
-                    attrs: { type: "number", required: "" },
-                    domProps: { value: product.item_quantity },
-                    on: {
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(product, "item_quantity", $event.target.value)
-                      }
-                    }
-                  })
-                ]),
-                _vm._v(" "),
-                _c(
-                  "button",
-                  {
-                    staticClass:
-                      "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
-                    attrs: { type: "button" }
-                  },
-                  [_vm._v("×")]
-                )
-              ])
             })
           ],
           2
@@ -17675,6 +17650,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             axios.post('/brands/' + this.brandId + '/products', this.formData()).then(function (response) {
                 Turbolinks.visit(response.data);
             }).catch(function (error) {
+                if (error.response.status === 401 || error.response.status === 419) {
+                    Turbolinks.visit(window.location);
+                }
                 console.log(error.response.data);
             });
         },

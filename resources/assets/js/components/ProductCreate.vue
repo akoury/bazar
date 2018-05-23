@@ -16,37 +16,37 @@
 
             <label for="product_image" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Image</label>
             <input type="file" @change="onImageChange" id="product_image" class="mb-6">
-            
 
-            <div class="mb-6">    
+
+            <div class="mb-6">
                 <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Attributes</h4>
                 <div v-for="(n, index) in numberOfAttributes" :key="index" class="flex">
-                    <multiselect 
-                        v-model="selectedAttributes[index]" 
-                        :options="attributes.filter(attribute => !selectedAttributes.includes(attribute))" 
-                        placeholder="Search or add an attribute" 
+                    <multiselect
+                        v-model="selectedAttributes[index]"
+                        :options="attributes.filter(attribute => !selectedAttributes.includes(attribute))"
+                        placeholder="Search or add an attribute"
                         :id="index"
                         @select="changeAttribute(index)"
                         :taggable="true"
-                        @tag="addAttribute" 
-                        tag-placeholder="Add as a new attribute" 
-                        label="name" 
-                        track-by="name" 
+                        @tag="addAttribute"
+                        tag-placeholder="Add as a new attribute"
+                        label="name"
+                        track-by="name"
                         openDirection="bottom">
                     </multiselect>
-                    <multiselect 
-                        v-if="selectedAttributes.length > index" 
-                        v-model="selectedValues[index]" 
-                        :options="selectedAttributes[index].hasOwnProperty('values') ? selectedAttributes[index].values : []" 
-                        placeholder="Search or add a value" 
-                        :id="index" 
+                    <multiselect
+                        v-if="selectedAttributes.length > index"
+                        v-model="selectedValues[index]"
+                        :options="selectedAttributes[index].hasOwnProperty('values') ? selectedAttributes[index].values : []"
+                        placeholder="Search or add a value"
+                        :id="index"
                         :multiple="true"
                         :close-on-select="false"
-                        :taggable="true" 
-                        @tag="addValue" 
-                        tag-placeholder="Add as a new value" 
-                        label="name" 
-                        track-by="name" 
+                        :taggable="true"
+                        @tag="addValue"
+                        tag-placeholder="Add as a new value"
+                        label="name"
+                        track-by="name"
                         openDirection="bottom">
                     </multiselect>
                     <button @click="removeAttribute(index)" type="button" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
@@ -59,18 +59,18 @@
                 <div class="flex">
                     <label v-show="products.length > 1" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 mr-2">Enabled
                         <input type="checkbox" v-model="products[index].isActive">
-                    </label>  
-                    
+                    </label>
+
                     <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 mr-2">Price
                         <input type="number" v-model="products[index].price" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" step="0.01" required :disabled="!products[index].isActive">
                     </label>
 
                     <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Item Quantity
                         <input type="number" v-model="products[index].item_quantity" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required :disabled="!products[index].isActive">
-                    </label>        
+                    </label>
                 </div>
             </div>
-            
+
             <button type="submit" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded mb-4">Create</button>
         </form>
     </div>
@@ -102,6 +102,9 @@ export default {
                     Turbolinks.visit(response.data)
                 })
                 .catch(error => {
+                    if (error.response.status === 401 || error.response.status === 419) {
+                        Turbolinks.visit(window.location)
+                    }
                     console.log(error.response.data)
                 })
         },

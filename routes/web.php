@@ -19,7 +19,7 @@ Route::delete('products/{id}', 'ProductsController@destroy')->name('products.des
 Route::get('cart', 'CartsController@show')->name('carts.show');
 Route::post('products/{id}/add', 'CartsController@store')->name('carts.store');
 Route::post('products/{id}/update', 'CartsController@update')->name('carts.update');
-Route::post('products/{id}/remove', 'CartsController@destroy')->name('carts.destroy');
+Route::delete('products/{id}/remove', 'CartsController@destroy')->name('carts.destroy');
 
 Route::get('orders', 'OrdersController@index')->name('orders.index')->middleware('auth');
 Route::get('orders/create', 'OrdersController@create')->name('orders.create');

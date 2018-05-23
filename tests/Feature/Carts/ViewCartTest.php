@@ -18,8 +18,8 @@ class ViewCartTest extends TestCase
         $productA = $this->create('Product')->addItems(2);
         $productB = $this->create('Product')->addItems(1);
         $products = Product::all();
-        $this->post(route('carts.store', $productA), ['quantity' => 2]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 2]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $productB), ['quantity' => 1]);
 
         $this->actingAs($user->fresh())
             ->get(route('carts.show'))
@@ -44,8 +44,8 @@ class ViewCartTest extends TestCase
     {
         $productA = $this->create('Product')->addItems(2);
         $productB = $this->create('Product')->addItems(1);
-        $this->post(route('carts.store', $productA), ['quantity' => 2]);
-        $this->post(route('carts.store', $productB), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
         $products = Product::all();
 
         $this->get(route('carts.show'))
@@ -66,7 +66,7 @@ class ViewCartTest extends TestCase
     public function a_guest_can_view_his_emptied_cart()
     {
         $product = $this->create('Product')->addItems(2);
-        $this->post(route('carts.store', $product), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
 
         cart()->clear();
 

@@ -77,12 +77,14 @@ abstract class TestCase extends BaseTestCase
     protected function assertValidationError($response, $field, $from = null)
     {
         if (request()->wantsJson()) {
-            $response->assertStatus(422);
-            $this->assertArrayHasKey($field, $response->decodeResponseJson()['errors']);
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors($field)
+                ->assertJsonCount(1, 'errors');
         } else {
             $response->assertStatus(302)
                 ->assertRedirect($from)
                 ->assertSessionHasErrors($field);
+            $this->assertEquals(1, count(session('errors')->default->messages()));
         }
     }
 

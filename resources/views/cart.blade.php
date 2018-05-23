@@ -16,6 +16,7 @@
         </h1>
         <form method="POST" action="{{ route('carts.destroy', $product) }}">
             @csrf
+            @method('DELETE')
             <button type="submit">Remove</button>
         </form>
         <form method="POST" action="{{ route('carts.update', $product) }}">

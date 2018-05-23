@@ -31,10 +31,10 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -69,10 +69,10 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->actingAs($user->fresh())->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->actingAs($user->fresh())->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
-        $response = $this->actingAs($user->fresh())->post(route('orders.store'), [
+        $response = $this->actingAs($user->fresh())->json('POST', route('orders.store'), [
             'email'         => 'user@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -89,12 +89,12 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
         $productA->model->update(['published' => false]);
 
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -113,10 +113,10 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => 'invalid-payment-token'
         ]);
@@ -135,15 +135,15 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
         cart()->products->transform(function ($product) {
             $product['quantity'] = 10;
             return $product;
         });
 
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -164,11 +164,11 @@ class CheckoutTest extends TestCase
         $userA = $this->create('User', 1, ['email' => 'userA@example.com']);
         $userB = $this->create('User', 1, ['email' => 'userB@example.com']);
 
-        $this->actingAs($userA)->post(route('carts.store', $product), ['quantity' => 3]);
-        $this->actingAs($userB)->post(route('carts.store', $product), ['quantity' => 1]);
+        $this->actingAs($userA)->json('POST', route('carts.store', $product), ['quantity' => 3]);
+        $this->actingAs($userB)->json('POST', route('carts.store', $product), ['quantity' => 1]);
 
         $this->paymentGateway->beforeFirstCharge(function () use ($userB, $product) {
-            $response = $this->actingAs($userB->fresh())->post(route('orders.store'), [
+            $response = $this->actingAs($userB->fresh())->json('POST', route('orders.store'), [
                 'email'         => 'userB@example.com',
                 'payment_token' => $this->paymentGateway->getValidTestToken()
             ]);
@@ -179,7 +179,7 @@ class CheckoutTest extends TestCase
             $this->assertEquals(0, $this->paymentGateway->totalCharges());
         });
 
-        $response = $this->actingAs($userA->fresh())->post(route('orders.store'), [
+        $response = $this->actingAs($userA->fresh())->json('POST', route('orders.store'), [
             'email'         => 'userA@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);
@@ -196,10 +196,10 @@ class CheckoutTest extends TestCase
         $productA = $this->create('Product', 1, ['price' => 3250])->addItems(1);
         $productB = $this->create('Product', 1, ['price' => 2000])->addItems(2);
 
-        $this->post(route('carts.store', $productA), ['quantity' => 1]);
-        $this->post(route('carts.store', $productB), ['quantity' => 2]);
+        $this->json('POST', route('carts.store', $productA), ['quantity' => 1]);
+        $this->json('POST', route('carts.store', $productB), ['quantity' => 2]);
 
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => 'invalid-payment-token'
         ]);
@@ -222,7 +222,7 @@ class CheckoutTest extends TestCase
     /** @test */
     public function a_customer_cannot_checkout_with_an_empty_cart()
     {
-        $response = $this->post(route('orders.store'), [
+        $response = $this->json('POST', route('orders.store'), [
             'email'         => 'customer@example.com',
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ]);

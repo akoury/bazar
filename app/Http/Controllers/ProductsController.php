@@ -59,12 +59,14 @@ class ProductsController extends Controller
     {
         $brand = auth()->user()->brands()->findOrFail($brandId);
 
+        request()['products'] = json_decode(request('products'), true);
+
         request()->validate([
             'name'                     => 'required',
             'description'              => 'required',
             'published'                => 'boolean|required',
             'product_image'            => 'required|image',
-            'products'                 => 'required|json',
+            'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
         ]);
@@ -77,7 +79,7 @@ class ProductsController extends Controller
             'image_path'  => request('product_image')->store('products', 'public'),
         ]);
 
-        $products = collect(json_decode(request('products'), true))->map(function ($product) {
+        $products = collect(request('products'))->map(function ($product) {
             if (isset($product['attributes'])) {
                 $product['attributes'] = array_map('strtolower', $product['attributes']);
                 $product['attributes'] = array_change_key_case($product['attributes'], CASE_LOWER);
@@ -147,13 +149,16 @@ class ProductsController extends Controller
 
         auth()->user()->brands()->findOrFail($model->brand_id);
 
+        request()['products'] = json_decode(request('products'), true);
+
         request()->validate([
             'name'                     => 'required',
             'description'              => 'required',
             'published'                => 'boolean|required',
-            'products'                 => 'required|json',
+            'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
+            // 'products.*.attributes'    => 'max:4',
         ]);
 
         $model->update([
@@ -162,14 +167,48 @@ class ProductsController extends Controller
             'published'   => request('published'),
         ]);
 
-        $products = json_decode(request('products'), true);
+        $products = collect(request('products'));
+
+        if (isset($products[0]['attributes'])) {
+            $attributes = Attribute::whereIn('name', array_keys($products[0]['attributes']))->get();
+            $values = Value::whereIn('name', $products->pluck('attributes')->flatten()->unique())->get();
+        }
 
         foreach ($products as $product) {
-            Product::findOrFail($product['id'])
-                ->setItemsRemaining($product['item_quantity'])
-                ->update([
+            if (isset($product['id'])) {
+                $newProduct = Product::findOrFail($product['id'])->setItemsRemaining($product['item_quantity']);
+                $newProduct->update([
                     'price' => $product['price'] * 100,
                 ]);
+            } else {
+                $newProduct = Product::create([
+                    'product_model_id' => $model->id,
+                    'price'            => $product['price'] * 100,
+                ])->addItems($product['item_quantity']);
+            }
+
+            if (isset($product['attributes'])) {
+                $productValues = collect();
+
+                foreach ($product['attributes'] as $attributeName => $valueName) {
+                    $foundAttribute = $attributes->firstWhere('name', $attributeName);
+                    if (! $foundAttribute) {
+                        $foundAttribute = Attribute::create(['name' => $attributeName]);
+                        $attributes->push($foundAttribute);
+                    }
+
+                    $foundValue = $values->where('attribute_id', $foundAttribute->id)->firstWhere('name', $valueName);
+                    if (! $foundValue) {
+                        $foundValue = Value::create(['attribute_id' => $foundAttribute->id, 'name' => $valueName]);
+                        $values->push($foundValue);
+                    }
+
+                    $productValues->push($foundValue);
+                }
+
+                $newProduct->values()->detach();
+                $newProduct->values()->attach($productValues->pluck('id'));
+            }
         }
 
         return response()->json($model->url(), 200);
@@ -187,6 +226,6 @@ class ProductsController extends Controller
             $product->model->update(['published' => false]);
         }
 
-        return response(200);
+        return response()->json(200);
     }
 }

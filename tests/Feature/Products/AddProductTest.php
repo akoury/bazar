@@ -59,7 +59,7 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->post(route('products.store', $brand), [
+        $response = $this->json('POST', route('products.store', $brand), [
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'published'     => true,
@@ -93,8 +93,8 @@ class AddProductTest extends TestCase
         $attributeA = $this->create('Attribute', 1, ['name' => 'COLOR']);
         $attributeB = $this->create('Attribute', 1, ['name' => 'capacity']);
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'products' => json_encode([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
@@ -111,7 +111,7 @@ class AddProductTest extends TestCase
                         'capaCity'        => '32gb'
                     ]
                 ]
-            ])
+            ]
         ]));
 
         $products = Product::all();
@@ -132,7 +132,7 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->post(route('products.store', $brand), [
+        $response = $this->json('POST', route('products.store', $brand), [
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'published'     => true,
@@ -166,18 +166,22 @@ class AddProductTest extends TestCase
 
     private function validParams($overrides = [])
     {
-        return array_replace_recursive([
+        $params = array_replace_recursive([
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'published'     => true,
             'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => json_encode([
+            'products'      => [
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
                 ]
-            ])
+            ]
         ], $overrides);
+
+        $params['products'] = json_encode($params['products']);
+
+        return $params;
     }
 
     /** @test */
@@ -186,7 +190,7 @@ class AddProductTest extends TestCase
         $this->signIn();
         $brand = $this->create('Brand');
 
-        $response = $this->post(route('products.store', $brand), $this->validParams());
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams());
 
         $response->assertStatus(404);
         $this->assertEquals(0, Product::count());
@@ -197,9 +201,8 @@ class AddProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $this->post(route('products.store', $brand), $this->validParams())
-            ->assertStatus(302)
-            ->assertRedirect(route('login'));
+        $this->json('POST', route('products.store', $brand), $this->validParams())
+            ->assertStatus(401);
 
         $this->assertEquals(0, Product::count());
     }
@@ -211,7 +214,7 @@ class AddProductTest extends TestCase
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
 
-        $response = $this->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
         $product = Product::first();
@@ -227,7 +230,7 @@ class AddProductTest extends TestCase
         Queue::fake();
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->post(route('products.store', $brand), $this->validParams());
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams());
 
         $model = ProductModel::first();
 
@@ -241,11 +244,11 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'name' => ''
         ]));
 
-        $this->assertValidationError($response, 'name', route('products.create', $brand));
+        $this->assertValidationError($response, 'name');
         $this->assertEquals(0, Product::count());
     }
 
@@ -254,11 +257,11 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'description' => ''
         ]));
 
-        $this->assertValidationError($response, 'description', route('products.create', $brand));
+        $this->assertValidationError($response, 'description');
         $this->assertEquals(0, Product::count());
     }
 
@@ -267,11 +270,11 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'published' => ''
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'published' => '',
         ]));
 
-        $this->assertValidationError($response, 'published', route('products.create', $brand));
+        $this->assertValidationError($response, 'published');
         $this->assertEquals(0, Product::count());
     }
 
@@ -280,11 +283,11 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'published' => 'not-a-boolean'
         ]));
 
-        $this->assertValidationError($response, 'published', route('products.create', $brand));
+        $this->assertValidationError($response, 'published');
         $this->assertEquals(0, Product::count());
     }
 
@@ -293,24 +296,24 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => ''
         ]));
 
-        $this->assertValidationError($response, 'products', route('products.create', $brand));
+        $this->assertValidationError($response, 'products');
         $this->assertEquals(0, Product::count());
     }
 
     /** @test */
-    public function products_must_be_json_to_create_a_product()
+    public function products_must_be_an_array_to_create_a_product()
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
-            'products' => 'not-json'
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => 'not-an-array'
         ]));
 
-        $this->assertValidationError($response, 'products', route('products.create', $brand));
+        $this->assertValidationError($response, 'products');
         $this->assertEquals(0, Product::count());
     }
 
@@ -319,13 +322,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['price' => '']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.price', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.price');
         $this->assertEquals(0, Product::count());
     }
 
@@ -334,13 +337,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['price' => 'not-numeric']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.price', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.price');
         $this->assertEquals(0, Product::count());
     }
 
@@ -349,13 +352,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['price' => '-1']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.price', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.price');
         $this->assertEquals(0, Product::count());
     }
 
@@ -364,13 +367,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.item_quantity', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
@@ -379,13 +382,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '1.3']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.item_quantity', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
@@ -394,13 +397,13 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '-1']
             ]
         ]));
 
-        $this->assertValidationError($response, 'products.*.item_quantity', route('products.create', $brand));
+        $this->assertValidationError($response, 'products.0.item_quantity');
         $this->assertEquals(0, Product::count());
     }
 
@@ -410,11 +413,11 @@ class AddProductTest extends TestCase
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->create('not-an-image.pdf');
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
 
-        $this->assertValidationError($response, 'product_image', route('products.create', $brand));
+        $this->assertValidationError($response, 'product_image');
         $this->assertEquals(0, Product::count());
     }
 
@@ -423,11 +426,11 @@ class AddProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->from(route('products.create', $brand))->post(route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
             'product_image' => null
         ]));
 
-        $this->assertValidationError($response, 'product_image', route('products.create', $brand));
+        $this->assertValidationError($response, 'product_image');
         $this->assertEquals(0, Product::count());
     }
 }
