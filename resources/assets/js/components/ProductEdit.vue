@@ -29,7 +29,16 @@
                     <th>Price</th>
                     <th>Item Quantity</th>
                     <th v-for="(attribute, index) in attributes" :key="index">
-                        <input type="text" v-model="attribute.name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
+                        <multiselect
+                            v-model="attribute.name"
+                            :options="dataAttributes.map(attribute => attribute.name)"
+                            :id="index"
+                            :taggable="true"
+                            @tag="addNewAttribute"
+                            tag-placeholder="Add as a new attribute"
+                            placeholder="Search or add an attribute"
+                            openDirection="bottom">
+                        </multiselect>
                     </th>
                     <button v-show="attributes.length < 4" type="button" @click="addAttribute" class="border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10">&plus;</button>
                 </tr>
@@ -41,7 +50,17 @@
                         <input type="number" v-model="product.item_quantity" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
                     </td>
                     <td v-for="(value, valIndex) in product.values" :key="valIndex">
-                        <input type="text" v-model="value.name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
+                        <multiselect
+                            v-if="attributes[valIndex].name"
+                            v-model="value.name"
+                            :options="dataAttributes.find(attribute => attribute.name === attributes[valIndex].name) ? dataAttributes.find(attribute => attribute.name === attributes[valIndex].name).values.map(val => val.name) : []"
+                            :id="[index,valIndex]"
+                            :taggable="true"
+                            @tag="addValue"
+                            tag-placeholder="Add as a new value"
+                            placeholder="Search or add a value"
+                            openDirection="bottom">
+                        </multiselect>
                     </td>
                     <button v-show="model.products.length > 1" type="button" @click="removeProduct(product.id, index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
                 </tr>
@@ -54,8 +73,11 @@
 </template>
 
 <script>
+import Multiselect from 'vue-multiselect'
+
 export default {
-    props: ['dataModel'],
+    components: { Multiselect },
+    props: ['dataModel', 'dataAttributes'],
     data() {
         return {
             model: this.dataModel,
@@ -129,7 +151,22 @@ export default {
             } else {
                 this.model.products.splice(index, 1)
             }
+        },
+        addNewAttribute(newAttribute, index) {
+            newAttribute = newAttribute.toLowerCase()
+            if (!this.attributes.some(attribute => attribute.name === newAttribute)) {
+                Vue.set(this.attributes, index, { name: newAttribute })
+            }
+        },
+        addValue(newValue, indexes) {
+            newValue = newValue.toLowerCase()
+            Vue.set(this.model.products[indexes[0]].values, indexes[1], { name: newValue })
+            if (!this.dataAttributes[indexes[1]].values.some(value => value.name === newValue)) {
+                this.dataAttributes[indexes[1]].values.push({ name: newValue })
+            }
         }
     }
 }
 </script>
+
+<style src="vue-multiselect/dist/vue-multiselect.min.css"></style>

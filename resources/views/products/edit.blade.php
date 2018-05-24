@@ -4,6 +4,6 @@
 
 @section('content')
     <div class="p-4 container mx-auto">
-        <product-edit :data-model="{{ $model }}"></product-edit>
+        <product-edit :data-model="{{ $model }}" :data-attributes="{{ $attributes }}"></product-edit>
     </div>
 @endsection

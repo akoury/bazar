@@ -140,7 +140,9 @@ class ProductsController extends Controller
             return $product;
         });
 
-        return view('products.edit', compact('model'));
+        $attributes = Attribute::with('values')->get();
+
+        return view('products.edit', compact('model', 'attributes'));
     }
 
     public function update($id)
