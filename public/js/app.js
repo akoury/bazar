@@ -16892,6 +16892,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
 
 
 
@@ -16983,6 +16984,31 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             } else {
                 this.model.products.splice(index, 1);
+            }
+        },
+        removeAttribute: function removeAttribute(attributeIndex) {
+            var remainingValues = this.model.products.map(function (product) {
+                return JSON.stringify(product.values.filter(function (value, index) {
+                    return index !== attributeIndex;
+                }).map(function (value) {
+                    return value.name;
+                }));
+            });
+
+            var matchingValues = remainingValues.map(function (value) {
+                return remainingValues.filter(function (val) {
+                    return val === value;
+                });
+            });
+            if (matchingValues.find(function (matches) {
+                return matches.length > 1;
+            })) {
+                alert('You cannot remove that attribute because some variants would be equal');
+            } else {
+                this.attributes.splice(attributeIndex, 1);
+                this.model.products.map(function (product) {
+                    return product.values.splice(attributeIndex, 1);
+                });
             }
         },
         addAttribute: function addAttribute(newAttribute, index) {
@@ -17262,6 +17288,29 @@ var render = function() {
                     "th",
                     { key: index },
                     [
+                      _c(
+                        "button",
+                        {
+                          directives: [
+                            {
+                              name: "show",
+                              rawName: "v-show",
+                              value: _vm.attributes.length > 0,
+                              expression: "attributes.length > 0"
+                            }
+                          ],
+                          staticClass:
+                            "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                          attrs: { type: "button" },
+                          on: {
+                            click: function($event) {
+                              _vm.removeAttribute(index)
+                            }
+                          }
+                        },
+                        [_vm._v("×")]
+                      ),
+                      _vm._v(" "),
                       _c("multiselect", {
                         attrs: {
                           options: _vm.availableAttributes,

@@ -29,6 +29,7 @@
                     <th>Price</th>
                     <th>Item Quantity</th>
                     <th v-for="(attribute, index) in attributes" :key="index">
+                        <button v-show="attributes.length > 0" type="button" @click="removeAttribute(index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
                         <multiselect
                             v-model="attribute.name"
                             :options="availableAttributes"
@@ -159,6 +160,17 @@ export default {
                     })
             } else {
                 this.model.products.splice(index, 1)
+            }
+        },
+        removeAttribute(attributeIndex) {
+            let remainingValues = this.model.products.map(product => JSON.stringify(product.values.filter((value, index) => index !== attributeIndex).map(value => value.name)))
+
+            let matchingValues = remainingValues.map(value => remainingValues.filter(val => val === value))
+            if (matchingValues.find(matches => matches.length > 1)) {
+                alert('You cannot remove that attribute because some variants would be equal')
+            } else {
+                this.attributes.splice(attributeIndex, 1)
+                this.model.products.map(product => product.values.splice(attributeIndex, 1))
             }
         },
         addAttribute(newAttribute, index) {
