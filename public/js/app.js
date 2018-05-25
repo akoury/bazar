@@ -16887,6 +16887,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 
@@ -16910,14 +16915,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
     methods: {
         updateProduct: function updateProduct() {
-            axios.post('/products/' + this.model.id, this.formData()).then(function (response) {
-                Turbolinks.visit(response.data);
-            }).catch(function (error) {
-                if (error.response.status === 401 || error.response.status === 419) {
-                    Turbolinks.visit(window.location);
-                }
-                console.log(error.response.data);
-            });
+            if (this.fieldsFilled) {
+                axios.post('/products/' + this.model.id, this.formData()).then(function (response) {
+                    Turbolinks.visit(response.data);
+                }).catch(function (error) {
+                    if (error.response.status === 401 || error.response.status === 419) {
+                        Turbolinks.visit(window.location);
+                    }
+                    console.log(error.response.data);
+                });
+            } else {
+                alert('You must fill all required inputs');
+            }
         },
         formData: function formData() {
             var _this = this;
@@ -16947,7 +16956,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         onImageChange: function onImageChange(e) {
             this.model.image_path = e.target.files[0];
         },
-        addAttribute: function addAttribute() {
+        addAttributeSlot: function addAttributeSlot() {
             if (this.attributes.length < 4) {
                 this.attributes.push({ name: '' });
                 this.model.products.map(function (product) {
@@ -16976,22 +16985,86 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 this.model.products.splice(index, 1);
             }
         },
-        addNewAttribute: function addNewAttribute(newAttribute, index) {
+        addAttribute: function addAttribute(newAttribute, index) {
             newAttribute = newAttribute.toLowerCase();
             if (!this.attributes.some(function (attribute) {
                 return attribute.name === newAttribute;
             })) {
                 Vue.set(this.attributes, index, { name: newAttribute });
+                this.dataAttributes.push({ name: newAttribute, values: [] });
             }
         },
         addValue: function addValue(newValue, indexes) {
+            var _this3 = this;
+
             newValue = newValue.toLowerCase();
             Vue.set(this.model.products[indexes[0]].values, indexes[1], { name: newValue });
-            if (!this.dataAttributes[indexes[1]].values.some(function (value) {
+            var dataValues = this.dataAttributes.find(function (attribute) {
+                return attribute.name === _this3.attributes[indexes[1]].name;
+            }).values;
+            if (!dataValues.some(function (value) {
                 return value.name === newValue;
             })) {
-                this.dataAttributes[indexes[1]].values.push({ name: newValue });
+                dataValues.push({ name: newValue });
             }
+        },
+        selectAttribute: function selectAttribute(newAttribute, index) {
+            Vue.set(this.attributes, index, { name: newAttribute });
+            this.model.products.map(function (product) {
+                return product.values[index].name = '';
+            });
+        },
+        selectValue: function selectValue(selectedValue, indexes) {
+            var originalValue = this.model.products[indexes[0]].values.map(function (value) {
+                return value.name;
+            })[indexes[1]];
+            var selectedValues = JSON.stringify(this.model.products[indexes[0]].values.map(function (value, index) {
+                return index === indexes[1] ? selectedValue : value.name;
+            }));
+
+            if (this.model.products.find(function (product) {
+                return JSON.stringify(product.values.map(function (value) {
+                    return value.name;
+                })) === selectedValues;
+            })) {
+                Vue.set(this.model.products[indexes[0]].values, indexes[1], { name: originalValue });
+                alert('This variant already exists');
+            }
+        },
+        availableValues: function availableValues(valIndex) {
+            var _this4 = this;
+
+            var attribute = this.dataAttributes.find(function (attribute) {
+                return attribute.name === _this4.attributes[valIndex].name;
+            });
+            if (attribute) {
+                return attribute.values.map(function (val) {
+                    return val.name;
+                });
+            }
+            return [];
+        }
+    },
+    computed: {
+        fieldsFilled: function fieldsFilled() {
+            return this.attributes.every(function (attribute) {
+                return attribute.name != '';
+            }) && this.model.products.every(function (product) {
+                return product.values.every(function (value) {
+                    return value.name != '';
+                });
+            });
+        },
+        availableAttributes: function availableAttributes() {
+            var _this5 = this;
+
+            return this.dataAttributes.map(function (attribute) {
+                return attribute.name;
+            }).filter(function (attribute) {
+                return !_this5.attributes.map(function (attr) {
+                    return attr.name;
+                }).includes(attribute);
+            });
         }
     }
 });
@@ -17191,16 +17264,19 @@ var render = function() {
                     [
                       _c("multiselect", {
                         attrs: {
-                          options: _vm.dataAttributes.map(function(attribute) {
-                            return attribute.name
-                          }),
+                          options: _vm.availableAttributes,
                           id: index,
+                          "allow-empty": false,
+                          "deselect-label": "Cannot leave field blank",
                           taggable: true,
                           "tag-placeholder": "Add as a new attribute",
                           placeholder: "Search or add an attribute",
                           openDirection: "bottom"
                         },
-                        on: { tag: _vm.addNewAttribute },
+                        on: {
+                          select: _vm.selectAttribute,
+                          tag: _vm.addAttribute
+                        },
                         model: {
                           value: attribute.name,
                           callback: function($$v) {
@@ -17228,7 +17304,7 @@ var render = function() {
                     staticClass:
                       "border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10",
                     attrs: { type: "button" },
-                    on: { click: _vm.addAttribute }
+                    on: { click: _vm.addAttributeSlot }
                   },
                   [_vm._v("+")]
                 )
@@ -17236,10 +17312,10 @@ var render = function() {
               2
             ),
             _vm._v(" "),
-            _vm._l(_vm.model.products, function(product, index) {
+            _vm._l(_vm.model.products, function(product, prodIndex) {
               return _c(
                 "tr",
-                { key: index },
+                { key: prodIndex },
                 [
                   _c("td", [
                     _c("input", {
@@ -17300,44 +17376,26 @@ var render = function() {
                       "td",
                       { key: valIndex },
                       [
-                        _vm.attributes[valIndex].name
-                          ? _c("multiselect", {
-                              attrs: {
-                                options: _vm.dataAttributes.find(function(
-                                  attribute
-                                ) {
-                                  return (
-                                    attribute.name ===
-                                    _vm.attributes[valIndex].name
-                                  )
-                                })
-                                  ? _vm.dataAttributes
-                                      .find(function(attribute) {
-                                        return (
-                                          attribute.name ===
-                                          _vm.attributes[valIndex].name
-                                        )
-                                      })
-                                      .values.map(function(val) {
-                                        return val.name
-                                      })
-                                  : [],
-                                id: [index, valIndex],
-                                taggable: true,
-                                "tag-placeholder": "Add as a new value",
-                                placeholder: "Search or add a value",
-                                openDirection: "bottom"
-                              },
-                              on: { tag: _vm.addValue },
-                              model: {
-                                value: value.name,
-                                callback: function($$v) {
-                                  _vm.$set(value, "name", $$v)
-                                },
-                                expression: "value.name"
-                              }
-                            })
-                          : _vm._e()
+                        _c("multiselect", {
+                          attrs: {
+                            options: _vm.availableValues(valIndex),
+                            id: [prodIndex, valIndex],
+                            "allow-empty": false,
+                            "deselect-label": "Cannot leave field blank",
+                            taggable: true,
+                            "tag-placeholder": "Add as a new value",
+                            placeholder: "Search or add a value",
+                            openDirection: "bottom"
+                          },
+                          on: { tag: _vm.addValue, select: _vm.selectValue },
+                          model: {
+                            value: value.name,
+                            callback: function($$v) {
+                              _vm.$set(value, "name", $$v)
+                            },
+                            expression: "value.name"
+                          }
+                        })
                       ],
                       1
                     )
@@ -17359,7 +17417,7 @@ var render = function() {
                       attrs: { type: "button" },
                       on: {
                         click: function($event) {
-                          _vm.removeProduct(product.id, index)
+                          _vm.removeProduct(product.id, prodIndex)
                         }
                       }
                     },

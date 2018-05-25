@@ -31,18 +31,21 @@
                     <th v-for="(attribute, index) in attributes" :key="index">
                         <multiselect
                             v-model="attribute.name"
-                            :options="dataAttributes.map(attribute => attribute.name)"
+                            :options="availableAttributes"
                             :id="index"
+                            :allow-empty="false"
+                            deselect-label="Cannot leave field blank"
+                            @select="selectAttribute"
                             :taggable="true"
-                            @tag="addNewAttribute"
+                            @tag="addAttribute"
                             tag-placeholder="Add as a new attribute"
                             placeholder="Search or add an attribute"
                             openDirection="bottom">
                         </multiselect>
                     </th>
-                    <button v-show="attributes.length < 4" type="button" @click="addAttribute" class="border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10">&plus;</button>
+                    <button v-show="attributes.length < 4" type="button" @click="addAttributeSlot" class="border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10">&plus;</button>
                 </tr>
-                <tr v-for="(product, index) in model.products" :key="index">
+                <tr v-for="(product, prodIndex) in model.products" :key="prodIndex">
                     <td>
                         <input type="number" v-model="product.price" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" step="0.01" required>
                     </td>
@@ -51,18 +54,20 @@
                     </td>
                     <td v-for="(value, valIndex) in product.values" :key="valIndex">
                         <multiselect
-                            v-if="attributes[valIndex].name"
                             v-model="value.name"
-                            :options="dataAttributes.find(attribute => attribute.name === attributes[valIndex].name) ? dataAttributes.find(attribute => attribute.name === attributes[valIndex].name).values.map(val => val.name) : []"
-                            :id="[index,valIndex]"
+                            :options="availableValues(valIndex)"
+                            :id="[prodIndex,valIndex]"
+                            :allow-empty="false"
+                            deselect-label="Cannot leave field blank"
                             :taggable="true"
                             @tag="addValue"
                             tag-placeholder="Add as a new value"
+                            @select="selectValue"
                             placeholder="Search or add a value"
                             openDirection="bottom">
                         </multiselect>
                     </td>
-                    <button v-show="model.products.length > 1" type="button" @click="removeProduct(product.id, index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+                    <button v-show="model.products.length > 1" type="button" @click="removeProduct(product.id, prodIndex)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
                 </tr>
             </table>
 
@@ -90,17 +95,21 @@ export default {
     },
     methods: {
         updateProduct() {
-            axios
-                .post('/products/' + this.model.id, this.formData())
-                .then(response => {
-                    Turbolinks.visit(response.data)
-                })
-                .catch(error => {
-                    if (error.response.status === 401 || error.response.status === 419) {
-                        Turbolinks.visit(window.location)
-                    }
-                    console.log(error.response.data)
-                })
+            if (this.fieldsFilled) {
+                axios
+                    .post('/products/' + this.model.id, this.formData())
+                    .then(response => {
+                        Turbolinks.visit(response.data)
+                    })
+                    .catch(error => {
+                        if (error.response.status === 401 || error.response.status === 419) {
+                            Turbolinks.visit(window.location)
+                        }
+                        console.log(error.response.data)
+                    })
+            } else {
+                alert('You must fill all required inputs')
+            }
         },
         formData() {
             let formData = new FormData()
@@ -126,7 +135,7 @@ export default {
         onImageChange(e) {
             this.model.image_path = e.target.files[0]
         },
-        addAttribute() {
+        addAttributeSlot() {
             if (this.attributes.length < 4) {
                 this.attributes.push({ name: '' })
                 this.model.products.map(product => product.values.push({ name: '' }))
@@ -152,18 +161,48 @@ export default {
                 this.model.products.splice(index, 1)
             }
         },
-        addNewAttribute(newAttribute, index) {
+        addAttribute(newAttribute, index) {
             newAttribute = newAttribute.toLowerCase()
             if (!this.attributes.some(attribute => attribute.name === newAttribute)) {
                 Vue.set(this.attributes, index, { name: newAttribute })
+                this.dataAttributes.push({ name: newAttribute, values: [] })
             }
         },
         addValue(newValue, indexes) {
             newValue = newValue.toLowerCase()
             Vue.set(this.model.products[indexes[0]].values, indexes[1], { name: newValue })
-            if (!this.dataAttributes[indexes[1]].values.some(value => value.name === newValue)) {
-                this.dataAttributes[indexes[1]].values.push({ name: newValue })
+            let dataValues = this.dataAttributes.find(attribute => attribute.name === this.attributes[indexes[1]].name).values
+            if (!dataValues.some(value => value.name === newValue)) {
+                dataValues.push({ name: newValue })
             }
+        },
+        selectAttribute(newAttribute, index) {
+            Vue.set(this.attributes, index, { name: newAttribute })
+            this.model.products.map(product => (product.values[index].name = ''))
+        },
+        selectValue(selectedValue, indexes) {
+            let originalValue = this.model.products[indexes[0]].values.map(value => value.name)[indexes[1]]
+            let selectedValues = JSON.stringify(this.model.products[indexes[0]].values.map((value, index) => (index === indexes[1] ? selectedValue : value.name)))
+
+            if (this.model.products.find(product => JSON.stringify(product.values.map(value => value.name)) === selectedValues)) {
+                Vue.set(this.model.products[indexes[0]].values, indexes[1], { name: originalValue })
+                alert('This variant already exists')
+            }
+        },
+        availableValues(valIndex) {
+            let attribute = this.dataAttributes.find(attribute => attribute.name === this.attributes[valIndex].name)
+            if (attribute) {
+                return attribute.values.map(val => val.name)
+            }
+            return []
+        }
+    },
+    computed: {
+        fieldsFilled() {
+            return this.attributes.every(attribute => attribute.name != '') && this.model.products.every(product => product.values.every(value => value.name != ''))
+        },
+        availableAttributes() {
+            return this.dataAttributes.map(attribute => attribute.name).filter(attribute => !this.attributes.map(attr => attr.name).includes(attribute))
         }
     }
 }
