@@ -16941,12 +16941,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             this.model.products.map(function (product) {
                 return products.push({
-                    id: product.hasOwnProperty('id') ? product.id : null,
+                    id: product.hasOwnProperty('id') ? product.id : undefined,
                     price: product.price,
                     item_quantity: product.item_quantity,
                     attributes: _this.attributes.length ? Object.assign.apply(Object, _toConsumableArray(_this.attributes.map(function (attribute, index) {
                         return _defineProperty({}, attribute.name, product.values[index].name);
-                    }))) : []
+                    }))) : undefined
                 });
             });
 

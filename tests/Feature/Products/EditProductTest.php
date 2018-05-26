@@ -41,6 +41,20 @@ class EditProductTest extends TestCase
         return $params;
     }
 
+    private function productForUserBrand()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        return $this->createProductsForModel($this->oldAttributes([
+            'brand_id' => $brand->id
+        ]));
+    }
+
+    private function updateProduct($product, $overridenParams)
+    {
+        return $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams($overridenParams));
+    }
+
     /** @test */
     public function a_user_can_view_the_edit_product_form_for_his_brand()
     {
@@ -86,70 +100,15 @@ class EditProductTest extends TestCase
             'brand_id'    => $brand->id
         ])->addItems(3);
 
-        $attributeA = factory(Attribute::class)->create([
-            'name' => 'color',
-        ]);
-
-        $valueA = factory(Value::class)->create([
-            'name'         => 'black',
-            'attribute_id' => $attributeA->id
-        ]);
-
-        $attributeB = factory(Attribute::class)->create([
-            'name' => 'capacity',
-        ]);
-
-        $valueB = factory(Value::class)->create([
-            'name'         => '32gb',
-            'attribute_id' => $attributeB->id
-        ]);
-
-        $valueC = factory(Value::class)->create([
-            'name'         => '64gb',
-            'attribute_id' => $attributeB->id
-        ]);
-
-        $attributeC = factory(Attribute::class)->create([
-            'name' => 'engraved',
-        ]);
-
-        $valueD = factory(Value::class)->create([
-            'name'         => 'yes',
-            'attribute_id' => $attributeC->id
-        ]);
-
-        $product->values()->attach($valueA);
-        $product->values()->attach($valueB);
-        $product->values()->attach($valueD);
-
         $response = $this->json('PATCH', route('products.update', $product->product_model_id), [
             'name'        => 'New name',
             'description' => 'New description',
             'published'   => false,
-            'products'    => json_encode([
-                [
-                    'id'            => $product->id,
-                    'price'         => '50.00',
-                    'item_quantity' => 2,
-                    'attributes'    => [
-                        'color'     => 'green',
-                        'capacity'  => '64gb',
-                        'engraving' => 'true',
-                        'unlocked'  => 'yes'
-                    ],
-                ],
-                [
-                    'id'            => null,
-                    'price'         => '30.00',
-                    'item_quantity' => 5,
-                    'attributes'    => [
-                        'color'     => 'green',
-                        'capacity'  => '32gb',
-                        'engraving' => 'true',
-                        'unlocked'  => 'yes',
-                    ],
-                ],
-            ]),
+            'products'    => json_encode([[
+                'id'            => $product->id,
+                'price'         => '50.00',
+                'item_quantity' => 2,
+            ]]),
         ]);
 
         $response->assertStatus(200)
@@ -162,18 +121,102 @@ class EditProductTest extends TestCase
         $this->assertEquals(5000, $product->price);
         $this->assertEquals(2, $product->itemsRemaining());
         $this->assertFalse($product->published);
-        $this->assertTrue($product->values->pluck('name')->contains('green'));
-        $this->assertFalse($product->values->pluck('name')->contains('black'));
-        $this->assertTrue($product->values->pluck('name')->contains('64gb'));
-        $this->assertTrue($product->values->pluck('name')->contains('true'));
-        $this->assertTrue($product->values->pluck('name')->contains('yes'));
-        $this->assertCount(2, $product->model->products);
-        $this->assertEquals(3000, $product->model->products->last()->price);
-        $this->assertEquals(5, $product->model->products->last()->itemsRemaining());
-        $this->assertTrue($product->model->products->last()->values->pluck('name')->contains('green'));
-        $this->assertTrue($product->model->products->last()->values->pluck('name')->contains('32gb'));
-        $this->assertTrue($product->model->products->last()->values->pluck('name')->contains('true'));
-        $this->assertTrue($product->model->products->last()->values->pluck('name')->contains('yes'));
+    }
+
+    /** @test */
+    public function a_user_can_edit_his_brands_product_and_add_new_ones()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                [
+                    'id'            => $product->id,
+                    'price'         => '50.00',
+                    'item_quantity' => 2,
+                ],
+                [
+                    'price'         => '30.00',
+                    'item_quantity' => 5,
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonFragment([$product->model->url()]);
+
+        $model = $product->fresh()->model;
+
+        $this->assertCount(2, $model->products);
+        $this->assertEquals(5000, $model->products->first()->price);
+        $this->assertEquals(2, $model->products->first()->itemsRemaining());
+        $this->assertEquals(3000, $model->products->last()->price);
+        $this->assertEquals(5, $model->products->last()->itemsRemaining());
+    }
+
+    /** @test */
+    public function a_user_can_edit_his_brands_products_with_attributes()
+    {
+        $product = $this->productForUserBrand();
+
+        $attribute = factory(Attribute::class)->create([
+            'name' => 'color',
+        ]);
+
+        $value = factory(Value::class)->create([
+            'name'         => 'black',
+            'attribute_id' => $attribute->id
+        ]);
+
+        $product->values()->attach($value);
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                [
+                    'id'            => $product->id,
+                    'price'         => '50.00',
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        'color'     => 'green',
+                        'capacity'  => '64gb',
+                        'engraving' => 'false',
+                        'unlocked'  => 'yes'
+                    ],
+                ],
+                [
+                    'price'         => '30.00',
+                    'item_quantity' => 5,
+                    'attributes'    => [
+                        'color'     => 'GREEN',
+                        'capacity'  => '32gb',
+                        'engraving' => 'true',
+                        'unlocked'  => 'yes',
+                    ],
+                ],
+            ],
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonFragment([$product->model->url()]);
+
+        $model = $product->fresh()->model;
+
+        $productAValues = $model->products->first()->values->pluck('name');
+        $this->assertFalse($productAValues->contains('black'));
+        $this->assertTrue($productAValues->contains('green'));
+        $this->assertTrue($productAValues->contains('64gb'));
+        $this->assertTrue($productAValues->contains('false'));
+        $this->assertTrue($productAValues->contains('yes'));
+
+        $productBValues = $model->products->last()->values->pluck('name');
+        $this->assertTrue($productBValues->contains('green'));
+        $this->assertTrue($productBValues->contains('32gb'));
+        $this->assertTrue($productBValues->contains('true'));
+        $this->assertTrue($productBValues->contains('yes'));
+
+        $this->assertCount(1, Attribute::whereName('color')->get());
+        $this->assertCount(1, Value::whereName('green')->get());
+        $this->assertCount(1, Value::whereName('yes')->get());
     }
 
     /** @test */
@@ -202,15 +245,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function name_is_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
+        $product = $this->productForUserBrand();
 
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
-
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'name' => ''
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'name');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -219,14 +258,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function description_is_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'description' => ''
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'description');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -235,14 +271,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function published_is_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'published' => '',
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'published');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -251,15 +284,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function published_must_be_boolean_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
+        $product = $this->productForUserBrand();
 
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
-
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'published' => 'not-a-boolean'
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'published');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -268,14 +297,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function products_are_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => '',
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -284,14 +310,11 @@ class EditProductTest extends TestCase
     /** @test */
     public function products_must_be_an_array_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => 'not-an_array',
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -300,16 +323,13 @@ class EditProductTest extends TestCase
     /** @test */
     public function price_is_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['price' => '']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.price');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -318,16 +338,13 @@ class EditProductTest extends TestCase
     /** @test */
     public function price_must_be_numeric_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['price' => 'not-numeric']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.price');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -336,16 +353,13 @@ class EditProductTest extends TestCase
     /** @test */
     public function price_must_be_0_or_more_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['price' => '-1']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.price');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -354,16 +368,13 @@ class EditProductTest extends TestCase
     /** @test */
     public function item_quantity_is_required_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['item_quantity' => '']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -372,16 +383,13 @@ class EditProductTest extends TestCase
     /** @test */
     public function item_quantity_must_be_an_integer_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['item_quantity' => '1.2']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -390,18 +398,128 @@ class EditProductTest extends TestCase
     /** @test */
     public function item_quantity_must_be_0_or_more_to_edit_a_product()
     {
-        $brand = $this->brandForSignedInUser();
-        $product = $this->createProductsForModel($this->oldAttributes([
-            'brand_id' => $brand->id
-        ]));
+        $product = $this->productForUserBrand();
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams([
+        $response = $this->updateProduct($product, [
             'products' => [
                 ['item_quantity' => '-1']
             ]
-        ]));
+        ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function attributes_are_required_when_present_to_edit_a_product()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                ['attributes' => '']
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function attributes_must_be_an_array_to_edit_a_product()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                ['attributes' => 'not-an-array']
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function attributes_must_be_less_than_5_to_edit_a_product()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                ['attributes' => [
+                    'attribute1' => 'value1',
+                    'attribute2' => 'value2',
+                    'attribute3' => 'value3',
+                    'attribute4' => 'value4',
+                    'attribute5' => 'value5'
+                ]]
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function all_products_must_have_the_same_attributes_to_edit_a_product_model()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                [
+                    'price'         => 2000,
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        'firstAttribute' => 'value1',
+                    ]
+                ],
+                [
+                    'price'         => 2000,
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        'secondAttribute' => 'value2',
+                    ]
+                ],
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.1.attributes.firstAttribute');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function values_are_required_to_edit_a_product_with_attributes()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                ['attributes' => [
+                    'attribute' => '',
+                ]]
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.0.attributes.attribute');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function values_must_be_a_string_to_edit_a_product_with_attributes()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'products' => [
+                ['attributes' => [
+                    'attribute' => 100,
+                ]]
+            ]
+        ]);
+
+        $this->assertValidationError($response, 'products.0.attributes.attribute');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 }

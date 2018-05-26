@@ -61,7 +61,15 @@ class ProductsController extends Controller
 
         request()['products'] = json_decode(request('products'), true);
 
-        request()->validate([
+        $attributeRules = [];
+        if (! empty(request()['products'][0]['attributes']) && is_array(request()['products'][0]['attributes'])) {
+            $attributeKeys = array_keys(request()['products'][0]['attributes']);
+            foreach ($attributeKeys as $key) {
+                $attributeRules['products.*.attributes.' . $key] = 'required|string';
+            }
+        }
+
+        request()->validate(array_merge([
             'name'                     => 'required',
             'description'              => 'required',
             'published'                => 'boolean|required',
@@ -69,7 +77,9 @@ class ProductsController extends Controller
             'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
-        ]);
+            'products.*.attributes'    => 'sometimes|required|array|max:4',
+            'products.*.attributes.*'  => 'required|string',
+        ], $attributeRules));
 
         $model = ProductModel::create([
             'name'        => request('name'),
@@ -153,15 +163,24 @@ class ProductsController extends Controller
 
         request()['products'] = json_decode(request('products'), true);
 
-        request()->validate([
+        $attributeRules = [];
+        if (! empty(request()['products'][0]['attributes']) && is_array(request()['products'][0]['attributes'])) {
+            $attributeKeys = array_keys(request()['products'][0]['attributes']);
+            foreach ($attributeKeys as $key) {
+                $attributeRules['products.*.attributes.' . $key] = 'required|string';
+            }
+        }
+
+        request()->validate(array_merge([
             'name'                     => 'required',
             'description'              => 'required',
             'published'                => 'boolean|required',
             'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
-            // 'products.*.attributes'    => 'max:4',
-        ]);
+            'products.*.attributes'    => 'sometimes|required|array|max:4',
+            'products.*.attributes.*'  => 'required|string',
+        ], $attributeRules));
 
         $model->update([
             'name'        => request('name'),
@@ -169,7 +188,13 @@ class ProductsController extends Controller
             'published'   => request('published'),
         ]);
 
-        $products = collect(request('products'));
+        $products = collect(request('products'))->map(function ($product) {
+            if (isset($product['attributes'])) {
+                $product['attributes'] = array_map('strtolower', $product['attributes']);
+                $product['attributes'] = array_change_key_case($product['attributes'], CASE_LOWER);
+            }
+            return $product;
+        });
 
         if (isset($products[0]['attributes'])) {
             $attributes = Attribute::whereIn('name', array_keys($products[0]['attributes']))->get();

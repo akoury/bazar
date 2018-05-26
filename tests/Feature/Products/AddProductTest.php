@@ -433,4 +433,117 @@ class AddProductTest extends TestCase
         $this->assertValidationError($response, 'product_image');
         $this->assertEquals(0, Product::count());
     }
+
+    /** @test */
+    public function attributes_are_required_when_present_to_create_a_product()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                ['attributes' => '']
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function attributes_must_be_an_array_to_create_a_product()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                ['attributes' => 'not-an-array']
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function attributes_must_be_less_than_5_to_create_a_product()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                ['attributes' => [
+                    'attribute1' => 'value1',
+                    'attribute2' => 'value2',
+                    'attribute3' => 'value3',
+                    'attribute4' => 'value4',
+                    'attribute5' => 'value5'
+                ]]
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.0.attributes');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function all_products_must_have_the_same_attributes_to_edit_a_product_model()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                [
+                    'price'         => 2000,
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        'firstAttribute' => 'value1',
+                    ]
+                ],
+                [
+                    'price'         => 2000,
+                    'item_quantity' => 2,
+                    'attributes'    => [
+                        'secondAttribute' => 'value2',
+                    ]
+                ],
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.1.attributes.firstAttribute');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function values_are_required_to_create_a_product_with_attributes()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                ['attributes' => [
+                    'attribute' => '',
+                ]]
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.0.attributes.attribute');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function values_must_be_a_string_to_edit_a_product_with_attributes()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+            'products' => [
+                ['attributes' => [
+                    'attribute' => 100,
+                ]]
+            ]
+        ]));
+
+        $this->assertValidationError($response, 'products.0.attributes.attribute');
+        $this->assertEquals(0, Product::count());
+    }
 }

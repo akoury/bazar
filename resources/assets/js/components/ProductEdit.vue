@@ -122,10 +122,10 @@ export default {
 
             this.model.products.map(product =>
                 products.push({
-                    id: product.hasOwnProperty('id') ? product.id : null,
+                    id: product.hasOwnProperty('id') ? product.id : undefined,
                     price: product.price,
                     item_quantity: product.item_quantity,
-                    attributes: this.attributes.length ? Object.assign(...this.attributes.map((attribute, index) => ({ [attribute.name]: product.values[index].name }))) : []
+                    attributes: this.attributes.length ? Object.assign(...this.attributes.map((attribute, index) => ({ [attribute.name]: product.values[index].name }))) : undefined
                 })
             )
 
