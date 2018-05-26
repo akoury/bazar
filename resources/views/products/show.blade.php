@@ -16,7 +16,7 @@
                 <img src="{{ url($product->image_path) }}" class="mx-auto" alt="product">
             </div>
             <div class="sm:w-2/5 p-6">
-                <product-checkout :model="{{ $model }}" :attributes="{{ $model->attributes() }}" product-id="{{ $product->id }}" user-email="{{ optional(auth()->user())->email }}"></product-checkout>
+                <product-show :model="{{ $model }}" :attributes="{{ $model->attributes() }}" product-id="{{ $product->id }}" user-email="{{ optional(auth()->user())->email }}"></product-show>
             </div>
         </div>
     </div>

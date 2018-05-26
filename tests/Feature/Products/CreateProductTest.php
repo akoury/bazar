@@ -13,7 +13,7 @@ use App\Jobs\ProcessProductModelImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class AddProductTest extends TestCase
+class CreateProductTest extends TestCase
 {
     use RefreshDatabase;
 

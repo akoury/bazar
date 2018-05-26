@@ -7,7 +7,7 @@ use App\Models\User;
 use App\Models\Brand;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class AddBrandTest extends TestCase
+class CreateBrandTest extends TestCase
 {
     use RefreshDatabase;
 
