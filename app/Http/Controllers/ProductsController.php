@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\ProductModel;
 use App\Http\Requests\ProductRequest;
+use Illuminate\Support\Facades\Storage;
 
 class ProductsController extends Controller
 {
@@ -83,6 +84,10 @@ class ProductsController extends Controller
         $model = ProductModel::findOrFail($id);
 
         auth()->user()->brands()->findOrFail($model->brand_id);
+
+        if ($request->has('product_image')) {
+            Storage::disk('public')->delete($model->image_path);
+        }
 
         $model->update([
             'name'        => $request->name,

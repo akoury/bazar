@@ -224,20 +224,22 @@ class EditProductTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_edit_the_image_of_a_product_and_it_is_uploaded()
+    public function a_user_can_edit_the_image_of_a_product_while_removing_the_previous_one()
     {
         Storage::fake('public');
         Queue::fake();
 
         $product = $this->productForUserBrand();
-        $file = UploadedFile::fake()->image('new-product-image.png');
-        $oldFile = $product->image_path;
+        $oldFilePath = $product->image_path;
+        Storage::disk('public')->putFileAs('', UploadedFile::fake()->image($oldFilePath), $oldFilePath);
 
-        $this->updateProduct($product, ['product_image' => $file])->assertStatus(200);
+        $newFile = UploadedFile::fake()->image('new-product-image.png');
+        $this->updateProduct($product, ['product_image' => $newFile])->assertStatus(200);
 
-        $this->assertNotEquals($oldFile, $product->fresh()->image_path);
+        $this->assertNotEquals($oldFilePath, $product->fresh()->image_path);
         Storage::disk('public')->assertExists($product->fresh()->image_path);
-        $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->fresh()->image_path));
+        $this->assertFileEquals($newFile->getPathname(), Storage::disk('public')->path($product->fresh()->image_path));
+        Storage::disk('public')->assertMissing($oldFilePath);
     }
 
     /** @test */
