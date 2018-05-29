@@ -17646,7 +17646,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             })));
 
             this.combinations = this.products.map(function (product) {
-                return { product_id: product.id, available: product.item_count > 0, values: Object.assign.apply(Object, _toConsumableArray(product.values.map(function (value) {
+                return { product_id: product.id, available: product.item_quantity > 0, values: Object.assign.apply(Object, _toConsumableArray(product.values.map(function (value) {
                         return _defineProperty({}, value.attribute_id, value.id);
                     }))) };
             });
@@ -17896,7 +17896,7 @@ var render = function() {
         ])
       }),
       _vm._v(" "),
-      _vm.selectedProduct.item_count > 0
+      _vm.selectedProduct.item_quantity > 0
         ? _c("div", [
             _c(
               "form",

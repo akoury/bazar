@@ -31,7 +31,7 @@
             </div>
         </fieldset>
 
-        <div v-if="selectedProduct.item_count > 0">
+        <div v-if="selectedProduct.item_quantity > 0">
             <form @submit.prevent="order">
                 <label for="quantity" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
                     Quantity
@@ -70,7 +70,7 @@ export default {
         if (this.selectedProduct.values.length > 0) {
             this.values = Object.assign(...this.selectedProduct.values.map(value => ({ [value.attribute.id]: value.id })))
 
-            this.combinations = this.products.map(product => ({ product_id: product.id, available: product.item_count > 0, values: Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))) }))
+            this.combinations = this.products.map(product => ({ product_id: product.id, available: product.item_quantity > 0, values: Object.assign(...product.values.map(value => ({ [value.attribute_id]: value.id }))) }))
         }
 
         this.stripeHandler = this.initStripe()

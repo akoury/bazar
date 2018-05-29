@@ -44,4 +44,15 @@ class ProductModel extends Model
             return $attribute;
         });
     }
+
+    public function loadItemQuantity()
+    {
+        $this->products->transform(function ($product) {
+            $product->setAttribute('item_quantity', $product->items->count());
+            unset($product->items);
+            return $product;
+        });
+
+        return $this;
+    }
 }
