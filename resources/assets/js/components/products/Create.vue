@@ -87,7 +87,7 @@ export default {
             name: '',
             description: '',
             published: true,
-            product_image: '',
+            product_image: null,
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
@@ -112,8 +112,8 @@ export default {
             let formData = new FormData()
             formData.append('name', this.name)
             formData.append('description', this.description)
-            formData.append('product_image', this.product_image)
             formData.append('published', this.published ? 1 : 0)
+            formData.append('product_image', this.product_image)
 
             let products = this.products
             if (products.length === 1) {

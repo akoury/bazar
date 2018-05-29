@@ -40,6 +40,7 @@ class ProductModel extends Model
             $attribute->setRelation('values', $values->where('attribute_id', $attribute->id)->values());
             $attribute->values->map(function ($value) {
                 unset($value->attribute);
+                unset($value->pivot);
             });
             return $attribute;
         });

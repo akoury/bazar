@@ -16902,7 +16902,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     data: function data() {
         return {
             model: this.dataModel,
-            attributes: []
+            attributes: [],
+            product_image: null
         };
     },
     created: function created() {
@@ -16937,6 +16938,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('description', this.model.description);
             formData.append('published', this.model.published ? 1 : 0);
 
+            if (this.product_image) {
+                formData.append('product_image', this.product_image);
+            }
+
             var products = [];
 
             this.model.products.map(function (product) {
@@ -16955,7 +16960,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return formData;
         },
         onImageChange: function onImageChange(e) {
-            this.model.image_path = e.target.files[0];
+            this.product_image = e.target.files[0];
         },
         addAttributeSlot: function addAttributeSlot() {
             if (this.attributes.length < 4) {
@@ -17249,6 +17254,14 @@ var render = function() {
             ),
             _vm._v(" "),
             _c("img", {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: !_vm.product_image,
+                  expression: "!product_image"
+                }
+              ],
               attrs: {
                 src: "http://bazar.test/" + _vm.model.image_path,
                 alt: "product_image",
@@ -18224,7 +18237,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             name: '',
             description: '',
             published: true,
-            product_image: '',
+            product_image: null,
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
@@ -18249,8 +18262,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var formData = new FormData();
             formData.append('name', this.name);
             formData.append('description', this.description);
-            formData.append('product_image', this.product_image);
             formData.append('published', this.published ? 1 : 0);
+            formData.append('product_image', this.product_image);
 
             var products = this.products;
             if (products.length === 1) {

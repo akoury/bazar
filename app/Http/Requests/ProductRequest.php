@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Value;
 use App\Models\Product;
 use App\Models\Attribute;
+use App\Jobs\ProcessProductModelImage;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
@@ -107,6 +108,10 @@ class ProductRequest extends FormRequest
                 $newProduct->values()->detach();
                 $newProduct->values()->attach($productValues->pluck('id'));
             }
+        }
+
+        if ($this->has('product_image')) {
+            ProcessProductModelImage::dispatch($model);
         }
     }
 }

@@ -6,6 +6,10 @@ use Tests\TestCase;
 use App\Models\Value;
 use App\Models\Product;
 use App\Models\Attribute;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Queue;
+use App\Jobs\ProcessProductModelImage;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EditProductTest extends TestCase
@@ -159,11 +163,11 @@ class EditProductTest extends TestCase
     {
         $product = $this->productForUserBrand();
 
-        $attribute = factory(Attribute::class)->create([
+        $attribute = $this->create('Attribute', 1, [
             'name' => 'color',
         ]);
 
-        $value = factory(Value::class)->create([
+        $value = $this->create('Value', 1, [
             'name'         => 'black',
             'attribute_id' => $attribute->id
         ]);
@@ -217,6 +221,48 @@ class EditProductTest extends TestCase
         $this->assertCount(1, Attribute::whereName('color')->get());
         $this->assertCount(1, Value::whereName('green')->get());
         $this->assertCount(1, Value::whereName('yes')->get());
+    }
+
+    /** @test */
+    public function a_user_can_edit_the_image_of_a_product_and_it_is_uploaded()
+    {
+        Storage::fake('public');
+        Queue::fake();
+
+        $product = $this->productForUserBrand();
+        $file = UploadedFile::fake()->image('new-product-image.png');
+        $oldFile = $product->image_path;
+
+        $this->updateProduct($product, ['product_image' => $file])->assertStatus(200);
+
+        $this->assertNotEquals($oldFile, $product->fresh()->image_path);
+        Storage::disk('public')->assertExists($product->fresh()->image_path);
+        $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->fresh()->image_path));
+    }
+
+    /** @test */
+    public function an_image_optimizer_job_is_queued_when_a_product_is_edited_with_a_new_image()
+    {
+        Storage::fake('public');
+        Queue::fake();
+        $product = $this->productForUserBrand();
+
+        $this->updateProduct($product, ['product_image' => UploadedFile::fake()->image('new-product-image.png')])->assertStatus(200);
+
+        Queue::assertPushed(ProcessProductModelImage::class, function ($job) use ($product) {
+            return $job->model->is($product->model);
+        });
+    }
+
+    /** @test */
+    public function an_image_optimizer_job_is_not_queued_when_a_product_is_edited_without_a_new_image()
+    {
+        Queue::fake();
+        $product = $this->productForUserBrand();
+
+        $this->updateProduct($product, [])->assertStatus(200);
+
+        Queue::assertNotPushed(ProcessProductModelImage::class);
     }
 
     /** @test */
@@ -520,6 +566,19 @@ class EditProductTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes.attribute');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function product_image_must_be_an_image()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'product_image' => UploadedFile::fake()->create('not-an-image.pdf')
+        ]);
+
+        $this->assertValidationError($response, 'product_image');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 }

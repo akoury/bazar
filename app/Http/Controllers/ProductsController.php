@@ -7,7 +7,6 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\ProductModel;
 use App\Http\Requests\ProductRequest;
-use App\Jobs\ProcessProductModelImage;
 
 class ProductsController extends Controller
 {
@@ -63,8 +62,6 @@ class ProductsController extends Controller
 
         $request->addProductsToModel($model);
 
-        ProcessProductModelImage::dispatch($model);
-
         return response()->json($model->url(), 201);
     }
 
@@ -91,6 +88,7 @@ class ProductsController extends Controller
             'name'        => $request->name,
             'description' => $request->description,
             'published'   => $request->published,
+            'image_path'  => $request->has('product_image') ? $request->product_image->store('products', 'public') : $model->image_path,
         ]);
 
         $request->addProductsToModel($model);
