@@ -49,7 +49,8 @@ class ProductRequest extends FormRequest
             'name'                     => 'required',
             'description'              => 'required',
             'published'                => 'boolean|required',
-            'product_image'            => 'sometimes|required|image',
+            'product_images'           => 'sometimes|array|min:1',
+            'product_images.*'         => 'image',
             'products'                 => 'required|array',
             'products.*.price'         => 'required|numeric|min:0',
             'products.*.item_quantity' => 'required|integer|min:0',
@@ -85,7 +86,7 @@ class ProductRequest extends FormRequest
             }
         }
 
-        if ($this->has('product_image')) {
+        if ($this->has('product_images')) {
             ProcessProductModelImage::dispatch($model);
         }
     }

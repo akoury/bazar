@@ -58,11 +58,11 @@ class CreateProductModelTest extends TestCase
         $brand = $this->brandForSignedInUser();
 
         $response = $this->json('POST', route('product-models.store', $brand), [
-            'name'          => 'iPhone 8',
-            'description'   => 'The new iPhone',
-            'published'     => true,
-            'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => json_encode([
+            'name'           => 'iPhone 8',
+            'description'    => 'The new iPhone',
+            'published'      => true,
+            'product_images' => [UploadedFile::fake()->image('product-image.png')],
+            'products'       => json_encode([
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
@@ -84,7 +84,44 @@ class CreateProductModelTest extends TestCase
     }
 
     /** @test */
-    public function a_product_can_have_attributes_associated_to_it()
+    public function a_user_can_add_multiple_products_from_the_same_model_to_his_brand()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('product-models.store', $brand), [
+            'name'           => 'iPhone 8',
+            'description'    => 'The new iPhone',
+            'published'      => true,
+            'product_images' => [UploadedFile::fake()->image('product-image.png')],
+            'products'       => json_encode([
+                [
+                    'price'         => '700.50',
+                    'item_quantity' => 2
+                ],
+                [
+                    'price'         => '200.50',
+                    'item_quantity' => 0
+                ],
+            ]),
+        ]);
+
+        $model = ProductModel::first();
+
+        $response->assertStatus(201)
+            ->assertJsonFragment([$model->url()]);
+
+        $this->assertEquals('iPhone 8', $model->name);
+        $this->assertEquals('The new iPhone', $model->description);
+        $this->assertTrue($model->published);
+        $this->assertTrue($model->brand->is($brand));
+        $this->assertEquals(70050, $model->products->first()->price);
+        $this->assertEquals(2, $model->products->first()->itemsRemaining());
+        $this->assertEquals(20050, $model->products->last()->price);
+        $this->assertEquals(0, $model->products->last()->itemsRemaining());
+    }
+
+    /** @test */
+    public function a_user_can_add_products_with_attributes_associated_to_it()
     {
         $brand = $this->brandForSignedInUser();
 
@@ -125,51 +162,14 @@ class CreateProductModelTest extends TestCase
         $this->assertEquals('capacity', $products->last()->values->last()->attribute->name);
     }
 
-    /** @test */
-    public function a_user_can_add_multiple_products_from_the_same_model_to_his_brand()
-    {
-        $brand = $this->brandForSignedInUser();
-
-        $response = $this->json('POST', route('product-models.store', $brand), [
-            'name'          => 'iPhone 8',
-            'description'   => 'The new iPhone',
-            'published'     => true,
-            'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => json_encode([
-                [
-                    'price'         => '700.50',
-                    'item_quantity' => 2
-                ],
-                [
-                    'price'         => '200.50',
-                    'item_quantity' => 0
-                ],
-            ]),
-        ]);
-
-        $model = ProductModel::first();
-
-        $response->assertStatus(201)
-            ->assertJsonFragment([$model->url()]);
-
-        $this->assertEquals('iPhone 8', $model->name);
-        $this->assertEquals('The new iPhone', $model->description);
-        $this->assertTrue($model->published);
-        $this->assertTrue($model->brand->is($brand));
-        $this->assertEquals(70050, $model->products->first()->price);
-        $this->assertEquals(2, $model->products->first()->itemsRemaining());
-        $this->assertEquals(20050, $model->products->last()->price);
-        $this->assertEquals(0, $model->products->last()->itemsRemaining());
-    }
-
     private function validParams($overrides = [])
     {
         $params = array_replace_recursive([
-            'name'          => 'iPhone 8',
-            'description'   => 'The new iPhone',
-            'published'     => true,
-            'product_image' => UploadedFile::fake()->image('product-image.png'),
-            'products'      => [
+            'name'           => 'iPhone 8',
+            'description'    => 'The new iPhone',
+            'published'      => true,
+            'product_images' => [UploadedFile::fake()->image('product-image.png')],
+            'products'       => [
                 [
                     'price'         => '700.50',
                     'item_quantity' => 2,
@@ -206,20 +206,41 @@ class CreateProductModelTest extends TestCase
     }
 
     /** @test */
-    public function product_image_is_uploaded()
+    public function product_images_are_uploaded_when_creating_a_product()
     {
         Queue::fake();
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
 
         $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
-            'product_image' => $file
+            'product_images' => [$file]
         ]));
         $product = Product::first();
 
         $this->assertNotNull($product->image_path);
         Storage::disk('public')->assertExists($product->image_path);
         $this->assertFileEquals($file->getPathname(), Storage::disk('public')->path($product->image_path));
+    }
+
+    /** @test */
+    public function a_user_can_add_a_product_with_multiple_images()
+    {
+        Queue::fake();
+        $brand = $this->brandForSignedInUser();
+        $files = [UploadedFile::fake()->image('product-image.png'), UploadedFile::fake()->image('product-image-2.png')];
+
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
+            'product_images' => $files
+        ]));
+
+        $product = Product::first();
+
+        $response->assertStatus(201)
+            ->assertJsonFragment([$product->model->url()]);
+
+        $this->assertNotNull($product->image_path);
+        Storage::disk('public')->assertExists($product->image_path);
+        $this->assertFileEquals($files[0]->getPathname(), Storage::disk('public')->path($product->image_path));
     }
 
     /** @test */
@@ -406,29 +427,62 @@ class CreateProductModelTest extends TestCase
     }
 
     /** @test */
-    public function product_image_must_be_an_image()
+    public function product_images_are_required_to_create_a_product()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
+            'product_images' => null
+        ]));
+
+        $this->assertValidationError($response, 'product_images');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function product_images_must_be_an_array()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
+            'product_images' => 'not-an-array'
+        ]));
+
+        $this->assertValidationError($response, 'product_images');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function product_images_must_have_at_least_one_image()
+    {
+        $brand = $this->brandForSignedInUser();
+
+        $response = $this->json('POST', route('product-models.store', $brand), [
+            'name'           => 'iPhone 8',
+            'description'    => 'The new iPhone',
+            'published'      => true,
+            'product_images' => [],
+            'products'       => json_encode([[
+                'price'         => '700.50',
+                'item_quantity' => 2,
+            ]])
+        ]);
+
+        $this->assertValidationError($response, 'product_images');
+        $this->assertEquals(0, Product::count());
+    }
+
+    /** @test */
+    public function product_images_contents_must_be_an_image()
     {
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->create('not-an-image.pdf');
 
         $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
-            'product_image' => $file
+            'product_images' => [UploadedFile::fake()->create('not-an-image.pdf')]
         ]));
 
-        $this->assertValidationError($response, 'product_image');
-        $this->assertEquals(0, Product::count());
-    }
-
-    /** @test */
-    public function product_image_is_required_to_create_a_product()
-    {
-        $brand = $this->brandForSignedInUser();
-
-        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
-            'product_image' => null
-        ]));
-
-        $this->assertValidationError($response, 'product_image');
+        $this->assertValidationError($response, 'product_images.0');
         $this->assertEquals(0, Product::count());
     }
 

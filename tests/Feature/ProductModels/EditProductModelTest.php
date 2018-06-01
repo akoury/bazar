@@ -234,7 +234,7 @@ class EditProductModelTest extends TestCase
         Storage::disk('public')->putFileAs('', UploadedFile::fake()->image($oldFilePath), $oldFilePath);
 
         $newFile = UploadedFile::fake()->image('new-product-image.png');
-        $this->updateProduct($product, ['product_image' => $newFile])->assertStatus(200);
+        $this->updateProduct($product, ['product_images' => [$newFile]])->assertStatus(200);
 
         $this->assertNotEquals($oldFilePath, $product->fresh()->image_path);
         Storage::disk('public')->assertExists($product->fresh()->image_path);
@@ -249,7 +249,7 @@ class EditProductModelTest extends TestCase
         Queue::fake();
         $product = $this->productForUserBrand();
 
-        $this->updateProduct($product, ['product_image' => UploadedFile::fake()->image('new-product-image.png')])->assertStatus(200);
+        $this->updateProduct($product, ['product_images' => [UploadedFile::fake()->image('new-product-image.png')]])->assertStatus(200);
 
         Queue::assertPushed(ProcessProductModelImage::class, function ($job) use ($product) {
             return $job->model->is($product->model);
@@ -572,15 +572,41 @@ class EditProductModelTest extends TestCase
     }
 
     /** @test */
-    public function product_image_must_be_an_image()
+    public function product_images_must_be_an_array_if_present()
     {
         $product = $this->productForUserBrand();
 
         $response = $this->updateProduct($product, [
-            'product_image' => UploadedFile::fake()->create('not-an-image.pdf')
+            'product_images' => 'not-an-array'
         ]);
 
-        $this->assertValidationError($response, 'product_image');
+        $this->assertValidationError($response, 'product_images');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function product_images_must_have_at_least_one_image_when_present()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'product_images' => []
+        ]);
+
+        $this->assertValidationError($response, 'product_images');
+        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+    }
+
+    /** @test */
+    public function product_images_contents_must_be_an_image()
+    {
+        $product = $this->productForUserBrand();
+
+        $response = $this->updateProduct($product, [
+            'product_images' => [UploadedFile::fake()->create('not-an-image.pdf')]
+        ]);
+
+        $this->assertValidationError($response, 'product_images.0');
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 }

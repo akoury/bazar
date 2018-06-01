@@ -36,7 +36,7 @@ class ProductModelsController extends Controller
             'description' => $request->description,
             'published'   => $request->published,
             'brand_id'    => $brand->id,
-            'image_path'  => $request->product_image->store('products', 'public'),
+            'image_path'  => $request->product_images[0]->store('products', 'public'),
         ]);
 
         $request->addProductsToModel($model);
@@ -61,7 +61,7 @@ class ProductModelsController extends Controller
 
         auth()->user()->brands()->findOrFail($model->brand_id);
 
-        if ($request->has('product_image')) {
+        if ($request->has('product_images')) {
             Storage::disk('public')->delete($model->image_path);
         }
 
@@ -69,7 +69,7 @@ class ProductModelsController extends Controller
             'name'        => $request->name,
             'description' => $request->description,
             'published'   => $request->published,
-            'image_path'  => $request->has('product_image') ? $request->product_image->store('products', 'public') : $model->image_path,
+            'image_path'  => $request->has('product_images') ? $request->product_images[0]->store('products', 'public') : $model->image_path,
         ]);
 
         $request->addProductsToModel($model);

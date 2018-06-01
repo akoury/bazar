@@ -16904,7 +16904,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         return {
             model: this.dataModel,
             attributes: [],
-            product_image: null
+            product_images: null
         };
     },
     created: function created() {
@@ -16939,8 +16939,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('description', this.model.description);
             formData.append('published', this.model.published ? 1 : 0);
 
-            if (this.product_image) {
-                formData.append('product_image', this.product_image);
+            if (this.product_images) {
+                formData.append('product_images', this.product_images);
             }
 
             var products = [];
@@ -16961,7 +16961,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return formData;
         },
         onImageChange: function onImageChange(e) {
-            this.product_image = e.target.files[0];
+            this.product_images = e.target.files[0];
         },
         addAttributeSlot: function addAttributeSlot() {
             if (this.attributes.length < 4) {
@@ -17259,7 +17259,7 @@ var render = function() {
               {
                 staticClass:
                   "uppercase tracking-wide text-teal-light text-sm font-bold mb-2 block",
-                attrs: { for: "product_image" }
+                attrs: { for: "product_images" }
               },
               [_vm._v("Product Image")]
             ),
@@ -17269,20 +17269,20 @@ var render = function() {
                 {
                   name: "show",
                   rawName: "v-show",
-                  value: !_vm.product_image,
-                  expression: "!product_image"
+                  value: !_vm.product_images,
+                  expression: "!product_images"
                 }
               ],
               attrs: {
                 src: "http://bazar.test/" + _vm.model.image_path,
-                alt: "product_image",
+                alt: "product_images",
                 width: "100"
               }
             }),
             _vm._v(" "),
             _c("input", {
               staticClass: "mb-6",
-              attrs: { type: "file", id: "product_image" },
+              attrs: { type: "file", id: "product_images" },
               on: { change: _vm.onImageChange }
             })
           ])
@@ -18249,6 +18249,18 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -18260,7 +18272,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             name: '',
             description: '',
             published: true,
-            product_image: null,
+            product_images: [],
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
@@ -18286,7 +18298,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('name', this.name);
             formData.append('description', this.description);
             formData.append('published', this.published ? 1 : 0);
-            formData.append('product_image', this.product_image);
+
+            this.product_images.map(function (image, index) {
+                return formData.append('product_images[' + index + ']', image.content);
+            });
 
             var products = this.products;
             if (products.length === 1) {
@@ -18309,8 +18324,25 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('products', JSON.stringify(products));
             return formData;
         },
-        onImageChange: function onImageChange(e) {
-            this.product_image = e.target.files[0];
+        onImagesChange: function onImagesChange(e) {
+            var files = e.target.files;
+            var vm = this;
+
+            for (var index = 0; index < files.length; index++) {
+                if (/\.(jpe?g|png|gif)$/i.test(files[index].name)) {
+                    var preview = URL.createObjectURL(files[index]);
+                    vm.product_images.push({ content: files[index], preview: preview });
+                }
+            }
+        },
+        removeImage: function removeImage(index) {
+            this.product_images.splice(index, 1);
+        },
+        removeFromMemory: function removeFromMemory(object) {
+            URL.revokeObjectURL(object);
+        },
+        toggleHoverStyles: function toggleHoverStyles(event) {
+            event.target.parentElement.classList.toggle('bg-grey-light');
         },
         changeAttribute: function changeAttribute(index) {
             Vue.set(this.selectedValues, index, []);
@@ -18513,24 +18545,78 @@ var render = function() {
         ),
         _vm._v(" "),
         _c(
+          "span",
+          {
+            staticClass:
+              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2"
+          },
+          [_vm._v("Product Images")]
+        ),
+        _vm._v(" "),
+        _c(
           "label",
           {
             staticClass:
-              "uppercase tracking-wide text-teal-light text-sm font-bold mb-2",
-            attrs: { for: "product_image" }
+              "border border-2 border-grey-light border-dashed hover:bg-grey-light w-full h-32 rounded relative flex items-center justify-center",
+            attrs: { for: "product_images" }
           },
-          [_vm._v("Product Image")]
+          [
+            _c("span", { staticClass: "text-grey-darker text-lg" }, [
+              _vm._v("Drop images here or click to choose")
+            ]),
+            _vm._v(" "),
+            _c("input", {
+              staticClass:
+                "cursor-pointer absolute opacity-0 pin w-full h-full",
+              attrs: {
+                type: "file",
+                multiple: "",
+                accept: "image/*",
+                id: "product_images"
+              },
+              on: {
+                change: _vm.onImagesChange,
+                dragenter: _vm.toggleHoverStyles,
+                dragleave: _vm.toggleHoverStyles,
+                drop: _vm.toggleHoverStyles
+              }
+            })
+          ]
         ),
         _vm._v(" "),
-        _c("input", {
-          staticClass: "mb-6",
-          attrs: { type: "file", id: "product_image" },
-          on: { change: _vm.onImageChange }
+        _vm._l(_vm.product_images, function(image, index) {
+          return _c("div", { key: image.content.name, staticClass: "mt-2" }, [
+            _c("img", {
+              attrs: { src: image.preview, width: "75px", height: "75px" },
+              on: {
+                load: function($event) {
+                  _vm.removeFromMemory(image.preview)
+                }
+              }
+            }),
+            _vm._v(
+              "\n            " + _vm._s(image.content.name) + "\n            "
+            ),
+            _c(
+              "button",
+              {
+                staticClass:
+                  "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
+                attrs: { type: "button" },
+                on: {
+                  click: function($event) {
+                    _vm.removeImage(index)
+                  }
+                }
+              },
+              [_vm._v("×")]
+            )
+          ])
         }),
         _vm._v(" "),
         _c(
           "div",
-          { staticClass: "mb-6" },
+          { staticClass: "my-6" },
           [
             _c(
               "h4",

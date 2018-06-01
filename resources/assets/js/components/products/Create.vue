@@ -14,11 +14,23 @@
                 <input type="checkbox" v-model="published">Publish
             </label>
 
-            <label for="product_image" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Image</label>
-            <input type="file" @change="onImageChange" id="product_image" class="mb-6">
+            <span class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Images</span>
+            <label for="product_images" class="border border-2 border-grey-light border-dashed hover:bg-grey-light w-full h-32 rounded relative flex items-center justify-center">
+                <span class="text-grey-darker text-lg">Drop images here or click to choose</span>
+                <input type="file" multiple accept="image/*" @change="onImagesChange" id="product_images" class="cursor-pointer absolute opacity-0 pin w-full h-full"
+                    @dragenter="toggleHoverStyles"
+                    @dragleave="toggleHoverStyles"
+                    @drop="toggleHoverStyles">
+            </label>
+
+            <div class="mt-2" v-for="(image, index) in product_images" :key="image.content.name">
+                <img :src="image.preview" width="75px" height="75px" @load="removeFromMemory(image.preview)"/>
+                {{ image.content.name }}
+                <button type="button" @click="removeImage(index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+            </div>
 
 
-            <div class="mb-6">
+            <div class="my-6">
                 <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Attributes</h4>
                 <div v-for="(n, index) in numberOfAttributes" :key="index" class="flex">
                     <multiselect
@@ -87,7 +99,7 @@ export default {
             name: '',
             description: '',
             published: true,
-            product_image: null,
+            product_images: [],
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
@@ -113,7 +125,8 @@ export default {
             formData.append('name', this.name)
             formData.append('description', this.description)
             formData.append('published', this.published ? 1 : 0)
-            formData.append('product_image', this.product_image)
+
+            this.product_images.map((image, index) => formData.append('product_images[' + index + ']', image.content))
 
             let products = this.products
             if (products.length === 1) {
@@ -132,8 +145,25 @@ export default {
             formData.append('products', JSON.stringify(products))
             return formData
         },
-        onImageChange(e) {
-            this.product_image = e.target.files[0]
+        onImagesChange(e) {
+            let files = e.target.files
+            let vm = this
+
+            for (let index = 0; index < files.length; index++) {
+                if (/\.(jpe?g|png|gif)$/i.test(files[index].name)) {
+                    let preview = URL.createObjectURL(files[index])
+                    vm.product_images.push({ content: files[index], preview: preview })
+                }
+            }
+        },
+        removeImage(index) {
+            this.product_images.splice(index, 1)
+        },
+        removeFromMemory(object) {
+            URL.revokeObjectURL(object)
+        },
+        toggleHoverStyles(event) {
+            event.target.parentElement.classList.toggle('bg-grey-light')
         },
         changeAttribute(index) {
             Vue.set(this.selectedValues, index, [])

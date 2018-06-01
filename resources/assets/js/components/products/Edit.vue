@@ -17,9 +17,9 @@
                     </label>
                 </div>
                 <div class="ml-4">
-                    <label for="product_image" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 block">Product Image</label>
-                    <img :src="'http://bazar.test/' + model.image_path" alt="product_image" width="100" v-show="!product_image">
-                    <input type="file" @change="onImageChange" id="product_image" class="mb-6">
+                    <label for="product_images" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 block">Product Image</label>
+                    <img :src="'http://bazar.test/' + model.image_path" alt="product_images" width="100" v-show="!product_images">
+                    <input type="file" @change="onImageChange" id="product_images" class="mb-6">
                 </div>
             </div>
 
@@ -89,7 +89,7 @@ export default {
         return {
             model: this.dataModel,
             attributes: [],
-            product_image: null
+            product_images: null
         }
     },
     created() {
@@ -120,8 +120,8 @@ export default {
             formData.append('description', this.model.description)
             formData.append('published', this.model.published ? 1 : 0)
 
-            if (this.product_image) {
-                formData.append('product_image', this.product_image)
+            if (this.product_images) {
+                formData.append('product_images', this.product_images)
             }
 
             let products = []
@@ -140,7 +140,7 @@ export default {
             return formData
         },
         onImageChange(e) {
-            this.product_image = e.target.files[0]
+            this.product_images = e.target.files[0]
         },
         addAttributeSlot() {
             if (this.attributes.length < 4) {
