@@ -36,7 +36,7 @@ class Product extends Model
 
     public function model()
     {
-        return $this->belongsTo(ProductModel::class, 'product_model_id');
+        return $this->belongsTo(ProductModel::class, 'product_model_id')->withTrashed();
     }
 
     public function price()

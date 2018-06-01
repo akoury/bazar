@@ -75,6 +75,7 @@
             <button type="button" @click="addProduct" class="bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4">Add Product</button>
             <button type="submit" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded mb-4">Edit</button>
         </form>
+        <button @click="removeProductModel" type="button" class="bg-red hover:bg-red-dark text-white py-4 px-4 w-full rounded mb-4">Delete Model</button>
     </div>
 </template>
 
@@ -99,7 +100,7 @@ export default {
         updateProduct() {
             if (this.fieldsFilled) {
                 axios
-                    .post('/products/' + this.model.id, this.formData())
+                    .post('/models/' + this.model.id, this.formData())
                     .then(response => {
                         Turbolinks.visit(response.data)
                     })
@@ -212,6 +213,19 @@ export default {
                 return attribute.values.map(val => val.name)
             }
             return []
+        },
+        removeProductModel() {
+            axios
+                .delete('/models/' + this.model.id)
+                .then(response => {
+                    Turbolinks.visit(response.data)
+                })
+                .catch(error => {
+                    if (error.response.status === 401 || error.response.status === 419) {
+                        Turbolinks.visit(window.location)
+                    }
+                    console.log(error.response.data)
+                })
         }
     },
     computed: {

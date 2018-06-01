@@ -31,7 +31,7 @@
             </div>
         </fieldset>
 
-        <div v-if="selectedProduct.item_quantity > 0">
+        <div v-if="selectedProduct.item_quantity > 0 && selectedProduct.deleted_at == null">
             <form @submit.prevent="order">
                 <label for="quantity" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">
                     Quantity

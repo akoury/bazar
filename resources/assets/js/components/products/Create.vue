@@ -97,7 +97,7 @@ export default {
     methods: {
         createProduct() {
             axios
-                .post('/brands/' + this.brandId + '/products', this.formData())
+                .post('/brands/' + this.brandId + '/models', this.formData())
                 .then(response => {
                     Turbolinks.visit(response.data)
                 })

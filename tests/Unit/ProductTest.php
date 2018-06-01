@@ -160,4 +160,12 @@ class ProductTest extends TestCase
 
         $this->fail('Reserving items succeeded even though the items were already reserved');
     }
+
+    /** @test */
+    public function can_get_the_products_url()
+    {
+        $product = $this->create('Product');
+
+        $this->assertEquals($product->url(), route('products.show', [$product->brand_id, $product->id]));
+    }
 }

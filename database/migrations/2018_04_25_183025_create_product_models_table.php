@@ -21,6 +21,7 @@ class CreateProductModelsTable extends Migration
             $table->boolean('published')->default(false);
             $table->string('image_path');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

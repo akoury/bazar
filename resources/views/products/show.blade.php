@@ -4,7 +4,7 @@
 
 @section('content')
     @auth
-        <a href="{{ route('products.edit', $product->product_model_id) }}">Edit</a>
+        <a href="{{ route('product-models.edit', $product->product_model_id) }}">Edit</a>
         <h2>Sold: {{ $product->itemsSold() }}</h2>
         <h2>Revenue: {{ $product->revenue() }}</h2>
         <h2>Items Remaining: {{ $product->item_quantity }}</h2>

@@ -18,7 +18,7 @@ class RemoveProductTest extends TestCase
         $this->json('DELETE', route('products.destroy', $product->id))
             ->assertStatus(401);
 
-        $this->assertNotNull($product->fresh());
+        $this->assertFalse($product->fresh()->trashed());
     }
 
     /** @test */
@@ -27,10 +27,10 @@ class RemoveProductTest extends TestCase
         $this->signIn();
         $product = $this->create('Product');
 
-        $response = $this->json('DELETE', route('products.destroy', $product->id));
+        $this->json('DELETE', route('products.destroy', $product->id))
+            ->assertStatus(404);
 
-        $response->assertStatus(404);
-        $this->assertNotNull($product->fresh());
+        $this->assertFalse($product->fresh()->trashed());
     }
 
     /** @test */
@@ -41,11 +41,9 @@ class RemoveProductTest extends TestCase
             'brand_id' => $brand->id
         ])->addItems(4);
 
-        $item = $product->items->first();
+        $this->json('DELETE', route('products.destroy', $product->id))
+            ->assertStatus(200);
 
-        $response = $this->json('DELETE', route('products.destroy', $product->id));
-
-        $response->assertStatus(200);
         $this->assertTrue($product->fresh()->trashed());
         $this->assertEquals(0, Product::withTrashed()->findOrFail($product->id)->itemsRemaining());
     }
@@ -58,7 +56,8 @@ class RemoveProductTest extends TestCase
             'brand_id' => $brand->id
         ]);
 
-        $response = $this->json('DELETE', route('products.destroy', $product->id));
+        $this->json('DELETE', route('products.destroy', $product->id))
+            ->assertStatus(200);
 
         $this->assertFalse($product->model->published);
     }

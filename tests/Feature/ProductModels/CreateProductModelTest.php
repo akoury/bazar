@@ -13,7 +13,7 @@ use App\Jobs\ProcessProductModelImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class CreateProductTest extends TestCase
+class CreateProductModelTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -28,9 +28,8 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->get(route('products.create', $brand));
-
-        $response->assertStatus(200);
+        $this->get(route('product-models.create', $brand))
+            ->assertStatus(200);
     }
 
     /** @test */
@@ -39,9 +38,8 @@ class CreateProductTest extends TestCase
         $this->signIn();
         $brand = $this->create('Brand');
 
-        $response = $this->get(route('products.create', $brand));
-
-        $response->assertStatus(404);
+        $this->get(route('product-models.create', $brand))
+            ->assertStatus(404);
     }
 
     /** @test */
@@ -49,7 +47,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $this->get(route('products.create', $brand))
+        $this->get(route('product-models.create', $brand))
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -59,7 +57,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), [
+        $response = $this->json('POST', route('product-models.store', $brand), [
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'published'     => true,
@@ -93,7 +91,7 @@ class CreateProductTest extends TestCase
         $attributeA = $this->create('Attribute', 1, ['name' => 'COLOR']);
         $attributeB = $this->create('Attribute', 1, ['name' => 'capacity']);
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 [
                     'price'         => '700.50',
@@ -132,7 +130,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), [
+        $response = $this->json('POST', route('product-models.store', $brand), [
             'name'          => 'iPhone 8',
             'description'   => 'The new iPhone',
             'published'     => true,
@@ -190,7 +188,7 @@ class CreateProductTest extends TestCase
         $this->signIn();
         $brand = $this->create('Brand');
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams());
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams());
 
         $response->assertStatus(404);
         $this->assertEquals(0, Product::count());
@@ -201,7 +199,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->create('Brand');
 
-        $this->json('POST', route('products.store', $brand), $this->validParams())
+        $this->json('POST', route('product-models.store', $brand), $this->validParams())
             ->assertStatus(401);
 
         $this->assertEquals(0, Product::count());
@@ -214,7 +212,7 @@ class CreateProductTest extends TestCase
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
         $product = Product::first();
@@ -230,7 +228,7 @@ class CreateProductTest extends TestCase
         Queue::fake();
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams());
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams());
 
         $model = ProductModel::first();
 
@@ -244,7 +242,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'name' => ''
         ]));
 
@@ -257,7 +255,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'description' => ''
         ]));
 
@@ -270,7 +268,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'published' => '',
         ]));
 
@@ -283,7 +281,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'published' => 'not-a-boolean'
         ]));
 
@@ -296,7 +294,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => ''
         ]));
 
@@ -309,7 +307,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => 'not-an-array'
         ]));
 
@@ -322,7 +320,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['price' => '']
             ]
@@ -337,7 +335,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['price' => 'not-numeric']
             ]
@@ -352,7 +350,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['price' => '-1']
             ]
@@ -367,7 +365,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '']
             ]
@@ -382,7 +380,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '1.3']
             ]
@@ -397,7 +395,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['item_quantity' => '-1']
             ]
@@ -413,7 +411,7 @@ class CreateProductTest extends TestCase
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->create('not-an-image.pdf');
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'product_image' => $file
         ]));
 
@@ -426,7 +424,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'product_image' => null
         ]));
 
@@ -439,7 +437,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['attributes' => '']
             ]
@@ -454,7 +452,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['attributes' => 'not-an-array']
             ]
@@ -469,7 +467,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['attributes' => [
                     'attribute1' => 'value1',
@@ -490,7 +488,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 [
                     'price'         => 2000,
@@ -518,7 +516,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['attributes' => [
                     'attribute' => '',
@@ -535,7 +533,7 @@ class CreateProductTest extends TestCase
     {
         $brand = $this->brandForSignedInUser();
 
-        $response = $this->json('POST', route('products.store', $brand), $this->validParams([
+        $response = $this->json('POST', route('product-models.store', $brand), $this->validParams([
             'products' => [
                 ['attributes' => [
                     'attribute' => 100,

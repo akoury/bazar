@@ -74,44 +74,42 @@ class ProductRequest extends FormRequest
         }
 
         foreach ($products as $product) {
-            if (isset($product['id'])) {
-                $newProduct = Product::findOrFail($product['id'])->setItemsRemaining($product['item_quantity']);
-                $newProduct->update([
-                    'price' => $product['price'] * 100,
-                ]);
-            } else {
-                $newProduct = Product::create([
-                    'product_model_id' => $model->id,
-                    'price'            => $product['price'] * 100,
-                ])->addItems($product['item_quantity']);
-            }
+            $newProduct = Product::updateOrCreate(['id' => $product['id'] ?? null], [
+                'product_model_id' => $model->id,
+                'price'            => $product['price'] * 100
+            ])->setItemsRemaining($product['item_quantity']);
 
             if (isset($product['attributes'])) {
-                $productValues = collect();
-
-                foreach ($product['attributes'] as $attributeName => $valueName) {
-                    $foundAttribute = $attributes->firstWhere('name', $attributeName);
-                    if (! $foundAttribute) {
-                        $foundAttribute = Attribute::create(['name' => $attributeName]);
-                        $attributes->push($foundAttribute);
-                    }
-
-                    $foundValue = $values->where('attribute_id', $foundAttribute->id)->firstWhere('name', $valueName);
-                    if (! $foundValue) {
-                        $foundValue = Value::create(['attribute_id' => $foundAttribute->id, 'name' => $valueName]);
-                        $values->push($foundValue);
-                    }
-
-                    $productValues->push($foundValue);
-                }
-
                 $newProduct->values()->detach();
-                $newProduct->values()->attach($productValues->pluck('id'));
+                $newProduct->values()->attach($this->getValues($product, $attributes, $values));
             }
         }
 
         if ($this->has('product_image')) {
             ProcessProductModelImage::dispatch($model);
         }
+    }
+
+    private function getValues($product, $attributes, $values)
+    {
+        $productValues = collect();
+
+        foreach ($product['attributes'] as $attributeName => $valueName) {
+            $foundAttribute = $attributes->firstWhere('name', $attributeName);
+            if (! $foundAttribute) {
+                $foundAttribute = Attribute::create(['name' => $attributeName]);
+                $attributes->push($foundAttribute);
+            }
+
+            $foundValue = $values->where('attribute_id', $foundAttribute->id)->firstWhere('name', $valueName);
+            if (! $foundValue) {
+                $foundValue = Value::create(['attribute_id' => $foundAttribute->id, 'name' => $valueName]);
+                $values->push($foundValue);
+            }
+
+            $productValues->push($foundValue);
+        }
+
+        return $productValues->pluck('id');
     }
 }

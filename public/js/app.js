@@ -16893,6 +16893,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
+//
 
 
 
@@ -16918,7 +16919,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     methods: {
         updateProduct: function updateProduct() {
             if (this.fieldsFilled) {
-                axios.post('/products/' + this.model.id, this.formData()).then(function (response) {
+                axios.post('/models/' + this.model.id, this.formData()).then(function (response) {
                     Turbolinks.visit(response.data);
                 }).catch(function (error) {
                     if (error.response.status === 401 || error.response.status === 419) {
@@ -17074,6 +17075,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 });
             }
             return [];
+        },
+        removeProductModel: function removeProductModel() {
+            axios.delete('/models/' + this.model.id).then(function (response) {
+                Turbolinks.visit(response.data);
+            }).catch(function (error) {
+                if (error.response.status === 401 || error.response.status === 419) {
+                    Turbolinks.visit(window.location);
+                }
+                console.log(error.response.data);
+            });
         }
     },
     computed: {
@@ -17514,6 +17525,17 @@ var render = function() {
           [_vm._v("Edit")]
         )
       ]
+    ),
+    _vm._v(" "),
+    _c(
+      "button",
+      {
+        staticClass:
+          "bg-red hover:bg-red-dark text-white py-4 px-4 w-full rounded mb-4",
+        attrs: { type: "button" },
+        on: { click: _vm.removeProductModel }
+      },
+      [_vm._v("Delete Model")]
     )
   ])
 }
@@ -17909,7 +17931,8 @@ var render = function() {
         ])
       }),
       _vm._v(" "),
-      _vm.selectedProduct.item_quantity > 0
+      _vm.selectedProduct.item_quantity > 0 &&
+      _vm.selectedProduct.deleted_at == null
         ? _c("div", [
             _c(
               "form",
@@ -18247,7 +18270,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
     methods: {
         createProduct: function createProduct() {
-            axios.post('/brands/' + this.brandId + '/products', this.formData()).then(function (response) {
+            axios.post('/brands/' + this.brandId + '/models', this.formData()).then(function (response) {
                 Turbolinks.visit(response.data);
             }).catch(function (error) {
                 if (error.response.status === 401 || error.response.status === 419) {

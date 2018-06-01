@@ -12,7 +12,7 @@ use App\Jobs\ProcessProductModelImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
-class EditProductTest extends TestCase
+class EditProductModelTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -56,7 +56,7 @@ class EditProductTest extends TestCase
 
     private function updateProduct($product, $overridenParams)
     {
-        return $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams($overridenParams));
+        return $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams($overridenParams));
     }
 
     /** @test */
@@ -65,7 +65,7 @@ class EditProductTest extends TestCase
         $brand = $this->brandForSignedInUser();
         $product = $this->createProductsForModel(['brand_id' => $brand]);
 
-        $response = $this->get(route('products.edit', $product->product_model_id));
+        $response = $this->get(route('product-models.edit', $product->product_model_id));
 
         $response->assertStatus(200);
     }
@@ -76,7 +76,7 @@ class EditProductTest extends TestCase
         $this->signIn();
         $product = $this->create('Product');
 
-        $response = $this->get(route('products.edit', $product->product_model_id));
+        $response = $this->get(route('product-models.edit', $product->product_model_id));
 
         $response->assertStatus(404);
     }
@@ -86,7 +86,7 @@ class EditProductTest extends TestCase
     {
         $product = $this->create('Product');
 
-        $this->get(route('products.edit', $product->product_model_id))
+        $this->get(route('product-models.edit', $product->product_model_id))
             ->assertStatus(302)
             ->assertRedirect(route('login'));
     }
@@ -104,7 +104,7 @@ class EditProductTest extends TestCase
             'brand_id'    => $brand->id
         ])->addItems(3);
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), [
+        $response = $this->json('PATCH', route('product-models.update', $product->product_model_id), [
             'name'        => 'New name',
             'description' => 'New description',
             'published'   => false,
@@ -273,7 +273,7 @@ class EditProductTest extends TestCase
         $this->signIn();
         $product = $this->createProductsForModel($this->oldAttributes());
 
-        $response = $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams());
+        $response = $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams());
 
         $response->assertStatus(404);
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -284,7 +284,7 @@ class EditProductTest extends TestCase
     {
         $product = $this->createProductsForModel($this->oldAttributes());
 
-        $this->json('PATCH', route('products.update', $product->product_model_id), $this->validParams())
+        $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams())
             ->assertStatus(401);
 
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));

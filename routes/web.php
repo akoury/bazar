@@ -8,12 +8,14 @@ Route::get('brands/create', 'BrandsController@create')->name('brands.create')->m
 Route::get('brands/{id}', 'BrandsController@show')->name('brands.show');
 Route::post('brands', 'BrandsController@store')->name('brands.store')->middleware('auth');
 
-Route::get('brands/{id}/products', 'ProductsController@index')->name('products.index');
-Route::get('brands/{id}/products/create', 'ProductsController@create')->name('products.create')->middleware('auth');
-Route::post('brands/{id}/products', 'ProductsController@store')->name('products.store')->middleware('auth');
+Route::get('brands/{id}/products', 'ProductModelsController@index')->name('product-models.index');
+Route::get('brands/{id}/products/create', 'ProductModelsController@create')->name('product-models.create')->middleware('auth');
+Route::post('brands/{id}/models', 'ProductModelsController@store')->name('product-models.store')->middleware('auth');
+Route::get('products/{id}/edit', 'ProductModelsController@edit')->name('product-models.edit')->middleware('auth');
+Route::patch('models/{id}', 'ProductModelsController@update')->name('product-models.update')->middleware('auth');
+Route::delete('models/{id}', 'ProductModelsController@destroy')->name('product-models.destroy')->middleware('auth');
+
 Route::get('brands/{brandId}/products/{id}', 'ProductsController@show')->name('products.show');
-Route::get('products/{id}/edit', 'ProductsController@edit')->name('products.edit')->middleware('auth');
-Route::patch('products/{id}', 'ProductsController@update')->name('products.update')->middleware('auth');
 Route::delete('products/{id}', 'ProductsController@destroy')->name('products.destroy')->middleware('auth');
 
 Route::get('cart', 'CartsController@show')->name('carts.show');

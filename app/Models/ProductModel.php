@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductModel extends Model
 {
+    use SoftDeletes;
+
     protected $guarded = [];
 
-    protected $casts = [
-        'published' => 'boolean',
-    ];
+    protected $casts = ['published' => 'boolean'];
+
+    protected $dates = ['deleted_at'];
 
     public function brand()
     {
@@ -32,9 +35,16 @@ class ProductModel extends Model
         return price($this->products->min('price'));
     }
 
+    public function scopeWithRelationships($query, $id)
+    {
+        return $query->findOrFail($id)->loadMissing(['products.items' => function ($query) {
+            $query->available();
+        }, 'products.values.attribute'])->loadItemQuantity();
+    }
+
     public function attributes()
     {
-        $values = $this->products->pluck('values')->flatten()->unique('id');
+        $values = $this->loadMissing('products.values.attribute')->products->pluck('values')->flatten()->unique('id');
 
         return $values->pluck('attribute')->unique('id')->map(function ($attribute) use ($values) {
             $attribute->setRelation('values', $values->where('attribute_id', $attribute->id)->values());

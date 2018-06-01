@@ -59,13 +59,24 @@ class ProductModelTest extends TestCase
     public function can_load_the_products_item_quantities()
     {
         $model = $this->create('ProductModel');
-        $product = $this->create('Product', 1, ['product_model_id' => $model->id])->addItems(1);
-        $product = $this->create('Product', 1, ['product_model_id' => $model->id])->addItems(3);
+        $this->create('Product', 1, ['product_model_id' => $model->id])->addItems(1);
+        $this->create('Product', 1, ['product_model_id' => $model->id])->addItems(3);
 
         $model->loadItemQuantity();
 
         $this->assertEquals(1, $model->products->first()->item_quantity);
         $this->assertEquals(3, $model->products->last()->item_quantity);
         $this->assertArrayNotHasKey('items', $model->products->first()->toArray());
+    }
+
+    /** @test */
+    public function can_get_the_models_url_for_the_product_with_the_lowest_price()
+    {
+        $model = $this->create('ProductModel');
+        $productA = $this->create('Product', 1, ['product_model_id' => $model->id, 'price' => 300]);
+        $productB = $this->create('Product', 1, ['product_model_id' => $model->id, 'price' => 100]);
+        $productC = $this->create('Product', 1, ['product_model_id' => $model->id, 'price' => 200]);
+
+        $this->assertEquals($model->url(), route('products.show', [$model->brand_id, $productB->id]));
     }
 }

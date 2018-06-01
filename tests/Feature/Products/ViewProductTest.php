@@ -3,7 +3,6 @@
 namespace Tests\Feature\Products;
 
 use Tests\TestCase;
-use App\Models\Brand;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -44,40 +43,23 @@ class ViewProductTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_view_a_brands_published_product_models()
-    {
-        $brand = $this->create('Brand');
-
-        $productA = $this->createProductsForModel([
-            'name'      => 'iPhone X',
-            'published' => true,
-            'brand_id'  => $brand->id
-        ]);
-
-        $productB = $this->createProductsForModel([
-            'name'      => 'iPhone 8',
-            'published' => false,
-            'brand_id'  => $brand->id
-        ]);
-
-        $models = $brand->models()->wherePublished(true)->get();
-
-        $this->get(route('products.index', $brand))
-            ->assertStatus(200)
-            ->assertViewHas('models', function ($viewModels) use ($models) {
-                return $this->assertCollectionsAreEqual($viewModels, $models);
-            })
-            ->assertSee('iPhone X')
-            ->assertDontSee('iPhone 8');
-    }
-
-    /** @test */
     public function a_customer_can_view_a_deleted_product_even_if_its_model_is_not_published()
     {
         $product = $this->create('Product');
         $product->delete();
         $product->model->published = false;
         $product->model->save();
+
+        $this->get(route('products.show', [$product->brand_id, $product]))
+            ->assertStatus(200);
+    }
+
+    /** @test */
+    public function a_customer_can_view_a_deleted_product_even_if_its_model_is_deleted()
+    {
+        $product = $this->create('Product');
+        $product->delete();
+        $product->model->delete();
 
         $this->get(route('products.show', [$product->brand_id, $product]))
             ->assertStatus(200);
