@@ -15,20 +15,18 @@
             </label>
 
             <span class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Images</span>
-            <label for="product_images" class="border border-2 border-grey-light border-dashed hover:bg-grey-light w-full h-32 rounded relative flex items-center justify-center">
-                <span class="text-grey-darker text-lg">Drop images here or click to choose</span>
-                <input type="file" multiple accept="image/*" @change="onImagesChange" id="product_images" class="cursor-pointer absolute opacity-0 pin w-full h-full"
-                    @dragenter="toggleHoverStyles"
-                    @dragleave="toggleHoverStyles"
-                    @drop="toggleHoverStyles">
-            </label>
-
-            <div class="mt-2" v-for="(image, index) in product_images" :key="image.content.name">
-                <img :src="image.preview" width="75px" height="75px" @load="removeFromMemory(image.preview)"/>
-                {{ image.content.name }}
-                <button type="button" @click="removeImage(index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
-            </div>
-
+            <file-pond
+                name="product_images"
+                ref="pond"
+                label-idle="Drop files here or click to select..."
+                required="true"
+                allow-multiple="true"
+                dropOnPage="true"
+                dropOnElement="false"
+                allowImagePreview="true"
+                imagePreviewHeight="75"
+                accepted-file-types="image/*"
+                maxFileSize="10MB"/>
 
             <div class="my-6">
                 <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Attributes</h4>
@@ -91,8 +89,17 @@
 <script>
 import Multiselect from 'vue-multiselect'
 
+import vueFilePond from 'vue-filepond'
+import 'filepond/dist/filepond.min.css'
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
+import FilepondPluginImagePreview from 'filepond-plugin-image-preview'
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+import FilepondPluginFileValidateSize from 'filepond-plugin-file-validate-size'
+
+const FilePond = vueFilePond(FilePondPluginFileValidateType, FilepondPluginImagePreview, FilepondPluginFileValidateSize)
+
 export default {
-    components: { Multiselect },
+    components: { Multiselect, FilePond },
     props: ['brandId', 'attributes'],
     data() {
         return {
@@ -126,7 +133,10 @@ export default {
             formData.append('description', this.description)
             formData.append('published', this.published ? 1 : 0)
 
-            this.product_images.map((image, index) => formData.append('product_images[' + index + ']', image.content))
+            this.$refs.pond
+                .getFiles()
+                .filter(file => file.status === 2)
+                .map((file, index) => formData.append('product_images[' + index + ']', file.file))
 
             let products = this.products
             if (products.length === 1) {
@@ -144,26 +154,6 @@ export default {
 
             formData.append('products', JSON.stringify(products))
             return formData
-        },
-        onImagesChange(e) {
-            let files = e.target.files
-            let vm = this
-
-            for (let index = 0; index < files.length; index++) {
-                if (/\.(jpe?g|png|gif)$/i.test(files[index].name)) {
-                    let preview = URL.createObjectURL(files[index])
-                    vm.product_images.push({ content: files[index], preview: preview })
-                }
-            }
-        },
-        removeImage(index) {
-            this.product_images.splice(index, 1)
-        },
-        removeFromMemory(object) {
-            URL.revokeObjectURL(object)
-        },
-        toggleHoverStyles(event) {
-            event.target.parentElement.classList.toggle('bg-grey-light')
         },
         changeAttribute(index) {
             Vue.set(this.selectedValues, index, [])

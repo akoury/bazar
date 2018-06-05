@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 76);
+/******/ 	return __webpack_require__(__webpack_require__.s = 78);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -97,7 +97,7 @@ module.exports = g;
 "use strict";
 
 
-var enumerate = __webpack_require__(21);
+var enumerate = __webpack_require__(22);
 
 /**
  * @class
@@ -255,9 +255,9 @@ module.exports = {
 "use strict";
 
 
-var deferred = __webpack_require__(142);
-var once = __webpack_require__(143);
-var promiseOrCallback = __webpack_require__(144);
+var deferred = __webpack_require__(153);
+var once = __webpack_require__(154);
+var promiseOrCallback = __webpack_require__(155);
 
 function wrapPromise(fn) {
   return function () {
@@ -316,7 +316,7 @@ module.exports = wrapPromise;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Promise = global.Promise || __webpack_require__(52);
+var Promise = global.Promise || __webpack_require__(54);
 
 module.exports = Promise;
 
@@ -329,7 +329,7 @@ module.exports = Promise;
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var Promise = global.Promise || __webpack_require__(52);
+var Promise = global.Promise || __webpack_require__(54);
 
 module.exports = Promise;
 
@@ -342,8 +342,8 @@ module.exports = Promise;
 "use strict";
 
 
-var bind = __webpack_require__(32);
-var isBuffer = __webpack_require__(81);
+var bind = __webpack_require__(33);
+var isBuffer = __webpack_require__(83);
 
 /*global toString:true*/
 
@@ -653,7 +653,7 @@ module.exports = {
 
 
 var constants = __webpack_require__(18);
-var addMetadata = __webpack_require__(50);
+var addMetadata = __webpack_require__(52);
 
 function _millisToSeconds(millis) {
   return Math.floor(millis / 1000);
@@ -879,9 +879,9 @@ module.exports = function (instance, methodNames) {
 "use strict";
 
 
-var atob = __webpack_require__(42).atob;
+var atob = __webpack_require__(44).atob;
 var constants = __webpack_require__(2);
-var braintreeClientVersion = __webpack_require__(43).VERSION;
+var braintreeClientVersion = __webpack_require__(45).VERSION;
 
 function _millisToSeconds(millis) {
   return Math.floor(millis / 1000);
@@ -1215,6 +1215,88 @@ module.exports = function isIos(ua) {
 
 /***/ }),
 /* 21 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1234,7 +1316,7 @@ module.exports = enumerate;
 
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1247,7 +1329,7 @@ module.exports = function isIe9(ua) {
 
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1266,15 +1348,15 @@ module.exports = uuid;
 
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /* eslint-disable no-reserved-keys */
 
-var enumerate = __webpack_require__(21);
-var errors = __webpack_require__(25);
+var enumerate = __webpack_require__(22);
+var errors = __webpack_require__(26);
 var VERSION = "3.34.0";
 
 var constants = {
@@ -1406,7 +1488,7 @@ module.exports = constants;
 
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1488,7 +1570,7 @@ module.exports = {
 
 
 /***/ }),
-/* 26 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1544,14 +1626,14 @@ module.exports = {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(6);
-var normalizeHeaderName = __webpack_require__(83);
+var normalizeHeaderName = __webpack_require__(85);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -1567,10 +1649,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(34);
+    adapter = __webpack_require__(35);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(34);
+    adapter = __webpack_require__(35);
   }
   return adapter;
 }
@@ -1645,10 +1727,10 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = defaults;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(33)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(34)))
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1669,7 +1751,7 @@ module.exports = once;
 
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1767,7 +1849,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 30 */
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1780,7 +1862,7 @@ module.exports = {
 
 
 /***/ }),
-/* 31 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1799,7 +1881,7 @@ module.exports = addSelectionEventHandler;
 
 
 /***/ }),
-/* 32 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1817,7 +1899,7 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 33 */
+/* 34 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -2007,19 +2089,19 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 34 */
+/* 35 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(6);
-var settle = __webpack_require__(84);
-var buildURL = __webpack_require__(86);
-var parseHeaders = __webpack_require__(87);
-var isURLSameOrigin = __webpack_require__(88);
-var createError = __webpack_require__(35);
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(89);
+var settle = __webpack_require__(86);
+var buildURL = __webpack_require__(88);
+var parseHeaders = __webpack_require__(89);
+var isURLSameOrigin = __webpack_require__(90);
+var createError = __webpack_require__(36);
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(91);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -2116,7 +2198,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(90);
+      var cookies = __webpack_require__(92);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -2194,13 +2276,13 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 35 */
+/* 36 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(85);
+var enhanceError = __webpack_require__(87);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -2219,7 +2301,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 36 */
+/* 37 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2231,7 +2313,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 37 */
+/* 38 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2257,3231 +2339,7 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 38 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
-            (typeof self !== "undefined" && self) ||
-            window;
-var apply = Function.prototype.apply;
-
-// DOM APIs, for completeness
-
-exports.setTimeout = function() {
-  return new Timeout(apply.call(setTimeout, scope, arguments), clearTimeout);
-};
-exports.setInterval = function() {
-  return new Timeout(apply.call(setInterval, scope, arguments), clearInterval);
-};
-exports.clearTimeout =
-exports.clearInterval = function(timeout) {
-  if (timeout) {
-    timeout.close();
-  }
-};
-
-function Timeout(id, clearFn) {
-  this._id = id;
-  this._clearFn = clearFn;
-}
-Timeout.prototype.unref = Timeout.prototype.ref = function() {};
-Timeout.prototype.close = function() {
-  this._clearFn.call(scope, this._id);
-};
-
-// Does not start the time, just sets up the members needed.
-exports.enroll = function(item, msecs) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = msecs;
-};
-
-exports.unenroll = function(item) {
-  clearTimeout(item._idleTimeoutId);
-  item._idleTimeout = -1;
-};
-
-exports._unrefActive = exports.active = function(item) {
-  clearTimeout(item._idleTimeoutId);
-
-  var msecs = item._idleTimeout;
-  if (msecs >= 0) {
-    item._idleTimeoutId = setTimeout(function onTimeout() {
-      if (item._onTimeout)
-        item._onTimeout();
-    }, msecs);
-  }
-};
-
-// setimmediate attaches itself to the global object
-__webpack_require__(101);
-// On some exotic environments, it's not clear which object `setimmediate` was
-// able to install onto.  Search each possibility in the same order as the
-// `setimmediate` library.
-exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
-                       (typeof global !== "undefined" && global.setImmediate) ||
-                       (this && this.setImmediate);
-exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
-                         (typeof global !== "undefined" && global.clearImmediate) ||
-                         (this && this.clearImmediate);
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
 /* 39 */
-/***/ (function(module, exports) {
-
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-var listToStyles = __webpack_require__(106)
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-var options = null
-var ssrIdKey = 'data-vue-ssr-id'
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-module.exports = function (parentId, list, _isProduction, _options) {
-  isProduction = _isProduction
-
-  options = _options || {}
-
-  var styles = listToStyles(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = listToStyles(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-  if (options.ssrId) {
-    styleElement.setAttribute(ssrIdKey, obj.id)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
-
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports, __webpack_require__) {
-
-!function(t,e){ true?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.VueMultiselect=e():t.VueMultiselect=e()}(this,function(){return function(t){function e(i){if(n[i])return n[i].exports;var r=n[i]={i:i,l:!1,exports:{}};return t[i].call(r.exports,r,r.exports,e),r.l=!0,r.exports}var n={};return e.m=t,e.c=n,e.i=function(t){return t},e.d=function(t,n,i){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:i})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="/",e(e.s=66)}([function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){t.exports=!n(12)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){var i=n(10),r=n(43),o=n(31),s=Object.defineProperty;e.f=n(1)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e,n){var i=n(77),r=n(21);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(9),r=n(52),o=n(18),s=n(55),u=n(53),a=function(t,e,n){var l,c,f,p,h=t&a.F,d=t&a.G,v=t&a.S,y=t&a.P,g=t&a.B,b=d?i:v?i[e]||(i[e]={}):(i[e]||{}).prototype,m=d?r:r[e]||(r[e]={}),_=m.prototype||(m.prototype={});d&&(n=e);for(l in n)c=!h&&b&&void 0!==b[l],f=(c?b:n)[l],p=g&&c?u(f,i):y&&"function"==typeof f?u(Function.call,f):f,b&&s(b,l,f,t&a.U),m[l]!=f&&o(m,l,p),y&&_[l]!=f&&(_[l]=f)};i.core=r,a.F=1,a.G=2,a.S=4,a.P=8,a.B=16,a.W=32,a.U=64,a.R=128,t.exports=a},function(t,e,n){var i=n(3),r=n(15);t.exports=n(1)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e,n){var i=n(29)("wks"),r=n(16),o=n(0).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){var i=n(13);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(48),r=n(22);t.exports=Object.keys||function(t){return i(t,r)}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e,n){var i=n(109),r=n(110);t.exports=n(35)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(8);t.exports=function(t,e){return!!t&&i(function(){e?t.call(null,function(){},1):t.call(null)})}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e){t.exports="constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf".split(",")},function(t,e,n){var i=n(0),r=n(11),o=n(74),s=n(6),u=function(t,e,n){var a,l,c,f=t&u.F,p=t&u.G,h=t&u.S,d=t&u.P,v=t&u.B,y=t&u.W,g=p?r:r[e]||(r[e]={}),b=g.prototype,m=p?i:h?i[e]:(i[e]||{}).prototype;p&&(n=e);for(a in n)(l=!f&&m&&void 0!==m[a])&&a in g||(c=l?m[a]:n[a],g[a]=p&&"function"!=typeof m[a]?n[a]:v&&l?o(c,i):y&&m[a]==c?function(t){var e=function(e,n,i){if(this instanceof t){switch(arguments.length){case 0:return new t;case 1:return new t(e);case 2:return new t(e,n)}return new t(e,n,i)}return t.apply(this,arguments)};return e.prototype=t.prototype,e}(c):d&&"function"==typeof c?o(Function.call,c):c,d&&((g.virtual||(g.virtual={}))[a]=c,t&u.R&&b&&!b[a]&&s(b,a,c)))};u.F=1,u.G=2,u.S=4,u.P=8,u.B=16,u.W=32,u.U=64,u.R=128,t.exports=u},function(t,e){t.exports={}},function(t,e){t.exports=!0},function(t,e){e.f={}.propertyIsEnumerable},function(t,e,n){var i=n(3).f,r=n(2),o=n(7)("toStringTag");t.exports=function(t,e,n){t&&!r(t=n?t:t.prototype,o)&&i(t,o,{configurable:!0,value:e})}},function(t,e,n){var i=n(29)("keys"),r=n(16);t.exports=function(t){return i[t]||(i[t]=r(t))}},function(t,e,n){var i=n(0),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(13);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){var i=n(0),r=n(11),o=n(25),s=n(33),u=n(3).f;t.exports=function(t){var e=r.Symbol||(r.Symbol=o?{}:i.Symbol||{});"_"==t.charAt(0)||t in e||u(e,t,{value:s.f(t)})}},function(t,e,n){e.f=n(7)},function(t,e,n){var i=n(53),r=n(36),o=n(57),s=n(37),u=n(104);t.exports=function(t,e){var n=1==t,a=2==t,l=3==t,c=4==t,f=6==t,p=5==t||f,h=e||u;return function(e,u,d){for(var v,y,g=o(e),b=r(g),m=i(u,d,3),_=s(b.length),x=0,w=n?h(e,_):a?h(e,0):void 0;_>x;x++)if((p||x in b)&&(v=b[x],y=m(v,x,g),t))if(n)w[x]=y;else if(y)switch(t){case 3:return!0;case 5:return v;case 6:return x;case 2:w.push(v)}else if(c)return!1;return f?-1:l||c?c:w}}},function(t,e,n){t.exports=!n(8)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(51);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(56),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(111)("wks"),r=n(58),o=n(9).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e,n){"use strict";function i(t){return 0!==t&&(!(!Array.isArray(t)||0!==t.length)||!t)}function r(t){return function(){return!t.apply(void 0,arguments)}}function o(t,e){return void 0===t&&(t="undefined"),null===t&&(t="null"),!1===t&&(t="false"),-1!==t.toString().toLowerCase().indexOf(e.trim())}function s(t,e,n,i){return t.filter(function(t){return o(i(t,n),e)})}function u(t){return t.filter(function(t){return!t.$isLabel})}function a(t,e){return function(n){return n.reduce(function(n,i){return i[t]&&i[t].length?(n.push({$groupLabel:i[e],$isLabel:!0}),n.concat(i[t])):n},[])}}function l(t,e,n,i,r){return function(o){return o.map(function(o){var u;if(!o[n])return console.warn("Options passed to vue-multiselect do not contain groups, despite the config."),[];var a=s(o[n],t,e,r);return a.length?(u={},v()(u,i,o[i]),v()(u,n,a),u):[]})}}var c=n(65),f=n.n(c),p=n(59),h=(n.n(p),n(122)),d=(n.n(h),n(64)),v=n.n(d),y=n(120),g=(n.n(y),n(121)),b=(n.n(g),n(117)),m=(n.n(b),n(123)),_=(n.n(m),n(118)),x=(n.n(_),n(119)),w=(n.n(x),function(){for(var t=arguments.length,e=new Array(t),n=0;n<t;n++)e[n]=arguments[n];return function(t){return e.reduce(function(t,e){return e(t)},t)}});e.a={data:function(){return{search:"",isOpen:!1,prefferedOpenDirection:"below",optimizedHeight:this.maxHeight}},props:{internalSearch:{type:Boolean,default:!0},options:{type:Array,required:!0},multiple:{type:Boolean,default:!1},value:{type:null,default:function(){return[]}},trackBy:{type:String},label:{type:String},searchable:{type:Boolean,default:!0},clearOnSelect:{type:Boolean,default:!0},hideSelected:{type:Boolean,default:!1},placeholder:{type:String,default:"Select option"},allowEmpty:{type:Boolean,default:!0},resetAfter:{type:Boolean,default:!1},closeOnSelect:{type:Boolean,default:!0},customLabel:{type:Function,default:function(t,e){return i(t)?"":e?t[e]:t}},taggable:{type:Boolean,default:!1},tagPlaceholder:{type:String,default:"Press enter to create a tag"},tagPosition:{type:String,default:"top"},max:{type:[Number,Boolean],default:!1},id:{default:null},optionsLimit:{type:Number,default:1e3},groupValues:{type:String},groupLabel:{type:String},groupSelect:{type:Boolean,default:!1},blockKeys:{type:Array,default:function(){return[]}},preserveSearch:{type:Boolean,default:!1},preselectFirst:{type:Boolean,default:!1}},mounted:function(){this.multiple||this.clearOnSelect||console.warn("[Vue-Multiselect warn]: ClearOnSelect and Multiple props can’t be both set to false."),!this.multiple&&this.max&&console.warn("[Vue-Multiselect warn]: Max prop should not be used when prop Multiple equals false."),this.preselectFirst&&!this.internalValue.length&&this.options.length&&this.select(this.filteredOptions[0])},computed:{internalValue:function(){return this.value||0===this.value?Array.isArray(this.value)?this.value:[this.value]:[]},filteredOptions:function(){var t=this.search||"",e=t.toLowerCase().trim(),n=this.options.concat();return n=this.internalSearch?this.groupValues?this.filterAndFlat(n,e,this.label):s(n,e,this.label,this.customLabel):this.groupValues?a(this.groupValues,this.groupLabel)(n):n,n=this.hideSelected?n.filter(r(this.isSelected)):n,this.taggable&&e.length&&!this.isExistingOption(e)&&("bottom"===this.tagPosition?n.push({isTag:!0,label:t}):n.unshift({isTag:!0,label:t})),n.slice(0,this.optionsLimit)},valueKeys:function(){var t=this;return this.trackBy?this.internalValue.map(function(e){return e[t.trackBy]}):this.internalValue},optionKeys:function(){var t=this;return(this.groupValues?this.flatAndStrip(this.options):this.options).map(function(e){return t.customLabel(e,t.label).toString().toLowerCase()})},currentOptionLabel:function(){return this.multiple?this.searchable?"":this.placeholder:this.internalValue.length?this.getOptionLabel(this.internalValue[0]):this.searchable?"":this.placeholder}},watch:{internalValue:function(){this.resetAfter&&this.internalValue.length&&(this.search="",this.$emit("input",this.multiple?[]:null))},search:function(){this.$emit("search-change",this.search,this.id)}},methods:{getValue:function(){return this.multiple?this.internalValue:0===this.internalValue.length?null:this.internalValue[0]},filterAndFlat:function(t,e,n){return w(l(e,n,this.groupValues,this.groupLabel,this.customLabel),a(this.groupValues,this.groupLabel))(t)},flatAndStrip:function(t){return w(a(this.groupValues,this.groupLabel),u)(t)},updateSearch:function(t){this.search=t},isExistingOption:function(t){return!!this.options&&this.optionKeys.indexOf(t)>-1},isSelected:function(t){var e=this.trackBy?t[this.trackBy]:t;return this.valueKeys.indexOf(e)>-1},getOptionLabel:function(t){if(i(t))return"";if(t.isTag)return t.label;if(t.$isLabel)return t.$groupLabel;var e=this.customLabel(t,this.label);return i(e)?"":e},select:function(t,e){if(t.$isLabel&&this.groupSelect)return void this.selectGroup(t);if(!(-1!==this.blockKeys.indexOf(e)||this.disabled||t.$isDisabled||t.$isLabel)&&(!this.max||!this.multiple||this.internalValue.length!==this.max)&&("Tab"!==e||this.pointerDirty)){if(t.isTag)this.$emit("tag",t.label,this.id),this.search="",this.closeOnSelect&&!this.multiple&&this.deactivate();else{if(this.isSelected(t))return void("Tab"!==e&&this.removeElement(t));this.$emit("select",t,this.id),this.multiple?this.$emit("input",this.internalValue.concat([t]),this.id):this.$emit("input",t,this.id),this.clearOnSelect&&(this.search="")}this.closeOnSelect&&this.deactivate()}},selectGroup:function(t){var e=this,n=this.options.find(function(n){return n[e.groupLabel]===t.$groupLabel});if(n)if(this.wholeGroupSelected(n)){this.$emit("remove",n[this.groupValues],this.id);var i=this.internalValue.filter(function(t){return-1===n[e.groupValues].indexOf(t)});this.$emit("input",i,this.id)}else{var o=n[this.groupValues].filter(r(this.isSelected));this.$emit("select",o,this.id),this.$emit("input",this.internalValue.concat(o),this.id)}},wholeGroupSelected:function(t){return t[this.groupValues].every(this.isSelected)},removeElement:function(t){var e=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];if(!this.disabled){if(!this.allowEmpty&&this.internalValue.length<=1)return void this.deactivate();var n="object"===f()(t)?this.valueKeys.indexOf(t[this.trackBy]):this.valueKeys.indexOf(t);if(this.$emit("remove",t,this.id),this.multiple){var i=this.internalValue.slice(0,n).concat(this.internalValue.slice(n+1));this.$emit("input",i,this.id)}else this.$emit("input",null,this.id);this.closeOnSelect&&e&&this.deactivate()}},removeLastElement:function(){-1===this.blockKeys.indexOf("Delete")&&0===this.search.length&&Array.isArray(this.internalValue)&&this.removeElement(this.internalValue[this.internalValue.length-1],!1)},activate:function(){var t=this;this.isOpen||this.disabled||(this.adjustPosition(),this.groupValues&&0===this.pointer&&this.filteredOptions.length&&(this.pointer=1),this.isOpen=!0,this.searchable?(this.preserveSearch||(this.search=""),this.$nextTick(function(){return t.$refs.search.focus()})):this.$el.focus(),this.$emit("open",this.id))},deactivate:function(){this.isOpen&&(this.isOpen=!1,this.searchable?this.$refs.search.blur():this.$el.blur(),this.preserveSearch||(this.search=""),this.$emit("close",this.getValue(),this.id))},toggle:function(){this.isOpen?this.deactivate():this.activate()},adjustPosition:function(){if("undefined"!=typeof window){var t=this.$el.getBoundingClientRect().top,e=window.innerHeight-this.$el.getBoundingClientRect().bottom;e>this.maxHeight||e>t||"below"===this.openDirection||"bottom"===this.openDirection?(this.prefferedOpenDirection="below",this.optimizedHeight=Math.min(e-40,this.maxHeight)):(this.prefferedOpenDirection="above",this.optimizedHeight=Math.min(t-40,this.maxHeight))}}}}},function(t,e,n){"use strict";var i=n(59);n.n(i);e.a={data:function(){return{pointer:0,pointerDirty:!1}},props:{showPointer:{type:Boolean,default:!0},optionHeight:{type:Number,default:40}},computed:{pointerPosition:function(){return this.pointer*this.optionHeight},visibleElements:function(){return this.optimizedHeight/this.optionHeight}},watch:{filteredOptions:function(){this.pointerAdjust()},isOpen:function(){this.pointerDirty=!1}},methods:{optionHighlight:function(t,e){return{"multiselect__option--highlight":t===this.pointer&&this.showPointer,"multiselect__option--selected":this.isSelected(e)}},groupHighlight:function(t,e){var n=this;if(!this.groupSelect)return["multiselect__option--disabled"];var i=this.options.find(function(t){return t[n.groupLabel]===e.$groupLabel});return[this.groupSelect?"multiselect__option--group":"multiselect__option--disabled",{"multiselect__option--highlight":t===this.pointer&&this.showPointer},{"multiselect__option--group-selected":this.wholeGroupSelected(i)}]},addPointerElement:function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"Enter",e=t.key;this.filteredOptions.length>0&&this.select(this.filteredOptions[this.pointer],e),this.pointerReset()},pointerForward:function(){this.pointer<this.filteredOptions.length-1&&(this.pointer++,this.$refs.list.scrollTop<=this.pointerPosition-(this.visibleElements-1)*this.optionHeight&&(this.$refs.list.scrollTop=this.pointerPosition-(this.visibleElements-1)*this.optionHeight),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()),this.pointerDirty=!0},pointerBackward:function(){this.pointer>0?(this.pointer--,this.$refs.list.scrollTop>=this.pointerPosition&&(this.$refs.list.scrollTop=this.pointerPosition),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerBackward()):this.filteredOptions[this.pointer]&&this.filteredOptions[0].$isLabel&&!this.groupSelect&&this.pointerForward(),this.pointerDirty=!0},pointerReset:function(){this.closeOnSelect&&(this.pointer=0,this.$refs.list&&(this.$refs.list.scrollTop=0))},pointerAdjust:function(){this.pointer>=this.filteredOptions.length-1&&(this.pointer=this.filteredOptions.length?this.filteredOptions.length-1:0),this.filteredOptions.length>0&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()},pointerSet:function(t){this.pointer=t,this.pointerDirty=!0}}}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e,n){var i=n(13),r=n(0).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){t.exports=!n(1)&&!n(12)(function(){return 7!=Object.defineProperty(n(42)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){"use strict";var i=n(25),r=n(23),o=n(49),s=n(6),u=n(2),a=n(24),l=n(79),c=n(27),f=n(86),p=n(7)("iterator"),h=!([].keys&&"next"in[].keys()),d=function(){return this};t.exports=function(t,e,n,v,y,g,b){l(n,e,v);var m,_,x,w=function(t){if(!h&&t in P)return P[t];switch(t){case"keys":case"values":return function(){return new n(this,t)}}return function(){return new n(this,t)}},S=e+" Iterator",O="values"==y,L=!1,P=t.prototype,k=P[p]||P["@@iterator"]||y&&P[y],E=k||w(y),j=y?O?w("entries"):E:void 0,V="Array"==e?P.entries||k:k;if(V&&(x=f(V.call(new t)))!==Object.prototype&&(c(x,S,!0),i||u(x,p)||s(x,p,d)),O&&k&&"values"!==k.name&&(L=!0,E=function(){return k.call(this)}),i&&!b||!h&&!L&&P[p]||s(P,p,E),a[e]=E,a[S]=d,y)if(m={values:O?E:w("values"),keys:g?E:w("keys"),entries:j},b)for(_ in m)_ in P||o(P,_,m[_]);else r(r.P+r.F*(h||L),e,m);return m}},function(t,e,n){var i=n(10),r=n(83),o=n(22),s=n(28)("IE_PROTO"),u=function(){},a=function(){var t,e=n(42)("iframe"),i=o.length;for(e.style.display="none",n(76).appendChild(e),e.src="javascript:",t=e.contentWindow.document,t.open(),t.write("<script>document.F=Object<\/script>"),t.close(),a=t.F;i--;)delete a.prototype[o[i]];return a()};t.exports=Object.create||function(t,e){var n;return null!==t?(u.prototype=i(t),n=new u,u.prototype=null,n[s]=t):n=a(),void 0===e?n:r(n,e)}},function(t,e,n){var i=n(48),r=n(22).concat("length","prototype");e.f=Object.getOwnPropertyNames||function(t){return i(t,r)}},function(t,e){e.f=Object.getOwnPropertySymbols},function(t,e,n){var i=n(2),r=n(4),o=n(73)(!1),s=n(28)("IE_PROTO");t.exports=function(t,e){var n,u=r(t),a=0,l=[];for(n in u)n!=s&&i(u,n)&&l.push(n);for(;e.length>a;)i(u,n=e[a++])&&(~o(l,n)||l.push(n));return l}},function(t,e,n){t.exports=n(6)},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e,n){var i=n(50);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(51);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){var i=n(9),r=n(18),o=n(107),s=n(58)("src"),u=Function.toString,a=(""+u).split("toString");n(52).inspectSource=function(t){return u.call(t)},(t.exports=function(t,e,n,u){var l="function"==typeof n;l&&(o(n,"name")||r(n,"name",e)),t[e]!==n&&(l&&(o(n,s)||r(n,s,t[e]?""+t[e]:a.join(String(e)))),t===i?t[e]=n:u?t[e]?t[e]=n:r(t,e,n):(delete t[e],r(t,e,n)))})(Function.prototype,"toString",function(){return"function"==typeof this&&this[s]||u.call(this)})},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(17);t.exports=function(t){return Object(i(t))}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e,n){"use strict";var i=n(5),r=n(34)(5),o=!0;"find"in[]&&Array(1).find(function(){o=!1}),i(i.P+i.F*o,"Array",{find:function(t){return r(this,t,arguments.length>1?arguments[1]:void 0)}}),n(99)("find")},function(t,e,n){"use strict";function i(t){n(124)}var r=n(67),o=n(126),s=n(125),u=i,a=s(r.a,o.a,!1,u,null,null);e.a=a.exports},function(t,e,n){t.exports=n(68)},function(t,e,n){t.exports=n(69)},function(t,e,n){t.exports=n(70)},function(t,e,n){function i(t,e,n){return e in t?r(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}var r=n(61);t.exports=i},function(t,e,n){function i(t){return(i="function"==typeof s&&"symbol"==typeof o?function(t){return typeof t}:function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":typeof t})(t)}function r(e){return"function"==typeof s&&"symbol"===i(o)?t.exports=r=function(t){return i(t)}:t.exports=r=function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":i(t)},r(e)}var o=n(63),s=n(62);t.exports=r},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var i=n(60),r=n(39),o=n(40);n.d(e,"Multiselect",function(){return i.a}),n.d(e,"multiselectMixin",function(){return r.a}),n.d(e,"pointerMixin",function(){return o.a}),e.default=i.a},function(t,e,n){"use strict";var i=n(39),r=n(40);e.a={name:"vue-multiselect",mixins:[i.a,r.a],props:{name:{type:String,default:""},selectLabel:{type:String,default:"Press enter to select"},selectGroupLabel:{type:String,default:"Press enter to select group"},selectedLabel:{type:String,default:"Selected"},deselectLabel:{type:String,default:"Press enter to remove"},deselectGroupLabel:{type:String,default:"Press enter to deselect group"},showLabels:{type:Boolean,default:!0},limit:{type:Number,default:99999},maxHeight:{type:Number,default:300},limitText:{type:Function,default:function(t){return"and ".concat(t," more")}},loading:{type:Boolean,default:!1},disabled:{type:Boolean,default:!1},openDirection:{type:String,default:""},showNoResults:{type:Boolean,default:!0},tabindex:{type:Number,default:0}},computed:{isSingleLabelVisible:function(){return this.singleValue&&(!this.isOpen||!this.searchable)&&!this.visibleValues.length},isPlaceholderVisible:function(){return!(this.internalValue.length||this.searchable&&this.isOpen)},visibleValues:function(){return this.multiple?this.internalValue.slice(0,this.limit):[]},singleValue:function(){return this.internalValue[0]},deselectLabelText:function(){return this.showLabels?this.deselectLabel:""},deselectGroupLabelText:function(){return this.showLabels?this.deselectGroupLabel:""},selectLabelText:function(){return this.showLabels?this.selectLabel:""},selectGroupLabelText:function(){return this.showLabels?this.selectGroupLabel:""},selectedLabelText:function(){return this.showLabels?this.selectedLabel:""},inputStyle:function(){if(this.searchable||this.multiple&&this.value&&this.value.length)return this.isOpen?{width:"auto"}:{width:"0",position:"absolute",padding:"0"}},contentStyle:function(){return this.options.length?{display:"inline-block"}:{display:"block"}},isAbove:function(){return"above"===this.openDirection||"top"===this.openDirection||"below"!==this.openDirection&&"bottom"!==this.openDirection&&"above"===this.prefferedOpenDirection},showSearchInput:function(){return this.searchable&&(!this.hasSingleSelectedSlot||!this.visibleSingleValue&&0!==this.visibleSingleValue||this.isOpen)}}}},function(t,e,n){n(92);var i=n(11).Object;t.exports=function(t,e,n){return i.defineProperty(t,e,n)}},function(t,e,n){n(95),n(93),n(96),n(97),t.exports=n(11).Symbol},function(t,e,n){n(94),n(98),t.exports=n(33).f("iterator")},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){t.exports=function(){}},function(t,e,n){var i=n(4),r=n(89),o=n(88);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(71);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(14),r=n(47),o=n(26);t.exports=function(t){var e=i(t),n=r.f;if(n)for(var s,u=n(t),a=o.f,l=0;u.length>l;)a.call(t,s=u[l++])&&e.push(s);return e}},function(t,e,n){t.exports=n(0).document&&document.documentElement},function(t,e,n){var i=n(41);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(41);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){"use strict";var i=n(45),r=n(15),o=n(27),s={};n(6)(s,n(7)("iterator"),function(){return this}),t.exports=function(t,e,n){t.prototype=i(s,{next:r(1,n)}),o(t,e+" Iterator")}},function(t,e){t.exports=function(t,e){return{value:e,done:!!t}}},function(t,e,n){var i=n(14),r=n(4);t.exports=function(t,e){for(var n,o=r(t),s=i(o),u=s.length,a=0;u>a;)if(o[n=s[a++]]===e)return n}},function(t,e,n){var i=n(16)("meta"),r=n(13),o=n(2),s=n(3).f,u=0,a=Object.isExtensible||function(){return!0},l=!n(12)(function(){return a(Object.preventExtensions({}))}),c=function(t){s(t,i,{value:{i:"O"+ ++u,w:{}}})},f=function(t,e){if(!r(t))return"symbol"==typeof t?t:("string"==typeof t?"S":"P")+t;if(!o(t,i)){if(!a(t))return"F";if(!e)return"E";c(t)}return t[i].i},p=function(t,e){if(!o(t,i)){if(!a(t))return!0;if(!e)return!1;c(t)}return t[i].w},h=function(t){return l&&d.NEED&&a(t)&&!o(t,i)&&c(t),t},d=t.exports={KEY:i,NEED:!1,fastKey:f,getWeak:p,onFreeze:h}},function(t,e,n){var i=n(3),r=n(10),o=n(14);t.exports=n(1)?Object.defineProperties:function(t,e){r(t);for(var n,s=o(e),u=s.length,a=0;u>a;)i.f(t,n=s[a++],e[n]);return t}},function(t,e,n){var i=n(26),r=n(15),o=n(4),s=n(31),u=n(2),a=n(43),l=Object.getOwnPropertyDescriptor;e.f=n(1)?l:function(t,e){if(t=o(t),e=s(e,!0),a)try{return l(t,e)}catch(t){}if(u(t,e))return r(!i.f.call(t,e),t[e])}},function(t,e,n){var i=n(4),r=n(46).f,o={}.toString,s="object"==typeof window&&window&&Object.getOwnPropertyNames?Object.getOwnPropertyNames(window):[],u=function(t){try{return r(t)}catch(t){return s.slice()}};t.exports.f=function(t){return s&&"[object Window]"==o.call(t)?u(t):r(i(t))}},function(t,e,n){var i=n(2),r=n(90),o=n(28)("IE_PROTO"),s=Object.prototype;t.exports=Object.getPrototypeOf||function(t){return t=r(t),i(t,o)?t[o]:"function"==typeof t.constructor&&t instanceof t.constructor?t.constructor.prototype:t instanceof Object?s:null}},function(t,e,n){var i=n(30),r=n(21);t.exports=function(t){return function(e,n){var o,s,u=String(r(e)),a=i(n),l=u.length;return a<0||a>=l?t?"":void 0:(o=u.charCodeAt(a),o<55296||o>56319||a+1===l||(s=u.charCodeAt(a+1))<56320||s>57343?t?u.charAt(a):o:t?u.slice(a,a+2):s-56320+(o-55296<<10)+65536)}}},function(t,e,n){var i=n(30),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(30),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(21);t.exports=function(t){return Object(i(t))}},function(t,e,n){"use strict";var i=n(72),r=n(80),o=n(24),s=n(4);t.exports=n(44)(Array,"Array",function(t,e){this._t=s(t),this._i=0,this._k=e},function(){var t=this._t,e=this._k,n=this._i++;return!t||n>=t.length?(this._t=void 0,r(1)):"keys"==e?r(0,n):"values"==e?r(0,t[n]):r(0,[n,t[n]])},"values"),o.Arguments=o.Array,i("keys"),i("values"),i("entries")},function(t,e,n){var i=n(23);i(i.S+i.F*!n(1),"Object",{defineProperty:n(3).f})},function(t,e){},function(t,e,n){"use strict";var i=n(87)(!0);n(44)(String,"String",function(t){this._t=String(t),this._i=0},function(){var t,e=this._t,n=this._i;return n>=e.length?{value:void 0,done:!0}:(t=i(e,n),this._i+=t.length,{value:t,done:!1})})},function(t,e,n){"use strict";var i=n(0),r=n(2),o=n(1),s=n(23),u=n(49),a=n(82).KEY,l=n(12),c=n(29),f=n(27),p=n(16),h=n(7),d=n(33),v=n(32),y=n(81),g=n(75),b=n(78),m=n(10),_=n(4),x=n(31),w=n(15),S=n(45),O=n(85),L=n(84),P=n(3),k=n(14),E=L.f,j=P.f,V=O.f,C=i.Symbol,T=i.JSON,A=T&&T.stringify,$=h("_hidden"),D=h("toPrimitive"),F={}.propertyIsEnumerable,M=c("symbol-registry"),B=c("symbols"),N=c("op-symbols"),R=Object.prototype,H="function"==typeof C,G=i.QObject,I=!G||!G.prototype||!G.prototype.findChild,K=o&&l(function(){return 7!=S(j({},"a",{get:function(){return j(this,"a",{value:7}).a}})).a})?function(t,e,n){var i=E(R,e);i&&delete R[e],j(t,e,n),i&&t!==R&&j(R,e,i)}:j,z=function(t){var e=B[t]=S(C.prototype);return e._k=t,e},U=H&&"symbol"==typeof C.iterator?function(t){return"symbol"==typeof t}:function(t){return t instanceof C},W=function(t,e,n){return t===R&&W(N,e,n),m(t),e=x(e,!0),m(n),r(B,e)?(n.enumerable?(r(t,$)&&t[$][e]&&(t[$][e]=!1),n=S(n,{enumerable:w(0,!1)})):(r(t,$)||j(t,$,w(1,{})),t[$][e]=!0),K(t,e,n)):j(t,e,n)},J=function(t,e){m(t);for(var n,i=g(e=_(e)),r=0,o=i.length;o>r;)W(t,n=i[r++],e[n]);return t},q=function(t,e){return void 0===e?S(t):J(S(t),e)},X=function(t){var e=F.call(this,t=x(t,!0));return!(this===R&&r(B,t)&&!r(N,t))&&(!(e||!r(this,t)||!r(B,t)||r(this,$)&&this[$][t])||e)},Y=function(t,e){if(t=_(t),e=x(e,!0),t!==R||!r(B,e)||r(N,e)){var n=E(t,e);return!n||!r(B,e)||r(t,$)&&t[$][e]||(n.enumerable=!0),n}},Q=function(t){for(var e,n=V(_(t)),i=[],o=0;n.length>o;)r(B,e=n[o++])||e==$||e==a||i.push(e);return i},Z=function(t){for(var e,n=t===R,i=V(n?N:_(t)),o=[],s=0;i.length>s;)!r(B,e=i[s++])||n&&!r(R,e)||o.push(B[e]);return o};H||(C=function(){if(this instanceof C)throw TypeError("Symbol is not a constructor!");var t=p(arguments.length>0?arguments[0]:void 0),e=function(n){this===R&&e.call(N,n),r(this,$)&&r(this[$],t)&&(this[$][t]=!1),K(this,t,w(1,n))};return o&&I&&K(R,t,{configurable:!0,set:e}),z(t)},u(C.prototype,"toString",function(){return this._k}),L.f=Y,P.f=W,n(46).f=O.f=Q,n(26).f=X,n(47).f=Z,o&&!n(25)&&u(R,"propertyIsEnumerable",X,!0),d.f=function(t){return z(h(t))}),s(s.G+s.W+s.F*!H,{Symbol:C});for(var tt="hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables".split(","),et=0;tt.length>et;)h(tt[et++]);for(var tt=k(h.store),et=0;tt.length>et;)v(tt[et++]);s(s.S+s.F*!H,"Symbol",{for:function(t){return r(M,t+="")?M[t]:M[t]=C(t)},keyFor:function(t){if(U(t))return y(M,t);throw TypeError(t+" is not a symbol!")},useSetter:function(){I=!0},useSimple:function(){I=!1}}),s(s.S+s.F*!H,"Object",{create:q,defineProperty:W,defineProperties:J,getOwnPropertyDescriptor:Y,getOwnPropertyNames:Q,getOwnPropertySymbols:Z}),T&&s(s.S+s.F*(!H||l(function(){var t=C();return"[null]"!=A([t])||"{}"!=A({a:t})||"{}"!=A(Object(t))})),"JSON",{stringify:function(t){if(void 0!==t&&!U(t)){for(var e,n,i=[t],r=1;arguments.length>r;)i.push(arguments[r++]);return e=i[1],"function"==typeof e&&(n=e),!n&&b(e)||(e=function(t,e){if(n&&(e=n.call(this,t,e)),!U(e))return e}),i[1]=e,A.apply(T,i)}}}),C.prototype[D]||n(6)(C.prototype,D,C.prototype.valueOf),f(C,"Symbol"),f(Math,"Math",!0),f(i.JSON,"JSON",!0)},function(t,e,n){n(32)("asyncIterator")},function(t,e,n){n(32)("observable")},function(t,e,n){n(91);for(var i=n(0),r=n(6),o=n(24),s=n(7)("toStringTag"),u=["NodeList","DOMTokenList","MediaList","StyleSheetList","CSSRuleList"],a=0;a<5;a++){var l=u[a],c=i[l],f=c&&c.prototype;f&&!f[s]&&r(f,s,l),o[l]=o.Array}},function(t,e,n){var i=n(38)("unscopables"),r=Array.prototype;void 0==r[i]&&n(18)(r,i,{}),t.exports=function(t){r[i][t]=!0}},function(t,e,n){var i=n(19);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e,n){var i=n(115),r=n(37),o=n(114);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(50),r=n(57),o=n(36),s=n(37);t.exports=function(t,e,n,u,a){i(e);var l=r(t),c=o(l),f=s(l.length),p=a?f-1:0,h=a?-1:1;if(n<2)for(;;){if(p in c){u=c[p],p+=h;break}if(p+=h,a?p<0:f<=p)throw TypeError("Reduce of empty array with no initial value")}for(;a?p>=0:f>p;p+=h)p in c&&(u=e(u,c[p],p,l));return u}},function(t,e,n){var i=n(19),r=n(54),o=n(38)("species");t.exports=function(t){var e;return r(t)&&(e=t.constructor,"function"!=typeof e||e!==Array&&!r(e.prototype)||(e=void 0),i(e)&&null===(e=e[o])&&(e=void 0)),void 0===e?Array:e}},function(t,e,n){var i=n(103);t.exports=function(t,e){return new(i(t))(e)}},function(t,e,n){var i=n(19),r=n(9).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){"use strict";var i=n(18),r=n(55),o=n(8),s=n(17),u=n(38);t.exports=function(t,e,n){var a=u(t),l=n(s,a,""[t]),c=l[0],f=l[1];o(function(){var e={};return e[a]=function(){return 7},7!=""[t](e)})&&(r(String.prototype,t,c),i(RegExp.prototype,a,2==e?function(t,e){return f.call(t,this,e)}:function(t){return f.call(t,this)}))}},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){t.exports=!n(35)&&!n(8)(function(){return 7!=Object.defineProperty(n(105)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(100),r=n(108),o=n(116),s=Object.defineProperty;e.f=n(35)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e,n){var i=n(9),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e,n){var i=n(5),r=n(17),o=n(8),s=n(113),u="["+s+"]",a="​",l=RegExp("^"+u+u+"*"),c=RegExp(u+u+"*$"),f=function(t,e,n){var r={},u=o(function(){return!!s[t]()||a[t]()!=a}),l=r[t]=u?e(p):s[t];n&&(r[n]=l),i(i.P+i.F*u,"String",r)},p=f.trim=function(t,e){return t=String(r(t)),1&e&&(t=t.replace(l,"")),2&e&&(t=t.replace(c,"")),t};t.exports=f},function(t,e){t.exports="\t\n\v\f\r   ᠎             　\u2028\u2029\ufeff"},function(t,e,n){var i=n(56),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(36),r=n(17);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(19);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){"use strict";var i=n(5),r=n(34)(2);i(i.P+i.F*!n(20)([].filter,!0),"Array",{filter:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(101)(!1),o=[].indexOf,s=!!o&&1/[1].indexOf(1,-0)<0;i(i.P+i.F*(s||!n(20)(o)),"Array",{indexOf:function(t){return s?o.apply(this,arguments)||0:r(this,t,arguments[1])}})},function(t,e,n){var i=n(5);i(i.S,"Array",{isArray:n(54)})},function(t,e,n){"use strict";var i=n(5),r=n(34)(1);i(i.P+i.F*!n(20)([].map,!0),"Array",{map:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(102);i(i.P+i.F*!n(20)([].reduce,!0),"Array",{reduce:function(t){return r(this,t,arguments.length,arguments[1],!1)}})},function(t,e,n){n(106)("search",1,function(t,e,n){return[function(n){"use strict";var i=t(this),r=void 0==n?void 0:n[e];return void 0!==r?r.call(n,i):new RegExp(n)[e](String(i))},n]})},function(t,e,n){"use strict";n(112)("trim",function(t){return function(){return t(this,3)}})},function(t,e){},function(t,e){t.exports=function(t,e,n,i,r,o){var s,u=t=t||{},a=typeof t.default;"object"!==a&&"function"!==a||(s=t,u=t.default);var l="function"==typeof u?u.options:u;e&&(l.render=e.render,l.staticRenderFns=e.staticRenderFns,l._compiled=!0),n&&(l.functional=!0),r&&(l._scopeId=r);var c;if(o?(c=function(t){t=t||this.$vnode&&this.$vnode.ssrContext||this.parent&&this.parent.$vnode&&this.parent.$vnode.ssrContext,t||"undefined"==typeof __VUE_SSR_CONTEXT__||(t=__VUE_SSR_CONTEXT__),i&&i.call(this,t),t&&t._registeredComponents&&t._registeredComponents.add(o)},l._ssrRegister=c):i&&(c=i),c){var f=l.functional,p=f?l.render:l.beforeCreate;f?(l._injectStyles=c,l.render=function(t,e){return c.call(e),p(t,e)}):l.beforeCreate=p?[].concat(p,c):[c]}return{esModule:s,exports:u,options:l}}},function(t,e,n){"use strict";var i=function(){var t=this,e=t.$createElement,n=t._self._c||e;return n("div",{staticClass:"multiselect",class:{"multiselect--active":t.isOpen,"multiselect--disabled":t.disabled,"multiselect--above":t.isAbove},attrs:{tabindex:t.searchable?-1:t.tabindex},on:{focus:function(e){t.activate()},blur:function(e){!t.searchable&&t.deactivate()},keydown:[function(e){return"button"in e||!t._k(e.keyCode,"down",40,e.key,"ArrowDown")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerForward()):null},function(e){return"button"in e||!t._k(e.keyCode,"up",38,e.key,"ArrowUp")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerBackward()):null},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")||!t._k(e.keyCode,"tab",9,e.key,"Tab")?(e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null}],keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()}}},[t._t("caret",[n("div",{staticClass:"multiselect__select",on:{mousedown:function(e){e.preventDefault(),e.stopPropagation(),t.toggle()}}})],{toggle:t.toggle}),t._v(" "),t._t("clear",null,{search:t.search}),t._v(" "),n("div",{ref:"tags",staticClass:"multiselect__tags"},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.visibleValues.length>0,expression:"visibleValues.length > 0"}],staticClass:"multiselect__tags-wrap"},[t._l(t.visibleValues,function(e){return[t._t("tag",[n("span",{staticClass:"multiselect__tag"},[n("span",{domProps:{textContent:t._s(t.getOptionLabel(e))}}),t._v(" "),n("i",{staticClass:"multiselect__tag-icon",attrs:{"aria-hidden":"true",tabindex:"1"},on:{keydown:function(n){if(!("button"in n)&&t._k(n.keyCode,"enter",13,n.key,"Enter"))return null;n.preventDefault(),t.removeElement(e)},mousedown:function(n){n.preventDefault(),t.removeElement(e)}}})])],{option:e,search:t.search,remove:t.removeElement})]})],2),t._v(" "),t.internalValue&&t.internalValue.length>t.limit?[t._t("limit",[n("strong",{staticClass:"multiselect__strong",domProps:{textContent:t._s(t.limitText(t.internalValue.length-t.limit))}})])]:t._e(),t._v(" "),n("transition",{attrs:{name:"multiselect__loading"}},[t._t("loading",[n("div",{directives:[{name:"show",rawName:"v-show",value:t.loading,expression:"loading"}],staticClass:"multiselect__spinner"})])],2),t._v(" "),t.searchable?n("input",{ref:"search",staticClass:"multiselect__input",style:t.inputStyle,attrs:{name:t.name,id:t.id,type:"text",autocomplete:"off",placeholder:t.placeholder,disabled:t.disabled,tabindex:t.tabindex},domProps:{value:t.search},on:{input:function(e){t.updateSearch(e.target.value)},focus:function(e){e.preventDefault(),t.activate()},blur:function(e){e.preventDefault(),t.deactivate()},keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()},keydown:[function(e){if(!("button"in e)&&t._k(e.keyCode,"down",40,e.key,"ArrowDown"))return null;e.preventDefault(),t.pointerForward()},function(e){if(!("button"in e)&&t._k(e.keyCode,"up",38,e.key,"ArrowUp"))return null;e.preventDefault(),t.pointerBackward()},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")?(e.preventDefault(),e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null},function(e){if(!("button"in e)&&t._k(e.keyCode,"delete",[8,46],e.key,["Backspace","Delete"]))return null;e.stopPropagation(),t.removeLastElement()}]}}):t._e(),t._v(" "),t.isSingleLabelVisible?n("span",{staticClass:"multiselect__single",on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("singleLabel",[[t._v(t._s(t.currentOptionLabel))]],{option:t.singleValue})],2):t._e(),t._v(" "),t.isPlaceholderVisible?n("span",{on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("placeholder",[n("span",{staticClass:"multiselect__single"},[t._v("\n            "+t._s(t.placeholder)+"\n          ")])])],2):t._e()],2),t._v(" "),n("transition",{attrs:{name:"multiselect"}},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.isOpen,expression:"isOpen"}],ref:"list",staticClass:"multiselect__content-wrapper",style:{maxHeight:t.optimizedHeight+"px"},on:{focus:t.activate,mousedown:function(t){t.preventDefault()}}},[n("ul",{staticClass:"multiselect__content",style:t.contentStyle},[t._t("beforeList"),t._v(" "),t.multiple&&t.max===t.internalValue.length?n("li",[n("span",{staticClass:"multiselect__option"},[t._t("maxElements",[t._v("Maximum of "+t._s(t.max)+" options selected. First remove a selected option to select another.")])],2)]):t._e(),t._v(" "),!t.max||t.internalValue.length<t.max?t._l(t.filteredOptions,function(e,i){return n("li",{key:i,staticClass:"multiselect__element"},[e&&(e.$isLabel||e.$isDisabled)?t._e():n("span",{staticClass:"multiselect__option",class:t.optionHighlight(i,e),attrs:{"data-select":e&&e.isTag?t.tagPlaceholder:t.selectLabelText,"data-selected":t.selectedLabelText,"data-deselect":t.deselectLabelText},on:{click:function(n){n.stopPropagation(),t.select(e)},mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.pointerSet(i)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2),t._v(" "),e&&(e.$isLabel||e.$isDisabled)?n("span",{staticClass:"multiselect__option",class:t.groupHighlight(i,e),attrs:{"data-select":t.groupSelect&&t.selectGroupLabelText,"data-deselect":t.groupSelect&&t.deselectGroupLabelText},on:{mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.groupSelect&&t.pointerSet(i)},mousedown:function(n){n.preventDefault(),t.selectGroup(e)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2):t._e()])}):t._e(),t._v(" "),n("li",{directives:[{name:"show",rawName:"v-show",value:t.showNoResults&&0===t.filteredOptions.length&&t.search&&!t.loading,expression:"showNoResults && (filteredOptions.length === 0 && search && !loading)"}]},[n("span",{staticClass:"multiselect__option"},[t._t("noResult",[t._v("No elements found. Consider changing the search query.")])],2)]),t._v(" "),t._t("afterList")],2)])])],2)},r=[],o={render:i,staticRenderFns:r};e.a=o}])});
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-/* eslint-disable no-mixed-operators */
-
-var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
-
-function atob(base64String) {
-  var a, b, c, b1, b2, b3, b4, i;
-  var base64Matcher = new RegExp('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})([=]{1,2})?$');
-  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-  var result = '';
-
-  if (!base64Matcher.test(base64String)) {
-    throw new Error('Non base64 encoded input passed to window.atob polyfill');
-  }
-
-  i = 0;
-  do {
-    b1 = characters.indexOf(base64String.charAt(i++));
-    b2 = characters.indexOf(base64String.charAt(i++));
-    b3 = characters.indexOf(base64String.charAt(i++));
-    b4 = characters.indexOf(base64String.charAt(i++));
-
-    a = (b1 & 0x3F) << 2 | b2 >> 4 & 0x3;
-    b = (b2 & 0xF) << 4 | b3 >> 2 & 0xF;
-    c = (b3 & 0x3) << 6 | b4 & 0x3F;
-
-    result += String.fromCharCode(a) + (b ? String.fromCharCode(b) : '') + (c ? String.fromCharCode(c) : '');
-  } while (i < base64String.length);
-
-  return result;
-}
-
-module.exports = {
-  atob: function (base64String) {
-    return atobNormalized.call(global, base64String);
-  },
-  _atob: atob
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-var Client = __webpack_require__(124);
-var getConfiguration = __webpack_require__(145).getConfiguration;
-var VERSION = "3.34.0";
-var Promise = __webpack_require__(4);
-var wrapPromise = __webpack_require__(3);
-var sharedErrors = __webpack_require__(19);
-
-var cachedClients = {};
-
-/** @module braintree-web/client */
-
-/**
- * @function create
- * @description This function is the entry point for the <code>braintree.client</code> module. It is used for creating {@link Client} instances that service communication to Braintree servers.
- * @param {object} options Object containing all {@link Client} options:
- * @param {string} options.authorization A tokenizationKey or clientToken.
- * @param {callback} [callback] The second argument, <code>data</code>, is the {@link Client} instance.
- * @returns {Promise|void} Returns a promise if no callback is provided.
- * @example
- * var createClient = require('braintree-web/client').create;
- *
- * createClient({
- *   authorization: CLIENT_AUTHORIZATION
- * }, function (createErr, clientInstance) {
- *   // ...
- * });
- * @static
- */
-function create(options) {
-  if (!options.authorization) {
-    return Promise.reject(new BraintreeError({
-      type: sharedErrors.INSTANTIATION_OPTION_REQUIRED.type,
-      code: sharedErrors.INSTANTIATION_OPTION_REQUIRED.code,
-      message: 'options.authorization is required when instantiating a client.'
-    }));
-  }
-
-  if (cachedClients[options.authorization]) {
-    return Promise.resolve(cachedClients[options.authorization]);
-  }
-
-  return getConfiguration(options).then(function (configuration) {
-    var client;
-
-    if (options.debug) {
-      configuration.isDebug = true;
-    }
-
-    client = new Client(configuration);
-
-    cachedClients[options.authorization] = client;
-
-    return client;
-  });
-}
-
-// Primarily used for testing the client create call
-function clearCache() {
-  cachedClients = {};
-}
-
-module.exports = {
-  create: wrapPromise(create),
-  /**
-   * @description The current version of the SDK, i.e. `{@pkg version}`.
-   * @type {string}
-   */
-  VERSION: VERSION,
-  _clearCache: clearCache
-};
-
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var browserDetection = __webpack_require__(45);
-
-var features = {
-  tokenize_credit_cards: 'payment_methods/credit_cards', // eslint-disable-line camelcase
-  configuration: 'configuration'
-};
-
-var blacklistedInputPaths = [
-  'creditCard.options.unionPayEnrollment'
-];
-
-function GraphQL(config) {
-  this._config = config.graphQL;
-}
-
-GraphQL.prototype.getGraphQLEndpoint = function () {
-  return this._config.url;
-};
-
-GraphQL.prototype.isGraphQLRequest = function (url, body) {
-  var featureEnabled;
-  var path = this.getClientApiPath(url);
-
-  if (!this._isGraphQLEnabled() || !path || browserDetection.isIe9()) {
-    return false;
-  }
-
-  featureEnabled = this._config.features.some(function (feature) {
-    return features[feature] === path;
-  });
-
-  if (containsBlacklistedKeys(body)) {
-    return false;
-  }
-
-  return featureEnabled;
-};
-
-GraphQL.prototype.getClientApiPath = function (url) {
-  var path;
-  var clientApiPrefix = '/client_api/v1/';
-  var pathParts = url.split(clientApiPrefix);
-
-  if (pathParts.length > 1) {
-    path = pathParts[1].split('?')[0];
-  }
-
-  return path;
-};
-
-GraphQL.prototype._isGraphQLEnabled = function () {
-  return Boolean(this._config);
-};
-
-function containsBlacklistedKeys(body) {
-  return blacklistedInputPaths.some(function (keys) {
-    var value = keys.split('.').reduce(function (accumulator, key) {
-      return accumulator && accumulator[key];
-    }, body);
-
-    return value !== undefined; // eslint-disable-line no-undefined
-  });
-}
-
-module.exports = GraphQL;
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var isIe = __webpack_require__(125);
-var isIe9 = __webpack_require__(22);
-
-module.exports = {
-  isIe: isIe,
-  isIe9: isIe9
-};
-
-
-/***/ }),
-/* 46 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var ajaxIsAvaliable;
-var once = __webpack_require__(28);
-var JSONPDriver = __webpack_require__(127);
-var AJAXDriver = __webpack_require__(128);
-var getUserAgent = __webpack_require__(138);
-var isHTTP = __webpack_require__(139);
-
-function isAjaxAvailable() {
-  if (ajaxIsAvaliable == null) {
-    ajaxIsAvaliable = !(isHTTP() && /MSIE\s(8|9)/.test(getUserAgent()));
-  }
-
-  return ajaxIsAvaliable;
-}
-
-module.exports = function (options, cb) {
-  cb = once(cb || Function.prototype);
-  options.method = (options.method || 'GET').toUpperCase();
-  options.timeout = options.timeout == null ? 60000 : options.timeout;
-  options.data = options.data || {};
-
-  if (isAjaxAvailable()) {
-    AJAXDriver.request(options, cb);
-  } else {
-    JSONPDriver.request(options, cb);
-  }
-};
-
-
-/***/ }),
-/* 47 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function errorResponseAdapter(responseBody) {
-  var response;
-  var errorType = responseBody.errors &&
-    responseBody.errors[0] &&
-    responseBody.errors[0].extensions &&
-    responseBody.errors[0].extensions.errorType;
-
-  if (errorType === 'user_error') {
-    response = userErrorResponseAdapter(responseBody);
-  } else if (errorType) {
-    response = errorWithTypeResponseAdapter(responseBody);
-  } else {
-    response = {error: {message: 'There was a problem serving your request'}, fieldErrors: []};
-  }
-
-  return response;
-}
-
-function errorWithTypeResponseAdapter(responseBody) {
-  return {error: {message: responseBody.errors[0].message}, fieldErrors: []};
-}
-
-function userErrorResponseAdapter(responseBody) {
-  var fieldErrors = buildFieldErrors(responseBody.errors);
-
-  return {error: {message: getLegacyMessage(fieldErrors)}, fieldErrors: fieldErrors};
-}
-
-function buildFieldErrors(errors) {
-  var fieldErrors = [];
-
-  errors.forEach(function (error) {
-    addFieldError(error.extensions.inputPath.slice(1), error, fieldErrors);
-  });
-
-  return fieldErrors;
-}
-
-function addFieldError(inputPath, errorDetail, fieldErrors) {
-  var fieldError;
-  var legacyCode = errorDetail.extensions.legacyCode;
-  var inputField = inputPath[0];
-
-  if (inputPath.length === 1) {
-    fieldErrors.push({
-      code: legacyCode,
-      field: inputField,
-      message: errorDetail.message
-    });
-
-    return;
-  }
-
-  fieldErrors.forEach(function (candidate) {
-    if (candidate.field === inputField) {
-      fieldError = candidate;
-    }
-  });
-
-  if (!fieldError) {
-    fieldError = {field: inputField, fieldErrors: []};
-    fieldErrors.push(fieldError);
-  }
-
-  addFieldError(inputPath.slice(1), errorDetail, fieldError.fieldErrors);
-}
-
-function getLegacyMessage(errors) {
-  var legacyMessages = {
-    creditCard: 'Credit card is invalid'
-  };
-
-  var field = errors[0].field;
-
-  return legacyMessages[field];
-}
-
-module.exports = errorResponseAdapter;
-
-
-/***/ }),
-/* 48 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var parser;
-var legalHosts = {
-  'paypal.com': 1,
-  'braintreepayments.com': 1,
-  'braintreegateway.com': 1,
-  'braintree-api.com': 1
-};
-
-function stripSubdomains(domain) {
-  return domain.split('.').slice(-2).join('.');
-}
-
-function isWhitelistedDomain(url) {
-  var mainDomain;
-
-  url = url.toLowerCase();
-
-  if (!/^https:/.test(url)) {
-    return false;
-  }
-
-  parser = parser || document.createElement('a');
-  parser.href = url;
-  mainDomain = stripSubdomains(parser.hostname);
-
-  return legalHosts.hasOwnProperty(mainDomain);
-}
-
-module.exports = isWhitelistedDomain;
-
-
-/***/ }),
-/* 49 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-function convertToBraintreeError(originalErr, btErrorObject) {
-  if (originalErr instanceof BraintreeError) {
-    return originalErr;
-  }
-
-  return new BraintreeError({
-    type: btErrorObject.type,
-    code: btErrorObject.code,
-    message: btErrorObject.message,
-    details: {
-      originalError: originalErr
-    }
-  });
-}
-
-module.exports = convertToBraintreeError;
-
-
-/***/ }),
-/* 50 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var createAuthorizationData = __webpack_require__(51);
-var jsonClone = __webpack_require__(141);
-var constants = __webpack_require__(18);
-
-function addMetadata(configuration, data) {
-  var key;
-  var attrs = data ? jsonClone(data) : {};
-  var authAttrs = createAuthorizationData(configuration.authorization).attrs;
-  var _meta = jsonClone(configuration.analyticsMetadata);
-
-  attrs.braintreeLibraryVersion = constants.BRAINTREE_LIBRARY_VERSION;
-
-  for (key in attrs._meta) {
-    if (attrs._meta.hasOwnProperty(key)) {
-      _meta[key] = attrs._meta[key];
-    }
-  }
-
-  attrs._meta = _meta;
-
-  if (authAttrs.tokenizationKey) {
-    attrs.tokenizationKey = authAttrs.tokenizationKey;
-  } else {
-    attrs.authorizationFingerprint = authAttrs.authorizationFingerprint;
-  }
-
-  return attrs;
-}
-
-module.exports = addMetadata;
-
-
-/***/ }),
-/* 51 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var atob = __webpack_require__(140).atob;
-
-var apiUrls = {
-  production: 'https://api.braintreegateway.com:443',
-  sandbox: 'https://api.sandbox.braintreegateway.com:443'
-};
-
-function _isTokenizationKey(str) {
-  return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
-}
-
-function _parseTokenizationKey(tokenizationKey) {
-  var tokens = tokenizationKey.split('_');
-  var environment = tokens[0];
-  var merchantId = tokens.slice(2).join('_');
-
-  return {
-    merchantId: merchantId,
-    environment: environment
-  };
-}
-
-function createAuthorizationData(authorization) {
-  var parsedClientToken, parsedTokenizationKey;
-  var data = {
-    attrs: {},
-    configUrl: ''
-  };
-
-  if (_isTokenizationKey(authorization)) {
-    parsedTokenizationKey = _parseTokenizationKey(authorization);
-    data.attrs.tokenizationKey = authorization;
-    data.configUrl = apiUrls[parsedTokenizationKey.environment] + '/merchants/' + parsedTokenizationKey.merchantId + '/client_api/v1/configuration';
-  } else {
-    parsedClientToken = JSON.parse(atob(authorization));
-    data.attrs.authorizationFingerprint = parsedClientToken.authorizationFingerprint;
-    data.configUrl = parsedClientToken.configUrl;
-    data.graphQL = parsedClientToken.graphQL;
-  }
-
-  return data;
-}
-
-module.exports = createAuthorizationData;
-
-
-/***/ }),
-/* 52 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(setImmediate) {
-
-// Store setTimeout reference so promise-polyfill will be unaffected by
-// other code modifying setTimeout (like sinon.useFakeTimers())
-var setTimeoutFunc = setTimeout;
-
-function noop() {}
-
-// Polyfill for Function.prototype.bind
-function bind(fn, thisArg) {
-  return function() {
-    fn.apply(thisArg, arguments);
-  };
-}
-
-function Promise(fn) {
-  if (!(this instanceof Promise))
-    throw new TypeError('Promises must be constructed via new');
-  if (typeof fn !== 'function') throw new TypeError('not a function');
-  this._state = 0;
-  this._handled = false;
-  this._value = undefined;
-  this._deferreds = [];
-
-  doResolve(fn, this);
-}
-
-function handle(self, deferred) {
-  while (self._state === 3) {
-    self = self._value;
-  }
-  if (self._state === 0) {
-    self._deferreds.push(deferred);
-    return;
-  }
-  self._handled = true;
-  Promise._immediateFn(function() {
-    var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
-    if (cb === null) {
-      (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
-      return;
-    }
-    var ret;
-    try {
-      ret = cb(self._value);
-    } catch (e) {
-      reject(deferred.promise, e);
-      return;
-    }
-    resolve(deferred.promise, ret);
-  });
-}
-
-function resolve(self, newValue) {
-  try {
-    // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
-    if (newValue === self)
-      throw new TypeError('A promise cannot be resolved with itself.');
-    if (
-      newValue &&
-      (typeof newValue === 'object' || typeof newValue === 'function')
-    ) {
-      var then = newValue.then;
-      if (newValue instanceof Promise) {
-        self._state = 3;
-        self._value = newValue;
-        finale(self);
-        return;
-      } else if (typeof then === 'function') {
-        doResolve(bind(then, newValue), self);
-        return;
-      }
-    }
-    self._state = 1;
-    self._value = newValue;
-    finale(self);
-  } catch (e) {
-    reject(self, e);
-  }
-}
-
-function reject(self, newValue) {
-  self._state = 2;
-  self._value = newValue;
-  finale(self);
-}
-
-function finale(self) {
-  if (self._state === 2 && self._deferreds.length === 0) {
-    Promise._immediateFn(function() {
-      if (!self._handled) {
-        Promise._unhandledRejectionFn(self._value);
-      }
-    });
-  }
-
-  for (var i = 0, len = self._deferreds.length; i < len; i++) {
-    handle(self, self._deferreds[i]);
-  }
-  self._deferreds = null;
-}
-
-function Handler(onFulfilled, onRejected, promise) {
-  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
-  this.onRejected = typeof onRejected === 'function' ? onRejected : null;
-  this.promise = promise;
-}
-
-/**
- * Take a potentially misbehaving resolver function and make sure
- * onFulfilled and onRejected are only called once.
- *
- * Makes no guarantees about asynchrony.
- */
-function doResolve(fn, self) {
-  var done = false;
-  try {
-    fn(
-      function(value) {
-        if (done) return;
-        done = true;
-        resolve(self, value);
-      },
-      function(reason) {
-        if (done) return;
-        done = true;
-        reject(self, reason);
-      }
-    );
-  } catch (ex) {
-    if (done) return;
-    done = true;
-    reject(self, ex);
-  }
-}
-
-Promise.prototype['catch'] = function(onRejected) {
-  return this.then(null, onRejected);
-};
-
-Promise.prototype.then = function(onFulfilled, onRejected) {
-  var prom = new this.constructor(noop);
-
-  handle(this, new Handler(onFulfilled, onRejected, prom));
-  return prom;
-};
-
-Promise.all = function(arr) {
-  return new Promise(function(resolve, reject) {
-    if (!arr || typeof arr.length === 'undefined')
-      throw new TypeError('Promise.all accepts an array');
-    var args = Array.prototype.slice.call(arr);
-    if (args.length === 0) return resolve([]);
-    var remaining = args.length;
-
-    function res(i, val) {
-      try {
-        if (val && (typeof val === 'object' || typeof val === 'function')) {
-          var then = val.then;
-          if (typeof then === 'function') {
-            then.call(
-              val,
-              function(val) {
-                res(i, val);
-              },
-              reject
-            );
-            return;
-          }
-        }
-        args[i] = val;
-        if (--remaining === 0) {
-          resolve(args);
-        }
-      } catch (ex) {
-        reject(ex);
-      }
-    }
-
-    for (var i = 0; i < args.length; i++) {
-      res(i, args[i]);
-    }
-  });
-};
-
-Promise.resolve = function(value) {
-  if (value && typeof value === 'object' && value.constructor === Promise) {
-    return value;
-  }
-
-  return new Promise(function(resolve) {
-    resolve(value);
-  });
-};
-
-Promise.reject = function(value) {
-  return new Promise(function(resolve, reject) {
-    reject(value);
-  });
-};
-
-Promise.race = function(values) {
-  return new Promise(function(resolve, reject) {
-    for (var i = 0, len = values.length; i < len; i++) {
-      values[i].then(resolve, reject);
-    }
-  });
-};
-
-// Use polyfill for setImmediate for performance gains
-Promise._immediateFn =
-  (typeof setImmediate === 'function' &&
-    function(fn) {
-      setImmediate(fn);
-    }) ||
-  function(fn) {
-    setTimeoutFunc(fn, 0);
-  };
-
-Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
-  if (typeof console !== 'undefined' && console) {
-    console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
-  }
-};
-
-module.exports = Promise;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(38).setImmediate))
-
-/***/ }),
-/* 53 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-module.exports = function (fn) {
-  return function () {
-    // IE9 doesn't support passing arguments to setTimeout so we have to emulate it.
-    var args = arguments;
-
-    setTimeout(function () {
-      fn.apply(null, args);
-    }, 1);
-  };
-};
-
-
-/***/ }),
-/* 54 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  CLIENT_GATEWAY_CONFIGURATION_INVALID_DOMAIN: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_GATEWAY_CONFIGURATION_INVALID_DOMAIN'
-  },
-  CLIENT_OPTION_REQUIRED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_OPTION_REQUIRED'
-  },
-  CLIENT_OPTION_INVALID: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_OPTION_INVALID'
-  },
-  CLIENT_MISSING_GATEWAY_CONFIGURATION: {
-    type: BraintreeError.types.INTERNAL,
-    code: 'CLIENT_MISSING_GATEWAY_CONFIGURATION',
-    message: 'Missing gatewayConfiguration.'
-  },
-  CLIENT_INVALID_AUTHORIZATION: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_INVALID_AUTHORIZATION',
-    message: 'Authorization is invalid. Make sure your client token or tokenization key is valid.'
-  },
-  CLIENT_GATEWAY_NETWORK: {
-    type: BraintreeError.types.NETWORK,
-    code: 'CLIENT_GATEWAY_NETWORK',
-    message: 'Cannot contact the gateway at this time.'
-  },
-  CLIENT_REQUEST_TIMEOUT: {
-    type: BraintreeError.types.NETWORK,
-    code: 'CLIENT_REQUEST_TIMEOUT',
-    message: 'Request timed out waiting for a reply.'
-  },
-  CLIENT_REQUEST_ERROR: {
-    type: BraintreeError.types.NETWORK,
-    code: 'CLIENT_REQUEST_ERROR',
-    message: 'There was a problem with your request.'
-  },
-  CLIENT_RATE_LIMITED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_RATE_LIMITED',
-    message: 'You are being rate-limited; please try again in a few minutes.'
-  },
-  CLIENT_AUTHORIZATION_INSUFFICIENT: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'CLIENT_AUTHORIZATION_INSUFFICIENT',
-    message: 'The authorization used has insufficient privileges.'
-  }
-};
-
-
-/***/ }),
-/* 55 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function EventEmitter() {
-  this._events = {};
-}
-
-EventEmitter.prototype.on = function (event, callback) {
-  if (this._events[event]) {
-    this._events[event].push(callback);
-  } else {
-    this._events[event] = [callback];
-  }
-};
-
-EventEmitter.prototype._emit = function (event) {
-  var i, args;
-  var callbacks = this._events[event];
-
-  if (!callbacks) { return; }
-
-  args = Array.prototype.slice.call(arguments, 1);
-
-  for (i = 0; i < callbacks.length; i++) {
-    callbacks[i].apply(null, args);
-  }
-};
-
-module.exports = EventEmitter;
-
-
-/***/ }),
-/* 56 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var atob = __webpack_require__(42).atob;
-
-module.exports = function (client) {
-  var authorizationFingerprint;
-  var configuration = client.getConfiguration();
-
-  if (configuration.authorizationType !== 'TOKENIZATION_KEY') {
-    authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
-
-    return !authorizationFingerprint || authorizationFingerprint.indexOf('customer_id=') === -1;
-  }
-
-  return true;
-};
-
-
-/***/ }),
-/* 57 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-
-var result = {};
-
-result[paymentOptionIDs.applePay] = __webpack_require__(148);
-result[paymentOptionIDs.card] = __webpack_require__(152);
-result[paymentOptionIDs.googlePay] = __webpack_require__(178);
-result[paymentOptionIDs.paypal] = __webpack_require__(182);
-result[paymentOptionIDs.paypalCredit] = __webpack_require__(209);
-result[paymentOptionIDs.venmo] = __webpack_require__(210);
-
-module.exports = result;
-
-
-/***/ }),
-/* 58 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  APPLE_PAY_NOT_ENABLED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'APPLE_PAY_NOT_ENABLED',
-    message: 'Apple Pay is not enabled for this merchant.'
-  },
-  APPLE_PAY_VALIDATION_URL_REQUIRED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'APPLE_PAY_VALIDATION_URL_REQUIRED',
-    message: 'performValidation must be called with a validationURL.'
-  },
-  APPLE_PAY_MERCHANT_VALIDATION_NETWORK: {
-    type: BraintreeError.types.NETWORK,
-    code: 'APPLE_PAY_MERCHANT_VALIDATION_NETWORK',
-    message: 'A network error occurred when validating the Apple Pay merchant.'
-  },
-  APPLE_PAY_MERCHANT_VALIDATION_FAILED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'APPLE_PAY_MERCHANT_VALIDATION_FAILED',
-    message: 'Make sure you have registered your domain name in the Braintree Control Panel.'
-  },
-  APPLE_PAY_PAYMENT_TOKEN_REQUIRED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'APPLE_PAY_PAYMENT_TOKEN_REQUIRED',
-    message: 'tokenize must be called with a payment token.'
-  },
-  APPLE_PAY_TOKENIZATION: {
-    type: BraintreeError.types.NETWORK,
-    code: 'APPLE_PAY_TOKENIZATION',
-    message: 'A network error occurred when processing the Apple Pay payment.'
-  }
-};
-
-
-/***/ }),
-/* 59 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var setAttributes = __webpack_require__(158);
-var defaultAttributes = __webpack_require__(159);
-var assign = __webpack_require__(160);
-
-module.exports = function createFrame(options) {
-  var iframe = document.createElement('iframe');
-  var config = assign({}, defaultAttributes, options);
-
-  if (config.style && typeof config.style !== 'string') {
-    assign(iframe.style, config.style);
-    delete config.style;
-  }
-
-  setAttributes(iframe, config);
-
-  if (!iframe.getAttribute('id')) {
-    iframe.id = iframe.name;
-  }
-
-  return iframe;
-};
-
-
-/***/ }),
-/* 60 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var bus = __webpack_require__(161);
-var events = __webpack_require__(162);
-var checkOrigin = __webpack_require__(163).checkOrigin;
-var BraintreeError = __webpack_require__(1);
-
-function BraintreeBus(options) {
-  options = options || {};
-
-  this.channel = options.channel;
-  if (!this.channel) {
-    throw new BraintreeError({
-      type: BraintreeError.types.INTERNAL,
-      code: 'MISSING_CHANNEL_ID',
-      message: 'Channel ID must be specified.'
-    });
-  }
-
-  this.merchantUrl = options.merchantUrl;
-
-  this._isDestroyed = false;
-  this._isVerbose = false;
-
-  this._listeners = [];
-
-  this._log('new bus on channel ' + this.channel, [location.href]);
-}
-
-BraintreeBus.prototype.on = function (eventName, originalHandler) {
-  var namespacedEvent, args;
-  var handler = originalHandler;
-  var self = this;
-
-  if (this._isDestroyed) { return; }
-
-  if (this.merchantUrl) {
-    handler = function () {
-      /* eslint-disable no-invalid-this */
-      if (checkOrigin(this.origin, self.merchantUrl)) {
-        originalHandler.apply(this, arguments);
-      }
-      /* eslint-enable no-invalid-this */
-    };
-  }
-
-  namespacedEvent = this._namespaceEvent(eventName);
-  args = Array.prototype.slice.call(arguments);
-  args[0] = namespacedEvent;
-  args[1] = handler;
-
-  this._log('on', args);
-  bus.on.apply(bus, args);
-
-  this._listeners.push({
-    eventName: eventName,
-    handler: handler,
-    originalHandler: originalHandler
-  });
-};
-
-BraintreeBus.prototype.emit = function (eventName) {
-  var args;
-
-  if (this._isDestroyed) { return; }
-
-  args = Array.prototype.slice.call(arguments);
-  args[0] = this._namespaceEvent(eventName);
-
-  this._log('emit', args);
-  bus.emit.apply(bus, args);
-};
-
-BraintreeBus.prototype._offDirect = function (eventName) {
-  var args = Array.prototype.slice.call(arguments);
-
-  if (this._isDestroyed) { return; }
-
-  args[0] = this._namespaceEvent(eventName);
-
-  this._log('off', args);
-  bus.off.apply(bus, args);
-};
-
-BraintreeBus.prototype.off = function (eventName, originalHandler) {
-  var i, listener;
-  var handler = originalHandler;
-
-  if (this._isDestroyed) { return; }
-
-  if (this.merchantUrl) {
-    for (i = 0; i < this._listeners.length; i++) {
-      listener = this._listeners[i];
-
-      if (listener.originalHandler === originalHandler) {
-        handler = listener.handler;
-      }
-    }
-  }
-
-  this._offDirect(eventName, handler);
-};
-
-BraintreeBus.prototype._namespaceEvent = function (eventName) {
-  return ['braintree', this.channel, eventName].join(':');
-};
-
-BraintreeBus.prototype.teardown = function () {
-  var listener, i;
-
-  for (i = 0; i < this._listeners.length; i++) {
-    listener = this._listeners[i];
-    this._offDirect(listener.eventName, listener.handler);
-  }
-
-  this._listeners.length = 0;
-
-  this._isDestroyed = true;
-};
-
-BraintreeBus.prototype._log = function (functionName, args) {
-  if (this._isVerbose) {
-    console.log(functionName, args); // eslint-disable-line no-console
-  }
-};
-
-BraintreeBus.events = events;
-
-module.exports = BraintreeBus;
-
-
-/***/ }),
-/* 61 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-function useMin(isDebug) {
-  return isDebug ? '' : '.min';
-}
-
-module.exports = useMin;
-
-
-/***/ }),
-/* 62 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-module.exports = function isAndroid(ua) {
-  ua = ua || global.navigator.userAgent;
-  return /Android/.test(ua);
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 63 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var isEdge = __webpack_require__(176);
-var isSamsung = __webpack_require__(64);
-
-module.exports = function isChrome(ua) {
-  ua = ua || navigator.userAgent;
-  return (ua.indexOf('Chrome') !== -1 || ua.indexOf('CriOS') !== -1) && !isEdge(ua) && !isSamsung(ua);
-};
-
-
-/***/ }),
-/* 64 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-module.exports = function isSamsungBrowser(ua) {
-  ua = ua || global.navigator.userAgent;
-  return /SamsungBrowser/i.test(ua);
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 65 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-module.exports = function (win) {
-  win = win || global;
-
-  return win.document.characterSet.toLowerCase() === 'utf-8';
-};
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 66 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var browserDetection = __webpack_require__(177);
-
-function isHidden(element) {
-  if (!element) { // no parentNode, so nothing containing the element is hidden
-    return false;
-  }
-
-  if (element.style.display === 'none') {
-    return true;
-  }
-
-  return isHidden(element.parentNode);
-}
-
-function onTransitionEnd(element, propertyName, callback) {
-  if (browserDetection.isIe9() || isHidden(element)) {
-    callback();
-
-    return;
-  }
-
-  function transitionEventListener(event) {
-    if (event.propertyName === propertyName) {
-      element.removeEventListener('transitionend', transitionEventListener);
-      callback();
-    }
-  }
-
-  element.addEventListener('transitionend', transitionEventListener);
-}
-
-module.exports = {
-  onTransitionEnd: onTransitionEnd
-};
-
-
-/***/ }),
-/* 67 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* WEBPACK VAR INJECTION */(function(global) {
-
-var assign = __webpack_require__(10).assign;
-var BaseView = __webpack_require__(9);
-var btPaypal = __webpack_require__(183);
-var DropinError = __webpack_require__(8);
-var constants = __webpack_require__(2);
-var assets = __webpack_require__(26);
-var translations = __webpack_require__(69).fiveCharacterLocales;
-var Promise = __webpack_require__(5);
-
-var ASYNC_DEPENDENCY_TIMEOUT = 30000;
-var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
-var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
-
-var paypalScriptLoadInProgressPromise;
-
-function BasePayPalView() {
-  BaseView.apply(this, arguments);
-}
-
-BasePayPalView.prototype = Object.create(BaseView.prototype);
-
-BasePayPalView.prototype.initialize = function () {
-  var asyncDependencyTimeoutHandler;
-  var isCredit = Boolean(this._isPayPalCredit);
-  var setupComplete = false;
-  var self = this;
-  var paypalType = isCredit ? 'paypalCredit' : 'paypal';
-  var paypalConfiguration = this.model.merchantConfiguration[paypalType];
-
-  this.paypalConfiguration = assign({}, paypalConfiguration);
-
-  this.model.asyncDependencyStarting();
-  asyncDependencyTimeoutHandler = setTimeout(function () {
-    self.model.asyncDependencyFailed({
-      view: self.ID,
-      error: new DropinError('There was an error connecting to PayPal.')
-    });
-  }, ASYNC_DEPENDENCY_TIMEOUT);
-
-  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
-    var checkoutJSConfiguration;
-    var buttonSelector = '[data-braintree-id="paypal-button"]';
-    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
-    var locale = self.model.merchantConfiguration.locale;
-
-    self.paypalInstance = paypalInstance;
-
-    self.paypalConfiguration.offerCredit = Boolean(isCredit);
-    checkoutJSConfiguration = {
-      env: environment,
-      style: self.paypalConfiguration.buttonStyle || {},
-      commit: self.paypalConfiguration.commit,
-      payment: function () {
-        return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
-      },
-      onAuthorize: function (data) {
-        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
-          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
-            tokenizePayload.vaulted = true;
-          }
-          self.model.addPaymentMethod(tokenizePayload);
-        }).catch(reportError);
-      },
-      onError: reportError
-    };
-
-    if (locale && locale in translations) {
-      self.paypalConfiguration.locale = locale;
-      checkoutJSConfiguration.locale = locale;
-    }
-
-    if (isCredit) {
-      buttonSelector = '[data-braintree-id="paypal-credit-button"]';
-      checkoutJSConfiguration.style.label = 'credit';
-    }
-
-    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
-      self.model.asyncDependencyReady();
-      setupComplete = true;
-      clearTimeout(asyncDependencyTimeoutHandler);
-    });
-  }).catch(reportError);
-
-  function reportError(err) {
-    if (setupComplete) {
-      self.model.reportError(err);
-    } else {
-      self.model.asyncDependencyFailed({
-        view: self.ID,
-        error: err
-      });
-      clearTimeout(asyncDependencyTimeoutHandler);
-    }
-  }
-};
-
-BasePayPalView.prototype.updateConfiguration = function (key, value) {
-  if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
-    this.paypalConfiguration[key] = value;
-  }
-};
-
-BasePayPalView.isEnabled = function (options) {
-  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
-
-  if (!gatewayConfiguration.paypalEnabled) {
-    return Promise.resolve(false);
-  }
-
-  if (global.paypal && global.paypal.Button) {
-    return Promise.resolve(true);
-  }
-
-  if (paypalScriptLoadInProgressPromise) {
-    return paypalScriptLoadInProgressPromise;
-  }
-
-  paypalScriptLoadInProgressPromise = assets.loadScript({
-    src: constants.CHECKOUT_JS_SOURCE,
-    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
-    dataAttributes: {
-      'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
-    }
-  }).then(function () {
-    return Promise.resolve(true);
-  }).catch(function () {
-    return Promise.resolve(false);
-  }).then(function (result) {
-    paypalScriptLoadInProgressPromise = null;
-
-    return Promise.resolve(result);
-  });
-
-  return paypalScriptLoadInProgressPromise;
-};
-
-module.exports = BasePayPalView;
-
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
-
-/***/ }),
-/* 68 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  PAYPAL_NOT_ENABLED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_NOT_ENABLED',
-    message: 'PayPal is not enabled for this merchant.'
-  },
-  PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED',
-    message: 'A linked PayPal Sandbox account is required to use PayPal Checkout in Sandbox. See https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing for details on linking your PayPal sandbox with Braintree.'
-  },
-  PAYPAL_TOKENIZATION_REQUEST_ACTIVE: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_TOKENIZATION_REQUEST_ACTIVE',
-    message: 'Another tokenization request is active.'
-  },
-  PAYPAL_ACCOUNT_TOKENIZATION_FAILED: {
-    type: BraintreeError.types.NETWORK,
-    code: 'PAYPAL_ACCOUNT_TOKENIZATION_FAILED',
-    message: 'Could not tokenize user\'s PayPal account.'
-  },
-  PAYPAL_FLOW_FAILED: {
-    type: BraintreeError.types.NETWORK,
-    code: 'PAYPAL_FLOW_FAILED',
-    message: 'Could not initialize PayPal flow.'
-  },
-  PAYPAL_FLOW_OPTION_REQUIRED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_FLOW_OPTION_REQUIRED',
-    message: 'PayPal flow property is invalid or missing.'
-  },
-  PAYPAL_POPUP_OPEN_FAILED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_POPUP_OPEN_FAILED',
-    message: 'PayPal popup failed to open, make sure to tokenize in response to a user action.'
-  },
-  PAYPAL_POPUP_CLOSED: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'PAYPAL_POPUP_CLOSED',
-    message: 'Customer closed PayPal popup before authorizing.'
-  },
-  PAYPAL_INVALID_PAYMENT_OPTION: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'PAYPAL_INVALID_PAYMENT_OPTION',
-    message: 'PayPal payment options are invalid.'
-  }
-};
-
-
-/***/ }),
-/* 69 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-/* eslint-disable camelcase */
-
-
-var assign = __webpack_require__(10).assign;
-
-var fiveCharacterLocales = {
-  da_DK: __webpack_require__(186),
-  de_DE: __webpack_require__(187),
-  en_US: __webpack_require__(188),
-  en_AU: __webpack_require__(189),
-  en_GB: __webpack_require__(190),
-  es_ES: __webpack_require__(191),
-  fr_CA: __webpack_require__(192),
-  fr_FR: __webpack_require__(193),
-  id_ID: __webpack_require__(194),
-  it_IT: __webpack_require__(195),
-  ja_JP: __webpack_require__(196),
-  ko_KR: __webpack_require__(197),
-  nl_NL: __webpack_require__(198),
-  no_NO: __webpack_require__(199),
-  pl_PL: __webpack_require__(200),
-  pt_BR: __webpack_require__(201),
-  pt_PT: __webpack_require__(202),
-  ru_RU: __webpack_require__(203),
-  sv_SE: __webpack_require__(204),
-  th_TH: __webpack_require__(205),
-  zh_CN: __webpack_require__(206),
-  zh_HK: __webpack_require__(207),
-  zh_TW: __webpack_require__(208)
-};
-
-var twoCharacterLocaleAliases = {
-  da: fiveCharacterLocales.da_DK,
-  de: fiveCharacterLocales.de_DE,
-  en: fiveCharacterLocales.en_US,
-  es: fiveCharacterLocales.es_ES,
-  fr: fiveCharacterLocales.fr_FR,
-  id: fiveCharacterLocales.id_ID,
-  it: fiveCharacterLocales.it_IT,
-  ja: fiveCharacterLocales.ja_JP,
-  ko: fiveCharacterLocales.ko_KR,
-  nl: fiveCharacterLocales.nl_NL,
-  no: fiveCharacterLocales.no_NO,
-  pl: fiveCharacterLocales.pl_PL,
-  pt: fiveCharacterLocales.pt_PT,
-  ru: fiveCharacterLocales.ru_RU,
-  sv: fiveCharacterLocales.sv_SE,
-  th: fiveCharacterLocales.th_TH,
-  zh: fiveCharacterLocales.zh_CN
-};
-
-module.exports = {
-  twoCharacterLocaleAliases: twoCharacterLocaleAliases,
-  fiveCharacterLocales: fiveCharacterLocales,
-  translations: assign({}, twoCharacterLocaleAliases, fiveCharacterLocales)
-};
-/* eslint-enable camelcase */
-
-
-/***/ }),
-/* 70 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  VENMO_NOT_ENABLED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'VENMO_NOT_ENABLED',
-    message: 'Venmo is not enabled for this merchant.'
-  },
-  VENMO_TOKENIZATION_REQUEST_ACTIVE: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'VENMO_TOKENIZATION_REQUEST_ACTIVE',
-    message: 'Another tokenization request is active.'
-  },
-  VENMO_APP_FAILED: {
-    type: BraintreeError.types.UNKNOWN,
-    code: 'VENMO_APP_FAILED',
-    message: 'Venmo app encountered a problem.'
-  },
-  VENMO_APP_CANCELED: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'VENMO_APP_CANCELED',
-    message: 'Venmo app authorization was canceled.'
-  },
-  VENMO_CANCELED: {
-    type: BraintreeError.types.CUSTOMER,
-    code: 'VENMO_CANCELED',
-    message: 'User canceled Venmo authorization, or Venmo app is not available.'
-  }
-};
-
-
-/***/ }),
-/* 71 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var browserDetection = __webpack_require__(213);
-
-function isBrowserSupported(options) {
-  var isAndroidChrome = browserDetection.isAndroid() && browserDetection.isChrome();
-  var isIosChrome = browserDetection.isIos() && browserDetection.isChrome();
-  var supportsReturnToSameTab = browserDetection.isIosSafari() || isAndroidChrome;
-  var supportsReturnToNewTab = isIosChrome || browserDetection.isSamsungBrowser() || browserDetection.isMobileFirefox();
-
-  options = options || {
-    allowNewBrowserTab: true
-  };
-
-  return supportsReturnToSameTab || (options.allowNewBrowserTab && supportsReturnToNewTab);
-}
-
-module.exports = {
-  isBrowserSupported: isBrowserSupported
-};
-
-
-/***/ }),
-/* 72 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BaseView = __webpack_require__(9);
-var PaymentMethodView = __webpack_require__(219);
-var DropinError = __webpack_require__(8);
-var classlist = __webpack_require__(15);
-var errors = __webpack_require__(2).errors;
-var Promise = __webpack_require__(5);
-
-var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
-  CreditCard: 'Card',
-  PayPalAccount: 'PayPal',
-  ApplePayCard: 'Apple Pay',
-  AndroidPayCard: 'Google Pay',
-  VenmoAccount: 'Venmo'
-};
-
-function PaymentMethodsView() {
-  BaseView.apply(this, arguments);
-
-  this._initialize();
-}
-
-PaymentMethodsView.prototype = Object.create(BaseView.prototype);
-PaymentMethodsView.prototype.constructor = PaymentMethodsView;
-PaymentMethodsView.ID = PaymentMethodsView.prototype.ID = 'methods';
-
-PaymentMethodsView.prototype._initialize = function () {
-  var i;
-  var paymentMethods = this.model.getPaymentMethods();
-
-  this.views = [];
-  this.container = this.getElementById('methods-container');
-  this._headingLabel = this.getElementById('methods-label');
-
-  this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
-  this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
-  this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
-
-  for (i = paymentMethods.length - 1; i >= 0; i--) {
-    this._addPaymentMethod(paymentMethods[i]);
-  }
-};
-
-PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
-  if (!this.activeMethodView) {
-    return;
-  }
-  this.activeMethodView.setActive(false);
-  this.activeMethodView = null;
-  classlist.add(this._headingLabel, 'braintree-no-payment-method-selected');
-};
-
-PaymentMethodsView.prototype._getPaymentMethodString = function () {
-  var stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
-  var paymentMethodTypeString = this.strings[stringKey];
-
-  return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
-};
-
-PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
-  var paymentMethodView = new PaymentMethodView({
-    model: this.model,
-    paymentMethod: paymentMethod,
-    strings: this.strings
-  });
-
-  if (this.model.isGuestCheckout && this.container.firstChild) {
-    this.container.removeChild(this.container.firstChild);
-    this.views.pop();
-  }
-
-  if (this.container.firstChild) {
-    this.container.insertBefore(paymentMethodView.element, this.container.firstChild);
-  } else {
-    this.container.appendChild(paymentMethodView.element);
-  }
-
-  this.views.push(paymentMethodView);
-};
-
-PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
-  var i;
-
-  for (i = 0; i < this.views.length; i++) {
-    if (this.views[i].paymentMethod === paymentMethod) {
-      this.container.removeChild(this.views[i].element);
-      this._headingLabel.innerHTML = '&nbsp;';
-      this.views.splice(i, 1);
-      break;
-    }
-  }
-};
-
-PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
-  var i;
-  var previousActiveMethodView = this.activeMethodView;
-
-  for (i = 0; i < this.views.length; i++) {
-    if (this.views[i].paymentMethod === paymentMethod) {
-      this.activeMethodView = this.views[i];
-      this._headingLabel.innerHTML = this._getPaymentMethodString();
-      break;
-    }
-  }
-
-  if (previousActiveMethodView) {
-    previousActiveMethodView.setActive(false);
-  }
-  this.activeMethodView.setActive(true);
-  classlist.remove(this._headingLabel, 'braintree-no-payment-method-selected');
-};
-
-PaymentMethodsView.prototype.requestPaymentMethod = function () {
-  if (!this.activeMethodView) {
-    return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
-  }
-
-  return Promise.resolve(this.activeMethodView.paymentMethod);
-};
-
-module.exports = PaymentMethodsView;
-
-
-/***/ }),
-/* 73 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var analytics = __webpack_require__(14);
-var addSelectionEventHandler = __webpack_require__(31);
-var BaseView = __webpack_require__(9);
-
-var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-
-var paymentMethodOptionHTML = "<div class=\"braintree-option__logo\">\n  <svg width=\"48\" height=\"29\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-option__label\" aria-label=\"@OPTION_LABEL\">\n  @OPTION_TITLE\n  <div class=\"braintree-option__disabled-message\"></div>\n</div>\n";
-
-function PaymentOptionsView() {
-  BaseView.apply(this, arguments);
-
-  this._initialize();
-}
-
-PaymentOptionsView.prototype = Object.create(BaseView.prototype);
-PaymentOptionsView.prototype.constructor = PaymentOptionsView;
-PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'options';
-
-PaymentOptionsView.prototype._initialize = function () {
-  this.container = this.getElementById('payment-options-container');
-  this.elements = {};
-
-  this.model.supportedPaymentOptions.forEach(function (paymentOptionID) {
-    this._addPaymentOption(paymentOptionID);
-  }.bind(this));
-};
-
-PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
-  var paymentSource;
-  var div = document.createElement('div');
-  var html = paymentMethodOptionHTML;
-  var clickHandler = function clickHandler() {
-    this.mainView.setPrimaryView(paymentOptionID);
-    this.model.selectPaymentOption(paymentOptionID);
-    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
-  }.bind(this);
-
-  div.className = 'braintree-option braintree-option__' + paymentOptionID;
-  div.setAttribute('tabindex', '0');
-
-  switch (paymentOptionID) {
-    case paymentOptionIDs.applePay:
-      paymentSource = this.strings['Apple Pay'];
-      html = html.replace(/@ICON/g, 'logoApplePay');
-      break;
-    case paymentOptionIDs.card:
-      paymentSource = this.strings.Card;
-      html = html.replace(/@ICON/g, 'iconCardFront');
-      html = html.replace(/@CLASSNAME/g, 'braintree-icon--bordered');
-      break;
-    case paymentOptionIDs.googlePay:
-      paymentSource = this.strings['Google Pay'];
-      html = html.replace(/@ICON/g, 'logoGooglePay');
-      break;
-    case paymentOptionIDs.paypal:
-      paymentSource = this.strings.PayPal;
-      html = html.replace(/@ICON/g, 'logoPayPal');
-      break;
-    case paymentOptionIDs.paypalCredit:
-      paymentSource = this.strings['PayPal Credit'];
-      html = html.replace(/@ICON/g, 'logoPayPalCredit');
-      break;
-    case paymentOptionIDs.venmo:
-      paymentSource = this.strings.Venmo;
-      html = html.replace(/@ICON/g, 'logoVenmo');
-      break;
-    default:
-      break;
-  }
-
-  html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
-  html = html.replace(/@OPTION_TITLE/g, paymentSource);
-  html = html.replace(/@CLASSNAME/g, '');
-
-  div.innerHTML = html;
-
-  addSelectionEventHandler(div, clickHandler);
-
-  this.container.appendChild(div);
-  this.elements[paymentOptionID] = {
-    div: div,
-    clickHandler: clickHandler
-  };
-};
-
-PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceString) {
-  return this.strings.payingWith.replace('{{paymentSource}}', paymentSourceString);
-};
-
-module.exports = PaymentOptionsView;
-
-
-/***/ }),
-/* 74 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-/* eslint-disable no-mixed-operators */
-
-function uuid() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    var r = Math.random() * 16 | 0;
-    var v = c === 'x' ? r : r & 0x3 | 0x8;
-
-    return v.toString(16);
-  });
-}
-
-module.exports = uuid;
-
-
-/***/ }),
-/* 75 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var BraintreeError = __webpack_require__(1);
-
-module.exports = {
-  THREEDS_AUTHENTICATION_IN_PROGRESS: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_AUTHENTICATION_IN_PROGRESS',
-    message: 'Cannot call verifyCard while existing authentication is in progress.'
-  },
-  THREEDS_MISSING_VERIFY_CARD_OPTION: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_MISSING_VERIFY_CARD_OPTION'
-  },
-  THREEDS_NO_VERIFICATION_PAYLOAD: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_NO_VERIFICATION_PAYLOAD',
-    message: 'No verification payload available.'
-  },
-  THREEDS_NOT_ENABLED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_NOT_ENABLED',
-    message: '3D Secure is not enabled for this merchant.'
-  },
-  THREEDS_CAN_NOT_USE_TOKENIZATION_KEY: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_CAN_NOT_USE_TOKENIZATION_KEY',
-    message: '3D Secure can not use a tokenization key for authorization.'
-  },
-  THREEDS_HTTPS_REQUIRED: {
-    type: BraintreeError.types.MERCHANT,
-    code: 'THREEDS_HTTPS_REQUIRED',
-    message: '3D Secure requires HTTPS.'
-  },
-  THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN: {
-    type: BraintreeError.types.INTERNAL,
-    code: 'THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN',
-    message: 'Term Url must be on a Braintree domain.'
-  }
-};
-
-
-/***/ }),
-/* 76 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(77);
-module.exports = __webpack_require__(233);
-
-
-/***/ }),
-/* 77 */
-/***/ (function(module, exports, __webpack_require__) {
-
-/**
- * First we will load all of this project's JavaScript dependencies which
- * includes Vue and other libraries. It is a great starting point when
- * building robust, powerful web applications using Vue and Laravel.
- */
-
-__webpack_require__(78);
-
-/**
- * Next, we will create a fresh Vue application instance and attach it to
- * the page. Then, you may begin adding components to this application
- * or customize the JavaScript scaffolding to fit your unique needs.
- */
-
-Vue.component('product-edit', __webpack_require__(103));
-Vue.component('product-show', __webpack_require__(109));
-Vue.component('product-create', __webpack_require__(112));
-Vue.component('cart-checkout', __webpack_require__(117));
-Vue.component('braintree-checkout', __webpack_require__(120));
-
-document.addEventListener('turbolinks:load', function () {
-  var app = new Vue({
-    el: '#app'
-  });
-});
-
-/***/ }),
-/* 78 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks__ = __webpack_require__(98);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_turbolinks__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__ = __webpack_require__(102);
-/**
- * We'll load the axios HTTP library which allows us to easily issue requests
- * to our Laravel back-end. This library automatically handles sending the
- * CSRF token as a header based on the value of the "XSRF" token cookie.
- */
-
-window.axios = __webpack_require__(79);
-
-window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
-
-/**
- * Next we will register the CSRF Token as a common header with Axios so that
- * all outgoing HTTP requests automatically have it attached. This is just
- * a simple convenience so we don't have to attach every token manually.
- */
-
-var token = document.head.querySelector('meta[name="csrf-token"]');
-
-if (token) {
-  window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
-} else {
-  console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
-}
-
-/**
- * User Libraries
- */
-
-
-__WEBPACK_IMPORTED_MODULE_0_turbolinks___default.a.start();
-
-window.Vue = __webpack_require__(100);
-
-
-Vue.use(__WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__["a" /* default */]);
-
-/***/ }),
-/* 79 */
-/***/ (function(module, exports, __webpack_require__) {
-
-module.exports = __webpack_require__(80);
-
-/***/ }),
-/* 80 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-var bind = __webpack_require__(32);
-var Axios = __webpack_require__(82);
-var defaults = __webpack_require__(27);
-
-/**
- * Create an instance of Axios
- *
- * @param {Object} defaultConfig The default config for the instance
- * @return {Axios} A new instance of Axios
- */
-function createInstance(defaultConfig) {
-  var context = new Axios(defaultConfig);
-  var instance = bind(Axios.prototype.request, context);
-
-  // Copy axios.prototype to instance
-  utils.extend(instance, Axios.prototype, context);
-
-  // Copy context to instance
-  utils.extend(instance, context);
-
-  return instance;
-}
-
-// Create the default instance to be exported
-var axios = createInstance(defaults);
-
-// Expose Axios class to allow class inheritance
-axios.Axios = Axios;
-
-// Factory for creating new instances
-axios.create = function create(instanceConfig) {
-  return createInstance(utils.merge(defaults, instanceConfig));
-};
-
-// Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(37);
-axios.CancelToken = __webpack_require__(96);
-axios.isCancel = __webpack_require__(36);
-
-// Expose all/spread
-axios.all = function all(promises) {
-  return Promise.all(promises);
-};
-axios.spread = __webpack_require__(97);
-
-module.exports = axios;
-
-// Allow use of default import syntax in TypeScript
-module.exports.default = axios;
-
-
-/***/ }),
-/* 81 */
-/***/ (function(module, exports) {
-
-/*!
- * Determine if an object is a Buffer
- *
- * @author   Feross Aboukhadijeh <https://feross.org>
- * @license  MIT
- */
-
-// The _isBuffer check is for Safari 5-7 support, because it's missing
-// Object.prototype.constructor. Remove this eventually
-module.exports = function (obj) {
-  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
-}
-
-function isBuffer (obj) {
-  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
-}
-
-// For Node v0.10 support. Remove this eventually.
-function isSlowBuffer (obj) {
-  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
-}
-
-
-/***/ }),
-/* 82 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var defaults = __webpack_require__(27);
-var utils = __webpack_require__(6);
-var InterceptorManager = __webpack_require__(91);
-var dispatchRequest = __webpack_require__(92);
-
-/**
- * Create a new instance of Axios
- *
- * @param {Object} instanceConfig The default config for the instance
- */
-function Axios(instanceConfig) {
-  this.defaults = instanceConfig;
-  this.interceptors = {
-    request: new InterceptorManager(),
-    response: new InterceptorManager()
-  };
-}
-
-/**
- * Dispatch a request
- *
- * @param {Object} config The config specific for this request (merged with this.defaults)
- */
-Axios.prototype.request = function request(config) {
-  /*eslint no-param-reassign:0*/
-  // Allow for axios('example/url'[, config]) a la fetch API
-  if (typeof config === 'string') {
-    config = utils.merge({
-      url: arguments[0]
-    }, arguments[1]);
-  }
-
-  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
-  config.method = config.method.toLowerCase();
-
-  // Hook up interceptors middleware
-  var chain = [dispatchRequest, undefined];
-  var promise = Promise.resolve(config);
-
-  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
-    chain.unshift(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
-    chain.push(interceptor.fulfilled, interceptor.rejected);
-  });
-
-  while (chain.length) {
-    promise = promise.then(chain.shift(), chain.shift());
-  }
-
-  return promise;
-};
-
-// Provide aliases for supported request methods
-utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, config) {
-    return this.request(utils.merge(config || {}, {
-      method: method,
-      url: url
-    }));
-  };
-});
-
-utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
-  /*eslint func-names:0*/
-  Axios.prototype[method] = function(url, data, config) {
-    return this.request(utils.merge(config || {}, {
-      method: method,
-      url: url,
-      data: data
-    }));
-  };
-});
-
-module.exports = Axios;
-
-
-/***/ }),
-/* 83 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-module.exports = function normalizeHeaderName(headers, normalizedName) {
-  utils.forEach(headers, function processHeader(value, name) {
-    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
-      headers[normalizedName] = value;
-      delete headers[name];
-    }
-  });
-};
-
-
-/***/ }),
-/* 84 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var createError = __webpack_require__(35);
-
-/**
- * Resolve or reject a Promise based on response status.
- *
- * @param {Function} resolve A function that resolves the promise.
- * @param {Function} reject A function that rejects the promise.
- * @param {object} response The response.
- */
-module.exports = function settle(resolve, reject, response) {
-  var validateStatus = response.config.validateStatus;
-  // Note: status is not exposed by XDomainRequest
-  if (!response.status || !validateStatus || validateStatus(response.status)) {
-    resolve(response);
-  } else {
-    reject(createError(
-      'Request failed with status code ' + response.status,
-      response.config,
-      null,
-      response.request,
-      response
-    ));
-  }
-};
-
-
-/***/ }),
-/* 85 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Update an Error with the specified config, error code, and response.
- *
- * @param {Error} error The error to update.
- * @param {Object} config The config.
- * @param {string} [code] The error code (for example, 'ECONNABORTED').
- * @param {Object} [request] The request.
- * @param {Object} [response] The response.
- * @returns {Error} The error.
- */
-module.exports = function enhanceError(error, config, code, request, response) {
-  error.config = config;
-  if (code) {
-    error.code = code;
-  }
-  error.request = request;
-  error.response = response;
-  return error;
-};
-
-
-/***/ }),
-/* 86 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-function encode(val) {
-  return encodeURIComponent(val).
-    replace(/%40/gi, '@').
-    replace(/%3A/gi, ':').
-    replace(/%24/g, '$').
-    replace(/%2C/gi, ',').
-    replace(/%20/g, '+').
-    replace(/%5B/gi, '[').
-    replace(/%5D/gi, ']');
-}
-
-/**
- * Build a URL by appending params to the end
- *
- * @param {string} url The base of the url (e.g., http://www.google.com)
- * @param {object} [params] The params to be appended
- * @returns {string} The formatted url
- */
-module.exports = function buildURL(url, params, paramsSerializer) {
-  /*eslint no-param-reassign:0*/
-  if (!params) {
-    return url;
-  }
-
-  var serializedParams;
-  if (paramsSerializer) {
-    serializedParams = paramsSerializer(params);
-  } else if (utils.isURLSearchParams(params)) {
-    serializedParams = params.toString();
-  } else {
-    var parts = [];
-
-    utils.forEach(params, function serialize(val, key) {
-      if (val === null || typeof val === 'undefined') {
-        return;
-      }
-
-      if (utils.isArray(val)) {
-        key = key + '[]';
-      } else {
-        val = [val];
-      }
-
-      utils.forEach(val, function parseValue(v) {
-        if (utils.isDate(v)) {
-          v = v.toISOString();
-        } else if (utils.isObject(v)) {
-          v = JSON.stringify(v);
-        }
-        parts.push(encode(key) + '=' + encode(v));
-      });
-    });
-
-    serializedParams = parts.join('&');
-  }
-
-  if (serializedParams) {
-    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
-  }
-
-  return url;
-};
-
-
-/***/ }),
-/* 87 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-// Headers whose duplicates are ignored by node
-// c.f. https://nodejs.org/api/http.html#http_message_headers
-var ignoreDuplicateOf = [
-  'age', 'authorization', 'content-length', 'content-type', 'etag',
-  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
-  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
-  'referer', 'retry-after', 'user-agent'
-];
-
-/**
- * Parse headers into an object
- *
- * ```
- * Date: Wed, 27 Aug 2014 08:58:49 GMT
- * Content-Type: application/json
- * Connection: keep-alive
- * Transfer-Encoding: chunked
- * ```
- *
- * @param {String} headers Headers needing to be parsed
- * @returns {Object} Headers parsed into an object
- */
-module.exports = function parseHeaders(headers) {
-  var parsed = {};
-  var key;
-  var val;
-  var i;
-
-  if (!headers) { return parsed; }
-
-  utils.forEach(headers.split('\n'), function parser(line) {
-    i = line.indexOf(':');
-    key = utils.trim(line.substr(0, i)).toLowerCase();
-    val = utils.trim(line.substr(i + 1));
-
-    if (key) {
-      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
-        return;
-      }
-      if (key === 'set-cookie') {
-        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
-      } else {
-        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
-      }
-    }
-  });
-
-  return parsed;
-};
-
-
-/***/ }),
-/* 88 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs have full support of the APIs needed to test
-  // whether the request URL is of the same origin as current location.
-  (function standardBrowserEnv() {
-    var msie = /(msie|trident)/i.test(navigator.userAgent);
-    var urlParsingNode = document.createElement('a');
-    var originURL;
-
-    /**
-    * Parse a URL to discover it's components
-    *
-    * @param {String} url The URL to be parsed
-    * @returns {Object}
-    */
-    function resolveURL(url) {
-      var href = url;
-
-      if (msie) {
-        // IE needs attribute set twice to normalize properties
-        urlParsingNode.setAttribute('href', href);
-        href = urlParsingNode.href;
-      }
-
-      urlParsingNode.setAttribute('href', href);
-
-      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
-      return {
-        href: urlParsingNode.href,
-        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
-        host: urlParsingNode.host,
-        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
-        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
-        hostname: urlParsingNode.hostname,
-        port: urlParsingNode.port,
-        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
-                  urlParsingNode.pathname :
-                  '/' + urlParsingNode.pathname
-      };
-    }
-
-    originURL = resolveURL(window.location.href);
-
-    /**
-    * Determine if a URL shares the same origin as the current location
-    *
-    * @param {String} requestURL The URL to test
-    * @returns {boolean} True if URL shares the same origin, otherwise false
-    */
-    return function isURLSameOrigin(requestURL) {
-      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
-      return (parsed.protocol === originURL.protocol &&
-            parsed.host === originURL.host);
-    };
-  })() :
-
-  // Non standard browser envs (web workers, react-native) lack needed support.
-  (function nonStandardBrowserEnv() {
-    return function isURLSameOrigin() {
-      return true;
-    };
-  })()
-);
-
-
-/***/ }),
-/* 89 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
-
-var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
-
-function E() {
-  this.message = 'String contains an invalid character';
-}
-E.prototype = new Error;
-E.prototype.code = 5;
-E.prototype.name = 'InvalidCharacterError';
-
-function btoa(input) {
-  var str = String(input);
-  var output = '';
-  for (
-    // initialize result and counter
-    var block, charCode, idx = 0, map = chars;
-    // if the next str index does not exist:
-    //   change the mapping table to "="
-    //   check if d has no fractional digits
-    str.charAt(idx | 0) || (map = '=', idx % 1);
-    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
-    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
-  ) {
-    charCode = str.charCodeAt(idx += 3 / 4);
-    if (charCode > 0xFF) {
-      throw new E();
-    }
-    block = block << 8 | charCode;
-  }
-  return output;
-}
-
-module.exports = btoa;
-
-
-/***/ }),
-/* 90 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-module.exports = (
-  utils.isStandardBrowserEnv() ?
-
-  // Standard browser envs support document.cookie
-  (function standardBrowserEnv() {
-    return {
-      write: function write(name, value, expires, path, domain, secure) {
-        var cookie = [];
-        cookie.push(name + '=' + encodeURIComponent(value));
-
-        if (utils.isNumber(expires)) {
-          cookie.push('expires=' + new Date(expires).toGMTString());
-        }
-
-        if (utils.isString(path)) {
-          cookie.push('path=' + path);
-        }
-
-        if (utils.isString(domain)) {
-          cookie.push('domain=' + domain);
-        }
-
-        if (secure === true) {
-          cookie.push('secure');
-        }
-
-        document.cookie = cookie.join('; ');
-      },
-
-      read: function read(name) {
-        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
-        return (match ? decodeURIComponent(match[3]) : null);
-      },
-
-      remove: function remove(name) {
-        this.write(name, '', Date.now() - 86400000);
-      }
-    };
-  })() :
-
-  // Non standard browser env (web workers, react-native) lack needed support.
-  (function nonStandardBrowserEnv() {
-    return {
-      write: function write() {},
-      read: function read() { return null; },
-      remove: function remove() {}
-    };
-  })()
-);
-
-
-/***/ }),
-/* 91 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-function InterceptorManager() {
-  this.handlers = [];
-}
-
-/**
- * Add a new interceptor to the stack
- *
- * @param {Function} fulfilled The function to handle `then` for a `Promise`
- * @param {Function} rejected The function to handle `reject` for a `Promise`
- *
- * @return {Number} An ID used to remove interceptor later
- */
-InterceptorManager.prototype.use = function use(fulfilled, rejected) {
-  this.handlers.push({
-    fulfilled: fulfilled,
-    rejected: rejected
-  });
-  return this.handlers.length - 1;
-};
-
-/**
- * Remove an interceptor from the stack
- *
- * @param {Number} id The ID that was returned by `use`
- */
-InterceptorManager.prototype.eject = function eject(id) {
-  if (this.handlers[id]) {
-    this.handlers[id] = null;
-  }
-};
-
-/**
- * Iterate over all the registered interceptors
- *
- * This method is particularly useful for skipping over any
- * interceptors that may have become `null` calling `eject`.
- *
- * @param {Function} fn The function to call for each interceptor
- */
-InterceptorManager.prototype.forEach = function forEach(fn) {
-  utils.forEach(this.handlers, function forEachHandler(h) {
-    if (h !== null) {
-      fn(h);
-    }
-  });
-};
-
-module.exports = InterceptorManager;
-
-
-/***/ }),
-/* 92 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-var transformData = __webpack_require__(93);
-var isCancel = __webpack_require__(36);
-var defaults = __webpack_require__(27);
-var isAbsoluteURL = __webpack_require__(94);
-var combineURLs = __webpack_require__(95);
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-function throwIfCancellationRequested(config) {
-  if (config.cancelToken) {
-    config.cancelToken.throwIfRequested();
-  }
-}
-
-/**
- * Dispatch a request to the server using the configured adapter.
- *
- * @param {object} config The config that is to be used for the request
- * @returns {Promise} The Promise to be fulfilled
- */
-module.exports = function dispatchRequest(config) {
-  throwIfCancellationRequested(config);
-
-  // Support baseURL config
-  if (config.baseURL && !isAbsoluteURL(config.url)) {
-    config.url = combineURLs(config.baseURL, config.url);
-  }
-
-  // Ensure headers exist
-  config.headers = config.headers || {};
-
-  // Transform request data
-  config.data = transformData(
-    config.data,
-    config.headers,
-    config.transformRequest
-  );
-
-  // Flatten headers
-  config.headers = utils.merge(
-    config.headers.common || {},
-    config.headers[config.method] || {},
-    config.headers || {}
-  );
-
-  utils.forEach(
-    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
-    function cleanHeaderConfig(method) {
-      delete config.headers[method];
-    }
-  );
-
-  var adapter = config.adapter || defaults.adapter;
-
-  return adapter(config).then(function onAdapterResolution(response) {
-    throwIfCancellationRequested(config);
-
-    // Transform response data
-    response.data = transformData(
-      response.data,
-      response.headers,
-      config.transformResponse
-    );
-
-    return response;
-  }, function onAdapterRejection(reason) {
-    if (!isCancel(reason)) {
-      throwIfCancellationRequested(config);
-
-      // Transform response data
-      if (reason && reason.response) {
-        reason.response.data = transformData(
-          reason.response.data,
-          reason.response.headers,
-          config.transformResponse
-        );
-      }
-    }
-
-    return Promise.reject(reason);
-  });
-};
-
-
-/***/ }),
-/* 93 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var utils = __webpack_require__(6);
-
-/**
- * Transform the data for a request or a response
- *
- * @param {Object|String} data The data to be transformed
- * @param {Array} headers The headers for the request or response
- * @param {Array|Function} fns A single function or Array of functions
- * @returns {*} The resulting transformed data
- */
-module.exports = function transformData(data, headers, fns) {
-  /*eslint no-param-reassign:0*/
-  utils.forEach(fns, function transform(fn) {
-    data = fn(data, headers);
-  });
-
-  return data;
-};
-
-
-/***/ }),
-/* 94 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Determines whether the specified URL is absolute
- *
- * @param {string} url The URL to test
- * @returns {boolean} True if the specified URL is absolute, otherwise false
- */
-module.exports = function isAbsoluteURL(url) {
-  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
-  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
-  // by any combination of letters, digits, plus, period, or hyphen.
-  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
-};
-
-
-/***/ }),
-/* 95 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Creates a new URL by combining the specified URLs
- *
- * @param {string} baseURL The base URL
- * @param {string} relativeURL The relative URL
- * @returns {string} The combined URL
- */
-module.exports = function combineURLs(baseURL, relativeURL) {
-  return relativeURL
-    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
-    : baseURL;
-};
-
-
-/***/ }),
-/* 96 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var Cancel = __webpack_require__(37);
-
-/**
- * A `CancelToken` is an object that can be used to request cancellation of an operation.
- *
- * @class
- * @param {Function} executor The executor function.
- */
-function CancelToken(executor) {
-  if (typeof executor !== 'function') {
-    throw new TypeError('executor must be a function.');
-  }
-
-  var resolvePromise;
-  this.promise = new Promise(function promiseExecutor(resolve) {
-    resolvePromise = resolve;
-  });
-
-  var token = this;
-  executor(function cancel(message) {
-    if (token.reason) {
-      // Cancellation has already been requested
-      return;
-    }
-
-    token.reason = new Cancel(message);
-    resolvePromise(token.reason);
-  });
-}
-
-/**
- * Throws a `Cancel` if cancellation has been requested.
- */
-CancelToken.prototype.throwIfRequested = function throwIfRequested() {
-  if (this.reason) {
-    throw this.reason;
-  }
-};
-
-/**
- * Returns an object that contains a new `CancelToken` and a function that, when called,
- * cancels the `CancelToken`.
- */
-CancelToken.source = function source() {
-  var cancel;
-  var token = new CancelToken(function executor(c) {
-    cancel = c;
-  });
-  return {
-    token: token,
-    cancel: cancel
-  };
-};
-
-module.exports = CancelToken;
-
-
-/***/ }),
-/* 97 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-/**
- * Syntactic sugar for invoking a function and expanding an array for arguments.
- *
- * Common use case would be to use `Function.prototype.apply`.
- *
- *  ```js
- *  function f(x, y, z) {}
- *  var args = [1, 2, 3];
- *  f.apply(null, args);
- *  ```
- *
- * With `spread` this example can be re-written.
- *
- *  ```js
- *  spread(function(x, y, z) {})([1, 2, 3]);
- *  ```
- *
- * @param {Function} callback
- * @returns {Function}
- */
-module.exports = function spread(callback) {
-  return function wrap(arr) {
-    return callback.apply(null, arr);
-  };
-};
-
-
-/***/ }),
-/* 98 */
-/***/ (function(module, exports, __webpack_require__) {
-
-var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
-Turbolinks 5.1.1
-Copyright © 2018 Basecamp, LLC
- */
-(function(){var t=this;(function(){(function(){this.Turbolinks={supported:function(){return null!=window.history.pushState&&null!=window.requestAnimationFrame&&null!=window.addEventListener}(),visit:function(t,r){return e.controller.visit(t,r)},clearCache:function(){return e.controller.clearCache()},setProgressBarDelay:function(t){return e.controller.setProgressBarDelay(t)}}}).call(this)}).call(t);var e=t.Turbolinks;(function(){(function(){var t,r,n,o=[].slice;e.copyObject=function(t){var e,r,n;r={};for(e in t)n=t[e],r[e]=n;return r},e.closest=function(e,r){return t.call(e,r)},t=function(){var t,e;return t=document.documentElement,null!=(e=t.closest)?e:function(t){var e;for(e=this;e;){if(e.nodeType===Node.ELEMENT_NODE&&r.call(e,t))return e;e=e.parentNode}}}(),e.defer=function(t){return setTimeout(t,1)},e.throttle=function(t){var e;return e=null,function(){var r;return r=1<=arguments.length?o.call(arguments,0):[],null!=e?e:e=requestAnimationFrame(function(n){return function(){return e=null,t.apply(n,r)}}(this))}},e.dispatch=function(t,e){var r,o,i,s,a,u;return a=null!=e?e:{},u=a.target,r=a.cancelable,o=a.data,i=document.createEvent("Events"),i.initEvent(t,!0,r===!0),i.data=null!=o?o:{},i.cancelable&&!n&&(s=i.preventDefault,i.preventDefault=function(){return this.defaultPrevented||Object.defineProperty(this,"defaultPrevented",{get:function(){return!0}}),s.call(this)}),(null!=u?u:document).dispatchEvent(i),i},n=function(){var t;return t=document.createEvent("Events"),t.initEvent("test",!0,!0),t.preventDefault(),t.defaultPrevented}(),e.match=function(t,e){return r.call(t,e)},r=function(){var t,e,r,n;return t=document.documentElement,null!=(e=null!=(r=null!=(n=t.matchesSelector)?n:t.webkitMatchesSelector)?r:t.msMatchesSelector)?e:t.mozMatchesSelector}(),e.uuid=function(){var t,e,r;for(r="",t=e=1;36>=e;t=++e)r+=9===t||14===t||19===t||24===t?"-":15===t?"4":20===t?(Math.floor(4*Math.random())+8).toString(16):Math.floor(15*Math.random()).toString(16);return r}}).call(this),function(){e.Location=function(){function t(t){var e,r;null==t&&(t=""),r=document.createElement("a"),r.href=t.toString(),this.absoluteURL=r.href,e=r.hash.length,2>e?this.requestURL=this.absoluteURL:(this.requestURL=this.absoluteURL.slice(0,-e),this.anchor=r.hash.slice(1))}var e,r,n,o;return t.wrap=function(t){return t instanceof this?t:new this(t)},t.prototype.getOrigin=function(){return this.absoluteURL.split("/",3).join("/")},t.prototype.getPath=function(){var t,e;return null!=(t=null!=(e=this.requestURL.match(/\/\/[^\/]*(\/[^?;]*)/))?e[1]:void 0)?t:"/"},t.prototype.getPathComponents=function(){return this.getPath().split("/").slice(1)},t.prototype.getLastPathComponent=function(){return this.getPathComponents().slice(-1)[0]},t.prototype.getExtension=function(){var t,e;return null!=(t=null!=(e=this.getLastPathComponent().match(/\.[^.]*$/))?e[0]:void 0)?t:""},t.prototype.isHTML=function(){return this.getExtension().match(/^(?:|\.(?:htm|html|xhtml))$/)},t.prototype.isPrefixedBy=function(t){var e;return e=r(t),this.isEqualTo(t)||o(this.absoluteURL,e)},t.prototype.isEqualTo=function(t){return this.absoluteURL===(null!=t?t.absoluteURL:void 0)},t.prototype.toCacheKey=function(){return this.requestURL},t.prototype.toJSON=function(){return this.absoluteURL},t.prototype.toString=function(){return this.absoluteURL},t.prototype.valueOf=function(){return this.absoluteURL},r=function(t){return e(t.getOrigin()+t.getPath())},e=function(t){return n(t,"/")?t:t+"/"},o=function(t,e){return t.slice(0,e.length)===e},n=function(t,e){return t.slice(-e.length)===e},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.HttpRequest=function(){function r(r,n,o){this.delegate=r,this.requestCanceled=t(this.requestCanceled,this),this.requestTimedOut=t(this.requestTimedOut,this),this.requestFailed=t(this.requestFailed,this),this.requestLoaded=t(this.requestLoaded,this),this.requestProgressed=t(this.requestProgressed,this),this.url=e.Location.wrap(n).requestURL,this.referrer=e.Location.wrap(o).absoluteURL,this.createXHR()}return r.NETWORK_FAILURE=0,r.TIMEOUT_FAILURE=-1,r.timeout=60,r.prototype.send=function(){var t;return this.xhr&&!this.sent?(this.notifyApplicationBeforeRequestStart(),this.setProgress(0),this.xhr.send(),this.sent=!0,"function"==typeof(t=this.delegate).requestStarted?t.requestStarted():void 0):void 0},r.prototype.cancel=function(){return this.xhr&&this.sent?this.xhr.abort():void 0},r.prototype.requestProgressed=function(t){return t.lengthComputable?this.setProgress(t.loaded/t.total):void 0},r.prototype.requestLoaded=function(){return this.endRequest(function(t){return function(){var e;return 200<=(e=t.xhr.status)&&300>e?t.delegate.requestCompletedWithResponse(t.xhr.responseText,t.xhr.getResponseHeader("Turbolinks-Location")):(t.failed=!0,t.delegate.requestFailedWithStatusCode(t.xhr.status,t.xhr.responseText))}}(this))},r.prototype.requestFailed=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.NETWORK_FAILURE)}}(this))},r.prototype.requestTimedOut=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.TIMEOUT_FAILURE)}}(this))},r.prototype.requestCanceled=function(){return this.endRequest()},r.prototype.notifyApplicationBeforeRequestStart=function(){return e.dispatch("turbolinks:request-start",{data:{url:this.url,xhr:this.xhr}})},r.prototype.notifyApplicationAfterRequestEnd=function(){return e.dispatch("turbolinks:request-end",{data:{url:this.url,xhr:this.xhr}})},r.prototype.createXHR=function(){return this.xhr=new XMLHttpRequest,this.xhr.open("GET",this.url,!0),this.xhr.timeout=1e3*this.constructor.timeout,this.xhr.setRequestHeader("Accept","text/html, application/xhtml+xml"),this.xhr.setRequestHeader("Turbolinks-Referrer",this.referrer),this.xhr.onprogress=this.requestProgressed,this.xhr.onload=this.requestLoaded,this.xhr.onerror=this.requestFailed,this.xhr.ontimeout=this.requestTimedOut,this.xhr.onabort=this.requestCanceled},r.prototype.endRequest=function(t){return this.xhr?(this.notifyApplicationAfterRequestEnd(),null!=t&&t.call(this),this.destroy()):void 0},r.prototype.setProgress=function(t){var e;return this.progress=t,"function"==typeof(e=this.delegate).requestProgressed?e.requestProgressed(this.progress):void 0},r.prototype.destroy=function(){var t;return this.setProgress(1),"function"==typeof(t=this.delegate).requestFinished&&t.requestFinished(),this.delegate=null,this.xhr=null},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ProgressBar=function(){function e(){this.trickle=t(this.trickle,this),this.stylesheetElement=this.createStylesheetElement(),this.progressElement=this.createProgressElement()}var r;return r=300,e.defaultCSS=".turbolinks-progress-bar {\n  position: fixed;\n  display: block;\n  top: 0;\n  left: 0;\n  height: 3px;\n  background: #0076ff;\n  z-index: 9999;\n  transition: width "+r+"ms ease-out, opacity "+r/2+"ms "+r/2+"ms ease-in;\n  transform: translate3d(0, 0, 0);\n}",e.prototype.show=function(){return this.visible?void 0:(this.visible=!0,this.installStylesheetElement(),this.installProgressElement(),this.startTrickling())},e.prototype.hide=function(){return this.visible&&!this.hiding?(this.hiding=!0,this.fadeProgressElement(function(t){return function(){return t.uninstallProgressElement(),t.stopTrickling(),t.visible=!1,t.hiding=!1}}(this))):void 0},e.prototype.setValue=function(t){return this.value=t,this.refresh()},e.prototype.installStylesheetElement=function(){return document.head.insertBefore(this.stylesheetElement,document.head.firstChild)},e.prototype.installProgressElement=function(){return this.progressElement.style.width=0,this.progressElement.style.opacity=1,document.documentElement.insertBefore(this.progressElement,document.body),this.refresh()},e.prototype.fadeProgressElement=function(t){return this.progressElement.style.opacity=0,setTimeout(t,1.5*r)},e.prototype.uninstallProgressElement=function(){return this.progressElement.parentNode?document.documentElement.removeChild(this.progressElement):void 0},e.prototype.startTrickling=function(){return null!=this.trickleInterval?this.trickleInterval:this.trickleInterval=setInterval(this.trickle,r)},e.prototype.stopTrickling=function(){return clearInterval(this.trickleInterval),this.trickleInterval=null},e.prototype.trickle=function(){return this.setValue(this.value+Math.random()/100)},e.prototype.refresh=function(){return requestAnimationFrame(function(t){return function(){return t.progressElement.style.width=10+90*t.value+"%"}}(this))},e.prototype.createStylesheetElement=function(){var t;return t=document.createElement("style"),t.type="text/css",t.textContent=this.constructor.defaultCSS,t},e.prototype.createProgressElement=function(){var t;return t=document.createElement("div"),t.className="turbolinks-progress-bar",t},e}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.BrowserAdapter=function(){function r(r){this.controller=r,this.showProgressBar=t(this.showProgressBar,this),this.progressBar=new e.ProgressBar}var n,o,i;return i=e.HttpRequest,n=i.NETWORK_FAILURE,o=i.TIMEOUT_FAILURE,r.prototype.visitProposedToLocationWithAction=function(t,e){return this.controller.startVisitToLocationWithAction(t,e)},r.prototype.visitStarted=function(t){return t.issueRequest(),t.changeHistory(),t.loadCachedSnapshot()},r.prototype.visitRequestStarted=function(t){return this.progressBar.setValue(0),t.hasCachedSnapshot()||"restore"!==t.action?this.showProgressBarAfterDelay():this.showProgressBar()},r.prototype.visitRequestProgressed=function(t){return this.progressBar.setValue(t.progress)},r.prototype.visitRequestCompleted=function(t){return t.loadResponse()},r.prototype.visitRequestFailedWithStatusCode=function(t,e){switch(e){case n:case o:return this.reload();default:return t.loadResponse()}},r.prototype.visitRequestFinished=function(t){return this.hideProgressBar()},r.prototype.visitCompleted=function(t){return t.followRedirect()},r.prototype.pageInvalidated=function(){return this.reload()},r.prototype.showProgressBarAfterDelay=function(){return this.progressBarTimeout=setTimeout(this.showProgressBar,this.controller.progressBarDelay)},r.prototype.showProgressBar=function(){return this.progressBar.show()},r.prototype.hideProgressBar=function(){return this.progressBar.hide(),clearTimeout(this.progressBarTimeout)},r.prototype.reload=function(){return window.location.reload()},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.History=function(){function r(e){this.delegate=e,this.onPageLoad=t(this.onPageLoad,this),this.onPopState=t(this.onPopState,this)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("popstate",this.onPopState,!1),addEventListener("load",this.onPageLoad,!1),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("popstate",this.onPopState,!1),removeEventListener("load",this.onPageLoad,!1),this.started=!1):void 0},r.prototype.push=function(t,r){return t=e.Location.wrap(t),this.update("push",t,r)},r.prototype.replace=function(t,r){return t=e.Location.wrap(t),this.update("replace",t,r)},r.prototype.onPopState=function(t){var r,n,o,i;return this.shouldHandlePopState()&&(i=null!=(n=t.state)?n.turbolinks:void 0)?(r=e.Location.wrap(window.location),o=i.restorationIdentifier,this.delegate.historyPoppedToLocationWithRestorationIdentifier(r,o)):void 0},r.prototype.onPageLoad=function(t){return e.defer(function(t){return function(){return t.pageLoaded=!0}}(this))},r.prototype.shouldHandlePopState=function(){return this.pageIsLoaded()},r.prototype.pageIsLoaded=function(){return this.pageLoaded||"complete"===document.readyState},r.prototype.update=function(t,e,r){var n;return n={turbolinks:{restorationIdentifier:r}},history[t+"State"](n,null,e)},r}()}.call(this),function(){e.Snapshot=function(){function t(t){var e,r;r=t.head,e=t.body,this.head=null!=r?r:document.createElement("head"),this.body=null!=e?e:document.createElement("body")}return t.wrap=function(t){return t instanceof this?t:this.fromHTML(t)},t.fromHTML=function(t){var e;return e=document.createElement("html"),e.innerHTML=t,this.fromElement(e)},t.fromElement=function(t){return new this({head:t.querySelector("head"),body:t.querySelector("body")})},t.prototype.clone=function(){return new t({head:this.head.cloneNode(!0),body:this.body.cloneNode(!0)})},t.prototype.getRootLocation=function(){var t,r;return r=null!=(t=this.getSetting("root"))?t:"/",new e.Location(r)},t.prototype.getCacheControlValue=function(){return this.getSetting("cache-control")},t.prototype.getElementForAnchor=function(t){try{return this.body.querySelector("[id='"+t+"'], a[name='"+t+"']")}catch(e){}},t.prototype.hasAnchor=function(t){return null!=this.getElementForAnchor(t)},t.prototype.isPreviewable=function(){return"no-preview"!==this.getCacheControlValue()},t.prototype.isCacheable=function(){return"no-cache"!==this.getCacheControlValue()},t.prototype.isVisitable=function(){return"reload"!==this.getSetting("visit-control")},t.prototype.getSetting=function(t){var e,r;return r=this.head.querySelectorAll("meta[name='turbolinks-"+t+"']"),e=r[r.length-1],null!=e?e.getAttribute("content"):void 0},t}()}.call(this),function(){var t=[].slice;e.Renderer=function(){function e(){}var r;return e.render=function(){var e,r,n,o;return n=arguments[0],r=arguments[1],e=3<=arguments.length?t.call(arguments,2):[],o=function(t,e,r){r.prototype=t.prototype;var n=new r,o=t.apply(n,e);return Object(o)===o?o:n}(this,e,function(){}),o.delegate=n,o.render(r),o},e.prototype.renderView=function(t){return this.delegate.viewWillRender(this.newBody),t(),this.delegate.viewRendered(this.newBody)},e.prototype.invalidateView=function(){return this.delegate.viewInvalidated()},e.prototype.createScriptElement=function(t){var e;return"false"===t.getAttribute("data-turbolinks-eval")?t:(e=document.createElement("script"),e.textContent=t.textContent,e.async=!1,r(e,t),e)},r=function(t,e){var r,n,o,i,s,a,u;for(i=e.attributes,a=[],r=0,n=i.length;n>r;r++)s=i[r],o=s.name,u=s.value,a.push(t.setAttribute(o,u));return a},e}()}.call(this),function(){e.HeadDetails=function(){function t(t){var e,r,i,s,a,u,l;for(this.element=t,this.elements={},l=this.element.childNodes,s=0,u=l.length;u>s;s++)i=l[s],i.nodeType===Node.ELEMENT_NODE&&(a=i.outerHTML,r=null!=(e=this.elements)[a]?e[a]:e[a]={type:o(i),tracked:n(i),elements:[]},r.elements.push(i))}var e,r,n,o;return t.prototype.hasElementWithKey=function(t){return t in this.elements},t.prototype.getTrackedElementSignature=function(){var t,e;return function(){var r,n;r=this.elements,n=[];for(t in r)e=r[t].tracked,e&&n.push(t);return n}.call(this).join("")},t.prototype.getScriptElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("script",t)},t.prototype.getStylesheetElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("stylesheet",t)},t.prototype.getElementsMatchingTypeNotInDetails=function(t,e){var r,n,o,i,s,a;o=this.elements,s=[];for(n in o)i=o[n],a=i.type,r=i.elements,a!==t||e.hasElementWithKey(n)||s.push(r[0]);return s},t.prototype.getProvisionalElements=function(){var t,e,r,n,o,i,s;r=[],n=this.elements;for(e in n)o=n[e],s=o.type,i=o.tracked,t=o.elements,null!=s||i?t.length>1&&r.push.apply(r,t.slice(1)):r.push.apply(r,t);return r},o=function(t){return e(t)?"script":r(t)?"stylesheet":void 0},n=function(t){return"reload"===t.getAttribute("data-turbolinks-track")},e=function(t){var e;return e=t.tagName.toLowerCase(),"script"===e},r=function(t){var e;return e=t.tagName.toLowerCase(),"style"===e||"link"===e&&"stylesheet"===t.getAttribute("rel")},t}()}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.SnapshotRenderer=function(r){function n(t,r,n){this.currentSnapshot=t,this.newSnapshot=r,this.isPreview=n,this.currentHeadDetails=new e.HeadDetails(this.currentSnapshot.head),this.newHeadDetails=new e.HeadDetails(this.newSnapshot.head),this.newBody=this.newSnapshot.body}return t(n,r),n.prototype.render=function(t){return this.shouldRender()?(this.mergeHead(),this.renderView(function(e){return function(){return e.replaceBody(),e.isPreview||e.focusFirstAutofocusableElement(),t()}}(this))):this.invalidateView()},n.prototype.mergeHead=function(){return this.copyNewHeadStylesheetElements(),this.copyNewHeadScriptElements(),this.removeCurrentHeadProvisionalElements(),this.copyNewHeadProvisionalElements()},n.prototype.replaceBody=function(){return this.activateBodyScriptElements(),this.importBodyPermanentElements(),this.assignNewBody()},n.prototype.shouldRender=function(){return this.newSnapshot.isVisitable()&&this.trackedElementsAreIdentical()},n.prototype.trackedElementsAreIdentical=function(){return this.currentHeadDetails.getTrackedElementSignature()===this.newHeadDetails.getTrackedElementSignature()},n.prototype.copyNewHeadStylesheetElements=function(){var t,e,r,n,o;for(n=this.getNewHeadStylesheetElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.copyNewHeadScriptElements=function(){var t,e,r,n,o;for(n=this.getNewHeadScriptElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(this.createScriptElement(t)));return o},n.prototype.removeCurrentHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getCurrentHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.removeChild(t));return o},n.prototype.copyNewHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getNewHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.importBodyPermanentElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyPermanentElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],(t=this.findCurrentBodyPermanentElement(o))?i.push(o.parentNode.replaceChild(t,o)):i.push(void 0);return i},n.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},n.prototype.assignNewBody=function(){return document.body=this.newBody},n.prototype.focusFirstAutofocusableElement=function(){var t;return null!=(t=this.findFirstAutofocusableElement())?t.focus():void 0},n.prototype.getNewHeadStylesheetElements=function(){return this.newHeadDetails.getStylesheetElementsNotInDetails(this.currentHeadDetails)},n.prototype.getNewHeadScriptElements=function(){return this.newHeadDetails.getScriptElementsNotInDetails(this.currentHeadDetails)},n.prototype.getCurrentHeadProvisionalElements=function(){return this.currentHeadDetails.getProvisionalElements()},n.prototype.getNewHeadProvisionalElements=function(){return this.newHeadDetails.getProvisionalElements()},n.prototype.getNewBodyPermanentElements=function(){return this.newBody.querySelectorAll("[id][data-turbolinks-permanent]")},n.prototype.findCurrentBodyPermanentElement=function(t){return document.body.querySelector("#"+t.id+"[data-turbolinks-permanent]")},n.prototype.getNewBodyScriptElements=function(){return this.newBody.querySelectorAll("script")},n.prototype.findFirstAutofocusableElement=function(){return document.body.querySelector("[autofocus]")},n}(e.Renderer)}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.ErrorRenderer=function(e){function r(t){this.html=t}return t(r,e),r.prototype.render=function(t){return this.renderView(function(e){return function(){return e.replaceDocumentHTML(),e.activateBodyScriptElements(),t()}}(this))},r.prototype.replaceDocumentHTML=function(){return document.documentElement.innerHTML=this.html},r.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},r.prototype.getScriptElements=function(){return document.documentElement.querySelectorAll("script")},r}(e.Renderer)}.call(this),function(){e.View=function(){function t(t){this.delegate=t,this.element=document.documentElement}return t.prototype.getRootLocation=function(){return this.getSnapshot().getRootLocation()},t.prototype.getElementForAnchor=function(t){return this.getSnapshot().getElementForAnchor(t)},t.prototype.getSnapshot=function(){return e.Snapshot.fromElement(this.element)},t.prototype.render=function(t,e){var r,n,o;return o=t.snapshot,r=t.error,n=t.isPreview,this.markAsPreview(n),null!=o?this.renderSnapshot(o,n,e):this.renderError(r,e)},t.prototype.markAsPreview=function(t){return t?this.element.setAttribute("data-turbolinks-preview",""):this.element.removeAttribute("data-turbolinks-preview")},t.prototype.renderSnapshot=function(t,r,n){return e.SnapshotRenderer.render(this.delegate,n,this.getSnapshot(),e.Snapshot.wrap(t),r)},t.prototype.renderError=function(t,r){return e.ErrorRenderer.render(this.delegate,r,t)},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ScrollManager=function(){function r(r){this.delegate=r,this.onScroll=t(this.onScroll,this),this.onScroll=e.throttle(this.onScroll)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("scroll",this.onScroll,!1),this.onScroll(),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("scroll",this.onScroll,!1),this.started=!1):void 0},r.prototype.scrollToElement=function(t){return t.scrollIntoView()},r.prototype.scrollToPosition=function(t){var e,r;return e=t.x,r=t.y,window.scrollTo(e,r)},r.prototype.onScroll=function(t){return this.updatePosition({x:window.pageXOffset,y:window.pageYOffset})},r.prototype.updatePosition=function(t){var e;return this.position=t,null!=(e=this.delegate)?e.scrollPositionChanged(this.position):void 0},r}()}.call(this),function(){e.SnapshotCache=function(){function t(t){this.size=t,this.keys=[],this.snapshots={}}var r;return t.prototype.has=function(t){var e;return e=r(t),e in this.snapshots},t.prototype.get=function(t){var e;if(this.has(t))return e=this.read(t),this.touch(t),e},t.prototype.put=function(t,e){return this.write(t,e),this.touch(t),e},t.prototype.read=function(t){var e;return e=r(t),this.snapshots[e]},t.prototype.write=function(t,e){var n;return n=r(t),this.snapshots[n]=e},t.prototype.touch=function(t){var e,n;return n=r(t),e=this.keys.indexOf(n),e>-1&&this.keys.splice(e,1),this.keys.unshift(n),this.trim()},t.prototype.trim=function(){var t,e,r,n,o;for(n=this.keys.splice(this.size),o=[],t=0,r=n.length;r>t;t++)e=n[t],o.push(delete this.snapshots[e]);return o},r=function(t){return e.Location.wrap(t).toCacheKey()},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Visit=function(){function r(r,n,o){this.controller=r,this.action=o,this.performScroll=t(this.performScroll,this),this.identifier=e.uuid(),this.location=e.Location.wrap(n),this.adapter=this.controller.adapter,this.state="initialized",this.timingMetrics={}}var n;return r.prototype.start=function(){return"initialized"===this.state?(this.recordTimingMetric("visitStart"),this.state="started",this.adapter.visitStarted(this)):void 0},r.prototype.cancel=function(){var t;return"started"===this.state?(null!=(t=this.request)&&t.cancel(),this.cancelRender(),this.state="canceled"):void 0},r.prototype.complete=function(){var t;return"started"===this.state?(this.recordTimingMetric("visitEnd"),this.state="completed","function"==typeof(t=this.adapter).visitCompleted&&t.visitCompleted(this),this.controller.visitCompleted(this)):void 0},r.prototype.fail=function(){var t;return"started"===this.state?(this.state="failed","function"==typeof(t=this.adapter).visitFailed?t.visitFailed(this):void 0):void 0},r.prototype.changeHistory=function(){var t,e;return this.historyChanged?void 0:(t=this.location.isEqualTo(this.referrer)?"replace":this.action,e=n(t),this.controller[e](this.location,this.restorationIdentifier),this.historyChanged=!0)},r.prototype.issueRequest=function(){return this.shouldIssueRequest()&&null==this.request?(this.progress=0,this.request=new e.HttpRequest(this,this.location,this.referrer),this.request.send()):void 0},r.prototype.getCachedSnapshot=function(){var t;return!(t=this.controller.getCachedSnapshotForLocation(this.location))||null!=this.location.anchor&&!t.hasAnchor(this.location.anchor)||"restore"!==this.action&&!t.isPreviewable()?void 0:t},r.prototype.hasCachedSnapshot=function(){return null!=this.getCachedSnapshot()},r.prototype.loadCachedSnapshot=function(){var t,e;return(e=this.getCachedSnapshot())?(t=this.shouldIssueRequest(),this.render(function(){var r;return this.cacheSnapshot(),this.controller.render({snapshot:e,isPreview:t},this.performScroll),"function"==typeof(r=this.adapter).visitRendered&&r.visitRendered(this),t?void 0:this.complete()})):void 0},r.prototype.loadResponse=function(){return null!=this.response?this.render(function(){var t,e;return this.cacheSnapshot(),this.request.failed?(this.controller.render({error:this.response},this.performScroll),"function"==typeof(t=this.adapter).visitRendered&&t.visitRendered(this),this.fail()):(this.controller.render({snapshot:this.response},this.performScroll),"function"==typeof(e=this.adapter).visitRendered&&e.visitRendered(this),this.complete())}):void 0},r.prototype.followRedirect=function(){return this.redirectedToLocation&&!this.followedRedirect?(this.location=this.redirectedToLocation,this.controller.replaceHistoryWithLocationAndRestorationIdentifier(this.redirectedToLocation,this.restorationIdentifier),this.followedRedirect=!0):void 0},r.prototype.requestStarted=function(){var t;return this.recordTimingMetric("requestStart"),"function"==typeof(t=this.adapter).visitRequestStarted?t.visitRequestStarted(this):void 0},r.prototype.requestProgressed=function(t){var e;return this.progress=t,"function"==typeof(e=this.adapter).visitRequestProgressed?e.visitRequestProgressed(this):void 0},r.prototype.requestCompletedWithResponse=function(t,r){return this.response=t,null!=r&&(this.redirectedToLocation=e.Location.wrap(r)),this.adapter.visitRequestCompleted(this)},r.prototype.requestFailedWithStatusCode=function(t,e){return this.response=e,this.adapter.visitRequestFailedWithStatusCode(this,t)},r.prototype.requestFinished=function(){var t;return this.recordTimingMetric("requestEnd"),"function"==typeof(t=this.adapter).visitRequestFinished?t.visitRequestFinished(this):void 0},r.prototype.performScroll=function(){return this.scrolled?void 0:("restore"===this.action?this.scrollToRestoredPosition()||this.scrollToTop():this.scrollToAnchor()||this.scrollToTop(),this.scrolled=!0)},r.prototype.scrollToRestoredPosition=function(){var t,e;return t=null!=(e=this.restorationData)?e.scrollPosition:void 0,null!=t?(this.controller.scrollToPosition(t),!0):void 0},r.prototype.scrollToAnchor=function(){return null!=this.location.anchor?(this.controller.scrollToAnchor(this.location.anchor),!0):void 0},r.prototype.scrollToTop=function(){return this.controller.scrollToPosition({x:0,y:0})},r.prototype.recordTimingMetric=function(t){var e;return null!=(e=this.timingMetrics)[t]?e[t]:e[t]=(new Date).getTime()},r.prototype.getTimingMetrics=function(){return e.copyObject(this.timingMetrics)},n=function(t){switch(t){case"replace":return"replaceHistoryWithLocationAndRestorationIdentifier";case"advance":case"restore":return"pushHistoryWithLocationAndRestorationIdentifier"}},r.prototype.shouldIssueRequest=function(){return"restore"===this.action?!this.hasCachedSnapshot():!0},r.prototype.cacheSnapshot=function(){return this.snapshotCached?void 0:(this.controller.cacheSnapshot(),this.snapshotCached=!0)},r.prototype.render=function(t){return this.cancelRender(),this.frame=requestAnimationFrame(function(e){return function(){return e.frame=null,t.call(e)}}(this))},r.prototype.cancelRender=function(){return this.frame?cancelAnimationFrame(this.frame):void 0},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Controller=function(){function r(){this.clickBubbled=t(this.clickBubbled,this),this.clickCaptured=t(this.clickCaptured,this),this.pageLoaded=t(this.pageLoaded,this),this.history=new e.History(this),this.view=new e.View(this),this.scrollManager=new e.ScrollManager(this),this.restorationData={},this.clearCache(),this.setProgressBarDelay(500)}return r.prototype.start=function(){return e.supported&&!this.started?(addEventListener("click",this.clickCaptured,!0),addEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.start(),this.startHistory(),this.started=!0,this.enabled=!0):void 0},r.prototype.disable=function(){return this.enabled=!1},r.prototype.stop=function(){return this.started?(removeEventListener("click",this.clickCaptured,!0),removeEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.stop(),this.stopHistory(),this.started=!1):void 0},r.prototype.clearCache=function(){return this.cache=new e.SnapshotCache(10)},r.prototype.visit=function(t,r){var n,o;return null==r&&(r={}),t=e.Location.wrap(t),this.applicationAllowsVisitingLocation(t)?this.locationIsVisitable(t)?(n=null!=(o=r.action)?o:"advance",this.adapter.visitProposedToLocationWithAction(t,n)):window.location=t:void 0},r.prototype.startVisitToLocationWithAction=function(t,r,n){var o;return e.supported?(o=this.getRestorationDataForIdentifier(n),this.startVisit(t,r,{restorationData:o})):window.location=t},r.prototype.setProgressBarDelay=function(t){return this.progressBarDelay=t},r.prototype.startHistory=function(){return this.location=e.Location.wrap(window.location),this.restorationIdentifier=e.uuid(),this.history.start(),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.stopHistory=function(){return this.history.stop()},r.prototype.pushHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.push(this.location,this.restorationIdentifier)},r.prototype.replaceHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.historyPoppedToLocationWithRestorationIdentifier=function(t,r){var n;return this.restorationIdentifier=r,this.enabled?(n=this.getRestorationDataForIdentifier(this.restorationIdentifier),this.startVisit(t,"restore",{restorationIdentifier:this.restorationIdentifier,restorationData:n,historyChanged:!0}),this.location=e.Location.wrap(t)):this.adapter.pageInvalidated()},r.prototype.getCachedSnapshotForLocation=function(t){var e;return e=this.cache.get(t),e?e.clone():void 0},r.prototype.shouldCacheSnapshot=function(){return this.view.getSnapshot().isCacheable()},r.prototype.cacheSnapshot=function(){var t;return this.shouldCacheSnapshot()?(this.notifyApplicationBeforeCachingSnapshot(),t=this.view.getSnapshot(),this.cache.put(this.lastRenderedLocation,t.clone())):void 0},r.prototype.scrollToAnchor=function(t){var e;return(e=this.view.getElementForAnchor(t))?this.scrollToElement(e):this.scrollToPosition({x:0,y:0})},r.prototype.scrollToElement=function(t){return this.scrollManager.scrollToElement(t)},r.prototype.scrollToPosition=function(t){return this.scrollManager.scrollToPosition(t)},r.prototype.scrollPositionChanged=function(t){var e;return e=this.getCurrentRestorationData(),e.scrollPosition=t},r.prototype.render=function(t,e){return this.view.render(t,e)},r.prototype.viewInvalidated=function(){return this.adapter.pageInvalidated()},r.prototype.viewWillRender=function(t){return this.notifyApplicationBeforeRender(t)},r.prototype.viewRendered=function(){return this.lastRenderedLocation=this.currentVisit.location,this.notifyApplicationAfterRender()},r.prototype.pageLoaded=function(){return this.lastRenderedLocation=this.location,this.notifyApplicationAfterPageLoad()},r.prototype.clickCaptured=function(){return removeEventListener("click",this.clickBubbled,!1),addEventListener("click",this.clickBubbled,!1)},r.prototype.clickBubbled=function(t){var e,r,n;return this.enabled&&this.clickEventIsSignificant(t)&&(r=this.getVisitableLinkForNode(t.target))&&(n=this.getVisitableLocationForLink(r))&&this.applicationAllowsFollowingLinkToLocation(r,n)?(t.preventDefault(),e=this.getActionForLink(r),
-this.visit(n,{action:e})):void 0},r.prototype.applicationAllowsFollowingLinkToLocation=function(t,e){var r;return r=this.notifyApplicationAfterClickingLinkToLocation(t,e),!r.defaultPrevented},r.prototype.applicationAllowsVisitingLocation=function(t){var e;return e=this.notifyApplicationBeforeVisitingLocation(t),!e.defaultPrevented},r.prototype.notifyApplicationAfterClickingLinkToLocation=function(t,r){return e.dispatch("turbolinks:click",{target:t,data:{url:r.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationBeforeVisitingLocation=function(t){return e.dispatch("turbolinks:before-visit",{data:{url:t.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationAfterVisitingLocation=function(t){return e.dispatch("turbolinks:visit",{data:{url:t.absoluteURL}})},r.prototype.notifyApplicationBeforeCachingSnapshot=function(){return e.dispatch("turbolinks:before-cache")},r.prototype.notifyApplicationBeforeRender=function(t){return e.dispatch("turbolinks:before-render",{data:{newBody:t}})},r.prototype.notifyApplicationAfterRender=function(){return e.dispatch("turbolinks:render")},r.prototype.notifyApplicationAfterPageLoad=function(t){return null==t&&(t={}),e.dispatch("turbolinks:load",{data:{url:this.location.absoluteURL,timing:t}})},r.prototype.startVisit=function(t,e,r){var n;return null!=(n=this.currentVisit)&&n.cancel(),this.currentVisit=this.createVisit(t,e,r),this.currentVisit.start(),this.notifyApplicationAfterVisitingLocation(t)},r.prototype.createVisit=function(t,r,n){var o,i,s,a,u;return i=null!=n?n:{},a=i.restorationIdentifier,s=i.restorationData,o=i.historyChanged,u=new e.Visit(this,t,r),u.restorationIdentifier=null!=a?a:e.uuid(),u.restorationData=e.copyObject(s),u.historyChanged=o,u.referrer=this.location,u},r.prototype.visitCompleted=function(t){return this.notifyApplicationAfterPageLoad(t.getTimingMetrics())},r.prototype.clickEventIsSignificant=function(t){return!(t.defaultPrevented||t.target.isContentEditable||t.which>1||t.altKey||t.ctrlKey||t.metaKey||t.shiftKey)},r.prototype.getVisitableLinkForNode=function(t){return this.nodeIsVisitable(t)?e.closest(t,"a[href]:not([target]):not([download])"):void 0},r.prototype.getVisitableLocationForLink=function(t){var r;return r=new e.Location(t.getAttribute("href")),this.locationIsVisitable(r)?r:void 0},r.prototype.getActionForLink=function(t){var e;return null!=(e=t.getAttribute("data-turbolinks-action"))?e:"advance"},r.prototype.nodeIsVisitable=function(t){var r;return(r=e.closest(t,"[data-turbolinks]"))?"false"!==r.getAttribute("data-turbolinks"):!0},r.prototype.locationIsVisitable=function(t){return t.isPrefixedBy(this.view.getRootLocation())&&t.isHTML()},r.prototype.getCurrentRestorationData=function(){return this.getRestorationDataForIdentifier(this.restorationIdentifier)},r.prototype.getRestorationDataForIdentifier=function(t){var e;return null!=(e=this.restorationData)[t]?e[t]:e[t]={}},r}()}.call(this),function(){!function(){var t,e;if((t=e=document.currentScript)&&!e.hasAttribute("data-turbolinks-suppress-warning"))for(;t=t.parentNode;)if(t===document.body)return console.warn("You are loading Turbolinks from a <script> element inside the <body> element. This is probably not what you meant to do!\n\nLoad your application\u2019s JavaScript bundle inside the <head> element instead. <script> elements in <body> are evaluated with each page change.\n\nFor more information, see: https://github.com/turbolinks/turbolinks#working-with-script-elements\n\n\u2014\u2014\nSuppress this warning by adding a `data-turbolinks-suppress-warning` attribute to: %s",e.outerHTML)}()}.call(this),function(){var t,r,n;e.start=function(){return r()?(null==e.controller&&(e.controller=t()),e.controller.start()):void 0},r=function(){return null==window.Turbolinks&&(window.Turbolinks=e),n()},t=function(){var t;return t=new e.Controller,t.adapter=new e.BrowserAdapter(t),t},n=function(){return window.Turbolinks===e},n()&&e.start()}.call(this)}).call(this),"object"==typeof module&&module.exports?module.exports=e:"function"=="function"&&__webpack_require__(99)&&!(__WEBPACK_AMD_DEFINE_FACTORY__ = (e),
-				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
-				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
-				__WEBPACK_AMD_DEFINE_FACTORY__),
-				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}).call(this);
-
-/***/ }),
-/* 99 */
-/***/ (function(module, exports) {
-
-/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
-module.exports = __webpack_amd_options__;
-
-/* WEBPACK VAR INJECTION */}.call(exports, {}))
-
-/***/ }),
-/* 100 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -16444,10 +13302,3511 @@ Vue.compile = compileToFunctions;
 
 module.exports = Vue;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(38).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(40).setImmediate))
+
+/***/ }),
+/* 40 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {var scope = (typeof global !== "undefined" && global) ||
+            (typeof self !== "undefined" && self) ||
+            window;
+var apply = Function.prototype.apply;
+
+// DOM APIs, for completeness
+
+exports.setTimeout = function() {
+  return new Timeout(apply.call(setTimeout, scope, arguments), clearTimeout);
+};
+exports.setInterval = function() {
+  return new Timeout(apply.call(setInterval, scope, arguments), clearInterval);
+};
+exports.clearTimeout =
+exports.clearInterval = function(timeout) {
+  if (timeout) {
+    timeout.close();
+  }
+};
+
+function Timeout(id, clearFn) {
+  this._id = id;
+  this._clearFn = clearFn;
+}
+Timeout.prototype.unref = Timeout.prototype.ref = function() {};
+Timeout.prototype.close = function() {
+  this._clearFn.call(scope, this._id);
+};
+
+// Does not start the time, just sets up the members needed.
+exports.enroll = function(item, msecs) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = msecs;
+};
+
+exports.unenroll = function(item) {
+  clearTimeout(item._idleTimeoutId);
+  item._idleTimeout = -1;
+};
+
+exports._unrefActive = exports.active = function(item) {
+  clearTimeout(item._idleTimeoutId);
+
+  var msecs = item._idleTimeout;
+  if (msecs >= 0) {
+    item._idleTimeoutId = setTimeout(function onTimeout() {
+      if (item._onTimeout)
+        item._onTimeout();
+    }, msecs);
+  }
+};
+
+// setimmediate attaches itself to the global object
+__webpack_require__(102);
+// On some exotic environments, it's not clear which object `setimmediate` was
+// able to install onto.  Search each possibility in the same order as the
+// `setimmediate` library.
+exports.setImmediate = (typeof self !== "undefined" && self.setImmediate) ||
+                       (typeof global !== "undefined" && global.setImmediate) ||
+                       (this && this.setImmediate);
+exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
+                         (typeof global !== "undefined" && global.clearImmediate) ||
+                         (this && this.clearImmediate);
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 41 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+var listToStyles = __webpack_require__(107)
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+module.exports = function (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = listToStyles(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = listToStyles(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
+/* 42 */
+/***/ (function(module, exports, __webpack_require__) {
+
+!function(t,e){ true?module.exports=e():"function"==typeof define&&define.amd?define([],e):"object"==typeof exports?exports.VueMultiselect=e():t.VueMultiselect=e()}(this,function(){return function(t){function e(i){if(n[i])return n[i].exports;var r=n[i]={i:i,l:!1,exports:{}};return t[i].call(r.exports,r,r.exports,e),r.l=!0,r.exports}var n={};return e.m=t,e.c=n,e.i=function(t){return t},e.d=function(t,n,i){e.o(t,n)||Object.defineProperty(t,n,{configurable:!1,enumerable:!0,get:i})},e.n=function(t){var n=t&&t.__esModule?function(){return t.default}:function(){return t};return e.d(n,"a",n),n},e.o=function(t,e){return Object.prototype.hasOwnProperty.call(t,e)},e.p="/",e(e.s=66)}([function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){t.exports=!n(12)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){var i=n(10),r=n(43),o=n(31),s=Object.defineProperty;e.f=n(1)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e,n){var i=n(77),r=n(21);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(9),r=n(52),o=n(18),s=n(55),u=n(53),a=function(t,e,n){var l,c,f,p,h=t&a.F,d=t&a.G,v=t&a.S,y=t&a.P,g=t&a.B,b=d?i:v?i[e]||(i[e]={}):(i[e]||{}).prototype,m=d?r:r[e]||(r[e]={}),_=m.prototype||(m.prototype={});d&&(n=e);for(l in n)c=!h&&b&&void 0!==b[l],f=(c?b:n)[l],p=g&&c?u(f,i):y&&"function"==typeof f?u(Function.call,f):f,b&&s(b,l,f,t&a.U),m[l]!=f&&o(m,l,p),y&&_[l]!=f&&(_[l]=f)};i.core=r,a.F=1,a.G=2,a.S=4,a.P=8,a.B=16,a.W=32,a.U=64,a.R=128,t.exports=a},function(t,e,n){var i=n(3),r=n(15);t.exports=n(1)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e,n){var i=n(29)("wks"),r=n(16),o=n(0).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){var n=t.exports="undefined"!=typeof window&&window.Math==Math?window:"undefined"!=typeof self&&self.Math==Math?self:Function("return this")();"number"==typeof __g&&(__g=n)},function(t,e,n){var i=n(13);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e){t.exports=function(t){try{return!!t()}catch(t){return!0}}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(48),r=n(22);t.exports=Object.keys||function(t){return i(t,r)}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e,n){var i=n(109),r=n(110);t.exports=n(35)?function(t,e,n){return i.f(t,e,r(1,n))}:function(t,e,n){return t[e]=n,t}},function(t,e){t.exports=function(t){return"object"==typeof t?null!==t:"function"==typeof t}},function(t,e,n){var i=n(8);t.exports=function(t,e){return!!t&&i(function(){e?t.call(null,function(){},1):t.call(null)})}},function(t,e){t.exports=function(t){if(void 0==t)throw TypeError("Can't call method on  "+t);return t}},function(t,e){t.exports="constructor,hasOwnProperty,isPrototypeOf,propertyIsEnumerable,toLocaleString,toString,valueOf".split(",")},function(t,e,n){var i=n(0),r=n(11),o=n(74),s=n(6),u=function(t,e,n){var a,l,c,f=t&u.F,p=t&u.G,h=t&u.S,d=t&u.P,v=t&u.B,y=t&u.W,g=p?r:r[e]||(r[e]={}),b=g.prototype,m=p?i:h?i[e]:(i[e]||{}).prototype;p&&(n=e);for(a in n)(l=!f&&m&&void 0!==m[a])&&a in g||(c=l?m[a]:n[a],g[a]=p&&"function"!=typeof m[a]?n[a]:v&&l?o(c,i):y&&m[a]==c?function(t){var e=function(e,n,i){if(this instanceof t){switch(arguments.length){case 0:return new t;case 1:return new t(e);case 2:return new t(e,n)}return new t(e,n,i)}return t.apply(this,arguments)};return e.prototype=t.prototype,e}(c):d&&"function"==typeof c?o(Function.call,c):c,d&&((g.virtual||(g.virtual={}))[a]=c,t&u.R&&b&&!b[a]&&s(b,a,c)))};u.F=1,u.G=2,u.S=4,u.P=8,u.B=16,u.W=32,u.U=64,u.R=128,t.exports=u},function(t,e){t.exports={}},function(t,e){t.exports=!0},function(t,e){e.f={}.propertyIsEnumerable},function(t,e,n){var i=n(3).f,r=n(2),o=n(7)("toStringTag");t.exports=function(t,e,n){t&&!r(t=n?t:t.prototype,o)&&i(t,o,{configurable:!0,value:e})}},function(t,e,n){var i=n(29)("keys"),r=n(16);t.exports=function(t){return i[t]||(i[t]=r(t))}},function(t,e,n){var i=n(0),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(13);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){var i=n(0),r=n(11),o=n(25),s=n(33),u=n(3).f;t.exports=function(t){var e=r.Symbol||(r.Symbol=o?{}:i.Symbol||{});"_"==t.charAt(0)||t in e||u(e,t,{value:s.f(t)})}},function(t,e,n){e.f=n(7)},function(t,e,n){var i=n(53),r=n(36),o=n(57),s=n(37),u=n(104);t.exports=function(t,e){var n=1==t,a=2==t,l=3==t,c=4==t,f=6==t,p=5==t||f,h=e||u;return function(e,u,d){for(var v,y,g=o(e),b=r(g),m=i(u,d,3),_=s(b.length),x=0,w=n?h(e,_):a?h(e,0):void 0;_>x;x++)if((p||x in b)&&(v=b[x],y=m(v,x,g),t))if(n)w[x]=y;else if(y)switch(t){case 3:return!0;case 5:return v;case 6:return x;case 2:w.push(v)}else if(c)return!1;return f?-1:l||c?c:w}}},function(t,e,n){t.exports=!n(8)(function(){return 7!=Object.defineProperty({},"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(51);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(56),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(111)("wks"),r=n(58),o=n(9).Symbol,s="function"==typeof o;(t.exports=function(t){return i[t]||(i[t]=s&&o[t]||(s?o:r)("Symbol."+t))}).store=i},function(t,e,n){"use strict";function i(t){return 0!==t&&(!(!Array.isArray(t)||0!==t.length)||!t)}function r(t){return function(){return!t.apply(void 0,arguments)}}function o(t,e){return void 0===t&&(t="undefined"),null===t&&(t="null"),!1===t&&(t="false"),-1!==t.toString().toLowerCase().indexOf(e.trim())}function s(t,e,n,i){return t.filter(function(t){return o(i(t,n),e)})}function u(t){return t.filter(function(t){return!t.$isLabel})}function a(t,e){return function(n){return n.reduce(function(n,i){return i[t]&&i[t].length?(n.push({$groupLabel:i[e],$isLabel:!0}),n.concat(i[t])):n},[])}}function l(t,e,n,i,r){return function(o){return o.map(function(o){var u;if(!o[n])return console.warn("Options passed to vue-multiselect do not contain groups, despite the config."),[];var a=s(o[n],t,e,r);return a.length?(u={},v()(u,i,o[i]),v()(u,n,a),u):[]})}}var c=n(65),f=n.n(c),p=n(59),h=(n.n(p),n(122)),d=(n.n(h),n(64)),v=n.n(d),y=n(120),g=(n.n(y),n(121)),b=(n.n(g),n(117)),m=(n.n(b),n(123)),_=(n.n(m),n(118)),x=(n.n(_),n(119)),w=(n.n(x),function(){for(var t=arguments.length,e=new Array(t),n=0;n<t;n++)e[n]=arguments[n];return function(t){return e.reduce(function(t,e){return e(t)},t)}});e.a={data:function(){return{search:"",isOpen:!1,prefferedOpenDirection:"below",optimizedHeight:this.maxHeight}},props:{internalSearch:{type:Boolean,default:!0},options:{type:Array,required:!0},multiple:{type:Boolean,default:!1},value:{type:null,default:function(){return[]}},trackBy:{type:String},label:{type:String},searchable:{type:Boolean,default:!0},clearOnSelect:{type:Boolean,default:!0},hideSelected:{type:Boolean,default:!1},placeholder:{type:String,default:"Select option"},allowEmpty:{type:Boolean,default:!0},resetAfter:{type:Boolean,default:!1},closeOnSelect:{type:Boolean,default:!0},customLabel:{type:Function,default:function(t,e){return i(t)?"":e?t[e]:t}},taggable:{type:Boolean,default:!1},tagPlaceholder:{type:String,default:"Press enter to create a tag"},tagPosition:{type:String,default:"top"},max:{type:[Number,Boolean],default:!1},id:{default:null},optionsLimit:{type:Number,default:1e3},groupValues:{type:String},groupLabel:{type:String},groupSelect:{type:Boolean,default:!1},blockKeys:{type:Array,default:function(){return[]}},preserveSearch:{type:Boolean,default:!1},preselectFirst:{type:Boolean,default:!1}},mounted:function(){this.multiple||this.clearOnSelect||console.warn("[Vue-Multiselect warn]: ClearOnSelect and Multiple props can’t be both set to false."),!this.multiple&&this.max&&console.warn("[Vue-Multiselect warn]: Max prop should not be used when prop Multiple equals false."),this.preselectFirst&&!this.internalValue.length&&this.options.length&&this.select(this.filteredOptions[0])},computed:{internalValue:function(){return this.value||0===this.value?Array.isArray(this.value)?this.value:[this.value]:[]},filteredOptions:function(){var t=this.search||"",e=t.toLowerCase().trim(),n=this.options.concat();return n=this.internalSearch?this.groupValues?this.filterAndFlat(n,e,this.label):s(n,e,this.label,this.customLabel):this.groupValues?a(this.groupValues,this.groupLabel)(n):n,n=this.hideSelected?n.filter(r(this.isSelected)):n,this.taggable&&e.length&&!this.isExistingOption(e)&&("bottom"===this.tagPosition?n.push({isTag:!0,label:t}):n.unshift({isTag:!0,label:t})),n.slice(0,this.optionsLimit)},valueKeys:function(){var t=this;return this.trackBy?this.internalValue.map(function(e){return e[t.trackBy]}):this.internalValue},optionKeys:function(){var t=this;return(this.groupValues?this.flatAndStrip(this.options):this.options).map(function(e){return t.customLabel(e,t.label).toString().toLowerCase()})},currentOptionLabel:function(){return this.multiple?this.searchable?"":this.placeholder:this.internalValue.length?this.getOptionLabel(this.internalValue[0]):this.searchable?"":this.placeholder}},watch:{internalValue:function(){this.resetAfter&&this.internalValue.length&&(this.search="",this.$emit("input",this.multiple?[]:null))},search:function(){this.$emit("search-change",this.search,this.id)}},methods:{getValue:function(){return this.multiple?this.internalValue:0===this.internalValue.length?null:this.internalValue[0]},filterAndFlat:function(t,e,n){return w(l(e,n,this.groupValues,this.groupLabel,this.customLabel),a(this.groupValues,this.groupLabel))(t)},flatAndStrip:function(t){return w(a(this.groupValues,this.groupLabel),u)(t)},updateSearch:function(t){this.search=t},isExistingOption:function(t){return!!this.options&&this.optionKeys.indexOf(t)>-1},isSelected:function(t){var e=this.trackBy?t[this.trackBy]:t;return this.valueKeys.indexOf(e)>-1},getOptionLabel:function(t){if(i(t))return"";if(t.isTag)return t.label;if(t.$isLabel)return t.$groupLabel;var e=this.customLabel(t,this.label);return i(e)?"":e},select:function(t,e){if(t.$isLabel&&this.groupSelect)return void this.selectGroup(t);if(!(-1!==this.blockKeys.indexOf(e)||this.disabled||t.$isDisabled||t.$isLabel)&&(!this.max||!this.multiple||this.internalValue.length!==this.max)&&("Tab"!==e||this.pointerDirty)){if(t.isTag)this.$emit("tag",t.label,this.id),this.search="",this.closeOnSelect&&!this.multiple&&this.deactivate();else{if(this.isSelected(t))return void("Tab"!==e&&this.removeElement(t));this.$emit("select",t,this.id),this.multiple?this.$emit("input",this.internalValue.concat([t]),this.id):this.$emit("input",t,this.id),this.clearOnSelect&&(this.search="")}this.closeOnSelect&&this.deactivate()}},selectGroup:function(t){var e=this,n=this.options.find(function(n){return n[e.groupLabel]===t.$groupLabel});if(n)if(this.wholeGroupSelected(n)){this.$emit("remove",n[this.groupValues],this.id);var i=this.internalValue.filter(function(t){return-1===n[e.groupValues].indexOf(t)});this.$emit("input",i,this.id)}else{var o=n[this.groupValues].filter(r(this.isSelected));this.$emit("select",o,this.id),this.$emit("input",this.internalValue.concat(o),this.id)}},wholeGroupSelected:function(t){return t[this.groupValues].every(this.isSelected)},removeElement:function(t){var e=!(arguments.length>1&&void 0!==arguments[1])||arguments[1];if(!this.disabled){if(!this.allowEmpty&&this.internalValue.length<=1)return void this.deactivate();var n="object"===f()(t)?this.valueKeys.indexOf(t[this.trackBy]):this.valueKeys.indexOf(t);if(this.$emit("remove",t,this.id),this.multiple){var i=this.internalValue.slice(0,n).concat(this.internalValue.slice(n+1));this.$emit("input",i,this.id)}else this.$emit("input",null,this.id);this.closeOnSelect&&e&&this.deactivate()}},removeLastElement:function(){-1===this.blockKeys.indexOf("Delete")&&0===this.search.length&&Array.isArray(this.internalValue)&&this.removeElement(this.internalValue[this.internalValue.length-1],!1)},activate:function(){var t=this;this.isOpen||this.disabled||(this.adjustPosition(),this.groupValues&&0===this.pointer&&this.filteredOptions.length&&(this.pointer=1),this.isOpen=!0,this.searchable?(this.preserveSearch||(this.search=""),this.$nextTick(function(){return t.$refs.search.focus()})):this.$el.focus(),this.$emit("open",this.id))},deactivate:function(){this.isOpen&&(this.isOpen=!1,this.searchable?this.$refs.search.blur():this.$el.blur(),this.preserveSearch||(this.search=""),this.$emit("close",this.getValue(),this.id))},toggle:function(){this.isOpen?this.deactivate():this.activate()},adjustPosition:function(){if("undefined"!=typeof window){var t=this.$el.getBoundingClientRect().top,e=window.innerHeight-this.$el.getBoundingClientRect().bottom;e>this.maxHeight||e>t||"below"===this.openDirection||"bottom"===this.openDirection?(this.prefferedOpenDirection="below",this.optimizedHeight=Math.min(e-40,this.maxHeight)):(this.prefferedOpenDirection="above",this.optimizedHeight=Math.min(t-40,this.maxHeight))}}}}},function(t,e,n){"use strict";var i=n(59);n.n(i);e.a={data:function(){return{pointer:0,pointerDirty:!1}},props:{showPointer:{type:Boolean,default:!0},optionHeight:{type:Number,default:40}},computed:{pointerPosition:function(){return this.pointer*this.optionHeight},visibleElements:function(){return this.optimizedHeight/this.optionHeight}},watch:{filteredOptions:function(){this.pointerAdjust()},isOpen:function(){this.pointerDirty=!1}},methods:{optionHighlight:function(t,e){return{"multiselect__option--highlight":t===this.pointer&&this.showPointer,"multiselect__option--selected":this.isSelected(e)}},groupHighlight:function(t,e){var n=this;if(!this.groupSelect)return["multiselect__option--disabled"];var i=this.options.find(function(t){return t[n.groupLabel]===e.$groupLabel});return[this.groupSelect?"multiselect__option--group":"multiselect__option--disabled",{"multiselect__option--highlight":t===this.pointer&&this.showPointer},{"multiselect__option--group-selected":this.wholeGroupSelected(i)}]},addPointerElement:function(){var t=arguments.length>0&&void 0!==arguments[0]?arguments[0]:"Enter",e=t.key;this.filteredOptions.length>0&&this.select(this.filteredOptions[this.pointer],e),this.pointerReset()},pointerForward:function(){this.pointer<this.filteredOptions.length-1&&(this.pointer++,this.$refs.list.scrollTop<=this.pointerPosition-(this.visibleElements-1)*this.optionHeight&&(this.$refs.list.scrollTop=this.pointerPosition-(this.visibleElements-1)*this.optionHeight),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()),this.pointerDirty=!0},pointerBackward:function(){this.pointer>0?(this.pointer--,this.$refs.list.scrollTop>=this.pointerPosition&&(this.$refs.list.scrollTop=this.pointerPosition),this.filteredOptions[this.pointer]&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerBackward()):this.filteredOptions[this.pointer]&&this.filteredOptions[0].$isLabel&&!this.groupSelect&&this.pointerForward(),this.pointerDirty=!0},pointerReset:function(){this.closeOnSelect&&(this.pointer=0,this.$refs.list&&(this.$refs.list.scrollTop=0))},pointerAdjust:function(){this.pointer>=this.filteredOptions.length-1&&(this.pointer=this.filteredOptions.length?this.filteredOptions.length-1:0),this.filteredOptions.length>0&&this.filteredOptions[this.pointer].$isLabel&&!this.groupSelect&&this.pointerForward()},pointerSet:function(t){this.pointer=t,this.pointerDirty=!0}}}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e,n){var i=n(13),r=n(0).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){t.exports=!n(1)&&!n(12)(function(){return 7!=Object.defineProperty(n(42)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){"use strict";var i=n(25),r=n(23),o=n(49),s=n(6),u=n(2),a=n(24),l=n(79),c=n(27),f=n(86),p=n(7)("iterator"),h=!([].keys&&"next"in[].keys()),d=function(){return this};t.exports=function(t,e,n,v,y,g,b){l(n,e,v);var m,_,x,w=function(t){if(!h&&t in P)return P[t];switch(t){case"keys":case"values":return function(){return new n(this,t)}}return function(){return new n(this,t)}},S=e+" Iterator",O="values"==y,L=!1,P=t.prototype,k=P[p]||P["@@iterator"]||y&&P[y],E=k||w(y),j=y?O?w("entries"):E:void 0,V="Array"==e?P.entries||k:k;if(V&&(x=f(V.call(new t)))!==Object.prototype&&(c(x,S,!0),i||u(x,p)||s(x,p,d)),O&&k&&"values"!==k.name&&(L=!0,E=function(){return k.call(this)}),i&&!b||!h&&!L&&P[p]||s(P,p,E),a[e]=E,a[S]=d,y)if(m={values:O?E:w("values"),keys:g?E:w("keys"),entries:j},b)for(_ in m)_ in P||o(P,_,m[_]);else r(r.P+r.F*(h||L),e,m);return m}},function(t,e,n){var i=n(10),r=n(83),o=n(22),s=n(28)("IE_PROTO"),u=function(){},a=function(){var t,e=n(42)("iframe"),i=o.length;for(e.style.display="none",n(76).appendChild(e),e.src="javascript:",t=e.contentWindow.document,t.open(),t.write("<script>document.F=Object<\/script>"),t.close(),a=t.F;i--;)delete a.prototype[o[i]];return a()};t.exports=Object.create||function(t,e){var n;return null!==t?(u.prototype=i(t),n=new u,u.prototype=null,n[s]=t):n=a(),void 0===e?n:r(n,e)}},function(t,e,n){var i=n(48),r=n(22).concat("length","prototype");e.f=Object.getOwnPropertyNames||function(t){return i(t,r)}},function(t,e){e.f=Object.getOwnPropertySymbols},function(t,e,n){var i=n(2),r=n(4),o=n(73)(!1),s=n(28)("IE_PROTO");t.exports=function(t,e){var n,u=r(t),a=0,l=[];for(n in u)n!=s&&i(u,n)&&l.push(n);for(;e.length>a;)i(u,n=e[a++])&&(~o(l,n)||l.push(n));return l}},function(t,e,n){t.exports=n(6)},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){var n={}.toString;t.exports=function(t){return n.call(t).slice(8,-1)}},function(t,e){var n=t.exports={version:"2.4.0"};"number"==typeof __e&&(__e=n)},function(t,e,n){var i=n(50);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(51);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){var i=n(9),r=n(18),o=n(107),s=n(58)("src"),u=Function.toString,a=(""+u).split("toString");n(52).inspectSource=function(t){return u.call(t)},(t.exports=function(t,e,n,u){var l="function"==typeof n;l&&(o(n,"name")||r(n,"name",e)),t[e]!==n&&(l&&(o(n,s)||r(n,s,t[e]?""+t[e]:a.join(String(e)))),t===i?t[e]=n:u?t[e]?t[e]=n:r(t,e,n):(delete t[e],r(t,e,n)))})(Function.prototype,"toString",function(){return"function"==typeof this&&this[s]||u.call(this)})},function(t,e){var n=Math.ceil,i=Math.floor;t.exports=function(t){return isNaN(t=+t)?0:(t>0?i:n)(t)}},function(t,e,n){var i=n(17);t.exports=function(t){return Object(i(t))}},function(t,e){var n=0,i=Math.random();t.exports=function(t){return"Symbol(".concat(void 0===t?"":t,")_",(++n+i).toString(36))}},function(t,e,n){"use strict";var i=n(5),r=n(34)(5),o=!0;"find"in[]&&Array(1).find(function(){o=!1}),i(i.P+i.F*o,"Array",{find:function(t){return r(this,t,arguments.length>1?arguments[1]:void 0)}}),n(99)("find")},function(t,e,n){"use strict";function i(t){n(124)}var r=n(67),o=n(126),s=n(125),u=i,a=s(r.a,o.a,!1,u,null,null);e.a=a.exports},function(t,e,n){t.exports=n(68)},function(t,e,n){t.exports=n(69)},function(t,e,n){t.exports=n(70)},function(t,e,n){function i(t,e,n){return e in t?r(t,e,{value:n,enumerable:!0,configurable:!0,writable:!0}):t[e]=n,t}var r=n(61);t.exports=i},function(t,e,n){function i(t){return(i="function"==typeof s&&"symbol"==typeof o?function(t){return typeof t}:function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":typeof t})(t)}function r(e){return"function"==typeof s&&"symbol"===i(o)?t.exports=r=function(t){return i(t)}:t.exports=r=function(t){return t&&"function"==typeof s&&t.constructor===s&&t!==s.prototype?"symbol":i(t)},r(e)}var o=n(63),s=n(62);t.exports=r},function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var i=n(60),r=n(39),o=n(40);n.d(e,"Multiselect",function(){return i.a}),n.d(e,"multiselectMixin",function(){return r.a}),n.d(e,"pointerMixin",function(){return o.a}),e.default=i.a},function(t,e,n){"use strict";var i=n(39),r=n(40);e.a={name:"vue-multiselect",mixins:[i.a,r.a],props:{name:{type:String,default:""},selectLabel:{type:String,default:"Press enter to select"},selectGroupLabel:{type:String,default:"Press enter to select group"},selectedLabel:{type:String,default:"Selected"},deselectLabel:{type:String,default:"Press enter to remove"},deselectGroupLabel:{type:String,default:"Press enter to deselect group"},showLabels:{type:Boolean,default:!0},limit:{type:Number,default:99999},maxHeight:{type:Number,default:300},limitText:{type:Function,default:function(t){return"and ".concat(t," more")}},loading:{type:Boolean,default:!1},disabled:{type:Boolean,default:!1},openDirection:{type:String,default:""},showNoResults:{type:Boolean,default:!0},tabindex:{type:Number,default:0}},computed:{isSingleLabelVisible:function(){return this.singleValue&&(!this.isOpen||!this.searchable)&&!this.visibleValues.length},isPlaceholderVisible:function(){return!(this.internalValue.length||this.searchable&&this.isOpen)},visibleValues:function(){return this.multiple?this.internalValue.slice(0,this.limit):[]},singleValue:function(){return this.internalValue[0]},deselectLabelText:function(){return this.showLabels?this.deselectLabel:""},deselectGroupLabelText:function(){return this.showLabels?this.deselectGroupLabel:""},selectLabelText:function(){return this.showLabels?this.selectLabel:""},selectGroupLabelText:function(){return this.showLabels?this.selectGroupLabel:""},selectedLabelText:function(){return this.showLabels?this.selectedLabel:""},inputStyle:function(){if(this.searchable||this.multiple&&this.value&&this.value.length)return this.isOpen?{width:"auto"}:{width:"0",position:"absolute",padding:"0"}},contentStyle:function(){return this.options.length?{display:"inline-block"}:{display:"block"}},isAbove:function(){return"above"===this.openDirection||"top"===this.openDirection||"below"!==this.openDirection&&"bottom"!==this.openDirection&&"above"===this.prefferedOpenDirection},showSearchInput:function(){return this.searchable&&(!this.hasSingleSelectedSlot||!this.visibleSingleValue&&0!==this.visibleSingleValue||this.isOpen)}}}},function(t,e,n){n(92);var i=n(11).Object;t.exports=function(t,e,n){return i.defineProperty(t,e,n)}},function(t,e,n){n(95),n(93),n(96),n(97),t.exports=n(11).Symbol},function(t,e,n){n(94),n(98),t.exports=n(33).f("iterator")},function(t,e){t.exports=function(t){if("function"!=typeof t)throw TypeError(t+" is not a function!");return t}},function(t,e){t.exports=function(){}},function(t,e,n){var i=n(4),r=n(89),o=n(88);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(71);t.exports=function(t,e,n){if(i(t),void 0===e)return t;switch(n){case 1:return function(n){return t.call(e,n)};case 2:return function(n,i){return t.call(e,n,i)};case 3:return function(n,i,r){return t.call(e,n,i,r)}}return function(){return t.apply(e,arguments)}}},function(t,e,n){var i=n(14),r=n(47),o=n(26);t.exports=function(t){var e=i(t),n=r.f;if(n)for(var s,u=n(t),a=o.f,l=0;u.length>l;)a.call(t,s=u[l++])&&e.push(s);return e}},function(t,e,n){t.exports=n(0).document&&document.documentElement},function(t,e,n){var i=n(41);t.exports=Object("z").propertyIsEnumerable(0)?Object:function(t){return"String"==i(t)?t.split(""):Object(t)}},function(t,e,n){var i=n(41);t.exports=Array.isArray||function(t){return"Array"==i(t)}},function(t,e,n){"use strict";var i=n(45),r=n(15),o=n(27),s={};n(6)(s,n(7)("iterator"),function(){return this}),t.exports=function(t,e,n){t.prototype=i(s,{next:r(1,n)}),o(t,e+" Iterator")}},function(t,e){t.exports=function(t,e){return{value:e,done:!!t}}},function(t,e,n){var i=n(14),r=n(4);t.exports=function(t,e){for(var n,o=r(t),s=i(o),u=s.length,a=0;u>a;)if(o[n=s[a++]]===e)return n}},function(t,e,n){var i=n(16)("meta"),r=n(13),o=n(2),s=n(3).f,u=0,a=Object.isExtensible||function(){return!0},l=!n(12)(function(){return a(Object.preventExtensions({}))}),c=function(t){s(t,i,{value:{i:"O"+ ++u,w:{}}})},f=function(t,e){if(!r(t))return"symbol"==typeof t?t:("string"==typeof t?"S":"P")+t;if(!o(t,i)){if(!a(t))return"F";if(!e)return"E";c(t)}return t[i].i},p=function(t,e){if(!o(t,i)){if(!a(t))return!0;if(!e)return!1;c(t)}return t[i].w},h=function(t){return l&&d.NEED&&a(t)&&!o(t,i)&&c(t),t},d=t.exports={KEY:i,NEED:!1,fastKey:f,getWeak:p,onFreeze:h}},function(t,e,n){var i=n(3),r=n(10),o=n(14);t.exports=n(1)?Object.defineProperties:function(t,e){r(t);for(var n,s=o(e),u=s.length,a=0;u>a;)i.f(t,n=s[a++],e[n]);return t}},function(t,e,n){var i=n(26),r=n(15),o=n(4),s=n(31),u=n(2),a=n(43),l=Object.getOwnPropertyDescriptor;e.f=n(1)?l:function(t,e){if(t=o(t),e=s(e,!0),a)try{return l(t,e)}catch(t){}if(u(t,e))return r(!i.f.call(t,e),t[e])}},function(t,e,n){var i=n(4),r=n(46).f,o={}.toString,s="object"==typeof window&&window&&Object.getOwnPropertyNames?Object.getOwnPropertyNames(window):[],u=function(t){try{return r(t)}catch(t){return s.slice()}};t.exports.f=function(t){return s&&"[object Window]"==o.call(t)?u(t):r(i(t))}},function(t,e,n){var i=n(2),r=n(90),o=n(28)("IE_PROTO"),s=Object.prototype;t.exports=Object.getPrototypeOf||function(t){return t=r(t),i(t,o)?t[o]:"function"==typeof t.constructor&&t instanceof t.constructor?t.constructor.prototype:t instanceof Object?s:null}},function(t,e,n){var i=n(30),r=n(21);t.exports=function(t){return function(e,n){var o,s,u=String(r(e)),a=i(n),l=u.length;return a<0||a>=l?t?"":void 0:(o=u.charCodeAt(a),o<55296||o>56319||a+1===l||(s=u.charCodeAt(a+1))<56320||s>57343?t?u.charAt(a):o:t?u.slice(a,a+2):s-56320+(o-55296<<10)+65536)}}},function(t,e,n){var i=n(30),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(30),r=Math.min;t.exports=function(t){return t>0?r(i(t),9007199254740991):0}},function(t,e,n){var i=n(21);t.exports=function(t){return Object(i(t))}},function(t,e,n){"use strict";var i=n(72),r=n(80),o=n(24),s=n(4);t.exports=n(44)(Array,"Array",function(t,e){this._t=s(t),this._i=0,this._k=e},function(){var t=this._t,e=this._k,n=this._i++;return!t||n>=t.length?(this._t=void 0,r(1)):"keys"==e?r(0,n):"values"==e?r(0,t[n]):r(0,[n,t[n]])},"values"),o.Arguments=o.Array,i("keys"),i("values"),i("entries")},function(t,e,n){var i=n(23);i(i.S+i.F*!n(1),"Object",{defineProperty:n(3).f})},function(t,e){},function(t,e,n){"use strict";var i=n(87)(!0);n(44)(String,"String",function(t){this._t=String(t),this._i=0},function(){var t,e=this._t,n=this._i;return n>=e.length?{value:void 0,done:!0}:(t=i(e,n),this._i+=t.length,{value:t,done:!1})})},function(t,e,n){"use strict";var i=n(0),r=n(2),o=n(1),s=n(23),u=n(49),a=n(82).KEY,l=n(12),c=n(29),f=n(27),p=n(16),h=n(7),d=n(33),v=n(32),y=n(81),g=n(75),b=n(78),m=n(10),_=n(4),x=n(31),w=n(15),S=n(45),O=n(85),L=n(84),P=n(3),k=n(14),E=L.f,j=P.f,V=O.f,C=i.Symbol,T=i.JSON,A=T&&T.stringify,$=h("_hidden"),D=h("toPrimitive"),F={}.propertyIsEnumerable,M=c("symbol-registry"),B=c("symbols"),N=c("op-symbols"),R=Object.prototype,H="function"==typeof C,G=i.QObject,I=!G||!G.prototype||!G.prototype.findChild,K=o&&l(function(){return 7!=S(j({},"a",{get:function(){return j(this,"a",{value:7}).a}})).a})?function(t,e,n){var i=E(R,e);i&&delete R[e],j(t,e,n),i&&t!==R&&j(R,e,i)}:j,z=function(t){var e=B[t]=S(C.prototype);return e._k=t,e},U=H&&"symbol"==typeof C.iterator?function(t){return"symbol"==typeof t}:function(t){return t instanceof C},W=function(t,e,n){return t===R&&W(N,e,n),m(t),e=x(e,!0),m(n),r(B,e)?(n.enumerable?(r(t,$)&&t[$][e]&&(t[$][e]=!1),n=S(n,{enumerable:w(0,!1)})):(r(t,$)||j(t,$,w(1,{})),t[$][e]=!0),K(t,e,n)):j(t,e,n)},J=function(t,e){m(t);for(var n,i=g(e=_(e)),r=0,o=i.length;o>r;)W(t,n=i[r++],e[n]);return t},q=function(t,e){return void 0===e?S(t):J(S(t),e)},X=function(t){var e=F.call(this,t=x(t,!0));return!(this===R&&r(B,t)&&!r(N,t))&&(!(e||!r(this,t)||!r(B,t)||r(this,$)&&this[$][t])||e)},Y=function(t,e){if(t=_(t),e=x(e,!0),t!==R||!r(B,e)||r(N,e)){var n=E(t,e);return!n||!r(B,e)||r(t,$)&&t[$][e]||(n.enumerable=!0),n}},Q=function(t){for(var e,n=V(_(t)),i=[],o=0;n.length>o;)r(B,e=n[o++])||e==$||e==a||i.push(e);return i},Z=function(t){for(var e,n=t===R,i=V(n?N:_(t)),o=[],s=0;i.length>s;)!r(B,e=i[s++])||n&&!r(R,e)||o.push(B[e]);return o};H||(C=function(){if(this instanceof C)throw TypeError("Symbol is not a constructor!");var t=p(arguments.length>0?arguments[0]:void 0),e=function(n){this===R&&e.call(N,n),r(this,$)&&r(this[$],t)&&(this[$][t]=!1),K(this,t,w(1,n))};return o&&I&&K(R,t,{configurable:!0,set:e}),z(t)},u(C.prototype,"toString",function(){return this._k}),L.f=Y,P.f=W,n(46).f=O.f=Q,n(26).f=X,n(47).f=Z,o&&!n(25)&&u(R,"propertyIsEnumerable",X,!0),d.f=function(t){return z(h(t))}),s(s.G+s.W+s.F*!H,{Symbol:C});for(var tt="hasInstance,isConcatSpreadable,iterator,match,replace,search,species,split,toPrimitive,toStringTag,unscopables".split(","),et=0;tt.length>et;)h(tt[et++]);for(var tt=k(h.store),et=0;tt.length>et;)v(tt[et++]);s(s.S+s.F*!H,"Symbol",{for:function(t){return r(M,t+="")?M[t]:M[t]=C(t)},keyFor:function(t){if(U(t))return y(M,t);throw TypeError(t+" is not a symbol!")},useSetter:function(){I=!0},useSimple:function(){I=!1}}),s(s.S+s.F*!H,"Object",{create:q,defineProperty:W,defineProperties:J,getOwnPropertyDescriptor:Y,getOwnPropertyNames:Q,getOwnPropertySymbols:Z}),T&&s(s.S+s.F*(!H||l(function(){var t=C();return"[null]"!=A([t])||"{}"!=A({a:t})||"{}"!=A(Object(t))})),"JSON",{stringify:function(t){if(void 0!==t&&!U(t)){for(var e,n,i=[t],r=1;arguments.length>r;)i.push(arguments[r++]);return e=i[1],"function"==typeof e&&(n=e),!n&&b(e)||(e=function(t,e){if(n&&(e=n.call(this,t,e)),!U(e))return e}),i[1]=e,A.apply(T,i)}}}),C.prototype[D]||n(6)(C.prototype,D,C.prototype.valueOf),f(C,"Symbol"),f(Math,"Math",!0),f(i.JSON,"JSON",!0)},function(t,e,n){n(32)("asyncIterator")},function(t,e,n){n(32)("observable")},function(t,e,n){n(91);for(var i=n(0),r=n(6),o=n(24),s=n(7)("toStringTag"),u=["NodeList","DOMTokenList","MediaList","StyleSheetList","CSSRuleList"],a=0;a<5;a++){var l=u[a],c=i[l],f=c&&c.prototype;f&&!f[s]&&r(f,s,l),o[l]=o.Array}},function(t,e,n){var i=n(38)("unscopables"),r=Array.prototype;void 0==r[i]&&n(18)(r,i,{}),t.exports=function(t){r[i][t]=!0}},function(t,e,n){var i=n(19);t.exports=function(t){if(!i(t))throw TypeError(t+" is not an object!");return t}},function(t,e,n){var i=n(115),r=n(37),o=n(114);t.exports=function(t){return function(e,n,s){var u,a=i(e),l=r(a.length),c=o(s,l);if(t&&n!=n){for(;l>c;)if((u=a[c++])!=u)return!0}else for(;l>c;c++)if((t||c in a)&&a[c]===n)return t||c||0;return!t&&-1}}},function(t,e,n){var i=n(50),r=n(57),o=n(36),s=n(37);t.exports=function(t,e,n,u,a){i(e);var l=r(t),c=o(l),f=s(l.length),p=a?f-1:0,h=a?-1:1;if(n<2)for(;;){if(p in c){u=c[p],p+=h;break}if(p+=h,a?p<0:f<=p)throw TypeError("Reduce of empty array with no initial value")}for(;a?p>=0:f>p;p+=h)p in c&&(u=e(u,c[p],p,l));return u}},function(t,e,n){var i=n(19),r=n(54),o=n(38)("species");t.exports=function(t){var e;return r(t)&&(e=t.constructor,"function"!=typeof e||e!==Array&&!r(e.prototype)||(e=void 0),i(e)&&null===(e=e[o])&&(e=void 0)),void 0===e?Array:e}},function(t,e,n){var i=n(103);t.exports=function(t,e){return new(i(t))(e)}},function(t,e,n){var i=n(19),r=n(9).document,o=i(r)&&i(r.createElement);t.exports=function(t){return o?r.createElement(t):{}}},function(t,e,n){"use strict";var i=n(18),r=n(55),o=n(8),s=n(17),u=n(38);t.exports=function(t,e,n){var a=u(t),l=n(s,a,""[t]),c=l[0],f=l[1];o(function(){var e={};return e[a]=function(){return 7},7!=""[t](e)})&&(r(String.prototype,t,c),i(RegExp.prototype,a,2==e?function(t,e){return f.call(t,this,e)}:function(t){return f.call(t,this)}))}},function(t,e){var n={}.hasOwnProperty;t.exports=function(t,e){return n.call(t,e)}},function(t,e,n){t.exports=!n(35)&&!n(8)(function(){return 7!=Object.defineProperty(n(105)("div"),"a",{get:function(){return 7}}).a})},function(t,e,n){var i=n(100),r=n(108),o=n(116),s=Object.defineProperty;e.f=n(35)?Object.defineProperty:function(t,e,n){if(i(t),e=o(e,!0),i(n),r)try{return s(t,e,n)}catch(t){}if("get"in n||"set"in n)throw TypeError("Accessors not supported!");return"value"in n&&(t[e]=n.value),t}},function(t,e){t.exports=function(t,e){return{enumerable:!(1&t),configurable:!(2&t),writable:!(4&t),value:e}}},function(t,e,n){var i=n(9),r=i["__core-js_shared__"]||(i["__core-js_shared__"]={});t.exports=function(t){return r[t]||(r[t]={})}},function(t,e,n){var i=n(5),r=n(17),o=n(8),s=n(113),u="["+s+"]",a="​",l=RegExp("^"+u+u+"*"),c=RegExp(u+u+"*$"),f=function(t,e,n){var r={},u=o(function(){return!!s[t]()||a[t]()!=a}),l=r[t]=u?e(p):s[t];n&&(r[n]=l),i(i.P+i.F*u,"String",r)},p=f.trim=function(t,e){return t=String(r(t)),1&e&&(t=t.replace(l,"")),2&e&&(t=t.replace(c,"")),t};t.exports=f},function(t,e){t.exports="\t\n\v\f\r   ᠎             　\u2028\u2029\ufeff"},function(t,e,n){var i=n(56),r=Math.max,o=Math.min;t.exports=function(t,e){return t=i(t),t<0?r(t+e,0):o(t,e)}},function(t,e,n){var i=n(36),r=n(17);t.exports=function(t){return i(r(t))}},function(t,e,n){var i=n(19);t.exports=function(t,e){if(!i(t))return t;var n,r;if(e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;if("function"==typeof(n=t.valueOf)&&!i(r=n.call(t)))return r;if(!e&&"function"==typeof(n=t.toString)&&!i(r=n.call(t)))return r;throw TypeError("Can't convert object to primitive value")}},function(t,e,n){"use strict";var i=n(5),r=n(34)(2);i(i.P+i.F*!n(20)([].filter,!0),"Array",{filter:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(101)(!1),o=[].indexOf,s=!!o&&1/[1].indexOf(1,-0)<0;i(i.P+i.F*(s||!n(20)(o)),"Array",{indexOf:function(t){return s?o.apply(this,arguments)||0:r(this,t,arguments[1])}})},function(t,e,n){var i=n(5);i(i.S,"Array",{isArray:n(54)})},function(t,e,n){"use strict";var i=n(5),r=n(34)(1);i(i.P+i.F*!n(20)([].map,!0),"Array",{map:function(t){return r(this,t,arguments[1])}})},function(t,e,n){"use strict";var i=n(5),r=n(102);i(i.P+i.F*!n(20)([].reduce,!0),"Array",{reduce:function(t){return r(this,t,arguments.length,arguments[1],!1)}})},function(t,e,n){n(106)("search",1,function(t,e,n){return[function(n){"use strict";var i=t(this),r=void 0==n?void 0:n[e];return void 0!==r?r.call(n,i):new RegExp(n)[e](String(i))},n]})},function(t,e,n){"use strict";n(112)("trim",function(t){return function(){return t(this,3)}})},function(t,e){},function(t,e){t.exports=function(t,e,n,i,r,o){var s,u=t=t||{},a=typeof t.default;"object"!==a&&"function"!==a||(s=t,u=t.default);var l="function"==typeof u?u.options:u;e&&(l.render=e.render,l.staticRenderFns=e.staticRenderFns,l._compiled=!0),n&&(l.functional=!0),r&&(l._scopeId=r);var c;if(o?(c=function(t){t=t||this.$vnode&&this.$vnode.ssrContext||this.parent&&this.parent.$vnode&&this.parent.$vnode.ssrContext,t||"undefined"==typeof __VUE_SSR_CONTEXT__||(t=__VUE_SSR_CONTEXT__),i&&i.call(this,t),t&&t._registeredComponents&&t._registeredComponents.add(o)},l._ssrRegister=c):i&&(c=i),c){var f=l.functional,p=f?l.render:l.beforeCreate;f?(l._injectStyles=c,l.render=function(t,e){return c.call(e),p(t,e)}):l.beforeCreate=p?[].concat(p,c):[c]}return{esModule:s,exports:u,options:l}}},function(t,e,n){"use strict";var i=function(){var t=this,e=t.$createElement,n=t._self._c||e;return n("div",{staticClass:"multiselect",class:{"multiselect--active":t.isOpen,"multiselect--disabled":t.disabled,"multiselect--above":t.isAbove},attrs:{tabindex:t.searchable?-1:t.tabindex},on:{focus:function(e){t.activate()},blur:function(e){!t.searchable&&t.deactivate()},keydown:[function(e){return"button"in e||!t._k(e.keyCode,"down",40,e.key,"ArrowDown")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerForward()):null},function(e){return"button"in e||!t._k(e.keyCode,"up",38,e.key,"ArrowUp")?e.target!==e.currentTarget?null:(e.preventDefault(),void t.pointerBackward()):null},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")||!t._k(e.keyCode,"tab",9,e.key,"Tab")?(e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null}],keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()}}},[t._t("caret",[n("div",{staticClass:"multiselect__select",on:{mousedown:function(e){e.preventDefault(),e.stopPropagation(),t.toggle()}}})],{toggle:t.toggle}),t._v(" "),t._t("clear",null,{search:t.search}),t._v(" "),n("div",{ref:"tags",staticClass:"multiselect__tags"},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.visibleValues.length>0,expression:"visibleValues.length > 0"}],staticClass:"multiselect__tags-wrap"},[t._l(t.visibleValues,function(e){return[t._t("tag",[n("span",{staticClass:"multiselect__tag"},[n("span",{domProps:{textContent:t._s(t.getOptionLabel(e))}}),t._v(" "),n("i",{staticClass:"multiselect__tag-icon",attrs:{"aria-hidden":"true",tabindex:"1"},on:{keydown:function(n){if(!("button"in n)&&t._k(n.keyCode,"enter",13,n.key,"Enter"))return null;n.preventDefault(),t.removeElement(e)},mousedown:function(n){n.preventDefault(),t.removeElement(e)}}})])],{option:e,search:t.search,remove:t.removeElement})]})],2),t._v(" "),t.internalValue&&t.internalValue.length>t.limit?[t._t("limit",[n("strong",{staticClass:"multiselect__strong",domProps:{textContent:t._s(t.limitText(t.internalValue.length-t.limit))}})])]:t._e(),t._v(" "),n("transition",{attrs:{name:"multiselect__loading"}},[t._t("loading",[n("div",{directives:[{name:"show",rawName:"v-show",value:t.loading,expression:"loading"}],staticClass:"multiselect__spinner"})])],2),t._v(" "),t.searchable?n("input",{ref:"search",staticClass:"multiselect__input",style:t.inputStyle,attrs:{name:t.name,id:t.id,type:"text",autocomplete:"off",placeholder:t.placeholder,disabled:t.disabled,tabindex:t.tabindex},domProps:{value:t.search},on:{input:function(e){t.updateSearch(e.target.value)},focus:function(e){e.preventDefault(),t.activate()},blur:function(e){e.preventDefault(),t.deactivate()},keyup:function(e){if(!("button"in e)&&t._k(e.keyCode,"esc",27,e.key,"Escape"))return null;t.deactivate()},keydown:[function(e){if(!("button"in e)&&t._k(e.keyCode,"down",40,e.key,"ArrowDown"))return null;e.preventDefault(),t.pointerForward()},function(e){if(!("button"in e)&&t._k(e.keyCode,"up",38,e.key,"ArrowUp"))return null;e.preventDefault(),t.pointerBackward()},function(e){return"button"in e||!t._k(e.keyCode,"enter",13,e.key,"Enter")?(e.preventDefault(),e.stopPropagation(),e.target!==e.currentTarget?null:void t.addPointerElement(e)):null},function(e){if(!("button"in e)&&t._k(e.keyCode,"delete",[8,46],e.key,["Backspace","Delete"]))return null;e.stopPropagation(),t.removeLastElement()}]}}):t._e(),t._v(" "),t.isSingleLabelVisible?n("span",{staticClass:"multiselect__single",on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("singleLabel",[[t._v(t._s(t.currentOptionLabel))]],{option:t.singleValue})],2):t._e(),t._v(" "),t.isPlaceholderVisible?n("span",{on:{mousedown:function(e){return e.preventDefault(),t.toggle(e)}}},[t._t("placeholder",[n("span",{staticClass:"multiselect__single"},[t._v("\n            "+t._s(t.placeholder)+"\n          ")])])],2):t._e()],2),t._v(" "),n("transition",{attrs:{name:"multiselect"}},[n("div",{directives:[{name:"show",rawName:"v-show",value:t.isOpen,expression:"isOpen"}],ref:"list",staticClass:"multiselect__content-wrapper",style:{maxHeight:t.optimizedHeight+"px"},on:{focus:t.activate,mousedown:function(t){t.preventDefault()}}},[n("ul",{staticClass:"multiselect__content",style:t.contentStyle},[t._t("beforeList"),t._v(" "),t.multiple&&t.max===t.internalValue.length?n("li",[n("span",{staticClass:"multiselect__option"},[t._t("maxElements",[t._v("Maximum of "+t._s(t.max)+" options selected. First remove a selected option to select another.")])],2)]):t._e(),t._v(" "),!t.max||t.internalValue.length<t.max?t._l(t.filteredOptions,function(e,i){return n("li",{key:i,staticClass:"multiselect__element"},[e&&(e.$isLabel||e.$isDisabled)?t._e():n("span",{staticClass:"multiselect__option",class:t.optionHighlight(i,e),attrs:{"data-select":e&&e.isTag?t.tagPlaceholder:t.selectLabelText,"data-selected":t.selectedLabelText,"data-deselect":t.deselectLabelText},on:{click:function(n){n.stopPropagation(),t.select(e)},mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.pointerSet(i)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2),t._v(" "),e&&(e.$isLabel||e.$isDisabled)?n("span",{staticClass:"multiselect__option",class:t.groupHighlight(i,e),attrs:{"data-select":t.groupSelect&&t.selectGroupLabelText,"data-deselect":t.groupSelect&&t.deselectGroupLabelText},on:{mouseenter:function(e){if(e.target!==e.currentTarget)return null;t.groupSelect&&t.pointerSet(i)},mousedown:function(n){n.preventDefault(),t.selectGroup(e)}}},[t._t("option",[n("span",[t._v(t._s(t.getOptionLabel(e)))])],{option:e,search:t.search})],2):t._e()])}):t._e(),t._v(" "),n("li",{directives:[{name:"show",rawName:"v-show",value:t.showNoResults&&0===t.filteredOptions.length&&t.search&&!t.loading,expression:"showNoResults && (filteredOptions.length === 0 && search && !loading)"}]},[n("span",{staticClass:"multiselect__option"},[t._t("noResult",[t._v("No elements found. Consider changing the search query.")])],2)]),t._v(" "),t._t("afterList")],2)])])],2)},r=[],o={render:i,staticRenderFns:r};e.a=o}])});
+
+
+/***/ }),
+/* 43 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+
+var stylesInDom = {};
+
+var	memoize = function (fn) {
+	var memo;
+
+	return function () {
+		if (typeof memo === "undefined") memo = fn.apply(this, arguments);
+		return memo;
+	};
+};
+
+var isOldIE = memoize(function () {
+	// Test for IE <= 9 as proposed by Browserhacks
+	// @see http://browserhacks.com/#hack-e71d8692f65334173fee715c222cb805
+	// Tests for existence of standard globals is to allow style-loader
+	// to operate correctly into non-standard environments
+	// @see https://github.com/webpack-contrib/style-loader/issues/177
+	return window && document && document.all && !window.atob;
+});
+
+var getElement = (function (fn) {
+	var memo = {};
+
+	return function(selector) {
+		if (typeof memo[selector] === "undefined") {
+			memo[selector] = fn.call(this, selector);
+		}
+
+		return memo[selector]
+	};
+})(function (target) {
+	return document.querySelector(target)
+});
+
+var singleton = null;
+var	singletonCounter = 0;
+var	stylesInsertedAtTop = [];
+
+var	fixUrls = __webpack_require__(121);
+
+module.exports = function(list, options) {
+	if (typeof DEBUG !== "undefined" && DEBUG) {
+		if (typeof document !== "object") throw new Error("The style-loader cannot be used in a non-browser environment");
+	}
+
+	options = options || {};
+
+	options.attrs = typeof options.attrs === "object" ? options.attrs : {};
+
+	// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+	// tags it will allow on a page
+	if (!options.singleton) options.singleton = isOldIE();
+
+	// By default, add <style> tags to the <head> element
+	if (!options.insertInto) options.insertInto = "head";
+
+	// By default, add <style> tags to the bottom of the target
+	if (!options.insertAt) options.insertAt = "bottom";
+
+	var styles = listToStyles(list, options);
+
+	addStylesToDom(styles, options);
+
+	return function update (newList) {
+		var mayRemove = [];
+
+		for (var i = 0; i < styles.length; i++) {
+			var item = styles[i];
+			var domStyle = stylesInDom[item.id];
+
+			domStyle.refs--;
+			mayRemove.push(domStyle);
+		}
+
+		if(newList) {
+			var newStyles = listToStyles(newList, options);
+			addStylesToDom(newStyles, options);
+		}
+
+		for (var i = 0; i < mayRemove.length; i++) {
+			var domStyle = mayRemove[i];
+
+			if(domStyle.refs === 0) {
+				for (var j = 0; j < domStyle.parts.length; j++) domStyle.parts[j]();
+
+				delete stylesInDom[domStyle.id];
+			}
+		}
+	};
+};
+
+function addStylesToDom (styles, options) {
+	for (var i = 0; i < styles.length; i++) {
+		var item = styles[i];
+		var domStyle = stylesInDom[item.id];
+
+		if(domStyle) {
+			domStyle.refs++;
+
+			for(var j = 0; j < domStyle.parts.length; j++) {
+				domStyle.parts[j](item.parts[j]);
+			}
+
+			for(; j < item.parts.length; j++) {
+				domStyle.parts.push(addStyle(item.parts[j], options));
+			}
+		} else {
+			var parts = [];
+
+			for(var j = 0; j < item.parts.length; j++) {
+				parts.push(addStyle(item.parts[j], options));
+			}
+
+			stylesInDom[item.id] = {id: item.id, refs: 1, parts: parts};
+		}
+	}
+}
+
+function listToStyles (list, options) {
+	var styles = [];
+	var newStyles = {};
+
+	for (var i = 0; i < list.length; i++) {
+		var item = list[i];
+		var id = options.base ? item[0] + options.base : item[0];
+		var css = item[1];
+		var media = item[2];
+		var sourceMap = item[3];
+		var part = {css: css, media: media, sourceMap: sourceMap};
+
+		if(!newStyles[id]) styles.push(newStyles[id] = {id: id, parts: [part]});
+		else newStyles[id].parts.push(part);
+	}
+
+	return styles;
+}
+
+function insertStyleElement (options, style) {
+	var target = getElement(options.insertInto)
+
+	if (!target) {
+		throw new Error("Couldn't find a style target. This probably means that the value for the 'insertInto' parameter is invalid.");
+	}
+
+	var lastStyleElementInsertedAtTop = stylesInsertedAtTop[stylesInsertedAtTop.length - 1];
+
+	if (options.insertAt === "top") {
+		if (!lastStyleElementInsertedAtTop) {
+			target.insertBefore(style, target.firstChild);
+		} else if (lastStyleElementInsertedAtTop.nextSibling) {
+			target.insertBefore(style, lastStyleElementInsertedAtTop.nextSibling);
+		} else {
+			target.appendChild(style);
+		}
+		stylesInsertedAtTop.push(style);
+	} else if (options.insertAt === "bottom") {
+		target.appendChild(style);
+	} else {
+		throw new Error("Invalid value for parameter 'insertAt'. Must be 'top' or 'bottom'.");
+	}
+}
+
+function removeStyleElement (style) {
+	if (style.parentNode === null) return false;
+	style.parentNode.removeChild(style);
+
+	var idx = stylesInsertedAtTop.indexOf(style);
+	if(idx >= 0) {
+		stylesInsertedAtTop.splice(idx, 1);
+	}
+}
+
+function createStyleElement (options) {
+	var style = document.createElement("style");
+
+	options.attrs.type = "text/css";
+
+	addAttrs(style, options.attrs);
+	insertStyleElement(options, style);
+
+	return style;
+}
+
+function createLinkElement (options) {
+	var link = document.createElement("link");
+
+	options.attrs.type = "text/css";
+	options.attrs.rel = "stylesheet";
+
+	addAttrs(link, options.attrs);
+	insertStyleElement(options, link);
+
+	return link;
+}
+
+function addAttrs (el, attrs) {
+	Object.keys(attrs).forEach(function (key) {
+		el.setAttribute(key, attrs[key]);
+	});
+}
+
+function addStyle (obj, options) {
+	var style, update, remove, result;
+
+	// If a transform function was defined, run it on the css
+	if (options.transform && obj.css) {
+	    result = options.transform(obj.css);
+
+	    if (result) {
+	    	// If transform returns a value, use that instead of the original css.
+	    	// This allows running runtime transformations on the css.
+	    	obj.css = result;
+	    } else {
+	    	// If the transform function returns a falsy value, don't add this css.
+	    	// This allows conditional loading of css
+	    	return function() {
+	    		// noop
+	    	};
+	    }
+	}
+
+	if (options.singleton) {
+		var styleIndex = singletonCounter++;
+
+		style = singleton || (singleton = createStyleElement(options));
+
+		update = applyToSingletonTag.bind(null, style, styleIndex, false);
+		remove = applyToSingletonTag.bind(null, style, styleIndex, true);
+
+	} else if (
+		obj.sourceMap &&
+		typeof URL === "function" &&
+		typeof URL.createObjectURL === "function" &&
+		typeof URL.revokeObjectURL === "function" &&
+		typeof Blob === "function" &&
+		typeof btoa === "function"
+	) {
+		style = createLinkElement(options);
+		update = updateLink.bind(null, style, options);
+		remove = function () {
+			removeStyleElement(style);
+
+			if(style.href) URL.revokeObjectURL(style.href);
+		};
+	} else {
+		style = createStyleElement(options);
+		update = applyToTag.bind(null, style);
+		remove = function () {
+			removeStyleElement(style);
+		};
+	}
+
+	update(obj);
+
+	return function updateStyle (newObj) {
+		if (newObj) {
+			if (
+				newObj.css === obj.css &&
+				newObj.media === obj.media &&
+				newObj.sourceMap === obj.sourceMap
+			) {
+				return;
+			}
+
+			update(obj = newObj);
+		} else {
+			remove();
+		}
+	};
+}
+
+var replaceText = (function () {
+	var textStore = [];
+
+	return function (index, replacement) {
+		textStore[index] = replacement;
+
+		return textStore.filter(Boolean).join('\n');
+	};
+})();
+
+function applyToSingletonTag (style, index, remove, obj) {
+	var css = remove ? "" : obj.css;
+
+	if (style.styleSheet) {
+		style.styleSheet.cssText = replaceText(index, css);
+	} else {
+		var cssNode = document.createTextNode(css);
+		var childNodes = style.childNodes;
+
+		if (childNodes[index]) style.removeChild(childNodes[index]);
+
+		if (childNodes.length) {
+			style.insertBefore(cssNode, childNodes[index]);
+		} else {
+			style.appendChild(cssNode);
+		}
+	}
+}
+
+function applyToTag (style, obj) {
+	var css = obj.css;
+	var media = obj.media;
+
+	if(media) {
+		style.setAttribute("media", media)
+	}
+
+	if(style.styleSheet) {
+		style.styleSheet.cssText = css;
+	} else {
+		while(style.firstChild) {
+			style.removeChild(style.firstChild);
+		}
+
+		style.appendChild(document.createTextNode(css));
+	}
+}
+
+function updateLink (link, options, obj) {
+	var css = obj.css;
+	var sourceMap = obj.sourceMap;
+
+	/*
+		If convertToAbsoluteUrls isn't defined, but sourcemaps are enabled
+		and there is no publicPath defined then lets turn convertToAbsoluteUrls
+		on by default.  Otherwise default to the convertToAbsoluteUrls option
+		directly
+	*/
+	var autoFixUrls = options.convertToAbsoluteUrls === undefined && sourceMap;
+
+	if (options.convertToAbsoluteUrls || autoFixUrls) {
+		css = fixUrls(css);
+	}
+
+	if (sourceMap) {
+		// http://stackoverflow.com/a/26603875
+		css += "\n/*# sourceMappingURL=data:application/json;base64," + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + " */";
+	}
+
+	var blob = new Blob([css], { type: "text/css" });
+
+	var oldSrc = link.href;
+
+	link.href = URL.createObjectURL(blob);
+
+	if(oldSrc) URL.revokeObjectURL(oldSrc);
+}
+
+
+/***/ }),
+/* 44 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+/* eslint-disable no-mixed-operators */
+
+var atobNormalized = typeof global.atob === 'function' ? global.atob : atob;
+
+function atob(base64String) {
+  var a, b, c, b1, b2, b3, b4, i;
+  var base64Matcher = new RegExp('^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{4})([=]{1,2})?$');
+  var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+  var result = '';
+
+  if (!base64Matcher.test(base64String)) {
+    throw new Error('Non base64 encoded input passed to window.atob polyfill');
+  }
+
+  i = 0;
+  do {
+    b1 = characters.indexOf(base64String.charAt(i++));
+    b2 = characters.indexOf(base64String.charAt(i++));
+    b3 = characters.indexOf(base64String.charAt(i++));
+    b4 = characters.indexOf(base64String.charAt(i++));
+
+    a = (b1 & 0x3F) << 2 | b2 >> 4 & 0x3;
+    b = (b2 & 0xF) << 4 | b3 >> 2 & 0xF;
+    c = (b3 & 0x3) << 6 | b4 & 0x3F;
+
+    result += String.fromCharCode(a) + (b ? String.fromCharCode(b) : '') + (c ? String.fromCharCode(c) : '');
+  } while (i < base64String.length);
+
+  return result;
+}
+
+module.exports = {
+  atob: function (base64String) {
+    return atobNormalized.call(global, base64String);
+  },
+  _atob: atob
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 45 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+var Client = __webpack_require__(135);
+var getConfiguration = __webpack_require__(156).getConfiguration;
+var VERSION = "3.34.0";
+var Promise = __webpack_require__(4);
+var wrapPromise = __webpack_require__(3);
+var sharedErrors = __webpack_require__(19);
+
+var cachedClients = {};
+
+/** @module braintree-web/client */
+
+/**
+ * @function create
+ * @description This function is the entry point for the <code>braintree.client</code> module. It is used for creating {@link Client} instances that service communication to Braintree servers.
+ * @param {object} options Object containing all {@link Client} options:
+ * @param {string} options.authorization A tokenizationKey or clientToken.
+ * @param {callback} [callback] The second argument, <code>data</code>, is the {@link Client} instance.
+ * @returns {Promise|void} Returns a promise if no callback is provided.
+ * @example
+ * var createClient = require('braintree-web/client').create;
+ *
+ * createClient({
+ *   authorization: CLIENT_AUTHORIZATION
+ * }, function (createErr, clientInstance) {
+ *   // ...
+ * });
+ * @static
+ */
+function create(options) {
+  if (!options.authorization) {
+    return Promise.reject(new BraintreeError({
+      type: sharedErrors.INSTANTIATION_OPTION_REQUIRED.type,
+      code: sharedErrors.INSTANTIATION_OPTION_REQUIRED.code,
+      message: 'options.authorization is required when instantiating a client.'
+    }));
+  }
+
+  if (cachedClients[options.authorization]) {
+    return Promise.resolve(cachedClients[options.authorization]);
+  }
+
+  return getConfiguration(options).then(function (configuration) {
+    var client;
+
+    if (options.debug) {
+      configuration.isDebug = true;
+    }
+
+    client = new Client(configuration);
+
+    cachedClients[options.authorization] = client;
+
+    return client;
+  });
+}
+
+// Primarily used for testing the client create call
+function clearCache() {
+  cachedClients = {};
+}
+
+module.exports = {
+  create: wrapPromise(create),
+  /**
+   * @description The current version of the SDK, i.e. `{@pkg version}`.
+   * @type {string}
+   */
+  VERSION: VERSION,
+  _clearCache: clearCache
+};
+
+
+/***/ }),
+/* 46 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var browserDetection = __webpack_require__(47);
+
+var features = {
+  tokenize_credit_cards: 'payment_methods/credit_cards', // eslint-disable-line camelcase
+  configuration: 'configuration'
+};
+
+var blacklistedInputPaths = [
+  'creditCard.options.unionPayEnrollment'
+];
+
+function GraphQL(config) {
+  this._config = config.graphQL;
+}
+
+GraphQL.prototype.getGraphQLEndpoint = function () {
+  return this._config.url;
+};
+
+GraphQL.prototype.isGraphQLRequest = function (url, body) {
+  var featureEnabled;
+  var path = this.getClientApiPath(url);
+
+  if (!this._isGraphQLEnabled() || !path || browserDetection.isIe9()) {
+    return false;
+  }
+
+  featureEnabled = this._config.features.some(function (feature) {
+    return features[feature] === path;
+  });
+
+  if (containsBlacklistedKeys(body)) {
+    return false;
+  }
+
+  return featureEnabled;
+};
+
+GraphQL.prototype.getClientApiPath = function (url) {
+  var path;
+  var clientApiPrefix = '/client_api/v1/';
+  var pathParts = url.split(clientApiPrefix);
+
+  if (pathParts.length > 1) {
+    path = pathParts[1].split('?')[0];
+  }
+
+  return path;
+};
+
+GraphQL.prototype._isGraphQLEnabled = function () {
+  return Boolean(this._config);
+};
+
+function containsBlacklistedKeys(body) {
+  return blacklistedInputPaths.some(function (keys) {
+    var value = keys.split('.').reduce(function (accumulator, key) {
+      return accumulator && accumulator[key];
+    }, body);
+
+    return value !== undefined; // eslint-disable-line no-undefined
+  });
+}
+
+module.exports = GraphQL;
+
+
+/***/ }),
+/* 47 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isIe = __webpack_require__(136);
+var isIe9 = __webpack_require__(23);
+
+module.exports = {
+  isIe: isIe,
+  isIe9: isIe9
+};
+
+
+/***/ }),
+/* 48 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var ajaxIsAvaliable;
+var once = __webpack_require__(29);
+var JSONPDriver = __webpack_require__(138);
+var AJAXDriver = __webpack_require__(139);
+var getUserAgent = __webpack_require__(149);
+var isHTTP = __webpack_require__(150);
+
+function isAjaxAvailable() {
+  if (ajaxIsAvaliable == null) {
+    ajaxIsAvaliable = !(isHTTP() && /MSIE\s(8|9)/.test(getUserAgent()));
+  }
+
+  return ajaxIsAvaliable;
+}
+
+module.exports = function (options, cb) {
+  cb = once(cb || Function.prototype);
+  options.method = (options.method || 'GET').toUpperCase();
+  options.timeout = options.timeout == null ? 60000 : options.timeout;
+  options.data = options.data || {};
+
+  if (isAjaxAvailable()) {
+    AJAXDriver.request(options, cb);
+  } else {
+    JSONPDriver.request(options, cb);
+  }
+};
+
+
+/***/ }),
+/* 49 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function errorResponseAdapter(responseBody) {
+  var response;
+  var errorType = responseBody.errors &&
+    responseBody.errors[0] &&
+    responseBody.errors[0].extensions &&
+    responseBody.errors[0].extensions.errorType;
+
+  if (errorType === 'user_error') {
+    response = userErrorResponseAdapter(responseBody);
+  } else if (errorType) {
+    response = errorWithTypeResponseAdapter(responseBody);
+  } else {
+    response = {error: {message: 'There was a problem serving your request'}, fieldErrors: []};
+  }
+
+  return response;
+}
+
+function errorWithTypeResponseAdapter(responseBody) {
+  return {error: {message: responseBody.errors[0].message}, fieldErrors: []};
+}
+
+function userErrorResponseAdapter(responseBody) {
+  var fieldErrors = buildFieldErrors(responseBody.errors);
+
+  return {error: {message: getLegacyMessage(fieldErrors)}, fieldErrors: fieldErrors};
+}
+
+function buildFieldErrors(errors) {
+  var fieldErrors = [];
+
+  errors.forEach(function (error) {
+    addFieldError(error.extensions.inputPath.slice(1), error, fieldErrors);
+  });
+
+  return fieldErrors;
+}
+
+function addFieldError(inputPath, errorDetail, fieldErrors) {
+  var fieldError;
+  var legacyCode = errorDetail.extensions.legacyCode;
+  var inputField = inputPath[0];
+
+  if (inputPath.length === 1) {
+    fieldErrors.push({
+      code: legacyCode,
+      field: inputField,
+      message: errorDetail.message
+    });
+
+    return;
+  }
+
+  fieldErrors.forEach(function (candidate) {
+    if (candidate.field === inputField) {
+      fieldError = candidate;
+    }
+  });
+
+  if (!fieldError) {
+    fieldError = {field: inputField, fieldErrors: []};
+    fieldErrors.push(fieldError);
+  }
+
+  addFieldError(inputPath.slice(1), errorDetail, fieldError.fieldErrors);
+}
+
+function getLegacyMessage(errors) {
+  var legacyMessages = {
+    creditCard: 'Credit card is invalid'
+  };
+
+  var field = errors[0].field;
+
+  return legacyMessages[field];
+}
+
+module.exports = errorResponseAdapter;
+
+
+/***/ }),
+/* 50 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var parser;
+var legalHosts = {
+  'paypal.com': 1,
+  'braintreepayments.com': 1,
+  'braintreegateway.com': 1,
+  'braintree-api.com': 1
+};
+
+function stripSubdomains(domain) {
+  return domain.split('.').slice(-2).join('.');
+}
+
+function isWhitelistedDomain(url) {
+  var mainDomain;
+
+  url = url.toLowerCase();
+
+  if (!/^https:/.test(url)) {
+    return false;
+  }
+
+  parser = parser || document.createElement('a');
+  parser.href = url;
+  mainDomain = stripSubdomains(parser.hostname);
+
+  return legalHosts.hasOwnProperty(mainDomain);
+}
+
+module.exports = isWhitelistedDomain;
+
+
+/***/ }),
+/* 51 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+function convertToBraintreeError(originalErr, btErrorObject) {
+  if (originalErr instanceof BraintreeError) {
+    return originalErr;
+  }
+
+  return new BraintreeError({
+    type: btErrorObject.type,
+    code: btErrorObject.code,
+    message: btErrorObject.message,
+    details: {
+      originalError: originalErr
+    }
+  });
+}
+
+module.exports = convertToBraintreeError;
+
+
+/***/ }),
+/* 52 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createAuthorizationData = __webpack_require__(53);
+var jsonClone = __webpack_require__(152);
+var constants = __webpack_require__(18);
+
+function addMetadata(configuration, data) {
+  var key;
+  var attrs = data ? jsonClone(data) : {};
+  var authAttrs = createAuthorizationData(configuration.authorization).attrs;
+  var _meta = jsonClone(configuration.analyticsMetadata);
+
+  attrs.braintreeLibraryVersion = constants.BRAINTREE_LIBRARY_VERSION;
+
+  for (key in attrs._meta) {
+    if (attrs._meta.hasOwnProperty(key)) {
+      _meta[key] = attrs._meta[key];
+    }
+  }
+
+  attrs._meta = _meta;
+
+  if (authAttrs.tokenizationKey) {
+    attrs.tokenizationKey = authAttrs.tokenizationKey;
+  } else {
+    attrs.authorizationFingerprint = authAttrs.authorizationFingerprint;
+  }
+
+  return attrs;
+}
+
+module.exports = addMetadata;
+
+
+/***/ }),
+/* 53 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var atob = __webpack_require__(151).atob;
+
+var apiUrls = {
+  production: 'https://api.braintreegateway.com:443',
+  sandbox: 'https://api.sandbox.braintreegateway.com:443'
+};
+
+function _isTokenizationKey(str) {
+  return /^[a-zA-Z0-9]+_[a-zA-Z0-9]+_[a-zA-Z0-9_]+$/.test(str);
+}
+
+function _parseTokenizationKey(tokenizationKey) {
+  var tokens = tokenizationKey.split('_');
+  var environment = tokens[0];
+  var merchantId = tokens.slice(2).join('_');
+
+  return {
+    merchantId: merchantId,
+    environment: environment
+  };
+}
+
+function createAuthorizationData(authorization) {
+  var parsedClientToken, parsedTokenizationKey;
+  var data = {
+    attrs: {},
+    configUrl: ''
+  };
+
+  if (_isTokenizationKey(authorization)) {
+    parsedTokenizationKey = _parseTokenizationKey(authorization);
+    data.attrs.tokenizationKey = authorization;
+    data.configUrl = apiUrls[parsedTokenizationKey.environment] + '/merchants/' + parsedTokenizationKey.merchantId + '/client_api/v1/configuration';
+  } else {
+    parsedClientToken = JSON.parse(atob(authorization));
+    data.attrs.authorizationFingerprint = parsedClientToken.authorizationFingerprint;
+    data.configUrl = parsedClientToken.configUrl;
+    data.graphQL = parsedClientToken.graphQL;
+  }
+
+  return data;
+}
+
+module.exports = createAuthorizationData;
+
+
+/***/ }),
+/* 54 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(setImmediate) {
+
+// Store setTimeout reference so promise-polyfill will be unaffected by
+// other code modifying setTimeout (like sinon.useFakeTimers())
+var setTimeoutFunc = setTimeout;
+
+function noop() {}
+
+// Polyfill for Function.prototype.bind
+function bind(fn, thisArg) {
+  return function() {
+    fn.apply(thisArg, arguments);
+  };
+}
+
+function Promise(fn) {
+  if (!(this instanceof Promise))
+    throw new TypeError('Promises must be constructed via new');
+  if (typeof fn !== 'function') throw new TypeError('not a function');
+  this._state = 0;
+  this._handled = false;
+  this._value = undefined;
+  this._deferreds = [];
+
+  doResolve(fn, this);
+}
+
+function handle(self, deferred) {
+  while (self._state === 3) {
+    self = self._value;
+  }
+  if (self._state === 0) {
+    self._deferreds.push(deferred);
+    return;
+  }
+  self._handled = true;
+  Promise._immediateFn(function() {
+    var cb = self._state === 1 ? deferred.onFulfilled : deferred.onRejected;
+    if (cb === null) {
+      (self._state === 1 ? resolve : reject)(deferred.promise, self._value);
+      return;
+    }
+    var ret;
+    try {
+      ret = cb(self._value);
+    } catch (e) {
+      reject(deferred.promise, e);
+      return;
+    }
+    resolve(deferred.promise, ret);
+  });
+}
+
+function resolve(self, newValue) {
+  try {
+    // Promise Resolution Procedure: https://github.com/promises-aplus/promises-spec#the-promise-resolution-procedure
+    if (newValue === self)
+      throw new TypeError('A promise cannot be resolved with itself.');
+    if (
+      newValue &&
+      (typeof newValue === 'object' || typeof newValue === 'function')
+    ) {
+      var then = newValue.then;
+      if (newValue instanceof Promise) {
+        self._state = 3;
+        self._value = newValue;
+        finale(self);
+        return;
+      } else if (typeof then === 'function') {
+        doResolve(bind(then, newValue), self);
+        return;
+      }
+    }
+    self._state = 1;
+    self._value = newValue;
+    finale(self);
+  } catch (e) {
+    reject(self, e);
+  }
+}
+
+function reject(self, newValue) {
+  self._state = 2;
+  self._value = newValue;
+  finale(self);
+}
+
+function finale(self) {
+  if (self._state === 2 && self._deferreds.length === 0) {
+    Promise._immediateFn(function() {
+      if (!self._handled) {
+        Promise._unhandledRejectionFn(self._value);
+      }
+    });
+  }
+
+  for (var i = 0, len = self._deferreds.length; i < len; i++) {
+    handle(self, self._deferreds[i]);
+  }
+  self._deferreds = null;
+}
+
+function Handler(onFulfilled, onRejected, promise) {
+  this.onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : null;
+  this.onRejected = typeof onRejected === 'function' ? onRejected : null;
+  this.promise = promise;
+}
+
+/**
+ * Take a potentially misbehaving resolver function and make sure
+ * onFulfilled and onRejected are only called once.
+ *
+ * Makes no guarantees about asynchrony.
+ */
+function doResolve(fn, self) {
+  var done = false;
+  try {
+    fn(
+      function(value) {
+        if (done) return;
+        done = true;
+        resolve(self, value);
+      },
+      function(reason) {
+        if (done) return;
+        done = true;
+        reject(self, reason);
+      }
+    );
+  } catch (ex) {
+    if (done) return;
+    done = true;
+    reject(self, ex);
+  }
+}
+
+Promise.prototype['catch'] = function(onRejected) {
+  return this.then(null, onRejected);
+};
+
+Promise.prototype.then = function(onFulfilled, onRejected) {
+  var prom = new this.constructor(noop);
+
+  handle(this, new Handler(onFulfilled, onRejected, prom));
+  return prom;
+};
+
+Promise.all = function(arr) {
+  return new Promise(function(resolve, reject) {
+    if (!arr || typeof arr.length === 'undefined')
+      throw new TypeError('Promise.all accepts an array');
+    var args = Array.prototype.slice.call(arr);
+    if (args.length === 0) return resolve([]);
+    var remaining = args.length;
+
+    function res(i, val) {
+      try {
+        if (val && (typeof val === 'object' || typeof val === 'function')) {
+          var then = val.then;
+          if (typeof then === 'function') {
+            then.call(
+              val,
+              function(val) {
+                res(i, val);
+              },
+              reject
+            );
+            return;
+          }
+        }
+        args[i] = val;
+        if (--remaining === 0) {
+          resolve(args);
+        }
+      } catch (ex) {
+        reject(ex);
+      }
+    }
+
+    for (var i = 0; i < args.length; i++) {
+      res(i, args[i]);
+    }
+  });
+};
+
+Promise.resolve = function(value) {
+  if (value && typeof value === 'object' && value.constructor === Promise) {
+    return value;
+  }
+
+  return new Promise(function(resolve) {
+    resolve(value);
+  });
+};
+
+Promise.reject = function(value) {
+  return new Promise(function(resolve, reject) {
+    reject(value);
+  });
+};
+
+Promise.race = function(values) {
+  return new Promise(function(resolve, reject) {
+    for (var i = 0, len = values.length; i < len; i++) {
+      values[i].then(resolve, reject);
+    }
+  });
+};
+
+// Use polyfill for setImmediate for performance gains
+Promise._immediateFn =
+  (typeof setImmediate === 'function' &&
+    function(fn) {
+      setImmediate(fn);
+    }) ||
+  function(fn) {
+    setTimeoutFunc(fn, 0);
+  };
+
+Promise._unhandledRejectionFn = function _unhandledRejectionFn(err) {
+  if (typeof console !== 'undefined' && console) {
+    console.warn('Possible Unhandled Promise Rejection:', err); // eslint-disable-line no-console
+  }
+};
+
+module.exports = Promise;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(40).setImmediate))
+
+/***/ }),
+/* 55 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+module.exports = function (fn) {
+  return function () {
+    // IE9 doesn't support passing arguments to setTimeout so we have to emulate it.
+    var args = arguments;
+
+    setTimeout(function () {
+      fn.apply(null, args);
+    }, 1);
+  };
+};
+
+
+/***/ }),
+/* 56 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  CLIENT_GATEWAY_CONFIGURATION_INVALID_DOMAIN: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_GATEWAY_CONFIGURATION_INVALID_DOMAIN'
+  },
+  CLIENT_OPTION_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_OPTION_REQUIRED'
+  },
+  CLIENT_OPTION_INVALID: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_OPTION_INVALID'
+  },
+  CLIENT_MISSING_GATEWAY_CONFIGURATION: {
+    type: BraintreeError.types.INTERNAL,
+    code: 'CLIENT_MISSING_GATEWAY_CONFIGURATION',
+    message: 'Missing gatewayConfiguration.'
+  },
+  CLIENT_INVALID_AUTHORIZATION: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_INVALID_AUTHORIZATION',
+    message: 'Authorization is invalid. Make sure your client token or tokenization key is valid.'
+  },
+  CLIENT_GATEWAY_NETWORK: {
+    type: BraintreeError.types.NETWORK,
+    code: 'CLIENT_GATEWAY_NETWORK',
+    message: 'Cannot contact the gateway at this time.'
+  },
+  CLIENT_REQUEST_TIMEOUT: {
+    type: BraintreeError.types.NETWORK,
+    code: 'CLIENT_REQUEST_TIMEOUT',
+    message: 'Request timed out waiting for a reply.'
+  },
+  CLIENT_REQUEST_ERROR: {
+    type: BraintreeError.types.NETWORK,
+    code: 'CLIENT_REQUEST_ERROR',
+    message: 'There was a problem with your request.'
+  },
+  CLIENT_RATE_LIMITED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_RATE_LIMITED',
+    message: 'You are being rate-limited; please try again in a few minutes.'
+  },
+  CLIENT_AUTHORIZATION_INSUFFICIENT: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'CLIENT_AUTHORIZATION_INSUFFICIENT',
+    message: 'The authorization used has insufficient privileges.'
+  }
+};
+
+
+/***/ }),
+/* 57 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function EventEmitter() {
+  this._events = {};
+}
+
+EventEmitter.prototype.on = function (event, callback) {
+  if (this._events[event]) {
+    this._events[event].push(callback);
+  } else {
+    this._events[event] = [callback];
+  }
+};
+
+EventEmitter.prototype._emit = function (event) {
+  var i, args;
+  var callbacks = this._events[event];
+
+  if (!callbacks) { return; }
+
+  args = Array.prototype.slice.call(arguments, 1);
+
+  for (i = 0; i < callbacks.length; i++) {
+    callbacks[i].apply(null, args);
+  }
+};
+
+module.exports = EventEmitter;
+
+
+/***/ }),
+/* 58 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var atob = __webpack_require__(44).atob;
+
+module.exports = function (client) {
+  var authorizationFingerprint;
+  var configuration = client.getConfiguration();
+
+  if (configuration.authorizationType !== 'TOKENIZATION_KEY') {
+    authorizationFingerprint = JSON.parse(atob(configuration.authorization)).authorizationFingerprint;
+
+    return !authorizationFingerprint || authorizationFingerprint.indexOf('customer_id=') === -1;
+  }
+
+  return true;
+};
+
+
+/***/ }),
+/* 59 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
+
+var result = {};
+
+result[paymentOptionIDs.applePay] = __webpack_require__(159);
+result[paymentOptionIDs.card] = __webpack_require__(163);
+result[paymentOptionIDs.googlePay] = __webpack_require__(189);
+result[paymentOptionIDs.paypal] = __webpack_require__(193);
+result[paymentOptionIDs.paypalCredit] = __webpack_require__(220);
+result[paymentOptionIDs.venmo] = __webpack_require__(221);
+
+module.exports = result;
+
+
+/***/ }),
+/* 60 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  APPLE_PAY_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_NOT_ENABLED',
+    message: 'Apple Pay is not enabled for this merchant.'
+  },
+  APPLE_PAY_VALIDATION_URL_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_VALIDATION_URL_REQUIRED',
+    message: 'performValidation must be called with a validationURL.'
+  },
+  APPLE_PAY_MERCHANT_VALIDATION_NETWORK: {
+    type: BraintreeError.types.NETWORK,
+    code: 'APPLE_PAY_MERCHANT_VALIDATION_NETWORK',
+    message: 'A network error occurred when validating the Apple Pay merchant.'
+  },
+  APPLE_PAY_MERCHANT_VALIDATION_FAILED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_MERCHANT_VALIDATION_FAILED',
+    message: 'Make sure you have registered your domain name in the Braintree Control Panel.'
+  },
+  APPLE_PAY_PAYMENT_TOKEN_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'APPLE_PAY_PAYMENT_TOKEN_REQUIRED',
+    message: 'tokenize must be called with a payment token.'
+  },
+  APPLE_PAY_TOKENIZATION: {
+    type: BraintreeError.types.NETWORK,
+    code: 'APPLE_PAY_TOKENIZATION',
+    message: 'A network error occurred when processing the Apple Pay payment.'
+  }
+};
+
+
+/***/ }),
+/* 61 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var setAttributes = __webpack_require__(169);
+var defaultAttributes = __webpack_require__(170);
+var assign = __webpack_require__(171);
+
+module.exports = function createFrame(options) {
+  var iframe = document.createElement('iframe');
+  var config = assign({}, defaultAttributes, options);
+
+  if (config.style && typeof config.style !== 'string') {
+    assign(iframe.style, config.style);
+    delete config.style;
+  }
+
+  setAttributes(iframe, config);
+
+  if (!iframe.getAttribute('id')) {
+    iframe.id = iframe.name;
+  }
+
+  return iframe;
+};
+
+
+/***/ }),
+/* 62 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var bus = __webpack_require__(172);
+var events = __webpack_require__(173);
+var checkOrigin = __webpack_require__(174).checkOrigin;
+var BraintreeError = __webpack_require__(1);
+
+function BraintreeBus(options) {
+  options = options || {};
+
+  this.channel = options.channel;
+  if (!this.channel) {
+    throw new BraintreeError({
+      type: BraintreeError.types.INTERNAL,
+      code: 'MISSING_CHANNEL_ID',
+      message: 'Channel ID must be specified.'
+    });
+  }
+
+  this.merchantUrl = options.merchantUrl;
+
+  this._isDestroyed = false;
+  this._isVerbose = false;
+
+  this._listeners = [];
+
+  this._log('new bus on channel ' + this.channel, [location.href]);
+}
+
+BraintreeBus.prototype.on = function (eventName, originalHandler) {
+  var namespacedEvent, args;
+  var handler = originalHandler;
+  var self = this;
+
+  if (this._isDestroyed) { return; }
+
+  if (this.merchantUrl) {
+    handler = function () {
+      /* eslint-disable no-invalid-this */
+      if (checkOrigin(this.origin, self.merchantUrl)) {
+        originalHandler.apply(this, arguments);
+      }
+      /* eslint-enable no-invalid-this */
+    };
+  }
+
+  namespacedEvent = this._namespaceEvent(eventName);
+  args = Array.prototype.slice.call(arguments);
+  args[0] = namespacedEvent;
+  args[1] = handler;
+
+  this._log('on', args);
+  bus.on.apply(bus, args);
+
+  this._listeners.push({
+    eventName: eventName,
+    handler: handler,
+    originalHandler: originalHandler
+  });
+};
+
+BraintreeBus.prototype.emit = function (eventName) {
+  var args;
+
+  if (this._isDestroyed) { return; }
+
+  args = Array.prototype.slice.call(arguments);
+  args[0] = this._namespaceEvent(eventName);
+
+  this._log('emit', args);
+  bus.emit.apply(bus, args);
+};
+
+BraintreeBus.prototype._offDirect = function (eventName) {
+  var args = Array.prototype.slice.call(arguments);
+
+  if (this._isDestroyed) { return; }
+
+  args[0] = this._namespaceEvent(eventName);
+
+  this._log('off', args);
+  bus.off.apply(bus, args);
+};
+
+BraintreeBus.prototype.off = function (eventName, originalHandler) {
+  var i, listener;
+  var handler = originalHandler;
+
+  if (this._isDestroyed) { return; }
+
+  if (this.merchantUrl) {
+    for (i = 0; i < this._listeners.length; i++) {
+      listener = this._listeners[i];
+
+      if (listener.originalHandler === originalHandler) {
+        handler = listener.handler;
+      }
+    }
+  }
+
+  this._offDirect(eventName, handler);
+};
+
+BraintreeBus.prototype._namespaceEvent = function (eventName) {
+  return ['braintree', this.channel, eventName].join(':');
+};
+
+BraintreeBus.prototype.teardown = function () {
+  var listener, i;
+
+  for (i = 0; i < this._listeners.length; i++) {
+    listener = this._listeners[i];
+    this._offDirect(listener.eventName, listener.handler);
+  }
+
+  this._listeners.length = 0;
+
+  this._isDestroyed = true;
+};
+
+BraintreeBus.prototype._log = function (functionName, args) {
+  if (this._isVerbose) {
+    console.log(functionName, args); // eslint-disable-line no-console
+  }
+};
+
+BraintreeBus.events = events;
+
+module.exports = BraintreeBus;
+
+
+/***/ }),
+/* 63 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+function useMin(isDebug) {
+  return isDebug ? '' : '.min';
+}
+
+module.exports = useMin;
+
+
+/***/ }),
+/* 64 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+module.exports = function isAndroid(ua) {
+  ua = ua || global.navigator.userAgent;
+  return /Android/.test(ua);
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 65 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isEdge = __webpack_require__(187);
+var isSamsung = __webpack_require__(66);
+
+module.exports = function isChrome(ua) {
+  ua = ua || navigator.userAgent;
+  return (ua.indexOf('Chrome') !== -1 || ua.indexOf('CriOS') !== -1) && !isEdge(ua) && !isSamsung(ua);
+};
+
+
+/***/ }),
+/* 66 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+module.exports = function isSamsungBrowser(ua) {
+  ua = ua || global.navigator.userAgent;
+  return /SamsungBrowser/i.test(ua);
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 67 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+module.exports = function (win) {
+  win = win || global;
+
+  return win.document.characterSet.toLowerCase() === 'utf-8';
+};
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 68 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var browserDetection = __webpack_require__(188);
+
+function isHidden(element) {
+  if (!element) { // no parentNode, so nothing containing the element is hidden
+    return false;
+  }
+
+  if (element.style.display === 'none') {
+    return true;
+  }
+
+  return isHidden(element.parentNode);
+}
+
+function onTransitionEnd(element, propertyName, callback) {
+  if (browserDetection.isIe9() || isHidden(element)) {
+    callback();
+
+    return;
+  }
+
+  function transitionEventListener(event) {
+    if (event.propertyName === propertyName) {
+      element.removeEventListener('transitionend', transitionEventListener);
+      callback();
+    }
+  }
+
+  element.addEventListener('transitionend', transitionEventListener);
+}
+
+module.exports = {
+  onTransitionEnd: onTransitionEnd
+};
+
+
+/***/ }),
+/* 69 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* WEBPACK VAR INJECTION */(function(global) {
+
+var assign = __webpack_require__(10).assign;
+var BaseView = __webpack_require__(9);
+var btPaypal = __webpack_require__(194);
+var DropinError = __webpack_require__(8);
+var constants = __webpack_require__(2);
+var assets = __webpack_require__(27);
+var translations = __webpack_require__(71).fiveCharacterLocales;
+var Promise = __webpack_require__(5);
+
+var ASYNC_DEPENDENCY_TIMEOUT = 30000;
+var READ_ONLY_CONFIGURATION_OPTIONS = ['offerCredit', 'locale'];
+var DEFAULT_CHECKOUTJS_LOG_LEVEL = 'warn';
+
+var paypalScriptLoadInProgressPromise;
+
+function BasePayPalView() {
+  BaseView.apply(this, arguments);
+}
+
+BasePayPalView.prototype = Object.create(BaseView.prototype);
+
+BasePayPalView.prototype.initialize = function () {
+  var asyncDependencyTimeoutHandler;
+  var isCredit = Boolean(this._isPayPalCredit);
+  var setupComplete = false;
+  var self = this;
+  var paypalType = isCredit ? 'paypalCredit' : 'paypal';
+  var paypalConfiguration = this.model.merchantConfiguration[paypalType];
+
+  this.paypalConfiguration = assign({}, paypalConfiguration);
+
+  this.model.asyncDependencyStarting();
+  asyncDependencyTimeoutHandler = setTimeout(function () {
+    self.model.asyncDependencyFailed({
+      view: self.ID,
+      error: new DropinError('There was an error connecting to PayPal.')
+    });
+  }, ASYNC_DEPENDENCY_TIMEOUT);
+
+  return btPaypal.create({client: this.client}).then(function (paypalInstance) {
+    var checkoutJSConfiguration;
+    var buttonSelector = '[data-braintree-id="paypal-button"]';
+    var environment = self.client.getConfiguration().gatewayConfiguration.environment === 'production' ? 'production' : 'sandbox';
+    var locale = self.model.merchantConfiguration.locale;
+
+    self.paypalInstance = paypalInstance;
+
+    self.paypalConfiguration.offerCredit = Boolean(isCredit);
+    checkoutJSConfiguration = {
+      env: environment,
+      style: self.paypalConfiguration.buttonStyle || {},
+      commit: self.paypalConfiguration.commit,
+      payment: function () {
+        return paypalInstance.createPayment(self.paypalConfiguration).catch(reportError);
+      },
+      onAuthorize: function (data) {
+        return paypalInstance.tokenizePayment(data).then(function (tokenizePayload) {
+          if (self.paypalConfiguration.flow === 'vault' && !self.model.isGuestCheckout) {
+            tokenizePayload.vaulted = true;
+          }
+          self.model.addPaymentMethod(tokenizePayload);
+        }).catch(reportError);
+      },
+      onError: reportError
+    };
+
+    if (locale && locale in translations) {
+      self.paypalConfiguration.locale = locale;
+      checkoutJSConfiguration.locale = locale;
+    }
+
+    if (isCredit) {
+      buttonSelector = '[data-braintree-id="paypal-credit-button"]';
+      checkoutJSConfiguration.style.label = 'credit';
+    }
+
+    return global.paypal.Button.render(checkoutJSConfiguration, buttonSelector).then(function () {
+      self.model.asyncDependencyReady();
+      setupComplete = true;
+      clearTimeout(asyncDependencyTimeoutHandler);
+    });
+  }).catch(reportError);
+
+  function reportError(err) {
+    if (setupComplete) {
+      self.model.reportError(err);
+    } else {
+      self.model.asyncDependencyFailed({
+        view: self.ID,
+        error: err
+      });
+      clearTimeout(asyncDependencyTimeoutHandler);
+    }
+  }
+};
+
+BasePayPalView.prototype.updateConfiguration = function (key, value) {
+  if (READ_ONLY_CONFIGURATION_OPTIONS.indexOf(key) === -1) {
+    this.paypalConfiguration[key] = value;
+  }
+};
+
+BasePayPalView.isEnabled = function (options) {
+  var gatewayConfiguration = options.client.getConfiguration().gatewayConfiguration;
+
+  if (!gatewayConfiguration.paypalEnabled) {
+    return Promise.resolve(false);
+  }
+
+  if (global.paypal && global.paypal.Button) {
+    return Promise.resolve(true);
+  }
+
+  if (paypalScriptLoadInProgressPromise) {
+    return paypalScriptLoadInProgressPromise;
+  }
+
+  paypalScriptLoadInProgressPromise = assets.loadScript({
+    src: constants.CHECKOUT_JS_SOURCE,
+    id: constants.PAYPAL_CHECKOUT_SCRIPT_ID,
+    dataAttributes: {
+      'log-level': options.merchantConfiguration.paypal.logLevel || DEFAULT_CHECKOUTJS_LOG_LEVEL
+    }
+  }).then(function () {
+    return Promise.resolve(true);
+  }).catch(function () {
+    return Promise.resolve(false);
+  }).then(function (result) {
+    paypalScriptLoadInProgressPromise = null;
+
+    return Promise.resolve(result);
+  });
+
+  return paypalScriptLoadInProgressPromise;
+};
+
+module.exports = BasePayPalView;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+
+/***/ }),
+/* 70 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  PAYPAL_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_NOT_ENABLED',
+    message: 'PayPal is not enabled for this merchant.'
+  },
+  PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_SANDBOX_ACCOUNT_NOT_LINKED',
+    message: 'A linked PayPal Sandbox account is required to use PayPal Checkout in Sandbox. See https://developers.braintreepayments.com/guides/paypal/testing-go-live/#linked-paypal-testing for details on linking your PayPal sandbox with Braintree.'
+  },
+  PAYPAL_TOKENIZATION_REQUEST_ACTIVE: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_TOKENIZATION_REQUEST_ACTIVE',
+    message: 'Another tokenization request is active.'
+  },
+  PAYPAL_ACCOUNT_TOKENIZATION_FAILED: {
+    type: BraintreeError.types.NETWORK,
+    code: 'PAYPAL_ACCOUNT_TOKENIZATION_FAILED',
+    message: 'Could not tokenize user\'s PayPal account.'
+  },
+  PAYPAL_FLOW_FAILED: {
+    type: BraintreeError.types.NETWORK,
+    code: 'PAYPAL_FLOW_FAILED',
+    message: 'Could not initialize PayPal flow.'
+  },
+  PAYPAL_FLOW_OPTION_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_FLOW_OPTION_REQUIRED',
+    message: 'PayPal flow property is invalid or missing.'
+  },
+  PAYPAL_POPUP_OPEN_FAILED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_POPUP_OPEN_FAILED',
+    message: 'PayPal popup failed to open, make sure to tokenize in response to a user action.'
+  },
+  PAYPAL_POPUP_CLOSED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'PAYPAL_POPUP_CLOSED',
+    message: 'Customer closed PayPal popup before authorizing.'
+  },
+  PAYPAL_INVALID_PAYMENT_OPTION: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'PAYPAL_INVALID_PAYMENT_OPTION',
+    message: 'PayPal payment options are invalid.'
+  }
+};
+
+
+/***/ }),
+/* 71 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/* eslint-disable camelcase */
+
+
+var assign = __webpack_require__(10).assign;
+
+var fiveCharacterLocales = {
+  da_DK: __webpack_require__(197),
+  de_DE: __webpack_require__(198),
+  en_US: __webpack_require__(199),
+  en_AU: __webpack_require__(200),
+  en_GB: __webpack_require__(201),
+  es_ES: __webpack_require__(202),
+  fr_CA: __webpack_require__(203),
+  fr_FR: __webpack_require__(204),
+  id_ID: __webpack_require__(205),
+  it_IT: __webpack_require__(206),
+  ja_JP: __webpack_require__(207),
+  ko_KR: __webpack_require__(208),
+  nl_NL: __webpack_require__(209),
+  no_NO: __webpack_require__(210),
+  pl_PL: __webpack_require__(211),
+  pt_BR: __webpack_require__(212),
+  pt_PT: __webpack_require__(213),
+  ru_RU: __webpack_require__(214),
+  sv_SE: __webpack_require__(215),
+  th_TH: __webpack_require__(216),
+  zh_CN: __webpack_require__(217),
+  zh_HK: __webpack_require__(218),
+  zh_TW: __webpack_require__(219)
+};
+
+var twoCharacterLocaleAliases = {
+  da: fiveCharacterLocales.da_DK,
+  de: fiveCharacterLocales.de_DE,
+  en: fiveCharacterLocales.en_US,
+  es: fiveCharacterLocales.es_ES,
+  fr: fiveCharacterLocales.fr_FR,
+  id: fiveCharacterLocales.id_ID,
+  it: fiveCharacterLocales.it_IT,
+  ja: fiveCharacterLocales.ja_JP,
+  ko: fiveCharacterLocales.ko_KR,
+  nl: fiveCharacterLocales.nl_NL,
+  no: fiveCharacterLocales.no_NO,
+  pl: fiveCharacterLocales.pl_PL,
+  pt: fiveCharacterLocales.pt_PT,
+  ru: fiveCharacterLocales.ru_RU,
+  sv: fiveCharacterLocales.sv_SE,
+  th: fiveCharacterLocales.th_TH,
+  zh: fiveCharacterLocales.zh_CN
+};
+
+module.exports = {
+  twoCharacterLocaleAliases: twoCharacterLocaleAliases,
+  fiveCharacterLocales: fiveCharacterLocales,
+  translations: assign({}, twoCharacterLocaleAliases, fiveCharacterLocales)
+};
+/* eslint-enable camelcase */
+
+
+/***/ }),
+/* 72 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  VENMO_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'VENMO_NOT_ENABLED',
+    message: 'Venmo is not enabled for this merchant.'
+  },
+  VENMO_TOKENIZATION_REQUEST_ACTIVE: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'VENMO_TOKENIZATION_REQUEST_ACTIVE',
+    message: 'Another tokenization request is active.'
+  },
+  VENMO_APP_FAILED: {
+    type: BraintreeError.types.UNKNOWN,
+    code: 'VENMO_APP_FAILED',
+    message: 'Venmo app encountered a problem.'
+  },
+  VENMO_APP_CANCELED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'VENMO_APP_CANCELED',
+    message: 'Venmo app authorization was canceled.'
+  },
+  VENMO_CANCELED: {
+    type: BraintreeError.types.CUSTOMER,
+    code: 'VENMO_CANCELED',
+    message: 'User canceled Venmo authorization, or Venmo app is not available.'
+  }
+};
+
+
+/***/ }),
+/* 73 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var browserDetection = __webpack_require__(224);
+
+function isBrowserSupported(options) {
+  var isAndroidChrome = browserDetection.isAndroid() && browserDetection.isChrome();
+  var isIosChrome = browserDetection.isIos() && browserDetection.isChrome();
+  var supportsReturnToSameTab = browserDetection.isIosSafari() || isAndroidChrome;
+  var supportsReturnToNewTab = isIosChrome || browserDetection.isSamsungBrowser() || browserDetection.isMobileFirefox();
+
+  options = options || {
+    allowNewBrowserTab: true
+  };
+
+  return supportsReturnToSameTab || (options.allowNewBrowserTab && supportsReturnToNewTab);
+}
+
+module.exports = {
+  isBrowserSupported: isBrowserSupported
+};
+
+
+/***/ }),
+/* 74 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BaseView = __webpack_require__(9);
+var PaymentMethodView = __webpack_require__(230);
+var DropinError = __webpack_require__(8);
+var classlist = __webpack_require__(15);
+var errors = __webpack_require__(2).errors;
+var Promise = __webpack_require__(5);
+
+var PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING = {
+  CreditCard: 'Card',
+  PayPalAccount: 'PayPal',
+  ApplePayCard: 'Apple Pay',
+  AndroidPayCard: 'Google Pay',
+  VenmoAccount: 'Venmo'
+};
+
+function PaymentMethodsView() {
+  BaseView.apply(this, arguments);
+
+  this._initialize();
+}
+
+PaymentMethodsView.prototype = Object.create(BaseView.prototype);
+PaymentMethodsView.prototype.constructor = PaymentMethodsView;
+PaymentMethodsView.ID = PaymentMethodsView.prototype.ID = 'methods';
+
+PaymentMethodsView.prototype._initialize = function () {
+  var i;
+  var paymentMethods = this.model.getPaymentMethods();
+
+  this.views = [];
+  this.container = this.getElementById('methods-container');
+  this._headingLabel = this.getElementById('methods-label');
+
+  this.model.on('addPaymentMethod', this._addPaymentMethod.bind(this));
+  this.model.on('removePaymentMethod', this._removePaymentMethod.bind(this));
+  this.model.on('changeActivePaymentMethod', this._changeActivePaymentMethodView.bind(this));
+
+  for (i = paymentMethods.length - 1; i >= 0; i--) {
+    this._addPaymentMethod(paymentMethods[i]);
+  }
+};
+
+PaymentMethodsView.prototype.removeActivePaymentMethod = function () {
+  if (!this.activeMethodView) {
+    return;
+  }
+  this.activeMethodView.setActive(false);
+  this.activeMethodView = null;
+  classlist.add(this._headingLabel, 'braintree-no-payment-method-selected');
+};
+
+PaymentMethodsView.prototype._getPaymentMethodString = function () {
+  var stringKey = PAYMENT_METHOD_TYPE_TO_TRANSLATION_STRING[this.activeMethodView.paymentMethod.type];
+  var paymentMethodTypeString = this.strings[stringKey];
+
+  return this.strings.payingWith.replace('{{paymentSource}}', paymentMethodTypeString);
+};
+
+PaymentMethodsView.prototype._addPaymentMethod = function (paymentMethod) {
+  var paymentMethodView = new PaymentMethodView({
+    model: this.model,
+    paymentMethod: paymentMethod,
+    strings: this.strings
+  });
+
+  if (this.model.isGuestCheckout && this.container.firstChild) {
+    this.container.removeChild(this.container.firstChild);
+    this.views.pop();
+  }
+
+  if (this.container.firstChild) {
+    this.container.insertBefore(paymentMethodView.element, this.container.firstChild);
+  } else {
+    this.container.appendChild(paymentMethodView.element);
+  }
+
+  this.views.push(paymentMethodView);
+};
+
+PaymentMethodsView.prototype._removePaymentMethod = function (paymentMethod) {
+  var i;
+
+  for (i = 0; i < this.views.length; i++) {
+    if (this.views[i].paymentMethod === paymentMethod) {
+      this.container.removeChild(this.views[i].element);
+      this._headingLabel.innerHTML = '&nbsp;';
+      this.views.splice(i, 1);
+      break;
+    }
+  }
+};
+
+PaymentMethodsView.prototype._changeActivePaymentMethodView = function (paymentMethod) {
+  var i;
+  var previousActiveMethodView = this.activeMethodView;
+
+  for (i = 0; i < this.views.length; i++) {
+    if (this.views[i].paymentMethod === paymentMethod) {
+      this.activeMethodView = this.views[i];
+      this._headingLabel.innerHTML = this._getPaymentMethodString();
+      break;
+    }
+  }
+
+  if (previousActiveMethodView) {
+    previousActiveMethodView.setActive(false);
+  }
+  this.activeMethodView.setActive(true);
+  classlist.remove(this._headingLabel, 'braintree-no-payment-method-selected');
+};
+
+PaymentMethodsView.prototype.requestPaymentMethod = function () {
+  if (!this.activeMethodView) {
+    return Promise.reject(new DropinError(errors.NO_PAYMENT_METHOD_ERROR));
+  }
+
+  return Promise.resolve(this.activeMethodView.paymentMethod);
+};
+
+module.exports = PaymentMethodsView;
+
+
+/***/ }),
+/* 75 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var analytics = __webpack_require__(14);
+var addSelectionEventHandler = __webpack_require__(32);
+var BaseView = __webpack_require__(9);
+
+var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
+
+var paymentMethodOptionHTML = "<div class=\"braintree-option__logo\">\n  <svg width=\"48\" height=\"29\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-option__label\" aria-label=\"@OPTION_LABEL\">\n  @OPTION_TITLE\n  <div class=\"braintree-option__disabled-message\"></div>\n</div>\n";
+
+function PaymentOptionsView() {
+  BaseView.apply(this, arguments);
+
+  this._initialize();
+}
+
+PaymentOptionsView.prototype = Object.create(BaseView.prototype);
+PaymentOptionsView.prototype.constructor = PaymentOptionsView;
+PaymentOptionsView.ID = PaymentOptionsView.prototype.ID = 'options';
+
+PaymentOptionsView.prototype._initialize = function () {
+  this.container = this.getElementById('payment-options-container');
+  this.elements = {};
+
+  this.model.supportedPaymentOptions.forEach(function (paymentOptionID) {
+    this._addPaymentOption(paymentOptionID);
+  }.bind(this));
+};
+
+PaymentOptionsView.prototype._addPaymentOption = function (paymentOptionID) {
+  var paymentSource;
+  var div = document.createElement('div');
+  var html = paymentMethodOptionHTML;
+  var clickHandler = function clickHandler() {
+    this.mainView.setPrimaryView(paymentOptionID);
+    this.model.selectPaymentOption(paymentOptionID);
+    analytics.sendEvent(this.client, 'selected.' + paymentOptionIDs[paymentOptionID]);
+  }.bind(this);
+
+  div.className = 'braintree-option braintree-option__' + paymentOptionID;
+  div.setAttribute('tabindex', '0');
+
+  switch (paymentOptionID) {
+    case paymentOptionIDs.applePay:
+      paymentSource = this.strings['Apple Pay'];
+      html = html.replace(/@ICON/g, 'logoApplePay');
+      break;
+    case paymentOptionIDs.card:
+      paymentSource = this.strings.Card;
+      html = html.replace(/@ICON/g, 'iconCardFront');
+      html = html.replace(/@CLASSNAME/g, 'braintree-icon--bordered');
+      break;
+    case paymentOptionIDs.googlePay:
+      paymentSource = this.strings['Google Pay'];
+      html = html.replace(/@ICON/g, 'logoGooglePay');
+      break;
+    case paymentOptionIDs.paypal:
+      paymentSource = this.strings.PayPal;
+      html = html.replace(/@ICON/g, 'logoPayPal');
+      break;
+    case paymentOptionIDs.paypalCredit:
+      paymentSource = this.strings['PayPal Credit'];
+      html = html.replace(/@ICON/g, 'logoPayPalCredit');
+      break;
+    case paymentOptionIDs.venmo:
+      paymentSource = this.strings.Venmo;
+      html = html.replace(/@ICON/g, 'logoVenmo');
+      break;
+    default:
+      break;
+  }
+
+  html = html.replace(/@OPTION_LABEL/g, this._generateOptionLabel(paymentSource));
+  html = html.replace(/@OPTION_TITLE/g, paymentSource);
+  html = html.replace(/@CLASSNAME/g, '');
+
+  div.innerHTML = html;
+
+  addSelectionEventHandler(div, clickHandler);
+
+  this.container.appendChild(div);
+  this.elements[paymentOptionID] = {
+    div: div,
+    clickHandler: clickHandler
+  };
+};
+
+PaymentOptionsView.prototype._generateOptionLabel = function (paymentSourceString) {
+  return this.strings.payingWith.replace('{{paymentSource}}', paymentSourceString);
+};
+
+module.exports = PaymentOptionsView;
+
+
+/***/ }),
+/* 76 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+/* eslint-disable no-mixed-operators */
+
+function uuid() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0;
+    var v = c === 'x' ? r : r & 0x3 | 0x8;
+
+    return v.toString(16);
+  });
+}
+
+module.exports = uuid;
+
+
+/***/ }),
+/* 77 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var BraintreeError = __webpack_require__(1);
+
+module.exports = {
+  THREEDS_AUTHENTICATION_IN_PROGRESS: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_AUTHENTICATION_IN_PROGRESS',
+    message: 'Cannot call verifyCard while existing authentication is in progress.'
+  },
+  THREEDS_MISSING_VERIFY_CARD_OPTION: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_MISSING_VERIFY_CARD_OPTION'
+  },
+  THREEDS_NO_VERIFICATION_PAYLOAD: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_NO_VERIFICATION_PAYLOAD',
+    message: 'No verification payload available.'
+  },
+  THREEDS_NOT_ENABLED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_NOT_ENABLED',
+    message: '3D Secure is not enabled for this merchant.'
+  },
+  THREEDS_CAN_NOT_USE_TOKENIZATION_KEY: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_CAN_NOT_USE_TOKENIZATION_KEY',
+    message: '3D Secure can not use a tokenization key for authorization.'
+  },
+  THREEDS_HTTPS_REQUIRED: {
+    type: BraintreeError.types.MERCHANT,
+    code: 'THREEDS_HTTPS_REQUIRED',
+    message: '3D Secure requires HTTPS.'
+  },
+  THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN: {
+    type: BraintreeError.types.INTERNAL,
+    code: 'THREEDS_TERM_URL_REQUIRES_BRAINTREE_DOMAIN',
+    message: 'Term Url must be on a Braintree domain.'
+  }
+};
+
+
+/***/ }),
+/* 78 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(79);
+module.exports = __webpack_require__(244);
+
+
+/***/ }),
+/* 79 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/**
+ * First we will load all of this project's JavaScript dependencies which
+ * includes Vue and other libraries. It is a great starting point when
+ * building robust, powerful web applications using Vue and Laravel.
+ */
+
+__webpack_require__(80);
+
+/**
+ * Next, we will create a fresh Vue application instance and attach it to
+ * the page. Then, you may begin adding components to this application
+ * or customize the JavaScript scaffolding to fit your unique needs.
+ */
+
+Vue.component('product-edit', __webpack_require__(104));
+Vue.component('product-show', __webpack_require__(110));
+Vue.component('product-create', __webpack_require__(113));
+Vue.component('cart-checkout', __webpack_require__(128));
+Vue.component('braintree-checkout', __webpack_require__(131));
+
+document.addEventListener('turbolinks:load', function () {
+  var app = new Vue({
+    el: '#app'
+  });
+});
+
+/***/ }),
+/* 80 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks__ = __webpack_require__(100);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_turbolinks___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_turbolinks__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__ = __webpack_require__(103);
+/**
+ * We'll load the axios HTTP library which allows us to easily issue requests
+ * to our Laravel back-end. This library automatically handles sending the
+ * CSRF token as a header based on the value of the "XSRF" token cookie.
+ */
+
+window.axios = __webpack_require__(81);
+
+window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
+
+/**
+ * Next we will register the CSRF Token as a common header with Axios so that
+ * all outgoing HTTP requests automatically have it attached. This is just
+ * a simple convenience so we don't have to attach every token manually.
+ */
+
+var token = document.head.querySelector('meta[name="csrf-token"]');
+
+if (token) {
+  window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+} else {
+  console.error('CSRF token not found: https://laravel.com/docs/csrf#csrf-x-csrf-token');
+}
+
+/**
+ * User Libraries
+ */
+
+
+__WEBPACK_IMPORTED_MODULE_0_turbolinks___default.a.start();
+
+window.Vue = __webpack_require__(39);
+
+
+Vue.use(__WEBPACK_IMPORTED_MODULE_1_vue_turbolinks__["a" /* default */]);
+
+/***/ }),
+/* 81 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(82);
+
+/***/ }),
+/* 82 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+var bind = __webpack_require__(33);
+var Axios = __webpack_require__(84);
+var defaults = __webpack_require__(28);
+
+/**
+ * Create an instance of Axios
+ *
+ * @param {Object} defaultConfig The default config for the instance
+ * @return {Axios} A new instance of Axios
+ */
+function createInstance(defaultConfig) {
+  var context = new Axios(defaultConfig);
+  var instance = bind(Axios.prototype.request, context);
+
+  // Copy axios.prototype to instance
+  utils.extend(instance, Axios.prototype, context);
+
+  // Copy context to instance
+  utils.extend(instance, context);
+
+  return instance;
+}
+
+// Create the default instance to be exported
+var axios = createInstance(defaults);
+
+// Expose Axios class to allow class inheritance
+axios.Axios = Axios;
+
+// Factory for creating new instances
+axios.create = function create(instanceConfig) {
+  return createInstance(utils.merge(defaults, instanceConfig));
+};
+
+// Expose Cancel & CancelToken
+axios.Cancel = __webpack_require__(38);
+axios.CancelToken = __webpack_require__(98);
+axios.isCancel = __webpack_require__(37);
+
+// Expose all/spread
+axios.all = function all(promises) {
+  return Promise.all(promises);
+};
+axios.spread = __webpack_require__(99);
+
+module.exports = axios;
+
+// Allow use of default import syntax in TypeScript
+module.exports.default = axios;
+
+
+/***/ }),
+/* 83 */
+/***/ (function(module, exports) {
+
+/*!
+ * Determine if an object is a Buffer
+ *
+ * @author   Feross Aboukhadijeh <https://feross.org>
+ * @license  MIT
+ */
+
+// The _isBuffer check is for Safari 5-7 support, because it's missing
+// Object.prototype.constructor. Remove this eventually
+module.exports = function (obj) {
+  return obj != null && (isBuffer(obj) || isSlowBuffer(obj) || !!obj._isBuffer)
+}
+
+function isBuffer (obj) {
+  return !!obj.constructor && typeof obj.constructor.isBuffer === 'function' && obj.constructor.isBuffer(obj)
+}
+
+// For Node v0.10 support. Remove this eventually.
+function isSlowBuffer (obj) {
+  return typeof obj.readFloatLE === 'function' && typeof obj.slice === 'function' && isBuffer(obj.slice(0, 0))
+}
+
+
+/***/ }),
+/* 84 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var defaults = __webpack_require__(28);
+var utils = __webpack_require__(6);
+var InterceptorManager = __webpack_require__(93);
+var dispatchRequest = __webpack_require__(94);
+
+/**
+ * Create a new instance of Axios
+ *
+ * @param {Object} instanceConfig The default config for the instance
+ */
+function Axios(instanceConfig) {
+  this.defaults = instanceConfig;
+  this.interceptors = {
+    request: new InterceptorManager(),
+    response: new InterceptorManager()
+  };
+}
+
+/**
+ * Dispatch a request
+ *
+ * @param {Object} config The config specific for this request (merged with this.defaults)
+ */
+Axios.prototype.request = function request(config) {
+  /*eslint no-param-reassign:0*/
+  // Allow for axios('example/url'[, config]) a la fetch API
+  if (typeof config === 'string') {
+    config = utils.merge({
+      url: arguments[0]
+    }, arguments[1]);
+  }
+
+  config = utils.merge(defaults, {method: 'get'}, this.defaults, config);
+  config.method = config.method.toLowerCase();
+
+  // Hook up interceptors middleware
+  var chain = [dispatchRequest, undefined];
+  var promise = Promise.resolve(config);
+
+  this.interceptors.request.forEach(function unshiftRequestInterceptors(interceptor) {
+    chain.unshift(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  this.interceptors.response.forEach(function pushResponseInterceptors(interceptor) {
+    chain.push(interceptor.fulfilled, interceptor.rejected);
+  });
+
+  while (chain.length) {
+    promise = promise.then(chain.shift(), chain.shift());
+  }
+
+  return promise;
+};
+
+// Provide aliases for supported request methods
+utils.forEach(['delete', 'get', 'head', 'options'], function forEachMethodNoData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url
+    }));
+  };
+});
+
+utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
+  /*eslint func-names:0*/
+  Axios.prototype[method] = function(url, data, config) {
+    return this.request(utils.merge(config || {}, {
+      method: method,
+      url: url,
+      data: data
+    }));
+  };
+});
+
+module.exports = Axios;
+
+
+/***/ }),
+/* 85 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+module.exports = function normalizeHeaderName(headers, normalizedName) {
+  utils.forEach(headers, function processHeader(value, name) {
+    if (name !== normalizedName && name.toUpperCase() === normalizedName.toUpperCase()) {
+      headers[normalizedName] = value;
+      delete headers[name];
+    }
+  });
+};
+
+
+/***/ }),
+/* 86 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var createError = __webpack_require__(36);
+
+/**
+ * Resolve or reject a Promise based on response status.
+ *
+ * @param {Function} resolve A function that resolves the promise.
+ * @param {Function} reject A function that rejects the promise.
+ * @param {object} response The response.
+ */
+module.exports = function settle(resolve, reject, response) {
+  var validateStatus = response.config.validateStatus;
+  // Note: status is not exposed by XDomainRequest
+  if (!response.status || !validateStatus || validateStatus(response.status)) {
+    resolve(response);
+  } else {
+    reject(createError(
+      'Request failed with status code ' + response.status,
+      response.config,
+      null,
+      response.request,
+      response
+    ));
+  }
+};
+
+
+/***/ }),
+/* 87 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Update an Error with the specified config, error code, and response.
+ *
+ * @param {Error} error The error to update.
+ * @param {Object} config The config.
+ * @param {string} [code] The error code (for example, 'ECONNABORTED').
+ * @param {Object} [request] The request.
+ * @param {Object} [response] The response.
+ * @returns {Error} The error.
+ */
+module.exports = function enhanceError(error, config, code, request, response) {
+  error.config = config;
+  if (code) {
+    error.code = code;
+  }
+  error.request = request;
+  error.response = response;
+  return error;
+};
+
+
+/***/ }),
+/* 88 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+function encode(val) {
+  return encodeURIComponent(val).
+    replace(/%40/gi, '@').
+    replace(/%3A/gi, ':').
+    replace(/%24/g, '$').
+    replace(/%2C/gi, ',').
+    replace(/%20/g, '+').
+    replace(/%5B/gi, '[').
+    replace(/%5D/gi, ']');
+}
+
+/**
+ * Build a URL by appending params to the end
+ *
+ * @param {string} url The base of the url (e.g., http://www.google.com)
+ * @param {object} [params] The params to be appended
+ * @returns {string} The formatted url
+ */
+module.exports = function buildURL(url, params, paramsSerializer) {
+  /*eslint no-param-reassign:0*/
+  if (!params) {
+    return url;
+  }
+
+  var serializedParams;
+  if (paramsSerializer) {
+    serializedParams = paramsSerializer(params);
+  } else if (utils.isURLSearchParams(params)) {
+    serializedParams = params.toString();
+  } else {
+    var parts = [];
+
+    utils.forEach(params, function serialize(val, key) {
+      if (val === null || typeof val === 'undefined') {
+        return;
+      }
+
+      if (utils.isArray(val)) {
+        key = key + '[]';
+      } else {
+        val = [val];
+      }
+
+      utils.forEach(val, function parseValue(v) {
+        if (utils.isDate(v)) {
+          v = v.toISOString();
+        } else if (utils.isObject(v)) {
+          v = JSON.stringify(v);
+        }
+        parts.push(encode(key) + '=' + encode(v));
+      });
+    });
+
+    serializedParams = parts.join('&');
+  }
+
+  if (serializedParams) {
+    url += (url.indexOf('?') === -1 ? '?' : '&') + serializedParams;
+  }
+
+  return url;
+};
+
+
+/***/ }),
+/* 89 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+// Headers whose duplicates are ignored by node
+// c.f. https://nodejs.org/api/http.html#http_message_headers
+var ignoreDuplicateOf = [
+  'age', 'authorization', 'content-length', 'content-type', 'etag',
+  'expires', 'from', 'host', 'if-modified-since', 'if-unmodified-since',
+  'last-modified', 'location', 'max-forwards', 'proxy-authorization',
+  'referer', 'retry-after', 'user-agent'
+];
+
+/**
+ * Parse headers into an object
+ *
+ * ```
+ * Date: Wed, 27 Aug 2014 08:58:49 GMT
+ * Content-Type: application/json
+ * Connection: keep-alive
+ * Transfer-Encoding: chunked
+ * ```
+ *
+ * @param {String} headers Headers needing to be parsed
+ * @returns {Object} Headers parsed into an object
+ */
+module.exports = function parseHeaders(headers) {
+  var parsed = {};
+  var key;
+  var val;
+  var i;
+
+  if (!headers) { return parsed; }
+
+  utils.forEach(headers.split('\n'), function parser(line) {
+    i = line.indexOf(':');
+    key = utils.trim(line.substr(0, i)).toLowerCase();
+    val = utils.trim(line.substr(i + 1));
+
+    if (key) {
+      if (parsed[key] && ignoreDuplicateOf.indexOf(key) >= 0) {
+        return;
+      }
+      if (key === 'set-cookie') {
+        parsed[key] = (parsed[key] ? parsed[key] : []).concat([val]);
+      } else {
+        parsed[key] = parsed[key] ? parsed[key] + ', ' + val : val;
+      }
+    }
+  });
+
+  return parsed;
+};
+
+
+/***/ }),
+/* 90 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs have full support of the APIs needed to test
+  // whether the request URL is of the same origin as current location.
+  (function standardBrowserEnv() {
+    var msie = /(msie|trident)/i.test(navigator.userAgent);
+    var urlParsingNode = document.createElement('a');
+    var originURL;
+
+    /**
+    * Parse a URL to discover it's components
+    *
+    * @param {String} url The URL to be parsed
+    * @returns {Object}
+    */
+    function resolveURL(url) {
+      var href = url;
+
+      if (msie) {
+        // IE needs attribute set twice to normalize properties
+        urlParsingNode.setAttribute('href', href);
+        href = urlParsingNode.href;
+      }
+
+      urlParsingNode.setAttribute('href', href);
+
+      // urlParsingNode provides the UrlUtils interface - http://url.spec.whatwg.org/#urlutils
+      return {
+        href: urlParsingNode.href,
+        protocol: urlParsingNode.protocol ? urlParsingNode.protocol.replace(/:$/, '') : '',
+        host: urlParsingNode.host,
+        search: urlParsingNode.search ? urlParsingNode.search.replace(/^\?/, '') : '',
+        hash: urlParsingNode.hash ? urlParsingNode.hash.replace(/^#/, '') : '',
+        hostname: urlParsingNode.hostname,
+        port: urlParsingNode.port,
+        pathname: (urlParsingNode.pathname.charAt(0) === '/') ?
+                  urlParsingNode.pathname :
+                  '/' + urlParsingNode.pathname
+      };
+    }
+
+    originURL = resolveURL(window.location.href);
+
+    /**
+    * Determine if a URL shares the same origin as the current location
+    *
+    * @param {String} requestURL The URL to test
+    * @returns {boolean} True if URL shares the same origin, otherwise false
+    */
+    return function isURLSameOrigin(requestURL) {
+      var parsed = (utils.isString(requestURL)) ? resolveURL(requestURL) : requestURL;
+      return (parsed.protocol === originURL.protocol &&
+            parsed.host === originURL.host);
+    };
+  })() :
+
+  // Non standard browser envs (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return function isURLSameOrigin() {
+      return true;
+    };
+  })()
+);
+
+
+/***/ }),
+/* 91 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+// btoa polyfill for IE<10 courtesy https://github.com/davidchambers/Base64.js
+
+var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+
+function E() {
+  this.message = 'String contains an invalid character';
+}
+E.prototype = new Error;
+E.prototype.code = 5;
+E.prototype.name = 'InvalidCharacterError';
+
+function btoa(input) {
+  var str = String(input);
+  var output = '';
+  for (
+    // initialize result and counter
+    var block, charCode, idx = 0, map = chars;
+    // if the next str index does not exist:
+    //   change the mapping table to "="
+    //   check if d has no fractional digits
+    str.charAt(idx | 0) || (map = '=', idx % 1);
+    // "8 - idx % 1 * 8" generates the sequence 2, 4, 6, 8
+    output += map.charAt(63 & block >> 8 - idx % 1 * 8)
+  ) {
+    charCode = str.charCodeAt(idx += 3 / 4);
+    if (charCode > 0xFF) {
+      throw new E();
+    }
+    block = block << 8 | charCode;
+  }
+  return output;
+}
+
+module.exports = btoa;
+
+
+/***/ }),
+/* 92 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+module.exports = (
+  utils.isStandardBrowserEnv() ?
+
+  // Standard browser envs support document.cookie
+  (function standardBrowserEnv() {
+    return {
+      write: function write(name, value, expires, path, domain, secure) {
+        var cookie = [];
+        cookie.push(name + '=' + encodeURIComponent(value));
+
+        if (utils.isNumber(expires)) {
+          cookie.push('expires=' + new Date(expires).toGMTString());
+        }
+
+        if (utils.isString(path)) {
+          cookie.push('path=' + path);
+        }
+
+        if (utils.isString(domain)) {
+          cookie.push('domain=' + domain);
+        }
+
+        if (secure === true) {
+          cookie.push('secure');
+        }
+
+        document.cookie = cookie.join('; ');
+      },
+
+      read: function read(name) {
+        var match = document.cookie.match(new RegExp('(^|;\\s*)(' + name + ')=([^;]*)'));
+        return (match ? decodeURIComponent(match[3]) : null);
+      },
+
+      remove: function remove(name) {
+        this.write(name, '', Date.now() - 86400000);
+      }
+    };
+  })() :
+
+  // Non standard browser env (web workers, react-native) lack needed support.
+  (function nonStandardBrowserEnv() {
+    return {
+      write: function write() {},
+      read: function read() { return null; },
+      remove: function remove() {}
+    };
+  })()
+);
+
+
+/***/ }),
+/* 93 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+function InterceptorManager() {
+  this.handlers = [];
+}
+
+/**
+ * Add a new interceptor to the stack
+ *
+ * @param {Function} fulfilled The function to handle `then` for a `Promise`
+ * @param {Function} rejected The function to handle `reject` for a `Promise`
+ *
+ * @return {Number} An ID used to remove interceptor later
+ */
+InterceptorManager.prototype.use = function use(fulfilled, rejected) {
+  this.handlers.push({
+    fulfilled: fulfilled,
+    rejected: rejected
+  });
+  return this.handlers.length - 1;
+};
+
+/**
+ * Remove an interceptor from the stack
+ *
+ * @param {Number} id The ID that was returned by `use`
+ */
+InterceptorManager.prototype.eject = function eject(id) {
+  if (this.handlers[id]) {
+    this.handlers[id] = null;
+  }
+};
+
+/**
+ * Iterate over all the registered interceptors
+ *
+ * This method is particularly useful for skipping over any
+ * interceptors that may have become `null` calling `eject`.
+ *
+ * @param {Function} fn The function to call for each interceptor
+ */
+InterceptorManager.prototype.forEach = function forEach(fn) {
+  utils.forEach(this.handlers, function forEachHandler(h) {
+    if (h !== null) {
+      fn(h);
+    }
+  });
+};
+
+module.exports = InterceptorManager;
+
+
+/***/ }),
+/* 94 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+var transformData = __webpack_require__(95);
+var isCancel = __webpack_require__(37);
+var defaults = __webpack_require__(28);
+var isAbsoluteURL = __webpack_require__(96);
+var combineURLs = __webpack_require__(97);
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+function throwIfCancellationRequested(config) {
+  if (config.cancelToken) {
+    config.cancelToken.throwIfRequested();
+  }
+}
+
+/**
+ * Dispatch a request to the server using the configured adapter.
+ *
+ * @param {object} config The config that is to be used for the request
+ * @returns {Promise} The Promise to be fulfilled
+ */
+module.exports = function dispatchRequest(config) {
+  throwIfCancellationRequested(config);
+
+  // Support baseURL config
+  if (config.baseURL && !isAbsoluteURL(config.url)) {
+    config.url = combineURLs(config.baseURL, config.url);
+  }
+
+  // Ensure headers exist
+  config.headers = config.headers || {};
+
+  // Transform request data
+  config.data = transformData(
+    config.data,
+    config.headers,
+    config.transformRequest
+  );
+
+  // Flatten headers
+  config.headers = utils.merge(
+    config.headers.common || {},
+    config.headers[config.method] || {},
+    config.headers || {}
+  );
+
+  utils.forEach(
+    ['delete', 'get', 'head', 'post', 'put', 'patch', 'common'],
+    function cleanHeaderConfig(method) {
+      delete config.headers[method];
+    }
+  );
+
+  var adapter = config.adapter || defaults.adapter;
+
+  return adapter(config).then(function onAdapterResolution(response) {
+    throwIfCancellationRequested(config);
+
+    // Transform response data
+    response.data = transformData(
+      response.data,
+      response.headers,
+      config.transformResponse
+    );
+
+    return response;
+  }, function onAdapterRejection(reason) {
+    if (!isCancel(reason)) {
+      throwIfCancellationRequested(config);
+
+      // Transform response data
+      if (reason && reason.response) {
+        reason.response.data = transformData(
+          reason.response.data,
+          reason.response.headers,
+          config.transformResponse
+        );
+      }
+    }
+
+    return Promise.reject(reason);
+  });
+};
+
+
+/***/ }),
+/* 95 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var utils = __webpack_require__(6);
+
+/**
+ * Transform the data for a request or a response
+ *
+ * @param {Object|String} data The data to be transformed
+ * @param {Array} headers The headers for the request or response
+ * @param {Array|Function} fns A single function or Array of functions
+ * @returns {*} The resulting transformed data
+ */
+module.exports = function transformData(data, headers, fns) {
+  /*eslint no-param-reassign:0*/
+  utils.forEach(fns, function transform(fn) {
+    data = fn(data, headers);
+  });
+
+  return data;
+};
+
+
+/***/ }),
+/* 96 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Determines whether the specified URL is absolute
+ *
+ * @param {string} url The URL to test
+ * @returns {boolean} True if the specified URL is absolute, otherwise false
+ */
+module.exports = function isAbsoluteURL(url) {
+  // A URL is considered absolute if it begins with "<scheme>://" or "//" (protocol-relative URL).
+  // RFC 3986 defines scheme name as a sequence of characters beginning with a letter and followed
+  // by any combination of letters, digits, plus, period, or hyphen.
+  return /^([a-z][a-z\d\+\-\.]*:)?\/\//i.test(url);
+};
+
+
+/***/ }),
+/* 97 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Creates a new URL by combining the specified URLs
+ *
+ * @param {string} baseURL The base URL
+ * @param {string} relativeURL The relative URL
+ * @returns {string} The combined URL
+ */
+module.exports = function combineURLs(baseURL, relativeURL) {
+  return relativeURL
+    ? baseURL.replace(/\/+$/, '') + '/' + relativeURL.replace(/^\/+/, '')
+    : baseURL;
+};
+
+
+/***/ }),
+/* 98 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var Cancel = __webpack_require__(38);
+
+/**
+ * A `CancelToken` is an object that can be used to request cancellation of an operation.
+ *
+ * @class
+ * @param {Function} executor The executor function.
+ */
+function CancelToken(executor) {
+  if (typeof executor !== 'function') {
+    throw new TypeError('executor must be a function.');
+  }
+
+  var resolvePromise;
+  this.promise = new Promise(function promiseExecutor(resolve) {
+    resolvePromise = resolve;
+  });
+
+  var token = this;
+  executor(function cancel(message) {
+    if (token.reason) {
+      // Cancellation has already been requested
+      return;
+    }
+
+    token.reason = new Cancel(message);
+    resolvePromise(token.reason);
+  });
+}
+
+/**
+ * Throws a `Cancel` if cancellation has been requested.
+ */
+CancelToken.prototype.throwIfRequested = function throwIfRequested() {
+  if (this.reason) {
+    throw this.reason;
+  }
+};
+
+/**
+ * Returns an object that contains a new `CancelToken` and a function that, when called,
+ * cancels the `CancelToken`.
+ */
+CancelToken.source = function source() {
+  var cancel;
+  var token = new CancelToken(function executor(c) {
+    cancel = c;
+  });
+  return {
+    token: token,
+    cancel: cancel
+  };
+};
+
+module.exports = CancelToken;
+
+
+/***/ }),
+/* 99 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+/**
+ * Syntactic sugar for invoking a function and expanding an array for arguments.
+ *
+ * Common use case would be to use `Function.prototype.apply`.
+ *
+ *  ```js
+ *  function f(x, y, z) {}
+ *  var args = [1, 2, 3];
+ *  f.apply(null, args);
+ *  ```
+ *
+ * With `spread` this example can be re-written.
+ *
+ *  ```js
+ *  spread(function(x, y, z) {})([1, 2, 3]);
+ *  ```
+ *
+ * @param {Function} callback
+ * @returns {Function}
+ */
+module.exports = function spread(callback) {
+  return function wrap(arr) {
+    return callback.apply(null, arr);
+  };
+};
+
+
+/***/ }),
+/* 100 */
+/***/ (function(module, exports, __webpack_require__) {
+
+var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_RESULT__;/*
+Turbolinks 5.1.1
+Copyright © 2018 Basecamp, LLC
+ */
+(function(){var t=this;(function(){(function(){this.Turbolinks={supported:function(){return null!=window.history.pushState&&null!=window.requestAnimationFrame&&null!=window.addEventListener}(),visit:function(t,r){return e.controller.visit(t,r)},clearCache:function(){return e.controller.clearCache()},setProgressBarDelay:function(t){return e.controller.setProgressBarDelay(t)}}}).call(this)}).call(t);var e=t.Turbolinks;(function(){(function(){var t,r,n,o=[].slice;e.copyObject=function(t){var e,r,n;r={};for(e in t)n=t[e],r[e]=n;return r},e.closest=function(e,r){return t.call(e,r)},t=function(){var t,e;return t=document.documentElement,null!=(e=t.closest)?e:function(t){var e;for(e=this;e;){if(e.nodeType===Node.ELEMENT_NODE&&r.call(e,t))return e;e=e.parentNode}}}(),e.defer=function(t){return setTimeout(t,1)},e.throttle=function(t){var e;return e=null,function(){var r;return r=1<=arguments.length?o.call(arguments,0):[],null!=e?e:e=requestAnimationFrame(function(n){return function(){return e=null,t.apply(n,r)}}(this))}},e.dispatch=function(t,e){var r,o,i,s,a,u;return a=null!=e?e:{},u=a.target,r=a.cancelable,o=a.data,i=document.createEvent("Events"),i.initEvent(t,!0,r===!0),i.data=null!=o?o:{},i.cancelable&&!n&&(s=i.preventDefault,i.preventDefault=function(){return this.defaultPrevented||Object.defineProperty(this,"defaultPrevented",{get:function(){return!0}}),s.call(this)}),(null!=u?u:document).dispatchEvent(i),i},n=function(){var t;return t=document.createEvent("Events"),t.initEvent("test",!0,!0),t.preventDefault(),t.defaultPrevented}(),e.match=function(t,e){return r.call(t,e)},r=function(){var t,e,r,n;return t=document.documentElement,null!=(e=null!=(r=null!=(n=t.matchesSelector)?n:t.webkitMatchesSelector)?r:t.msMatchesSelector)?e:t.mozMatchesSelector}(),e.uuid=function(){var t,e,r;for(r="",t=e=1;36>=e;t=++e)r+=9===t||14===t||19===t||24===t?"-":15===t?"4":20===t?(Math.floor(4*Math.random())+8).toString(16):Math.floor(15*Math.random()).toString(16);return r}}).call(this),function(){e.Location=function(){function t(t){var e,r;null==t&&(t=""),r=document.createElement("a"),r.href=t.toString(),this.absoluteURL=r.href,e=r.hash.length,2>e?this.requestURL=this.absoluteURL:(this.requestURL=this.absoluteURL.slice(0,-e),this.anchor=r.hash.slice(1))}var e,r,n,o;return t.wrap=function(t){return t instanceof this?t:new this(t)},t.prototype.getOrigin=function(){return this.absoluteURL.split("/",3).join("/")},t.prototype.getPath=function(){var t,e;return null!=(t=null!=(e=this.requestURL.match(/\/\/[^\/]*(\/[^?;]*)/))?e[1]:void 0)?t:"/"},t.prototype.getPathComponents=function(){return this.getPath().split("/").slice(1)},t.prototype.getLastPathComponent=function(){return this.getPathComponents().slice(-1)[0]},t.prototype.getExtension=function(){var t,e;return null!=(t=null!=(e=this.getLastPathComponent().match(/\.[^.]*$/))?e[0]:void 0)?t:""},t.prototype.isHTML=function(){return this.getExtension().match(/^(?:|\.(?:htm|html|xhtml))$/)},t.prototype.isPrefixedBy=function(t){var e;return e=r(t),this.isEqualTo(t)||o(this.absoluteURL,e)},t.prototype.isEqualTo=function(t){return this.absoluteURL===(null!=t?t.absoluteURL:void 0)},t.prototype.toCacheKey=function(){return this.requestURL},t.prototype.toJSON=function(){return this.absoluteURL},t.prototype.toString=function(){return this.absoluteURL},t.prototype.valueOf=function(){return this.absoluteURL},r=function(t){return e(t.getOrigin()+t.getPath())},e=function(t){return n(t,"/")?t:t+"/"},o=function(t,e){return t.slice(0,e.length)===e},n=function(t,e){return t.slice(-e.length)===e},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.HttpRequest=function(){function r(r,n,o){this.delegate=r,this.requestCanceled=t(this.requestCanceled,this),this.requestTimedOut=t(this.requestTimedOut,this),this.requestFailed=t(this.requestFailed,this),this.requestLoaded=t(this.requestLoaded,this),this.requestProgressed=t(this.requestProgressed,this),this.url=e.Location.wrap(n).requestURL,this.referrer=e.Location.wrap(o).absoluteURL,this.createXHR()}return r.NETWORK_FAILURE=0,r.TIMEOUT_FAILURE=-1,r.timeout=60,r.prototype.send=function(){var t;return this.xhr&&!this.sent?(this.notifyApplicationBeforeRequestStart(),this.setProgress(0),this.xhr.send(),this.sent=!0,"function"==typeof(t=this.delegate).requestStarted?t.requestStarted():void 0):void 0},r.prototype.cancel=function(){return this.xhr&&this.sent?this.xhr.abort():void 0},r.prototype.requestProgressed=function(t){return t.lengthComputable?this.setProgress(t.loaded/t.total):void 0},r.prototype.requestLoaded=function(){return this.endRequest(function(t){return function(){var e;return 200<=(e=t.xhr.status)&&300>e?t.delegate.requestCompletedWithResponse(t.xhr.responseText,t.xhr.getResponseHeader("Turbolinks-Location")):(t.failed=!0,t.delegate.requestFailedWithStatusCode(t.xhr.status,t.xhr.responseText))}}(this))},r.prototype.requestFailed=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.NETWORK_FAILURE)}}(this))},r.prototype.requestTimedOut=function(){return this.endRequest(function(t){return function(){return t.failed=!0,t.delegate.requestFailedWithStatusCode(t.constructor.TIMEOUT_FAILURE)}}(this))},r.prototype.requestCanceled=function(){return this.endRequest()},r.prototype.notifyApplicationBeforeRequestStart=function(){return e.dispatch("turbolinks:request-start",{data:{url:this.url,xhr:this.xhr}})},r.prototype.notifyApplicationAfterRequestEnd=function(){return e.dispatch("turbolinks:request-end",{data:{url:this.url,xhr:this.xhr}})},r.prototype.createXHR=function(){return this.xhr=new XMLHttpRequest,this.xhr.open("GET",this.url,!0),this.xhr.timeout=1e3*this.constructor.timeout,this.xhr.setRequestHeader("Accept","text/html, application/xhtml+xml"),this.xhr.setRequestHeader("Turbolinks-Referrer",this.referrer),this.xhr.onprogress=this.requestProgressed,this.xhr.onload=this.requestLoaded,this.xhr.onerror=this.requestFailed,this.xhr.ontimeout=this.requestTimedOut,this.xhr.onabort=this.requestCanceled},r.prototype.endRequest=function(t){return this.xhr?(this.notifyApplicationAfterRequestEnd(),null!=t&&t.call(this),this.destroy()):void 0},r.prototype.setProgress=function(t){var e;return this.progress=t,"function"==typeof(e=this.delegate).requestProgressed?e.requestProgressed(this.progress):void 0},r.prototype.destroy=function(){var t;return this.setProgress(1),"function"==typeof(t=this.delegate).requestFinished&&t.requestFinished(),this.delegate=null,this.xhr=null},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ProgressBar=function(){function e(){this.trickle=t(this.trickle,this),this.stylesheetElement=this.createStylesheetElement(),this.progressElement=this.createProgressElement()}var r;return r=300,e.defaultCSS=".turbolinks-progress-bar {\n  position: fixed;\n  display: block;\n  top: 0;\n  left: 0;\n  height: 3px;\n  background: #0076ff;\n  z-index: 9999;\n  transition: width "+r+"ms ease-out, opacity "+r/2+"ms "+r/2+"ms ease-in;\n  transform: translate3d(0, 0, 0);\n}",e.prototype.show=function(){return this.visible?void 0:(this.visible=!0,this.installStylesheetElement(),this.installProgressElement(),this.startTrickling())},e.prototype.hide=function(){return this.visible&&!this.hiding?(this.hiding=!0,this.fadeProgressElement(function(t){return function(){return t.uninstallProgressElement(),t.stopTrickling(),t.visible=!1,t.hiding=!1}}(this))):void 0},e.prototype.setValue=function(t){return this.value=t,this.refresh()},e.prototype.installStylesheetElement=function(){return document.head.insertBefore(this.stylesheetElement,document.head.firstChild)},e.prototype.installProgressElement=function(){return this.progressElement.style.width=0,this.progressElement.style.opacity=1,document.documentElement.insertBefore(this.progressElement,document.body),this.refresh()},e.prototype.fadeProgressElement=function(t){return this.progressElement.style.opacity=0,setTimeout(t,1.5*r)},e.prototype.uninstallProgressElement=function(){return this.progressElement.parentNode?document.documentElement.removeChild(this.progressElement):void 0},e.prototype.startTrickling=function(){return null!=this.trickleInterval?this.trickleInterval:this.trickleInterval=setInterval(this.trickle,r)},e.prototype.stopTrickling=function(){return clearInterval(this.trickleInterval),this.trickleInterval=null},e.prototype.trickle=function(){return this.setValue(this.value+Math.random()/100)},e.prototype.refresh=function(){return requestAnimationFrame(function(t){return function(){return t.progressElement.style.width=10+90*t.value+"%"}}(this))},e.prototype.createStylesheetElement=function(){var t;return t=document.createElement("style"),t.type="text/css",t.textContent=this.constructor.defaultCSS,t},e.prototype.createProgressElement=function(){var t;return t=document.createElement("div"),t.className="turbolinks-progress-bar",t},e}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.BrowserAdapter=function(){function r(r){this.controller=r,this.showProgressBar=t(this.showProgressBar,this),this.progressBar=new e.ProgressBar}var n,o,i;return i=e.HttpRequest,n=i.NETWORK_FAILURE,o=i.TIMEOUT_FAILURE,r.prototype.visitProposedToLocationWithAction=function(t,e){return this.controller.startVisitToLocationWithAction(t,e)},r.prototype.visitStarted=function(t){return t.issueRequest(),t.changeHistory(),t.loadCachedSnapshot()},r.prototype.visitRequestStarted=function(t){return this.progressBar.setValue(0),t.hasCachedSnapshot()||"restore"!==t.action?this.showProgressBarAfterDelay():this.showProgressBar()},r.prototype.visitRequestProgressed=function(t){return this.progressBar.setValue(t.progress)},r.prototype.visitRequestCompleted=function(t){return t.loadResponse()},r.prototype.visitRequestFailedWithStatusCode=function(t,e){switch(e){case n:case o:return this.reload();default:return t.loadResponse()}},r.prototype.visitRequestFinished=function(t){return this.hideProgressBar()},r.prototype.visitCompleted=function(t){return t.followRedirect()},r.prototype.pageInvalidated=function(){return this.reload()},r.prototype.showProgressBarAfterDelay=function(){return this.progressBarTimeout=setTimeout(this.showProgressBar,this.controller.progressBarDelay)},r.prototype.showProgressBar=function(){return this.progressBar.show()},r.prototype.hideProgressBar=function(){return this.progressBar.hide(),clearTimeout(this.progressBarTimeout)},r.prototype.reload=function(){return window.location.reload()},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.History=function(){function r(e){this.delegate=e,this.onPageLoad=t(this.onPageLoad,this),this.onPopState=t(this.onPopState,this)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("popstate",this.onPopState,!1),addEventListener("load",this.onPageLoad,!1),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("popstate",this.onPopState,!1),removeEventListener("load",this.onPageLoad,!1),this.started=!1):void 0},r.prototype.push=function(t,r){return t=e.Location.wrap(t),this.update("push",t,r)},r.prototype.replace=function(t,r){return t=e.Location.wrap(t),this.update("replace",t,r)},r.prototype.onPopState=function(t){var r,n,o,i;return this.shouldHandlePopState()&&(i=null!=(n=t.state)?n.turbolinks:void 0)?(r=e.Location.wrap(window.location),o=i.restorationIdentifier,this.delegate.historyPoppedToLocationWithRestorationIdentifier(r,o)):void 0},r.prototype.onPageLoad=function(t){return e.defer(function(t){return function(){return t.pageLoaded=!0}}(this))},r.prototype.shouldHandlePopState=function(){return this.pageIsLoaded()},r.prototype.pageIsLoaded=function(){return this.pageLoaded||"complete"===document.readyState},r.prototype.update=function(t,e,r){var n;return n={turbolinks:{restorationIdentifier:r}},history[t+"State"](n,null,e)},r}()}.call(this),function(){e.Snapshot=function(){function t(t){var e,r;r=t.head,e=t.body,this.head=null!=r?r:document.createElement("head"),this.body=null!=e?e:document.createElement("body")}return t.wrap=function(t){return t instanceof this?t:this.fromHTML(t)},t.fromHTML=function(t){var e;return e=document.createElement("html"),e.innerHTML=t,this.fromElement(e)},t.fromElement=function(t){return new this({head:t.querySelector("head"),body:t.querySelector("body")})},t.prototype.clone=function(){return new t({head:this.head.cloneNode(!0),body:this.body.cloneNode(!0)})},t.prototype.getRootLocation=function(){var t,r;return r=null!=(t=this.getSetting("root"))?t:"/",new e.Location(r)},t.prototype.getCacheControlValue=function(){return this.getSetting("cache-control")},t.prototype.getElementForAnchor=function(t){try{return this.body.querySelector("[id='"+t+"'], a[name='"+t+"']")}catch(e){}},t.prototype.hasAnchor=function(t){return null!=this.getElementForAnchor(t)},t.prototype.isPreviewable=function(){return"no-preview"!==this.getCacheControlValue()},t.prototype.isCacheable=function(){return"no-cache"!==this.getCacheControlValue()},t.prototype.isVisitable=function(){return"reload"!==this.getSetting("visit-control")},t.prototype.getSetting=function(t){var e,r;return r=this.head.querySelectorAll("meta[name='turbolinks-"+t+"']"),e=r[r.length-1],null!=e?e.getAttribute("content"):void 0},t}()}.call(this),function(){var t=[].slice;e.Renderer=function(){function e(){}var r;return e.render=function(){var e,r,n,o;return n=arguments[0],r=arguments[1],e=3<=arguments.length?t.call(arguments,2):[],o=function(t,e,r){r.prototype=t.prototype;var n=new r,o=t.apply(n,e);return Object(o)===o?o:n}(this,e,function(){}),o.delegate=n,o.render(r),o},e.prototype.renderView=function(t){return this.delegate.viewWillRender(this.newBody),t(),this.delegate.viewRendered(this.newBody)},e.prototype.invalidateView=function(){return this.delegate.viewInvalidated()},e.prototype.createScriptElement=function(t){var e;return"false"===t.getAttribute("data-turbolinks-eval")?t:(e=document.createElement("script"),e.textContent=t.textContent,e.async=!1,r(e,t),e)},r=function(t,e){var r,n,o,i,s,a,u;for(i=e.attributes,a=[],r=0,n=i.length;n>r;r++)s=i[r],o=s.name,u=s.value,a.push(t.setAttribute(o,u));return a},e}()}.call(this),function(){e.HeadDetails=function(){function t(t){var e,r,i,s,a,u,l;for(this.element=t,this.elements={},l=this.element.childNodes,s=0,u=l.length;u>s;s++)i=l[s],i.nodeType===Node.ELEMENT_NODE&&(a=i.outerHTML,r=null!=(e=this.elements)[a]?e[a]:e[a]={type:o(i),tracked:n(i),elements:[]},r.elements.push(i))}var e,r,n,o;return t.prototype.hasElementWithKey=function(t){return t in this.elements},t.prototype.getTrackedElementSignature=function(){var t,e;return function(){var r,n;r=this.elements,n=[];for(t in r)e=r[t].tracked,e&&n.push(t);return n}.call(this).join("")},t.prototype.getScriptElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("script",t)},t.prototype.getStylesheetElementsNotInDetails=function(t){return this.getElementsMatchingTypeNotInDetails("stylesheet",t)},t.prototype.getElementsMatchingTypeNotInDetails=function(t,e){var r,n,o,i,s,a;o=this.elements,s=[];for(n in o)i=o[n],a=i.type,r=i.elements,a!==t||e.hasElementWithKey(n)||s.push(r[0]);return s},t.prototype.getProvisionalElements=function(){var t,e,r,n,o,i,s;r=[],n=this.elements;for(e in n)o=n[e],s=o.type,i=o.tracked,t=o.elements,null!=s||i?t.length>1&&r.push.apply(r,t.slice(1)):r.push.apply(r,t);return r},o=function(t){return e(t)?"script":r(t)?"stylesheet":void 0},n=function(t){return"reload"===t.getAttribute("data-turbolinks-track")},e=function(t){var e;return e=t.tagName.toLowerCase(),"script"===e},r=function(t){var e;return e=t.tagName.toLowerCase(),"style"===e||"link"===e&&"stylesheet"===t.getAttribute("rel")},t}()}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.SnapshotRenderer=function(r){function n(t,r,n){this.currentSnapshot=t,this.newSnapshot=r,this.isPreview=n,this.currentHeadDetails=new e.HeadDetails(this.currentSnapshot.head),this.newHeadDetails=new e.HeadDetails(this.newSnapshot.head),this.newBody=this.newSnapshot.body}return t(n,r),n.prototype.render=function(t){return this.shouldRender()?(this.mergeHead(),this.renderView(function(e){return function(){return e.replaceBody(),e.isPreview||e.focusFirstAutofocusableElement(),t()}}(this))):this.invalidateView()},n.prototype.mergeHead=function(){return this.copyNewHeadStylesheetElements(),this.copyNewHeadScriptElements(),this.removeCurrentHeadProvisionalElements(),this.copyNewHeadProvisionalElements()},n.prototype.replaceBody=function(){return this.activateBodyScriptElements(),this.importBodyPermanentElements(),this.assignNewBody()},n.prototype.shouldRender=function(){return this.newSnapshot.isVisitable()&&this.trackedElementsAreIdentical()},n.prototype.trackedElementsAreIdentical=function(){return this.currentHeadDetails.getTrackedElementSignature()===this.newHeadDetails.getTrackedElementSignature()},n.prototype.copyNewHeadStylesheetElements=function(){var t,e,r,n,o;for(n=this.getNewHeadStylesheetElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.copyNewHeadScriptElements=function(){var t,e,r,n,o;for(n=this.getNewHeadScriptElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(this.createScriptElement(t)));return o},n.prototype.removeCurrentHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getCurrentHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.removeChild(t));return o},n.prototype.copyNewHeadProvisionalElements=function(){var t,e,r,n,o;for(n=this.getNewHeadProvisionalElements(),o=[],e=0,r=n.length;r>e;e++)t=n[e],o.push(document.head.appendChild(t));return o},n.prototype.importBodyPermanentElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyPermanentElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],(t=this.findCurrentBodyPermanentElement(o))?i.push(o.parentNode.replaceChild(t,o)):i.push(void 0);return i},n.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getNewBodyScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},n.prototype.assignNewBody=function(){return document.body=this.newBody},n.prototype.focusFirstAutofocusableElement=function(){var t;return null!=(t=this.findFirstAutofocusableElement())?t.focus():void 0},n.prototype.getNewHeadStylesheetElements=function(){return this.newHeadDetails.getStylesheetElementsNotInDetails(this.currentHeadDetails)},n.prototype.getNewHeadScriptElements=function(){return this.newHeadDetails.getScriptElementsNotInDetails(this.currentHeadDetails)},n.prototype.getCurrentHeadProvisionalElements=function(){return this.currentHeadDetails.getProvisionalElements()},n.prototype.getNewHeadProvisionalElements=function(){return this.newHeadDetails.getProvisionalElements()},n.prototype.getNewBodyPermanentElements=function(){return this.newBody.querySelectorAll("[id][data-turbolinks-permanent]")},n.prototype.findCurrentBodyPermanentElement=function(t){return document.body.querySelector("#"+t.id+"[data-turbolinks-permanent]")},n.prototype.getNewBodyScriptElements=function(){return this.newBody.querySelectorAll("script")},n.prototype.findFirstAutofocusableElement=function(){return document.body.querySelector("[autofocus]")},n}(e.Renderer)}.call(this),function(){var t=function(t,e){function n(){this.constructor=t}for(var o in e)r.call(e,o)&&(t[o]=e[o]);return n.prototype=e.prototype,t.prototype=new n,t.__super__=e.prototype,t},r={}.hasOwnProperty;e.ErrorRenderer=function(e){function r(t){this.html=t}return t(r,e),r.prototype.render=function(t){return this.renderView(function(e){return function(){return e.replaceDocumentHTML(),e.activateBodyScriptElements(),t()}}(this))},r.prototype.replaceDocumentHTML=function(){return document.documentElement.innerHTML=this.html},r.prototype.activateBodyScriptElements=function(){var t,e,r,n,o,i;for(n=this.getScriptElements(),i=[],e=0,r=n.length;r>e;e++)o=n[e],t=this.createScriptElement(o),i.push(o.parentNode.replaceChild(t,o));return i},r.prototype.getScriptElements=function(){return document.documentElement.querySelectorAll("script")},r}(e.Renderer)}.call(this),function(){e.View=function(){function t(t){this.delegate=t,this.element=document.documentElement}return t.prototype.getRootLocation=function(){return this.getSnapshot().getRootLocation()},t.prototype.getElementForAnchor=function(t){return this.getSnapshot().getElementForAnchor(t)},t.prototype.getSnapshot=function(){return e.Snapshot.fromElement(this.element)},t.prototype.render=function(t,e){var r,n,o;return o=t.snapshot,r=t.error,n=t.isPreview,this.markAsPreview(n),null!=o?this.renderSnapshot(o,n,e):this.renderError(r,e)},t.prototype.markAsPreview=function(t){return t?this.element.setAttribute("data-turbolinks-preview",""):this.element.removeAttribute("data-turbolinks-preview")},t.prototype.renderSnapshot=function(t,r,n){return e.SnapshotRenderer.render(this.delegate,n,this.getSnapshot(),e.Snapshot.wrap(t),r)},t.prototype.renderError=function(t,r){return e.ErrorRenderer.render(this.delegate,r,t)},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.ScrollManager=function(){function r(r){this.delegate=r,this.onScroll=t(this.onScroll,this),this.onScroll=e.throttle(this.onScroll)}return r.prototype.start=function(){return this.started?void 0:(addEventListener("scroll",this.onScroll,!1),this.onScroll(),this.started=!0)},r.prototype.stop=function(){return this.started?(removeEventListener("scroll",this.onScroll,!1),this.started=!1):void 0},r.prototype.scrollToElement=function(t){return t.scrollIntoView()},r.prototype.scrollToPosition=function(t){var e,r;return e=t.x,r=t.y,window.scrollTo(e,r)},r.prototype.onScroll=function(t){return this.updatePosition({x:window.pageXOffset,y:window.pageYOffset})},r.prototype.updatePosition=function(t){var e;return this.position=t,null!=(e=this.delegate)?e.scrollPositionChanged(this.position):void 0},r}()}.call(this),function(){e.SnapshotCache=function(){function t(t){this.size=t,this.keys=[],this.snapshots={}}var r;return t.prototype.has=function(t){var e;return e=r(t),e in this.snapshots},t.prototype.get=function(t){var e;if(this.has(t))return e=this.read(t),this.touch(t),e},t.prototype.put=function(t,e){return this.write(t,e),this.touch(t),e},t.prototype.read=function(t){var e;return e=r(t),this.snapshots[e]},t.prototype.write=function(t,e){var n;return n=r(t),this.snapshots[n]=e},t.prototype.touch=function(t){var e,n;return n=r(t),e=this.keys.indexOf(n),e>-1&&this.keys.splice(e,1),this.keys.unshift(n),this.trim()},t.prototype.trim=function(){var t,e,r,n,o;for(n=this.keys.splice(this.size),o=[],t=0,r=n.length;r>t;t++)e=n[t],o.push(delete this.snapshots[e]);return o},r=function(t){return e.Location.wrap(t).toCacheKey()},t}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Visit=function(){function r(r,n,o){this.controller=r,this.action=o,this.performScroll=t(this.performScroll,this),this.identifier=e.uuid(),this.location=e.Location.wrap(n),this.adapter=this.controller.adapter,this.state="initialized",this.timingMetrics={}}var n;return r.prototype.start=function(){return"initialized"===this.state?(this.recordTimingMetric("visitStart"),this.state="started",this.adapter.visitStarted(this)):void 0},r.prototype.cancel=function(){var t;return"started"===this.state?(null!=(t=this.request)&&t.cancel(),this.cancelRender(),this.state="canceled"):void 0},r.prototype.complete=function(){var t;return"started"===this.state?(this.recordTimingMetric("visitEnd"),this.state="completed","function"==typeof(t=this.adapter).visitCompleted&&t.visitCompleted(this),this.controller.visitCompleted(this)):void 0},r.prototype.fail=function(){var t;return"started"===this.state?(this.state="failed","function"==typeof(t=this.adapter).visitFailed?t.visitFailed(this):void 0):void 0},r.prototype.changeHistory=function(){var t,e;return this.historyChanged?void 0:(t=this.location.isEqualTo(this.referrer)?"replace":this.action,e=n(t),this.controller[e](this.location,this.restorationIdentifier),this.historyChanged=!0)},r.prototype.issueRequest=function(){return this.shouldIssueRequest()&&null==this.request?(this.progress=0,this.request=new e.HttpRequest(this,this.location,this.referrer),this.request.send()):void 0},r.prototype.getCachedSnapshot=function(){var t;return!(t=this.controller.getCachedSnapshotForLocation(this.location))||null!=this.location.anchor&&!t.hasAnchor(this.location.anchor)||"restore"!==this.action&&!t.isPreviewable()?void 0:t},r.prototype.hasCachedSnapshot=function(){return null!=this.getCachedSnapshot()},r.prototype.loadCachedSnapshot=function(){var t,e;return(e=this.getCachedSnapshot())?(t=this.shouldIssueRequest(),this.render(function(){var r;return this.cacheSnapshot(),this.controller.render({snapshot:e,isPreview:t},this.performScroll),"function"==typeof(r=this.adapter).visitRendered&&r.visitRendered(this),t?void 0:this.complete()})):void 0},r.prototype.loadResponse=function(){return null!=this.response?this.render(function(){var t,e;return this.cacheSnapshot(),this.request.failed?(this.controller.render({error:this.response},this.performScroll),"function"==typeof(t=this.adapter).visitRendered&&t.visitRendered(this),this.fail()):(this.controller.render({snapshot:this.response},this.performScroll),"function"==typeof(e=this.adapter).visitRendered&&e.visitRendered(this),this.complete())}):void 0},r.prototype.followRedirect=function(){return this.redirectedToLocation&&!this.followedRedirect?(this.location=this.redirectedToLocation,this.controller.replaceHistoryWithLocationAndRestorationIdentifier(this.redirectedToLocation,this.restorationIdentifier),this.followedRedirect=!0):void 0},r.prototype.requestStarted=function(){var t;return this.recordTimingMetric("requestStart"),"function"==typeof(t=this.adapter).visitRequestStarted?t.visitRequestStarted(this):void 0},r.prototype.requestProgressed=function(t){var e;return this.progress=t,"function"==typeof(e=this.adapter).visitRequestProgressed?e.visitRequestProgressed(this):void 0},r.prototype.requestCompletedWithResponse=function(t,r){return this.response=t,null!=r&&(this.redirectedToLocation=e.Location.wrap(r)),this.adapter.visitRequestCompleted(this)},r.prototype.requestFailedWithStatusCode=function(t,e){return this.response=e,this.adapter.visitRequestFailedWithStatusCode(this,t)},r.prototype.requestFinished=function(){var t;return this.recordTimingMetric("requestEnd"),"function"==typeof(t=this.adapter).visitRequestFinished?t.visitRequestFinished(this):void 0},r.prototype.performScroll=function(){return this.scrolled?void 0:("restore"===this.action?this.scrollToRestoredPosition()||this.scrollToTop():this.scrollToAnchor()||this.scrollToTop(),this.scrolled=!0)},r.prototype.scrollToRestoredPosition=function(){var t,e;return t=null!=(e=this.restorationData)?e.scrollPosition:void 0,null!=t?(this.controller.scrollToPosition(t),!0):void 0},r.prototype.scrollToAnchor=function(){return null!=this.location.anchor?(this.controller.scrollToAnchor(this.location.anchor),!0):void 0},r.prototype.scrollToTop=function(){return this.controller.scrollToPosition({x:0,y:0})},r.prototype.recordTimingMetric=function(t){var e;return null!=(e=this.timingMetrics)[t]?e[t]:e[t]=(new Date).getTime()},r.prototype.getTimingMetrics=function(){return e.copyObject(this.timingMetrics)},n=function(t){switch(t){case"replace":return"replaceHistoryWithLocationAndRestorationIdentifier";case"advance":case"restore":return"pushHistoryWithLocationAndRestorationIdentifier"}},r.prototype.shouldIssueRequest=function(){return"restore"===this.action?!this.hasCachedSnapshot():!0},r.prototype.cacheSnapshot=function(){return this.snapshotCached?void 0:(this.controller.cacheSnapshot(),this.snapshotCached=!0)},r.prototype.render=function(t){return this.cancelRender(),this.frame=requestAnimationFrame(function(e){return function(){return e.frame=null,t.call(e)}}(this))},r.prototype.cancelRender=function(){return this.frame?cancelAnimationFrame(this.frame):void 0},r}()}.call(this),function(){var t=function(t,e){return function(){return t.apply(e,arguments)}};e.Controller=function(){function r(){this.clickBubbled=t(this.clickBubbled,this),this.clickCaptured=t(this.clickCaptured,this),this.pageLoaded=t(this.pageLoaded,this),this.history=new e.History(this),this.view=new e.View(this),this.scrollManager=new e.ScrollManager(this),this.restorationData={},this.clearCache(),this.setProgressBarDelay(500)}return r.prototype.start=function(){return e.supported&&!this.started?(addEventListener("click",this.clickCaptured,!0),addEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.start(),this.startHistory(),this.started=!0,this.enabled=!0):void 0},r.prototype.disable=function(){return this.enabled=!1},r.prototype.stop=function(){return this.started?(removeEventListener("click",this.clickCaptured,!0),removeEventListener("DOMContentLoaded",this.pageLoaded,!1),this.scrollManager.stop(),this.stopHistory(),this.started=!1):void 0},r.prototype.clearCache=function(){return this.cache=new e.SnapshotCache(10)},r.prototype.visit=function(t,r){var n,o;return null==r&&(r={}),t=e.Location.wrap(t),this.applicationAllowsVisitingLocation(t)?this.locationIsVisitable(t)?(n=null!=(o=r.action)?o:"advance",this.adapter.visitProposedToLocationWithAction(t,n)):window.location=t:void 0},r.prototype.startVisitToLocationWithAction=function(t,r,n){var o;return e.supported?(o=this.getRestorationDataForIdentifier(n),this.startVisit(t,r,{restorationData:o})):window.location=t},r.prototype.setProgressBarDelay=function(t){return this.progressBarDelay=t},r.prototype.startHistory=function(){return this.location=e.Location.wrap(window.location),this.restorationIdentifier=e.uuid(),this.history.start(),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.stopHistory=function(){return this.history.stop()},r.prototype.pushHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.push(this.location,this.restorationIdentifier)},r.prototype.replaceHistoryWithLocationAndRestorationIdentifier=function(t,r){return this.restorationIdentifier=r,this.location=e.Location.wrap(t),this.history.replace(this.location,this.restorationIdentifier)},r.prototype.historyPoppedToLocationWithRestorationIdentifier=function(t,r){var n;return this.restorationIdentifier=r,this.enabled?(n=this.getRestorationDataForIdentifier(this.restorationIdentifier),this.startVisit(t,"restore",{restorationIdentifier:this.restorationIdentifier,restorationData:n,historyChanged:!0}),this.location=e.Location.wrap(t)):this.adapter.pageInvalidated()},r.prototype.getCachedSnapshotForLocation=function(t){var e;return e=this.cache.get(t),e?e.clone():void 0},r.prototype.shouldCacheSnapshot=function(){return this.view.getSnapshot().isCacheable()},r.prototype.cacheSnapshot=function(){var t;return this.shouldCacheSnapshot()?(this.notifyApplicationBeforeCachingSnapshot(),t=this.view.getSnapshot(),this.cache.put(this.lastRenderedLocation,t.clone())):void 0},r.prototype.scrollToAnchor=function(t){var e;return(e=this.view.getElementForAnchor(t))?this.scrollToElement(e):this.scrollToPosition({x:0,y:0})},r.prototype.scrollToElement=function(t){return this.scrollManager.scrollToElement(t)},r.prototype.scrollToPosition=function(t){return this.scrollManager.scrollToPosition(t)},r.prototype.scrollPositionChanged=function(t){var e;return e=this.getCurrentRestorationData(),e.scrollPosition=t},r.prototype.render=function(t,e){return this.view.render(t,e)},r.prototype.viewInvalidated=function(){return this.adapter.pageInvalidated()},r.prototype.viewWillRender=function(t){return this.notifyApplicationBeforeRender(t)},r.prototype.viewRendered=function(){return this.lastRenderedLocation=this.currentVisit.location,this.notifyApplicationAfterRender()},r.prototype.pageLoaded=function(){return this.lastRenderedLocation=this.location,this.notifyApplicationAfterPageLoad()},r.prototype.clickCaptured=function(){return removeEventListener("click",this.clickBubbled,!1),addEventListener("click",this.clickBubbled,!1)},r.prototype.clickBubbled=function(t){var e,r,n;return this.enabled&&this.clickEventIsSignificant(t)&&(r=this.getVisitableLinkForNode(t.target))&&(n=this.getVisitableLocationForLink(r))&&this.applicationAllowsFollowingLinkToLocation(r,n)?(t.preventDefault(),e=this.getActionForLink(r),
+this.visit(n,{action:e})):void 0},r.prototype.applicationAllowsFollowingLinkToLocation=function(t,e){var r;return r=this.notifyApplicationAfterClickingLinkToLocation(t,e),!r.defaultPrevented},r.prototype.applicationAllowsVisitingLocation=function(t){var e;return e=this.notifyApplicationBeforeVisitingLocation(t),!e.defaultPrevented},r.prototype.notifyApplicationAfterClickingLinkToLocation=function(t,r){return e.dispatch("turbolinks:click",{target:t,data:{url:r.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationBeforeVisitingLocation=function(t){return e.dispatch("turbolinks:before-visit",{data:{url:t.absoluteURL},cancelable:!0})},r.prototype.notifyApplicationAfterVisitingLocation=function(t){return e.dispatch("turbolinks:visit",{data:{url:t.absoluteURL}})},r.prototype.notifyApplicationBeforeCachingSnapshot=function(){return e.dispatch("turbolinks:before-cache")},r.prototype.notifyApplicationBeforeRender=function(t){return e.dispatch("turbolinks:before-render",{data:{newBody:t}})},r.prototype.notifyApplicationAfterRender=function(){return e.dispatch("turbolinks:render")},r.prototype.notifyApplicationAfterPageLoad=function(t){return null==t&&(t={}),e.dispatch("turbolinks:load",{data:{url:this.location.absoluteURL,timing:t}})},r.prototype.startVisit=function(t,e,r){var n;return null!=(n=this.currentVisit)&&n.cancel(),this.currentVisit=this.createVisit(t,e,r),this.currentVisit.start(),this.notifyApplicationAfterVisitingLocation(t)},r.prototype.createVisit=function(t,r,n){var o,i,s,a,u;return i=null!=n?n:{},a=i.restorationIdentifier,s=i.restorationData,o=i.historyChanged,u=new e.Visit(this,t,r),u.restorationIdentifier=null!=a?a:e.uuid(),u.restorationData=e.copyObject(s),u.historyChanged=o,u.referrer=this.location,u},r.prototype.visitCompleted=function(t){return this.notifyApplicationAfterPageLoad(t.getTimingMetrics())},r.prototype.clickEventIsSignificant=function(t){return!(t.defaultPrevented||t.target.isContentEditable||t.which>1||t.altKey||t.ctrlKey||t.metaKey||t.shiftKey)},r.prototype.getVisitableLinkForNode=function(t){return this.nodeIsVisitable(t)?e.closest(t,"a[href]:not([target]):not([download])"):void 0},r.prototype.getVisitableLocationForLink=function(t){var r;return r=new e.Location(t.getAttribute("href")),this.locationIsVisitable(r)?r:void 0},r.prototype.getActionForLink=function(t){var e;return null!=(e=t.getAttribute("data-turbolinks-action"))?e:"advance"},r.prototype.nodeIsVisitable=function(t){var r;return(r=e.closest(t,"[data-turbolinks]"))?"false"!==r.getAttribute("data-turbolinks"):!0},r.prototype.locationIsVisitable=function(t){return t.isPrefixedBy(this.view.getRootLocation())&&t.isHTML()},r.prototype.getCurrentRestorationData=function(){return this.getRestorationDataForIdentifier(this.restorationIdentifier)},r.prototype.getRestorationDataForIdentifier=function(t){var e;return null!=(e=this.restorationData)[t]?e[t]:e[t]={}},r}()}.call(this),function(){!function(){var t,e;if((t=e=document.currentScript)&&!e.hasAttribute("data-turbolinks-suppress-warning"))for(;t=t.parentNode;)if(t===document.body)return console.warn("You are loading Turbolinks from a <script> element inside the <body> element. This is probably not what you meant to do!\n\nLoad your application\u2019s JavaScript bundle inside the <head> element instead. <script> elements in <body> are evaluated with each page change.\n\nFor more information, see: https://github.com/turbolinks/turbolinks#working-with-script-elements\n\n\u2014\u2014\nSuppress this warning by adding a `data-turbolinks-suppress-warning` attribute to: %s",e.outerHTML)}()}.call(this),function(){var t,r,n;e.start=function(){return r()?(null==e.controller&&(e.controller=t()),e.controller.start()):void 0},r=function(){return null==window.Turbolinks&&(window.Turbolinks=e),n()},t=function(){var t;return t=new e.Controller,t.adapter=new e.BrowserAdapter(t),t},n=function(){return window.Turbolinks===e},n()&&e.start()}.call(this)}).call(this),"object"==typeof module&&module.exports?module.exports=e:"function"=="function"&&__webpack_require__(101)&&!(__WEBPACK_AMD_DEFINE_FACTORY__ = (e),
+				__WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ?
+				(__WEBPACK_AMD_DEFINE_FACTORY__.call(exports, __webpack_require__, exports, module)) :
+				__WEBPACK_AMD_DEFINE_FACTORY__),
+				__WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__))}).call(this);
 
 /***/ }),
 /* 101 */
+/***/ (function(module, exports) {
+
+/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {/* globals __webpack_amd_options__ */
+module.exports = __webpack_amd_options__;
+
+/* WEBPACK VAR INJECTION */}.call(exports, {}))
+
+/***/ }),
+/* 102 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, process) {(function (global, undefined) {
@@ -16637,10 +16996,10 @@ module.exports = Vue;
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(33)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(34)))
 
 /***/ }),
-/* 102 */
+/* 103 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -16678,19 +17037,19 @@ function plugin(Vue, options) {
 
 
 /***/ }),
-/* 103 */
+/* 104 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(104)
+  __webpack_require__(105)
 }
 var normalizeComponent = __webpack_require__(17)
 /* script */
-var __vue_script__ = __webpack_require__(107)
+var __vue_script__ = __webpack_require__(108)
 /* template */
-var __vue_template__ = __webpack_require__(108)
+var __vue_template__ = __webpack_require__(109)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -16729,17 +17088,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 104 */
+/* 105 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(105);
+var content = __webpack_require__(106);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(40)("677f0f80", content, false, {});
+var update = __webpack_require__(41)("677f0f80", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -16755,10 +17114,10 @@ if(false) {
 }
 
 /***/ }),
-/* 105 */
+/* 106 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(39)(false);
+exports = module.exports = __webpack_require__(21)(false);
 // imports
 
 
@@ -16769,7 +17128,7 @@ exports.push([module.i, "\nfieldset[disabled] .multiselect {\n  pointer-events: 
 
 
 /***/ }),
-/* 106 */
+/* 107 */
 /***/ (function(module, exports) {
 
 /**
@@ -16802,12 +17161,12 @@ module.exports = function listToStyles (parentId, list) {
 
 
 /***/ }),
-/* 107 */
+/* 108 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue_multiselect__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
@@ -17112,7 +17471,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 });
 
 /***/ }),
-/* 108 */
+/* 109 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -17550,15 +17909,15 @@ if (false) {
 }
 
 /***/ }),
-/* 109 */
+/* 110 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(17)
 /* script */
-var __vue_script__ = __webpack_require__(110)
+var __vue_script__ = __webpack_require__(111)
 /* template */
-var __vue_template__ = __webpack_require__(111)
+var __vue_template__ = __webpack_require__(112)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -17597,7 +17956,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 110 */
+/* 111 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -17802,7 +18161,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 });
 
 /***/ }),
-/* 111 */
+/* 112 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -18069,19 +18428,19 @@ if (false) {
 }
 
 /***/ }),
-/* 112 */
+/* 113 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 function injectStyle (ssrContext) {
   if (disposed) return
-  __webpack_require__(113)
+  __webpack_require__(114)
 }
 var normalizeComponent = __webpack_require__(17)
 /* script */
-var __vue_script__ = __webpack_require__(115)
+var __vue_script__ = __webpack_require__(116)
 /* template */
-var __vue_template__ = __webpack_require__(116)
+var __vue_template__ = __webpack_require__(127)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -18120,17 +18479,17 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 113 */
+/* 114 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(114);
+var content = __webpack_require__(115);
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var update = __webpack_require__(40)("99e05fb8", content, false, {});
+var update = __webpack_require__(41)("99e05fb8", content, false, {});
 // Hot Module Replacement
 if(false) {
  // When the styles change, update the <style> tags
@@ -18146,10 +18505,10 @@ if(false) {
 }
 
 /***/ }),
-/* 114 */
+/* 115 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(39)(false);
+exports = module.exports = __webpack_require__(21)(false);
 // imports
 
 
@@ -18160,13 +18519,25 @@ exports.push([module.i, "\nfieldset[disabled] .multiselect {\n  pointer-events: 
 
 
 /***/ }),
-/* 115 */
+/* 116 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect__ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_vue_multiselect__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_filepond__ = __webpack_require__(117);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_filepond___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_vue_filepond__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_filepond_dist_filepond_min_css__ = __webpack_require__(119);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_filepond_dist_filepond_min_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_filepond_dist_filepond_min_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_filepond_plugin_file_validate_type__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_filepond_plugin_file_validate_type___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_filepond_plugin_file_validate_type__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_filepond_plugin_image_preview__ = __webpack_require__(123);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_filepond_plugin_image_preview___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_filepond_plugin_image_preview__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_filepond_plugin_image_preview_dist_filepond_plugin_image_preview_css__ = __webpack_require__(124);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_filepond_plugin_image_preview_dist_filepond_plugin_image_preview_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_filepond_plugin_image_preview_dist_filepond_plugin_image_preview_css__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_filepond_plugin_file_validate_size__ = __webpack_require__(126);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_filepond_plugin_file_validate_size___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_filepond_plugin_file_validate_size__);
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
@@ -18259,13 +18630,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //
 //
 //
-//
-//
 
 
+
+
+
+
+
+
+
+
+var FilePond = __WEBPACK_IMPORTED_MODULE_1_vue_filepond___default()(__WEBPACK_IMPORTED_MODULE_3_filepond_plugin_file_validate_type___default.a, __WEBPACK_IMPORTED_MODULE_4_filepond_plugin_image_preview___default.a, __WEBPACK_IMPORTED_MODULE_6_filepond_plugin_file_validate_size___default.a);
 
 /* harmony default export */ __webpack_exports__["default"] = ({
-    components: { Multiselect: __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default.a },
+    components: { Multiselect: __WEBPACK_IMPORTED_MODULE_0_vue_multiselect___default.a, FilePond: FilePond },
     props: ['brandId', 'attributes'],
     data: function data() {
         return {
@@ -18299,8 +18677,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             formData.append('description', this.description);
             formData.append('published', this.published ? 1 : 0);
 
-            this.product_images.map(function (image, index) {
-                return formData.append('product_images[' + index + ']', image.content);
+            this.$refs.pond.getFiles().filter(function (file) {
+                return file.status === 2;
+            }).map(function (file, index) {
+                return formData.append('product_images[' + index + ']', file.file);
             });
 
             var products = this.products;
@@ -18323,26 +18703,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             formData.append('products', JSON.stringify(products));
             return formData;
-        },
-        onImagesChange: function onImagesChange(e) {
-            var files = e.target.files;
-            var vm = this;
-
-            for (var index = 0; index < files.length; index++) {
-                if (/\.(jpe?g|png|gif)$/i.test(files[index].name)) {
-                    var preview = URL.createObjectURL(files[index]);
-                    vm.product_images.push({ content: files[index], preview: preview });
-                }
-            }
-        },
-        removeImage: function removeImage(index) {
-            this.product_images.splice(index, 1);
-        },
-        removeFromMemory: function removeFromMemory(object) {
-            URL.revokeObjectURL(object);
-        },
-        toggleHoverStyles: function toggleHoverStyles(event) {
-            event.target.parentElement.classList.toggle('bg-grey-light');
         },
         changeAttribute: function changeAttribute(index) {
             Vue.set(this.selectedValues, index, []);
@@ -18408,7 +18768,10022 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 });
 
 /***/ }),
-/* 116 */
+/* 117 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*!
+ * vue-filepond v2.0.1
+ * A handy FilePond adapter component for Vue
+ * 
+ * Copyright (c) 2018 PQINA
+ * https://pqina.nl/filepond
+ * 
+ * Licensed under the MIT license.
+ */
+
+
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _vue = __webpack_require__(39);
+
+var _vue2 = _interopRequireDefault(_vue);
+
+var _filepond = __webpack_require__(118);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// Methods not made available to the component
+var filteredComponentMethods = ['setOptions', 'on', 'off', 'onOnce', 'appendTo', 'insertAfter', 'insertBefore', 'isAttachedTo', 'replaceElement', 'restoreElement', 'destroy'];
+
+// Test if is supported on this client
+var isSupported = (0, _filepond.supported)();
+
+// Setup initial prop types and update when plugins are added
+var getNativeConstructorFromType = function getNativeConstructorFromType(type) {
+    return {
+        string: String,
+        boolean: Boolean,
+        array: Array,
+        function: Function,
+        int: Number,
+        serverapi: Object
+    }[type];
+};
+
+// Activated props
+var props = {};
+
+// Events that need to be mapped to emitters
+var events = [];
+
+// Props to watch
+var watch = {};
+
+exports.default = function () {
+
+    // register plugins in FilePond
+    _filepond.registerPlugin.apply(undefined, arguments);
+
+    // build events and props array
+    events.length = 0;
+
+    var _loop = function _loop(prop) {
+        // don't add events to the props array
+        if (/^on/.test(prop)) {
+            events.push(prop);
+            return 'continue';
+        }
+
+        // get property type ( can be either a String or the type defined within FilePond )
+        props[prop] = [String, getNativeConstructorFromType(_filepond.OptionTypes[prop])];
+
+        // setup watcher
+        watch[prop] = function (value) {
+            this._pond[prop] = value;
+        };
+    };
+
+    for (var prop in _filepond.OptionTypes) {
+        var _ret = _loop(prop);
+
+        if (_ret === 'continue') continue;
+    }
+
+    // create 
+    return _vue2.default.component('FilePond', {
+        name: 'FilePond',
+        props: props,
+        watch: watch,
+        render: function render(h) {
+            return h('div', {
+                'class': {
+                    'filepond--wrapper': true
+                }
+            }, [h('input', {
+                attrs: {
+                    id: this.id,
+                    name: this.name,
+                    type: 'file',
+                    'class': this.className,
+                    required: this.required,
+                    multiple: this.allowMultiple,
+                    accept: this.acceptedFileTypes,
+                    capture: this.captureMethod
+                }
+            })]);
+        },
+
+        // Will setup FilePond instance when mounted
+        mounted: function mounted() {
+            var _this = this;
+
+            // exit here if not supported
+            if (!isSupported) {
+                return;
+            }
+
+            // get pond element
+            this._element = this.$el.querySelector('input');
+
+            // Map FilePond callback methods to Vue $emitters
+            var options = events.reduce(function (obj, value) {
+                obj[value] = function () {
+                    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+                        args[_key] = arguments[_key];
+                    }
+
+                    _this.$emit.apply(_this, [value.substr(2)].concat(args));
+                };
+                return obj;
+            }, {});
+
+            // Scoop up attributes that might not have been caught by Vue ( because the props object is extended dynamically )
+            var attrs = Object.assign({}, this.$attrs);
+
+            // Create our pond
+            this._pond = (0, _filepond.create)(this._element, Object.assign(options, attrs, this.$options.propsData));
+
+            // Copy instance method references to component instance
+            Object.keys(this._pond).filter(function (key) {
+                return !filteredComponentMethods.includes(key);
+            }).forEach(function (key) {
+                _this[key] = _this._pond[key];
+            });
+        },
+
+
+        // Will clean up FilePond instance when unmounted
+        beforeDestroy: function beforeDestroy() {
+            // exit when no pond defined
+            if (!this._pond) {
+                return;
+            }
+
+            this._pond.destroy();
+        }
+    });
+};
+
+
+
+
+/***/ }),
+/* 118 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+ * FilePond 1.7.1
+ * Licensed under MIT, https://opensource.org/licenses/MIT
+ * Please visit https://pqina.nl/filepond for details.
+ */
+(function(global, factory) {
+   true
+    ? factory(exports)
+    : typeof define === 'function' && define.amd
+      ? define(['exports'], factory)
+      : factory((global.FilePond = {}));
+})(this, function(exports) {
+  'use strict';
+
+  var isNode = function isNode(value) {
+    return value instanceof HTMLElement;
+  };
+
+  var _typeof =
+    typeof Symbol === 'function' && typeof Symbol.iterator === 'symbol'
+      ? function(obj) {
+          return typeof obj;
+        }
+      : function(obj) {
+          return obj &&
+            typeof Symbol === 'function' &&
+            obj.constructor === Symbol &&
+            obj !== Symbol.prototype
+            ? 'symbol'
+            : typeof obj;
+        };
+
+  var asyncGenerator = (function() {
+    function AwaitValue(value) {
+      this.value = value;
+    }
+
+    function AsyncGenerator(gen) {
+      var front, back;
+
+      function send(key, arg) {
+        return new Promise(function(resolve, reject) {
+          var request = {
+            key: key,
+            arg: arg,
+            resolve: resolve,
+            reject: reject,
+            next: null
+          };
+
+          if (back) {
+            back = back.next = request;
+          } else {
+            front = back = request;
+            resume(key, arg);
+          }
+        });
+      }
+
+      function resume(key, arg) {
+        try {
+          var result = gen[key](arg);
+          var value = result.value;
+
+          if (value instanceof AwaitValue) {
+            Promise.resolve(value.value).then(
+              function(arg) {
+                resume('next', arg);
+              },
+              function(arg) {
+                resume('throw', arg);
+              }
+            );
+          } else {
+            settle(result.done ? 'return' : 'normal', result.value);
+          }
+        } catch (err) {
+          settle('throw', err);
+        }
+      }
+
+      function settle(type, value) {
+        switch (type) {
+          case 'return':
+            front.resolve({
+              value: value,
+              done: true
+            });
+            break;
+
+          case 'throw':
+            front.reject(value);
+            break;
+
+          default:
+            front.resolve({
+              value: value,
+              done: false
+            });
+            break;
+        }
+
+        front = front.next;
+
+        if (front) {
+          resume(front.key, front.arg);
+        } else {
+          back = null;
+        }
+      }
+
+      this._invoke = send;
+
+      if (typeof gen.return !== 'function') {
+        this.return = undefined;
+      }
+    }
+
+    if (typeof Symbol === 'function' && Symbol.asyncIterator) {
+      AsyncGenerator.prototype[Symbol.asyncIterator] = function() {
+        return this;
+      };
+    }
+
+    AsyncGenerator.prototype.next = function(arg) {
+      return this._invoke('next', arg);
+    };
+
+    AsyncGenerator.prototype.throw = function(arg) {
+      return this._invoke('throw', arg);
+    };
+
+    AsyncGenerator.prototype.return = function(arg) {
+      return this._invoke('return', arg);
+    };
+
+    return {
+      wrap: function(fn) {
+        return function() {
+          return new AsyncGenerator(fn.apply(this, arguments));
+        };
+      },
+      await: function(value) {
+        return new AwaitValue(value);
+      }
+    };
+  })();
+
+  var _extends =
+    Object.assign ||
+    function(target) {
+      for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i];
+
+        for (var key in source) {
+          if (Object.prototype.hasOwnProperty.call(source, key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+
+      return target;
+    };
+
+  var toConsumableArray = function(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
+        arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  };
+
+  var createStore = function createStore(initialState) {
+    var queries =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : [];
+    var actions =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : [];
+
+    // internal state
+    var state = _extends({}, initialState);
+
+    // contains all actions for next frame, is clear when actions are requested
+    var actionQueue = [];
+    var dispatchQueue = [];
+
+    // returns a duplicate of the current state
+    var getState = function getState() {
+      return _extends({}, state);
+    };
+
+    // returns a duplicate of the actions array and clears the actions array
+    var processActionQueue = function processActionQueue() {
+      // create copy of actions queue
+      var queue = [].concat(actionQueue);
+
+      // clear actions queue (we don't want no double actions)
+      actionQueue.length = 0;
+
+      return queue;
+    };
+
+    // processes actions that might block the main UI thread
+    var processDispatchQueue = function processDispatchQueue() {
+      // create copy of actions queue
+      var queue = [].concat(dispatchQueue);
+
+      // clear actions queue (we don't want no double actions)
+      dispatchQueue.length = 0;
+
+      // now dispatch these actions
+      queue.forEach(function(_ref) {
+        var type = _ref.type,
+          data = _ref.data;
+
+        dispatch(type, data);
+      });
+    };
+
+    // adds a new action, calls its handler and
+    var dispatch = function dispatch(type, data, isBlocking) {
+      // is blocking action
+      if (isBlocking) {
+        dispatchQueue.push({
+          type: type,
+          data: data
+        });
+        return;
+      }
+
+      // if this action has a handler, handle the action
+      if (actionHandlers[type]) {
+        actionHandlers[type](data);
+      }
+
+      // now add action
+      actionQueue.push({
+        type: type,
+        data: data
+      });
+    };
+
+    var query = function query(str) {
+      var _queryHandles;
+
+      for (
+        var _len = arguments.length,
+          args = Array(_len > 1 ? _len - 1 : 0),
+          _key = 1;
+        _key < _len;
+        _key++
+      ) {
+        args[_key - 1] = arguments[_key];
+      }
+
+      return queryHandles[str]
+        ? (_queryHandles = queryHandles)[str].apply(_queryHandles, args)
+        : null;
+    };
+
+    var api = {
+      getState: getState,
+      processActionQueue: processActionQueue,
+      processDispatchQueue: processDispatchQueue,
+      dispatch: dispatch,
+      query: query
+    };
+
+    var queryHandles = {};
+    queries.forEach(function(query) {
+      queryHandles = _extends({}, query(state), queryHandles);
+    });
+
+    var actionHandlers = {};
+    actions.forEach(function(action) {
+      actionHandlers = _extends(
+        {},
+        action(dispatch, query, state),
+        actionHandlers
+      );
+    });
+
+    return api;
+  };
+
+  var defineProperty$1 = function defineProperty$$1(obj, property, definition) {
+    if (typeof definition === 'function') {
+      obj[property] = definition;
+      return;
+    }
+    Object.defineProperty(obj, property, _extends({}, definition));
+  };
+
+  var forin = function forin(obj, cb) {
+    for (var key in obj) {
+      if (!obj.hasOwnProperty(key)) {
+        continue;
+      }
+
+      cb(key, obj[key]);
+    }
+  };
+
+  var createObject = function createObject(definition) {
+    var obj = {};
+    forin(definition, function(property) {
+      defineProperty$1(obj, property, definition[property]);
+    });
+    return obj;
+  };
+
+  var attr = function attr(node, name) {
+    var value =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+
+    if (value === null) {
+      return node.getAttribute(name) || node.hasAttribute(name);
+    }
+    node.setAttribute(name, value);
+  };
+
+  var ns = 'http://www.w3.org/2000/svg';
+  var svgElements = ['svg', 'path']; // only svg elements used
+
+  var isSVGElement = function isSVGElement(tag) {
+    return svgElements.includes(tag);
+  };
+
+  var createElement = function createElement(tag, className) {
+    var attributes =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+    if (
+      (typeof className === 'undefined' ? 'undefined' : _typeof(className)) ===
+      'object'
+    ) {
+      attributes = className;
+      className = null;
+    }
+    var element = isSVGElement(tag)
+      ? document.createElementNS(ns, tag)
+      : document.createElement(tag);
+    if (className) {
+      if (isSVGElement(tag)) {
+        attr(element, 'class', className);
+      } else {
+        element.className = className;
+      }
+    }
+    forin(attributes, function(name, value) {
+      attr(element, name, value);
+    });
+    return element;
+  };
+
+  var appendChild = function appendChild(parent) {
+    return function(child, index) {
+      if (typeof index !== 'undefined' && parent.children[index]) {
+        parent.insertBefore(child, parent.children[index]);
+      } else {
+        parent.appendChild(child);
+      }
+    };
+  };
+
+  var appendChildView = function appendChildView(parent, childViews) {
+    return function(view, index) {
+      // todo: expand with location and target option (child, 'before', target)
+
+      if (typeof index !== 'undefined') {
+        childViews.splice(index, 0, view);
+      } else {
+        childViews.push(view);
+      }
+
+      return view;
+    };
+  };
+
+  var removeChildView = function removeChildView(parent, childViews) {
+    return function(view) {
+      // remove from child views
+      childViews.splice(childViews.indexOf(view), 1);
+
+      // remove the element
+      if (view.element.parentNode) {
+        parent.removeChild(view.element);
+      }
+
+      return view;
+    };
+  };
+
+  var getViewRect = function getViewRect(
+    elementRect,
+    childViews,
+    offset,
+    scale
+  ) {
+    var left = offset[0] || elementRect.left;
+    var top = offset[1] || elementRect.top;
+    var right = left + elementRect.width;
+    var bottom = top + elementRect.height * (scale[1] || 1);
+
+    var rect = {
+      // the rectangle of the element itself
+      element: _extends({}, elementRect),
+
+      // the rectangle of the element expanded to contain its children, does not include any margins
+      inner: {
+        left: elementRect.left,
+        top: elementRect.top,
+        right: elementRect.right,
+        bottom: elementRect.bottom
+      },
+
+      // the rectangle of the element expanded to contain its children including own margin and child margins
+      // margins will be added after we've recalculated the size
+      outer: {
+        left: left,
+        top: top,
+        right: right,
+        bottom: bottom
+      }
+    };
+
+    // expand rect to fit all child rectangles
+    childViews
+      .filter(function(childView) {
+        return !childView.isRectIgnored();
+      })
+      .map(function(childView) {
+        return childView.rect;
+      })
+      .forEach(function(childViewRect) {
+        expandRect(rect.inner, _extends({}, childViewRect.inner));
+        expandRect(rect.outer, _extends({}, childViewRect.outer));
+      });
+
+    // calculate inner width and height
+    calculateRectSize(rect.inner);
+
+    // append additional margin (top and left margins are included in top and left automatically)
+    rect.outer.bottom += rect.element.marginBottom;
+    rect.outer.right += rect.element.marginRight;
+
+    // calculate outer width and height
+    calculateRectSize(rect.outer);
+
+    return rect;
+  };
+
+  var expandRect = function expandRect(parent, child) {
+    // adjust for parent offset
+    child.top += parent.top;
+    child.right += parent.left;
+    child.bottom += parent.top;
+    child.left += parent.left;
+
+    if (child.bottom > parent.bottom) {
+      parent.bottom = child.bottom;
+    }
+
+    if (child.right > parent.right) {
+      parent.right = child.right;
+    }
+  };
+
+  var calculateRectSize = function calculateRectSize(rect) {
+    rect.width = rect.right - rect.left;
+    rect.height = rect.bottom - rect.top;
+  };
+
+  var isNumber = function isNumber(value) {
+    return typeof value === 'number';
+  };
+
+  /**
+   * Determines if position is at destination
+   * @param position
+   * @param destination
+   * @param velocity
+   * @param errorMargin
+   * @returns {boolean}
+   */
+  var thereYet = function thereYet(position, destination, velocity) {
+    var errorMargin =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 0.001;
+
+    return (
+      Math.abs(position - destination) < errorMargin &&
+      Math.abs(velocity) < errorMargin
+    );
+  };
+
+  /**
+   * Spring animation
+   */
+  var spring =
+    // default options
+    function spring() // method definition
+    {
+      var _ref =
+          arguments.length > 0 && arguments[0] !== undefined
+            ? arguments[0]
+            : {},
+        _ref$stiffness = _ref.stiffness,
+        stiffness = _ref$stiffness === undefined ? 0.5 : _ref$stiffness,
+        _ref$damping = _ref.damping,
+        damping = _ref$damping === undefined ? 0.75 : _ref$damping,
+        _ref$mass = _ref.mass,
+        mass = _ref$mass === undefined ? 10 : _ref$mass;
+
+      var target = null;
+      var position = null;
+      var velocity = 0;
+      var resting = false;
+
+      // updates spring state
+      var interpolate = function interpolate() {
+        // in rest, don't animate
+        if (resting) {
+          return;
+        }
+
+        // need at least a target or position to do springy things
+        if (!(isNumber(target) && isNumber(position))) {
+          resting = true;
+          velocity = 0;
+          return;
+        }
+
+        // calculate spring force
+        var f = -(position - target) * stiffness;
+
+        // update velocity by adding force based on mass
+        velocity += f / mass;
+
+        // update position by adding velocity
+        position += velocity;
+
+        // slow down based on amount of damping
+        velocity *= damping;
+
+        // we've arrived if we're near target and our velocity is near zero
+        if (thereYet(position, target, velocity)) {
+          position = target;
+          velocity = 0;
+          resting = true;
+
+          // we done
+          api.onupdate(position);
+          api.oncomplete(position);
+        } else {
+          // progress update
+          api.onupdate(position);
+        }
+      };
+
+      /**
+       * Set new target value
+       * @param value
+       */
+      var setTarget = function setTarget(value) {
+        // if currently has no position, set target and position to this value
+        if (isNumber(value) && !isNumber(position)) {
+          position = value;
+        }
+
+        // let start moving to target
+        target = value;
+
+        // already at target
+        if (position === target || typeof target === 'undefined') {
+          // now resting as target is current position, stop moving
+          resting = true;
+          velocity = 0;
+
+          // done!
+          api.onupdate(position);
+          api.oncomplete(position);
+
+          return;
+        }
+
+        resting = false;
+      };
+
+      // need 'api' to call onupdate callback
+      var api = createObject({
+        interpolate: interpolate,
+        target: {
+          set: setTarget,
+          get: function get() {
+            return target;
+          }
+        },
+        resting: {
+          get: function get() {
+            return resting;
+          }
+        },
+        onupdate: function onupdate(value) {},
+        oncomplete: function oncomplete(value) {}
+      });
+
+      return api;
+    };
+
+  var easeInOutQuad = function easeInOutQuad(t) {
+    return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+  };
+
+  var tween =
+    // default values
+    function tween() // method definition
+    {
+      var _ref =
+          arguments.length > 0 && arguments[0] !== undefined
+            ? arguments[0]
+            : {},
+        _ref$duration = _ref.duration,
+        duration = _ref$duration === undefined ? 500 : _ref$duration,
+        _ref$easing = _ref.easing,
+        easing = _ref$easing === undefined ? easeInOutQuad : _ref$easing,
+        _ref$delay = _ref.delay,
+        delay = _ref$delay === undefined ? 0 : _ref$delay;
+
+      var start = null;
+      var t = void 0;
+      var p = void 0;
+      var resting = true;
+      var reverse = false;
+      var target = null;
+
+      var interpolate = function interpolate(ts) {
+        if (resting || target === null) {
+          return;
+        }
+
+        if (start === null) {
+          start = ts;
+        }
+
+        if (ts - start < delay) {
+          return;
+        }
+
+        t = ts - start - delay;
+
+        if (t < duration) {
+          p = t / duration;
+          api.onupdate((t >= 0 ? easing(reverse ? 1 - p : p) : 0) * target);
+        } else {
+          t = 1;
+          resting = true;
+          p = reverse ? 0 : 1;
+          api.onupdate(p * target);
+          api.oncomplete(p * target);
+        }
+      };
+
+      // need 'api' to call onupdate callback
+      var api = createObject({
+        interpolate: interpolate,
+        target: {
+          get: function get() {
+            return reverse ? 0 : target;
+          },
+          set: function set(value) {
+            // is initial value
+            if (target === null) {
+              target = value;
+              api.onupdate(value);
+              api.oncomplete(value);
+              return;
+            }
+
+            // want to tween to a smaller value and have a current value
+            if (value < target) {
+              target = 1;
+              reverse = true;
+            } else {
+              // not tweening to a smaller value
+              reverse = false;
+              target = value;
+            }
+
+            // let's go!
+            resting = false;
+            start = null;
+          }
+        },
+        resting: {
+          get: function get() {
+            return resting;
+          }
+        },
+        onupdate: function onupdate(value) {},
+        oncomplete: function oncomplete(value) {}
+      });
+
+      return api;
+    };
+
+  var animator = {
+    spring: spring,
+    tween: tween
+  };
+
+  /*
+ { type: 'spring', stiffness: .5, damping: .75, mass: 10 };
+ { translation: { type: 'spring', ... }, ... }
+ { translation: { x: { type: 'spring', ... } } }
+*/
+  var createAnimator = function createAnimator(definition, category, property) {
+    // default is single definition
+    // we check if transform is set, if so, we check if property is set
+    var def =
+      definition[category] &&
+      _typeof(definition[category][property]) === 'object'
+        ? definition[category][property]
+        : definition[category] || definition;
+
+    var type = typeof def === 'string' ? def : def.type;
+    var props =
+      (typeof def === 'undefined' ? 'undefined' : _typeof(def)) === 'object'
+        ? _extends({}, def)
+        : {};
+
+    return animator[type] ? animator[type](props) : null;
+  };
+
+  var addGetSet = function addGetSet(keys, obj, props) {
+    var overwrite =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+    obj = Array.isArray(obj) ? obj : [obj];
+    obj.forEach(function(o) {
+      keys.forEach(function(key) {
+        var name = key;
+        var getter = function getter() {
+          return props[key];
+        };
+        var setter = function setter(value) {
+          return (props[key] = value);
+        };
+
+        if (
+          (typeof key === 'undefined' ? 'undefined' : _typeof(key)) === 'object'
+        ) {
+          name = key.key;
+          getter = key.getter || getter;
+          setter = key.setter || setter;
+        }
+
+        if (o[name] && !overwrite) {
+          return;
+        }
+
+        o[name] = {
+          get: getter,
+          set: setter
+        };
+      });
+    });
+  };
+
+  var isEmpty = function isEmpty(value) {
+    return value == null;
+  };
+
+  var isDefined = function isDefined(value) {
+    return !isEmpty(value);
+  };
+
+  // add to state,
+  // add getters and setters to internal and external api (if not set)
+  // setup animators
+
+  var animations = function animations(_ref) {
+    var mixinConfig = _ref.mixinConfig,
+      viewProps = _ref.viewProps,
+      viewInternalAPI = _ref.viewInternalAPI,
+      viewExternalAPI = _ref.viewExternalAPI;
+
+    // initial properties
+    var initialProps = _extends({}, viewProps);
+
+    // list of all active animations
+    var animations = [];
+
+    // setup animators
+    forin(mixinConfig, function(property, animation) {
+      var animator = createAnimator(animation);
+      if (!animator) {
+        return;
+      }
+
+      // when the animator updates, update the view state value
+      animator.onupdate = function(value) {
+        viewProps[property] = value;
+      };
+
+      // set animator target
+      animator.target = initialProps[property];
+
+      // when value is set, set the animator target value
+      var prop = {
+        key: property,
+        setter: function setter(value) {
+          // if already at target, we done!
+          if (animator.target === value) {
+            return;
+          }
+
+          animator.target = value;
+        },
+        getter: function getter() {
+          return viewProps[property];
+        }
+      };
+
+      // add getters and setters
+      addGetSet([prop], [viewInternalAPI, viewExternalAPI], viewProps, true);
+
+      // add it to the list for easy updating from the _write method
+      animations.push(animator);
+    });
+
+    // expose internal write api
+    return {
+      write: function write(ts) {
+        var resting = true;
+        animations.forEach(function(animation) {
+          animation.interpolate(ts);
+          if (!animation.resting) {
+            resting = false;
+          }
+        });
+        return resting;
+      },
+      destroy: function destroy() {}
+    };
+  };
+
+  var addEvent = function addEvent(element) {
+    return function(type, fn) {
+      element.addEventListener(type, fn);
+    };
+  };
+
+  var removeEvent = function removeEvent(element) {
+    return function(type, fn) {
+      element.removeEventListener(type, fn);
+    };
+  };
+
+  // mixin
+  var listeners = function listeners(_ref) {
+    var mixinConfig = _ref.mixinConfig,
+      viewProps = _ref.viewProps,
+      viewInternalAPI = _ref.viewInternalAPI,
+      viewExternalAPI = _ref.viewExternalAPI,
+      viewState = _ref.viewState,
+      view = _ref.view;
+
+    var events = [];
+
+    var add = addEvent(view.element);
+    var remove = removeEvent(view.element);
+
+    viewExternalAPI.on = function(type, fn) {
+      events.push({
+        type: type,
+        fn: fn
+      });
+      add(type, fn);
+    };
+
+    viewExternalAPI.off = function(type, fn) {
+      events.splice(
+        events.findIndex(function(event) {
+          return event.type === type && event.fn === fn;
+        }),
+        1
+      );
+      remove(type, fn);
+    };
+
+    return {
+      write: function write() {
+        // not busy
+        return true;
+      },
+      destroy: function destroy() {
+        events.forEach(function(event) {
+          remove(event.type, event.fn);
+        });
+      }
+    };
+  };
+
+  // add to external api and link to props
+
+  var apis = function apis(_ref) {
+    var mixinConfig = _ref.mixinConfig,
+      viewProps = _ref.viewProps,
+      viewExternalAPI = _ref.viewExternalAPI;
+
+    addGetSet(mixinConfig, viewExternalAPI, viewProps);
+  };
+
+  // add to state,
+  // add getters and setters to internal and external api (if not set)
+  // set initial state based on props in viewProps
+  // apply as transforms each frame
+
+  var defaults$1 = {
+    opacity: 1,
+    scaleX: 1,
+    scaleY: 1,
+    translateX: 0,
+    translateY: 0,
+    rotateX: 0,
+    rotateY: 0,
+    rotateZ: 0
+  };
+
+  var styles = function styles(_ref) {
+    var mixinConfig = _ref.mixinConfig,
+      viewProps = _ref.viewProps,
+      viewInternalAPI = _ref.viewInternalAPI,
+      viewExternalAPI = _ref.viewExternalAPI,
+      view = _ref.view;
+
+    // initial props
+    var initialProps = _extends({}, viewProps);
+
+    // current props
+    var currentProps = {};
+
+    // we will add those properties to the external API and link them to the viewState
+    addGetSet(mixinConfig, [viewInternalAPI, viewExternalAPI], viewProps);
+
+    // override rect on internal and external rect getter so it takes in account transforms
+    var getOffset = function getOffset() {
+      return [viewProps['translateX'] || 0, viewProps['translateY'] || 0];
+    };
+    var getScale = function getScale() {
+      return [viewProps['scaleX'] || 0, viewProps['scaleY'] || 0];
+    };
+    var getRect = function getRect() {
+      return view.rect
+        ? getViewRect(view.rect, view.childViews, getOffset(), getScale())
+        : null;
+    };
+    viewInternalAPI.rect = { get: getRect };
+    viewExternalAPI.rect = { get: getRect };
+
+    // apply view props
+    mixinConfig.forEach(function(key) {
+      viewProps[key] =
+        typeof initialProps[key] === 'undefined'
+          ? defaults$1[key]
+          : initialProps[key];
+    });
+
+    // expose api
+    return {
+      write: function write() {
+        // see if props have changed
+        if (!propsHaveChanged(currentProps, viewProps)) {
+          return;
+        }
+
+        // moves element to correct position on screen
+        applyStyles(view.element, viewProps);
+
+        // store new transforms
+        Object.assign.apply(
+          Object,
+          [currentProps].concat(toConsumableArray(viewProps))
+        );
+
+        // no longer busy
+        return true;
+      },
+      destroy: function destroy() {}
+    };
+  };
+
+  var propsHaveChanged = function propsHaveChanged(currentProps, newProps) {
+    // different amount of keys
+    if (Object.keys(currentProps).length !== Object.keys(newProps).length) {
+      return true;
+    }
+
+    // lets analyze the individual props
+    for (var prop in newProps) {
+      if (newProps[prop] !== currentProps[prop]) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+
+  var applyStyles = function applyStyles(element, _ref2) {
+    var opacity = _ref2.opacity,
+      translateX = _ref2.translateX,
+      translateY = _ref2.translateY,
+      scaleX = _ref2.scaleX,
+      scaleY = _ref2.scaleY,
+      rotateX = _ref2.rotateX,
+      rotateY = _ref2.rotateY,
+      rotateZ = _ref2.rotateZ,
+      height = _ref2.height;
+
+    var transforms = [];
+    var styles = [];
+
+    // transform order is relevant
+
+    // 1. translate
+    if (isDefined(translateX) || isDefined(translateY)) {
+      transforms.push(
+        'translate3d(' +
+          (translateX || 0) +
+          'px, ' +
+          (translateY || 0) +
+          'px, 0)'
+      );
+    }
+
+    // 2. scale
+    if (isDefined(scaleX) || isDefined(scaleY)) {
+      transforms.push(
+        'scale3d(' +
+          (isDefined(scaleX) ? scaleX : 1) +
+          ', ' +
+          (isDefined(scaleY) ? scaleY : 1) +
+          ', 1)'
+      );
+    }
+
+    // 3. rotate
+    if (isDefined(rotateZ) || isDefined(rotateY) || isDefined(rotateX)) {
+      transforms.push(
+        'rotate3d(' +
+          (rotateX || 0) +
+          ', ' +
+          (rotateY || 0) +
+          ', ' +
+          (rotateZ || 0) +
+          ', 360deg)'
+      );
+    }
+
+    // add transforms
+    if (transforms.length) {
+      styles.push('transform:' + transforms.join(' '));
+    }
+
+    // add opacity
+    if (isDefined(opacity)) {
+      styles.push('opacity:' + opacity);
+
+      // if we reach zero, we make the element inaccessible
+      if (opacity === 0) {
+        styles.push('visibility:hidden');
+      }
+
+      // if we're below 100% opacity this element can't be clicked
+      if (opacity < 1) {
+        styles.push('pointer-events:none;');
+      }
+    }
+
+    // add height
+    if (isDefined(height)) {
+      styles.push('height:' + height + 'px');
+    }
+
+    // apply styles
+    var currentStyles = element.getAttribute('style') || '';
+    var newStyles = styles.join(';');
+
+    // if new styles does not match current styles, lets update!
+    if (
+      newStyles.length !== currentStyles.length ||
+      newStyles !== currentStyles
+    ) {
+      element.setAttribute('style', newStyles);
+    }
+  };
+
+  var Mixins = {
+    styles: styles,
+    listeners: listeners,
+    animations: animations,
+    apis: apis
+  };
+
+  var updateRect = function updateRect() {
+    var rect =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+    var element =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+    var style =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
+
+    rect.paddingTop = parseInt(style.paddingTop, 10) || 0;
+    rect.marginTop = parseInt(style.marginTop, 10) || 0;
+    rect.marginRight = parseInt(style.marginRight, 10) || 0;
+    rect.marginBottom = parseInt(style.marginBottom, 10) || 0;
+    rect.marginLeft = parseInt(style.marginLeft, 10) || 0;
+
+    rect.left = element.offsetLeft || 0;
+    rect.top = element.offsetTop || 0;
+    rect.width = element.offsetWidth || 0;
+    rect.height = element.offsetHeight || 0;
+
+    rect.right = rect.left + rect.width;
+    rect.bottom = rect.top + rect.height;
+
+    rect.scrollTop = element.scrollTop;
+
+    rect.hidden = element.offsetParent === null;
+
+    return rect;
+  };
+
+  var createView =
+    // default view definition
+    function createView() {
+      var _ref =
+          arguments.length > 0 && arguments[0] !== undefined
+            ? arguments[0]
+            : {},
+        _ref$tag = _ref.tag,
+        tag = _ref$tag === undefined ? 'div' : _ref$tag,
+        _ref$name = _ref.name,
+        name = _ref$name === undefined ? null : _ref$name,
+        _ref$attributes = _ref.attributes,
+        attributes = _ref$attributes === undefined ? {} : _ref$attributes,
+        _ref$read = _ref.read,
+        read = _ref$read === undefined ? function() {} : _ref$read,
+        _ref$write = _ref.write,
+        write = _ref$write === undefined ? function() {} : _ref$write,
+        _ref$create = _ref.create,
+        create = _ref$create === undefined ? function() {} : _ref$create,
+        _ref$destroy = _ref.destroy,
+        destroy = _ref$destroy === undefined ? function() {} : _ref$destroy,
+        _ref$filterFrameActio = _ref.filterFrameActionsForChild,
+        filterFrameActionsForChild =
+          _ref$filterFrameActio === undefined
+            ? function(child, actions) {
+                return actions;
+              }
+            : _ref$filterFrameActio,
+        _ref$didCreateView = _ref.didCreateView,
+        didCreateView =
+          _ref$didCreateView === undefined ? function() {} : _ref$didCreateView,
+        _ref$ignoreRect = _ref.ignoreRect,
+        ignoreRect = _ref$ignoreRect === undefined ? false : _ref$ignoreRect,
+        _ref$mixins = _ref.mixins,
+        mixins = _ref$mixins === undefined ? [] : _ref$mixins;
+
+      return function(
+        // each view requires reference to store
+        store
+      ) {
+        var props =
+          arguments.length > 1 && arguments[1] !== undefined
+            ? arguments[1]
+            : {};
+
+        // root element should not be changed
+        var element = createElement(tag, 'filepond--' + name, attributes);
+
+        // style reference should also not be changed
+        var style = window.getComputedStyle(element, null);
+
+        // element rectangle
+        var rect = updateRect();
+        var frameRect = null;
+
+        // pretty self explanatory
+        var childViews = [];
+
+        // loaded mixins
+        var activeMixins = [];
+
+        // references to created children
+        var ref = {};
+
+        // state used for each instance
+        var state = {};
+
+        // list of writers that will be called to update this view
+        var writers = [
+          write // default writer
+        ];
+
+        var readers = [
+          read // default reader
+        ];
+
+        var destroyers = [
+          destroy // default destroy
+        ];
+
+        // core view methods
+        var getElement = function getElement() {
+          return element;
+        };
+        var getChildViews = function getChildViews() {
+          return [].concat(childViews);
+        };
+        var getReference = function getReference() {
+          return ref;
+        };
+        var createChildView = function createChildView(store) {
+          return function(view, props) {
+            return view(store, props);
+          };
+        };
+        var getRect = function getRect() {
+          if (frameRect) {
+            return frameRect;
+          }
+          frameRect = getViewRect(rect, childViews, [0, 0], [1, 1]);
+          return frameRect;
+        };
+        var getStyle = function getStyle() {
+          return style;
+        };
+
+        /**
+         * Read data from DOM
+         * @private
+         */
+        var _read = function _read() {
+          frameRect = null;
+
+          // read child views
+          childViews.forEach(function(child) {
+            return child._read();
+          });
+
+          // update my rectangle
+          updateRect(rect, element, style);
+
+          // writers
+          readers.forEach(function(reader) {
+            return reader({ root: internalAPI, props: props, rect: rect });
+          });
+        };
+
+        /**
+         * Write data to DOM
+         * @private
+         */
+        var _write = function _write(ts) {
+          var frameActions =
+            arguments.length > 1 && arguments[1] !== undefined
+              ? arguments[1]
+              : [];
+
+          // if no actions, we assume that the view is resting
+          var resting = frameActions.length === 0;
+
+          // writers
+          writers.forEach(function(writer) {
+            var writerResting = writer({
+              props: props,
+              root: internalAPI,
+              actions: frameActions,
+              timestamp: ts
+            });
+            if (writerResting === false) {
+              resting = false;
+            }
+          });
+
+          // run mixins
+          activeMixins.forEach(function(mixin) {
+            // if one of the mixins is still busy after write operation, we are not resting
+            var mixinResting = mixin.write(ts);
+            if (mixinResting === false) {
+              resting = false;
+            }
+          });
+
+          // updates child views that are currently attached to the DOM
+          childViews
+            .filter(function(child) {
+              return !!child.element.parentNode;
+            })
+            .forEach(function(child) {
+              // if a child view is not resting, we are not resting
+              var childResting = child._write(
+                ts,
+                filterFrameActionsForChild(child, frameActions)
+              );
+              if (!childResting) {
+                resting = false;
+              }
+            });
+
+          // append new elements to DOM and update those
+          childViews
+            .filter(function(child) {
+              return !child.element.parentNode;
+            })
+            .forEach(function(child, index) {
+              // append to DOM
+              internalAPI.appendChild(child.element, index);
+
+              // call read (need to know the size of these elements)
+              child._read();
+
+              // re-call write
+              child._write(ts, filterFrameActionsForChild(child, frameActions));
+
+              // we just added somthing to the dom, no rest
+              resting = false;
+            });
+
+          // let parent know if we are resting
+          return resting;
+        };
+
+        var _destroy = function _destroy() {
+          activeMixins.forEach(function(mixin) {
+            return mixin.destroy();
+          });
+          destroyers.forEach(function(destroyer) {
+            return destroyer({ root: internalAPI });
+          });
+          childViews.forEach(function(child) {
+            return child._destroy();
+          });
+        };
+
+        // sharedAPI
+        var sharedAPIDefinition = {
+          element: {
+            get: getElement
+          },
+          style: {
+            get: getStyle
+          },
+          childViews: {
+            get: getChildViews
+          }
+        };
+
+        // private API definition
+        var internalAPIDefinition = _extends({}, sharedAPIDefinition, {
+          rect: {
+            get: getRect
+          },
+
+          // access to custom children references
+          ref: {
+            get: getReference
+          },
+
+          // dom modifiers
+          is: function is(needle) {
+            return name === needle;
+          },
+          appendChild: appendChild(element),
+          createChildView: createChildView(store),
+          appendChildView: appendChildView(element, childViews),
+          removeChildView: removeChildView(element, childViews),
+          registerWriter: function registerWriter(writer) {
+            return writers.push(writer);
+          },
+          registerReader: function registerReader(reader) {
+            return readers.push(reader);
+          },
+
+          // access to data store
+          dispatch: store.dispatch,
+          query: store.query
+        });
+
+        // public view API methods
+        var externalAPIDefinition = {
+          element: {
+            get: getElement
+          },
+          childViews: {
+            get: getChildViews
+          },
+          rect: {
+            get: getRect
+          },
+          isRectIgnored: function isRectIgnored() {
+            return ignoreRect;
+          },
+          _read: _read,
+          _write: _write,
+          _destroy: _destroy
+        };
+
+        // mixin API methods
+        var mixinAPIDefinition = _extends({}, sharedAPIDefinition, {
+          rect: {
+            get: function get$$1() {
+              return rect;
+            }
+          }
+        });
+
+        // add mixin functionality
+        Object.keys(mixins)
+          .sort(function(a, b) {
+            // move styles to the back of the mixin list (so adjustments of other mixins are applied to the props correctly)
+            if (a === 'styles') {
+              return 1;
+            } else if (b === 'styles') {
+              return -1;
+            }
+            return 0;
+          })
+          .forEach(function(key) {
+            var mixinAPI = Mixins[key]({
+              mixinConfig: mixins[key],
+              viewProps: props,
+              viewState: state,
+              viewInternalAPI: internalAPIDefinition,
+              viewExternalAPI: externalAPIDefinition,
+              view: createObject(mixinAPIDefinition)
+            });
+
+            if (mixinAPI) {
+              activeMixins.push(mixinAPI);
+            }
+          });
+
+        // construct private api
+        var internalAPI = createObject(internalAPIDefinition);
+
+        // create the view
+        create({
+          root: internalAPI,
+          props: props
+        });
+
+        // append created child views to root node
+        var childCount = element.children.length; // need to know the current child count so appending happens in correct order
+        childViews.forEach(function(child, index) {
+          internalAPI.appendChild(child.element, childCount + index);
+        });
+
+        // call did create
+        didCreateView(internalAPI);
+
+        // expose public api
+        return createObject(externalAPIDefinition, props);
+      };
+    };
+
+  var createPainter = function createPainter(update) {
+    var fps =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 60;
+
+    var interval = 1000 / fps;
+    var last = null;
+    var frame = null;
+
+    var tick = function tick(ts) {
+      // queue next tick
+      frame = window.requestAnimationFrame(tick);
+
+      // limit fps
+      if (!last) {
+        last = ts;
+      }
+
+      var delta = ts - last;
+
+      if (delta <= interval) {
+        // skip frame
+        return;
+      }
+
+      // align next frame
+      last = ts - delta % interval;
+
+      // update view
+      update(ts);
+    };
+
+    tick(performance.now());
+
+    return {
+      pause: function pause() {
+        window.cancelAnimationFrame(frame);
+      }
+    };
+  };
+
+  var createUpdater = function createUpdater(apps, reader, writer) {
+    return function(ts) {
+      // all reads first (as these are free at the start of the frame)
+      apps.forEach(function(app) {
+        return app[reader]();
+      });
+
+      // now update the DOM
+      apps.forEach(function(app) {
+        return app[writer](ts);
+      });
+    };
+  };
+
+  var createRoute = function createRoute(routes) {
+    return function(_ref) {
+      var root = _ref.root,
+        props = _ref.props,
+        _ref$actions = _ref.actions,
+        actions = _ref$actions === undefined ? [] : _ref$actions;
+
+      actions
+        .filter(function(action) {
+          return routes[action.type];
+        })
+        .forEach(function(action) {
+          return routes[action.type]({
+            root: root,
+            props: props,
+            action: action.data
+          });
+        });
+    };
+  };
+
+  var insertBefore = function insertBefore(newNode, referenceNode) {
+    return referenceNode.parentNode.insertBefore(newNode, referenceNode);
+  };
+
+  var insertAfter = function insertAfter(newNode, referenceNode) {
+    return referenceNode.parentNode.insertBefore(
+      newNode,
+      referenceNode.nextSibling
+    );
+  };
+
+  var isArray = function isArray(value) {
+    return Array.isArray(value);
+  };
+
+  var trim = function trim(str) {
+    return str.trim();
+  };
+
+  var toString = function toString(value) {
+    return '' + value;
+  };
+
+  var toArray$1 = function toArray(value) {
+    var splitter =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : ',';
+
+    if (isEmpty(value)) {
+      return [];
+    }
+    if (isArray(value)) {
+      return value;
+    }
+    return toString(value)
+      .split(splitter)
+      .map(trim)
+      .filter(function(str) {
+        return str.length;
+      });
+  };
+
+  var isBoolean = function isBoolean(value) {
+    return typeof value === 'boolean';
+  };
+
+  var toBoolean = function toBoolean(value) {
+    return isBoolean(value) ? value : value === 'true';
+  };
+
+  var isString = function isString(value) {
+    return typeof value === 'string';
+  };
+
+  var toNumber = function toNumber(value) {
+    return isNumber(value)
+      ? value
+      : isString(value) ? toString(value).replace(/[a-z]+/gi, '') : 0;
+  };
+
+  var toInt = function toInt(value) {
+    return parseInt(toNumber(value), 10);
+  };
+
+  var toFloat = function toFloat(value) {
+    return parseFloat(toNumber(value));
+  };
+
+  var isInt = function isInt(value) {
+    return isNumber(value) && isFinite(value) && Math.floor(value) === value;
+  };
+
+  var toBytes = function toBytes(value) {
+    // is in bytes
+    if (isInt(value)) {
+      return value;
+    }
+
+    // is natural file size
+    var naturalFileSize = toString(value).trim();
+
+    // if is value in megabytes
+    if (/MB$/i.test(naturalFileSize)) {
+      naturalFileSize = naturalFileSize.replace(/MB$i/, '').trim();
+      return toInt(naturalFileSize) * 1000 * 1000;
+    }
+
+    // if is value in kilobytes
+    if (/KB/i.test(naturalFileSize)) {
+      naturalFileSize = naturalFileSize.replace(/KB$i/, '').trim();
+      return toInt(naturalFileSize) * 1000;
+    }
+
+    return toInt(naturalFileSize);
+  };
+
+  var toFunctionReference = function toFunctionReference(string) {
+    var ref = self;
+    var levels = string.split('.');
+    var level = null;
+    while ((level = levels.shift())) {
+      ref = ref[level];
+      if (!ref) {
+        return null;
+      }
+    }
+    return ref;
+  };
+
+  var methods = {
+    process: 'POST',
+    revert: 'DELETE',
+    fetch: 'GET',
+    restore: 'GET',
+    load: 'GET'
+  };
+
+  var createServerAPI = function createServerAPI(outline) {
+    var api = {};
+
+    api.url = isString(outline) ? outline : outline.url || '';
+    api.timeout = outline.timeout ? parseInt(outline.timeout, 10) : 7000;
+
+    forin(methods, function(key) {
+      api[key] = createAction(key, outline[key], methods[key], api.timeout);
+    });
+
+    return api;
+  };
+
+  var createAction = function createAction(name, outline, method, timeout) {
+    // is explicitely set to null so disable
+    if (outline === null) {
+      return null;
+    }
+
+    // if is custom function, done! Dev handles everything.
+    if (typeof outline === 'function') {
+      return outline;
+    }
+
+    // build action object
+    var action = {
+      url: method === 'GET' ? '?' + name + '=' : '',
+      method: method,
+      headers: {},
+      withCredentials: false,
+      timeout: timeout,
+      onload: null,
+      onerror: null
+    };
+
+    // is a single url
+    if (isString(outline)) {
+      action.url = outline;
+      return action;
+    }
+
+    // overwrite
+    Object.assign(action, outline);
+
+    // see if should reformat headers;
+    if (isString(action.headers)) {
+      var parts = action.headers.split(/:(.+)/);
+      action.headers = {
+        header: parts[0],
+        value: parts[1]
+      };
+    }
+
+    // if is bool withCredentials
+    action.withCredentials = toBoolean(action.withCredentials);
+
+    return action;
+  };
+
+  var toServerAPI = function toServerAPI(value) {
+    return createServerAPI(value);
+  };
+
+  var isNull = function isNull(value) {
+    return value === null;
+  };
+
+  var isObject = function isObject(value) {
+    return (
+      (typeof value === 'undefined' ? 'undefined' : _typeof(value)) ===
+        'object' && value !== null
+    );
+  };
+
+  var isAPI = function isAPI(value) {
+    return (
+      isObject(value) &&
+      isString(value.url) &&
+      isObject(value.process) &&
+      isObject(value.revert) &&
+      isObject(value.restore) &&
+      isObject(value.fetch)
+    );
+  };
+
+  var getType = function getType(value) {
+    if (isArray(value)) {
+      return 'array';
+    }
+
+    if (isNull(value)) {
+      return 'null';
+    }
+
+    if (isInt(value)) {
+      return 'int';
+    }
+
+    if (/^[0-9]+ ?(?:GB|MB|KB)$/gi.test(value)) {
+      return 'bytes';
+    }
+
+    if (isAPI(value)) {
+      return 'api';
+    }
+
+    return typeof value === 'undefined' ? 'undefined' : _typeof(value);
+  };
+
+  var replaceSingleQuotes = function replaceSingleQuotes(str) {
+    return str
+      .replace(/{\s*'/g, '{"')
+      .replace(/'\s*}/g, '"}')
+      .replace(/'\s*:/g, '":')
+      .replace(/:\s*'/g, ':"')
+      .replace(/,\s*'/g, ',"')
+      .replace(/'\s*,/g, '",');
+  };
+
+  var conversionTable = {
+    array: toArray$1,
+    boolean: toBoolean,
+    int: function int(value) {
+      return getType(value) === 'bytes' ? toBytes(value) : toInt(value);
+    },
+    float: toFloat,
+    bytes: toBytes,
+    string: toString,
+    serverapi: toServerAPI,
+    object: function object(value) {
+      try {
+        return JSON.parse(replaceSingleQuotes(value));
+      } catch (e) {
+        return null;
+      }
+    },
+    function: function _function(value) {
+      return toFunctionReference(value);
+    }
+  };
+
+  var convertTo = function convertTo(value, type) {
+    return conversionTable[type](value);
+  };
+
+  var getValueByType = function getValueByType(
+    newValue,
+    defaultValue,
+    valueType
+  ) {
+    // can always assign default value
+    if (newValue === defaultValue) {
+      return newValue;
+    }
+
+    // get the type of the new value
+    var newValueType = getType(newValue);
+
+    // is valid type?
+    if (newValueType !== valueType) {
+      // is string input, let's attempt to convert
+      var convertedValue = convertTo(newValue, valueType);
+
+      // what is the type now
+      newValueType = getType(convertedValue);
+
+      // no valid conversions found
+      if (convertedValue === null) {
+        throw 'Trying to assign value with incorrect type to "' +
+          option +
+          '", allowed type: "' +
+          valueType +
+          '"';
+      } else {
+        newValue = convertedValue;
+      }
+    }
+
+    // assign new value
+    return newValue;
+  };
+
+  var createOption = function createOption(option, defaultValue, valueType) {
+    var currentValue = defaultValue;
+
+    return {
+      get: function get() {
+        return currentValue;
+      },
+      set: function set(newValue) {
+        currentValue = getValueByType(newValue, defaultValue, valueType);
+      }
+    };
+  };
+
+  var createOptions = function createOptions(options) {
+    var obj = {};
+    forin(options, function(prop) {
+      var optionDefinition = options[prop];
+      obj[prop] = createOption(prop, optionDefinition[0], optionDefinition[1]);
+    });
+    return createObject(obj);
+  };
+
+  var createInitialState = function createInitialState(options) {
+    return {
+      // model
+      items: [],
+
+      // options
+      options: createOptions(options)
+    };
+  };
+
+  var fromCamels = function fromCamels(string) {
+    var separator =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '-';
+    return string
+      .split(/(?=[A-Z])/)
+      .map(function(part) {
+        return part.toLowerCase();
+      })
+      .join(separator);
+  };
+
+  var createOptionAPI = function createOptionAPI(store, options) {
+    var obj = {};
+    forin(options, function(key) {
+      obj[key] = {
+        get: function get() {
+          return store.getState().options[key];
+        },
+        set: function set(value) {
+          store.dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
+            value: value
+          });
+        }
+      };
+    });
+    return obj;
+  };
+
+  var createOptionActions = function createOptionActions(options) {
+    return function(dispatch, query, state) {
+      var obj = {};
+      forin(options, function(key) {
+        var name = fromCamels(key, '_').toUpperCase();
+        obj['SET_' + name] = function(action) {
+          try {
+            state.options[key] = action.value;
+          } catch (e) {}
+          // nope, failed
+
+          // we successfully set the value of this option
+          dispatch('DID_SET_' + name, { value: state.options[key] });
+        };
+      });
+      return obj;
+    };
+  };
+
+  var createOptionQueries = function createOptionQueries(options) {
+    return function(state) {
+      var obj = {};
+      forin(options, function(key) {
+        obj['GET_' + fromCamels(key, '_').toUpperCase()] = function(action) {
+          return state.options[key];
+        };
+      });
+      return obj;
+    };
+  };
+
+  var InteractionMethod = {
+    API: 1,
+    DROP: 2,
+    BROWSE: 3,
+    PASTE: 4,
+    NONE: 5
+  };
+
+  var getUniqueId = function getUniqueId() {
+    return Math.random()
+      .toString(36)
+      .substr(2, 9);
+  };
+
+  var forEachDelayed = function forEachDelayed(items, cb) {
+    var delay =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 75;
+    return items.map(function(item, index) {
+      return new Promise(function(resolve, reject) {
+        setTimeout(function() {
+          cb(item);
+          resolve();
+        }, delay * index);
+      });
+    });
+  };
+
+  var arrayRemove = function arrayRemove(arr, index) {
+    return arr.splice(index, 1);
+  };
+
+  var on = function on() {
+    var listeners = [];
+    var off = function off(event, cb) {
+      arrayRemove(
+        listeners,
+        listeners.findIndex(function(listener) {
+          return listener.event === event && (listener.cb === cb || !cb);
+        })
+      );
+    };
+    return {
+      fire: function fire(event) {
+        for (
+          var _len = arguments.length,
+            args = Array(_len > 1 ? _len - 1 : 0),
+            _key = 1;
+          _key < _len;
+          _key++
+        ) {
+          args[_key - 1] = arguments[_key];
+        }
+
+        setTimeout(function() {
+          listeners
+            .filter(function(listener) {
+              return listener.event === event;
+            })
+            .map(function(listener) {
+              return listener.cb;
+            })
+            .forEach(function(cb) {
+              cb.apply(undefined, args);
+            });
+        }, 0);
+      },
+      on: function on(event, cb) {
+        listeners.push({ event: event, cb: cb });
+      },
+      onOnce: function onOnce(event, _cb) {
+        listeners.push({
+          event: event,
+          cb: function cb() {
+            off(event, _cb);
+            _cb.apply(undefined, arguments);
+          }
+        });
+      },
+      off: off
+    };
+  };
+
+  var copyObjectPropertiesToObject = function copyObjectPropertiesToObject(
+    src,
+    target,
+    excluded
+  ) {
+    Object.getOwnPropertyNames(src)
+      .filter(function(property) {
+        return !excluded.includes(property);
+      })
+      .forEach(function(key) {
+        return Object.defineProperty(
+          target,
+          key,
+          Object.getOwnPropertyDescriptor(src, key)
+        );
+      });
+  };
+
+  var PRIVATE_METHODS = [
+    'fire',
+    'process',
+    'revert',
+    'load',
+    'on',
+    'off',
+    'onOnce',
+    'retryLoad'
+  ];
+
+  var createItemAPI = function createItemAPI(item) {
+    var api = {};
+    copyObjectPropertiesToObject(item, api, PRIVATE_METHODS);
+    return api;
+  };
+
+  var getNonNumeric = function getNonNumeric(str) {
+    return /[^0-9]+/.exec(str);
+  };
+
+  var getDecimalSeparator = function getDecimalSeparator() {
+    return getNonNumeric((1.1).toLocaleString())[0];
+  };
+
+  var getThousandsSeparator = function getThousandsSeparator() {
+    // Added for browsers that do not return the thousands separator (happend on native browser Android 4.4.4)
+    // We check against the normal toString output and if they're the same return a comma when decimal separator is a dot
+    var decimalSeparator = getDecimalSeparator();
+    var thousandsStringWithSeparator = (1000.0).toLocaleString();
+    var thousandsStringWithoutSeparator = (1000.0).toString();
+    if (thousandsStringWithSeparator !== thousandsStringWithoutSeparator) {
+      return getNonNumeric(thousandsStringWithSeparator)[0];
+    }
+    return decimalSeparator === '.' ? ',' : '.';
+  };
+
+  var Type = {
+    BOOLEAN: 'boolean',
+    INT: 'int',
+    STRING: 'string',
+    ARRAY: 'array',
+    OBJECT: 'object',
+    FUNCTION: 'function',
+    ACTION: 'action',
+    SERVER_API: 'serverapi',
+    REGEX: 'regex'
+  };
+
+  // all registered filters
+  var filters = [];
+
+  // loops over matching filters and passes options to each filter, returning the mapped results
+  var applyFilterChain = function applyFilterChain(key, value, utils) {
+    return new Promise(function(resolve, reject) {
+      // find matching filters for this key
+      var matchingFilters = filters
+        .filter(function(f) {
+          return f.key === key;
+        })
+        .map(function(f) {
+          return f.cb;
+        });
+
+      // resolve now
+      if (matchingFilters.length === 0) {
+        resolve(value);
+        return;
+      }
+
+      // first filter to kick things of
+      var initialFilter = matchingFilters.shift();
+
+      // chain filters
+      matchingFilters
+        .reduce(
+          // loop over promises passing value to next promise
+          function(current, next) {
+            return current.then(function(value) {
+              return next(value, utils);
+            });
+          },
+
+          // call initial filter, will return a promise
+          initialFilter(value, utils)
+
+          // all executed
+        )
+        .then(function(value) {
+          return resolve(value);
+        })
+        .catch(function(error) {
+          return reject(error);
+        });
+    });
+  };
+
+  var applyFilters = function applyFilters(key, value, utils) {
+    return filters
+      .filter(function(f) {
+        return f.key === key;
+      })
+      .map(function(f) {
+        return f.cb(value, utils);
+      });
+  };
+
+  // adds a new filter to the list
+  var addFilter = function addFilter(key, cb) {
+    return filters.push({ key: key, cb: cb });
+  };
+
+  var extendDefaultOptions = function extendDefaultOptions(additionalOptions) {
+    return Object.assign(defaultOptions, additionalOptions);
+  };
+
+  var getOptions$1 = function getOptions() {
+    return _extends({}, defaultOptions);
+  };
+
+  var setOptions$1 = function setOptions(opts) {
+    forin(opts, function(key, value) {
+      // key does not exist, so this option cannot be set
+      if (!defaultOptions[key]) {
+        return;
+      }
+      defaultOptions[key][0] = getValueByType(
+        value,
+        defaultOptions[key][0],
+        defaultOptions[key][1]
+      );
+    });
+  };
+
+  // default options on app
+  var defaultOptions = {
+    // the id to add to the root element
+    id: [null, Type.STRING],
+
+    // input field name to use
+    name: ['filepond', Type.STRING],
+
+    // classname to put on wrapper
+    className: [null, Type.STRING],
+
+    // is the field required
+    required: [false, Type.BOOLEAN],
+
+    // Allow media capture when value is set
+    captureMethod: [null, Type.STRING],
+    // - "camera", "microphone" or "camcorder",
+    // - Does not work with multiple on apple devices
+    // - If set, acceptedFileTypes must be made to match with media wildcard "image/*", "audio/*" or "video/*"
+
+    // Feature toggles
+    allowDrop: [true, Type.BOOLEAN], // Allow dropping of files
+    allowBrowse: [true, Type.BOOLEAN], // Allow browsing the file system
+    allowPaste: [true, Type.BOOLEAN], // Allow pasting files
+    allowMultiple: [false, Type.BOOLEAN], // Allow multiple files (disabled by default, as multiple attribute is also required on input to allow multiple)
+    allowReplace: [true, Type.BOOLEAN], // Allow dropping a file on other file to replace it (only works when multiple is set to false)
+    allowRevert: [true, Type.BOOLEAN], // Allows user to revert file upload
+    // TODO: allowDrag: [true, Type.BOOLEAN],					// Allow dragging files
+    // TODO: allowSwipe: [true, Type.BOOLEAN],					// Allow swipe to remove files
+    // TODO: allowRemoveAll: [true, Type.BOOLEAN],				// Allow removing all items at once
+    // TODO: allowUploadAll: [true, Type.BOOLEAN],				// Allow uploading all items at once
+
+    // Input requirements
+    maxFiles: [null, Type.INT], // Max number of files
+
+    // Drag 'n Drop related
+    dropOnPage: [false, Type.BOOLEAN], // Allow dropping of files anywhere on page (prevents browser from opening file if dropped outside of Up)
+    dropOnElement: [true, Type.BOOLEAN], // Drop needs to happen on element (set to false to also load drops outside of Up)
+    dropValidation: [false, Type.BOOLEAN], // Enable or disable validating files on drop
+    ignoredFiles: [['.ds_store', 'thumbs.db', 'desktop.ini'], Type.ARRAY],
+    // catchDirectories: [true, Type.BOOLEAN],					// Allow dropping directories in modern browsers
+
+    // Upload related
+    instantUpload: [true, Type.BOOLEAN], // Should upload files immidiately on drop
+    // TODO: parallel: [1, Type.INT],							// Maximum files to upload in parallel
+    // TODO: chunks: [false, Type.BOOLEAN],						// Use chunk uploading
+    // TODO: chunkSize: [.5 * (1024 * 1024), Type.INT],			// Upload in 512KB chunks
+
+    // by default no async api is supplied
+    /* expected format
+    {
+    url: '',
+    timeout: 1000,
+    process: {
+    url: '',
+    method: 'POST',
+            withCredentials: false,
+    headers: {},
+            onload: (response) => {
+                return response.id
+            }
+    },
+    revert: {
+    url: '',
+    method: 'DELETE',
+    withCredentials: false,
+    headers: {},
+            onload: null
+    },
+    fetch: {
+    url: '',
+    method: 'GET',
+    withCredentials: false,
+    headers: {},
+            onload: null
+    },
+    restore: {
+    url: '',
+    method: 'GET',
+    withCredentials: false,
+    headers: {},
+            onload: null
+    }
+    }
+    */
+    server: [null, Type.SERVER_API],
+
+    // Labels and status messages
+    labelDecimalSeparator: [getDecimalSeparator(), Type.STRING], // Default is locale separator
+    labelThousandsSeparator: [getThousandsSeparator(), Type.STRING], // Default is locale separator
+
+    labelIdle: [
+      'Drag & Drop your files or <span class="filepond--label-action">Browse</span>',
+      Type.STRING
+    ],
+
+    labelFileWaitingForSize: ['Waiting for size', Type.STRING],
+    labelFileSizeNotAvailable: ['Size not available', Type.STRING],
+    labelFileCountSingular: ['file in list', Type.STRING],
+    labelFileCountPlural: ['files in list', Type.STRING],
+    labelFileLoading: ['Loading', Type.STRING],
+    labelFileAdded: ['Added', Type.STRING], // assistive only
+    labelFileRemoved: ['Removed', Type.STRING], // assistive only
+    labelFileLoadError: ['Error during load', Type.STRING],
+    labelFileProcessing: ['Uploading', Type.STRING],
+    labelFileProcessingComplete: ['Upload complete', Type.STRING],
+    labelFileProcessingAborted: ['Upload cancelled', Type.STRING],
+    labelFileProcessingError: ['Error during upload', Type.STRING],
+    // labelFileProcessingPaused: ['Upload paused', Type.STRING],
+
+    labelTapToCancel: ['tap to cancel', Type.STRING],
+    labelTapToRetry: ['tap to retry', Type.STRING],
+    labelTapToUndo: ['tap to undo', Type.STRING],
+    // labelTapToPause: ['tap to pause', Type.STRING],
+    // labelTapToResume: ['tap to resume', Type.STRING],
+
+    labelButtonRemoveItem: ['Remove', Type.STRING],
+    labelButtonAbortItemLoad: ['Abort', Type.STRING],
+    labelButtonRetryItemLoad: ['Retry', Type.STRING],
+    labelButtonAbortItemProcessing: ['Cancel', Type.STRING],
+    labelButtonUndoItemProcessing: ['Undo', Type.STRING],
+    labelButtonRetryItemProcessing: ['Retry', Type.STRING],
+    labelButtonProcessItem: ['Upload', Type.STRING],
+
+    // make sure width and height plus viewpox are even numbers so icons are nicely centered
+    iconRemove: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M11.586 13l-2.293 2.293a1 1 0 0 0 1.414 1.414L13 14.414l2.293 2.293a1 1 0 0 0 1.414-1.414L14.414 13l2.293-2.293a1 1 0 0 0-1.414-1.414L13 11.586l-2.293-2.293a1 1 0 0 0-1.414 1.414L11.586 13z" fill="currentColor" fill-rule="nonzero"/></svg>',
+      Type.STRING
+    ],
+    iconProcess: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M14 10.414v3.585a1 1 0 0 1-2 0v-3.585l-1.293 1.293a1 1 0 0 1-1.414-1.415l3-3a1 1 0 0 1 1.414 0l3 3a1 1 0 0 1-1.414 1.415L14 10.414zM9 18a1 1 0 0 1 0-2h8a1 1 0 0 1 0 2H9z" fill="currentColor" fill-rule="evenodd"/></svg>',
+      Type.STRING
+    ],
+    iconRetry: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M10.81 9.185l-.038.02A4.997 4.997 0 0 0 8 13.683a5 5 0 0 0 5 5 5 5 0 0 0 5-5 1 1 0 0 1 2 0A7 7 0 1 1 9.722 7.496l-.842-.21a.999.999 0 1 1 .484-1.94l3.23.806c.535.133.86.675.73 1.21l-.804 3.233a.997.997 0 0 1-1.21.73.997.997 0 0 1-.73-1.21l.23-.928v-.002z" fill="currentColor" fill-rule="nonzero"/></svg>',
+      Type.STRING
+    ],
+    iconUndo: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M9.185 10.81l.02-.038A4.997 4.997 0 0 1 13.683 8a5 5 0 0 1 5 5 5 5 0 0 1-5 5 1 1 0 0 0 0 2A7 7 0 1 0 7.496 9.722l-.21-.842a.999.999 0 1 0-1.94.484l.806 3.23c.133.535.675.86 1.21.73l3.233-.803a.997.997 0 0 0 .73-1.21.997.997 0 0 0-1.21-.73l-.928.23-.002-.001z" fill="currentColor" fill-rule="nonzero"/></svg>',
+      Type.STRING
+    ],
+    iconDone: [
+      '<svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg"><path d="M18.293 9.293a1 1 0 0 1 1.414 1.414l-7.002 7a1 1 0 0 1-1.414 0l-3.998-4a1 1 0 1 1 1.414-1.414L12 15.586l6.294-6.293z" fill="currentColor" fill-rule="nonzero"/></svg>',
+      Type.STRING
+    ],
+
+    // event handlers
+    oninit: [null, Type.FUNCTION],
+    onwarning: [null, Type.FUNCTION],
+    onerror: [null, Type.FUNCTION],
+    onaddfilestart: [null, Type.FUNCTION],
+    onaddfileprogress: [null, Type.FUNCTION],
+    onaddfile: [null, Type.FUNCTION],
+    onprocessfilestart: [null, Type.FUNCTION],
+    onprocessfileprogress: [null, Type.FUNCTION],
+    onprocessfileabort: [null, Type.FUNCTION],
+    onprocessfilerevert: [null, Type.FUNCTION],
+    onprocessfile: [null, Type.FUNCTION],
+    onremovefile: [null, Type.FUNCTION],
+
+    // custom initial files array
+    files: [[], Type.ARRAY]
+  };
+
+  var isFunction = function isFunction(value) {
+    return typeof value === 'function';
+  };
+
+  var getItemByQuery = function getItemByQuery(items, query) {
+    // just return first index
+    if (isEmpty(query)) {
+      return items[0] || null;
+    }
+
+    // query is index
+    if (isInt(query)) {
+      return items[query] || null;
+    }
+
+    // if query is item, get the id
+    if (
+      (typeof query === 'undefined' ? 'undefined' : _typeof(query)) === 'object'
+    ) {
+      query = query.id;
+    }
+
+    // assume query is a string and return item by id
+    return (
+      items.find(function(item) {
+        return item.id === query;
+      }) || null
+    );
+  };
+
+  var queries = function queries(state) {
+    return {
+      GET_ITEM: function GET_ITEM(query) {
+        return getItemByQuery(state.items, query);
+      },
+
+      GET_ITEMS: function GET_ITEMS(query) {
+        return [].concat(toConsumableArray(state.items));
+      },
+
+      GET_ITEM_NAME: function GET_ITEM_NAME(query) {
+        var item = getItemByQuery(state.items, query);
+        return item ? item.filename : null;
+      },
+
+      GET_ITEM_SIZE: function GET_ITEM_SIZE(query) {
+        var item = getItemByQuery(state.items, query);
+        return item ? item.fileSize : null;
+      },
+
+      GET_TOTAL_ITEMS: function GET_TOTAL_ITEMS() {
+        return state.items.length;
+      },
+
+      IS_ASYNC: function IS_ASYNC() {
+        return (
+          isObject(state.options.server) &&
+          (isObject(state.options.server.process) ||
+            isFunction(state.options.server.process))
+        );
+      }
+    };
+  };
+
+  var getItemIndexByQuery = function getItemIndexByQuery(items, query) {
+    // just return first index
+    if (isEmpty(query)) {
+      return 0;
+    }
+
+    // invalid queries
+    if (!isString(query)) {
+      return -1;
+    }
+
+    // return item by id (or -1 if not found)
+    return items.findIndex(function(item) {
+      return item.id === query;
+    });
+  };
+
+  var removeIndex = function removeIndex(arr, index) {
+    return arr.splice(index, 1);
+  };
+
+  var hasRoomForItem = function hasRoomForItem(state) {
+    var count = state.items.length;
+
+    // if cannot have multiple items, to add one item it should currently not contain items
+    if (!state.options.allowMultiple) {
+      return count === 0;
+    }
+
+    // if allows multiple items, we check if a max item count has been set, if not, there's no limit
+    var maxFileCount = state.options.maxFiles;
+    if (maxFileCount === null) {
+      return true;
+    }
+
+    // we check if the current count is smaller than the max count, if so, another file can still be added
+    if (count < maxFileCount) {
+      return true;
+    }
+
+    // no more room for another file
+    return false;
+  };
+
+  var limit = function limit(value, min, max) {
+    return Math.max(Math.min(max, value), min);
+  };
+
+  var arrayInsert = function arrayInsert(arr, index, item) {
+    return arr.splice(index, 0, item);
+  };
+
+  var insertItem = function insertItem(items, item, index) {
+    if (isEmpty(item)) {
+      return null;
+    }
+
+    // if index is undefined, append
+    if (typeof index === 'undefined') {
+      items.push(item);
+      return item;
+    }
+
+    // limit the index to the size of the items array
+    index = limit(index, 0, items.length);
+
+    // add item to array
+    arrayInsert(items, index, item);
+
+    // expose
+    return item;
+  };
+
+  var leftPad = function leftPad(value) {
+    var padding =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
+    return (padding + value).slice(-padding.length);
+  };
+
+  var getDateString = function getDateString() {
+    var date =
+      arguments.length > 0 && arguments[0] !== undefined
+        ? arguments[0]
+        : new Date();
+    return (
+      date.getFullYear() +
+      '-' +
+      leftPad(date.getMonth() + 1, '00') +
+      '-' +
+      leftPad(date.getDate(), '00') +
+      '_' +
+      leftPad(date.getHours(), '00') +
+      '-' +
+      leftPad(date.getMinutes(), '00') +
+      '-' +
+      leftPad(date.getSeconds(), '00')
+    );
+  };
+
+  var isBase64DataURI = function isBase64DataURI(str) {
+    return /^\s*data:([a-z]+\/[a-z0-9-+.]+(;[a-z-]+=[a-z0-9-]+)?)?(;base64)?,([a-z0-9!$&',()*+;=\-._~:@\/?%\s]*)\s*$/i.test(
+      str
+    );
+  };
+
+  var getFilenameFromURL = function getFilenameFromURL(url) {
+    return url
+      .split('/')
+      .pop()
+      .split('?')
+      .shift();
+  };
+
+  var getExtensionFromFilename = function getExtensionFromFilename(name) {
+    return name.split('.').pop();
+  };
+
+  var guesstimateExtension = function guesstimateExtension(type) {
+    // if no extension supplied, exit here
+    if (typeof type !== 'string') {
+      return '';
+    }
+
+    // get subtype
+    var subtype = type.split('/').pop();
+
+    // is svg subtype
+    if (/svg/.test(subtype)) {
+      return 'svg';
+    }
+
+    if (/zip|compressed/.test(subtype)) {
+      return 'zip';
+    }
+
+    if (/plain/.test(subtype)) {
+      return 'txt';
+    }
+
+    if (/msword/.test(subtype)) {
+      return 'doc';
+    }
+
+    // if is valid subtype
+    if (/[a-z]+/.test(subtype)) {
+      // always use jpg extension
+      if (subtype === 'jpeg') {
+        return 'jpg';
+      }
+
+      // return subtype
+      return subtype;
+    }
+
+    return '';
+  };
+
+  var getFileFromBlob = function getFileFromBlob(blob, filename) {
+    var type =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : null;
+    var extension =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : null;
+
+    var file =
+      typeof type === 'string'
+        ? blob.slice(0, blob.size, type)
+        : blob.slice(0, blob.size, blob.type);
+    file.lastModifiedDate = new Date();
+
+    // if filename supplied but no extension and filename has extension
+    if (filename && extension === null && getExtensionFromFilename(filename)) {
+      file.name = filename;
+    } else {
+      extension = extension || guesstimateExtension(file.type);
+      file.name = filename + (extension ? '.' + extension : '');
+    }
+    return file;
+  };
+
+  var getBlobBuilder = function getBlobBuilder() {
+    return (window.BlobBuilder =
+      window.BlobBuilder ||
+      window.WebKitBlobBuilder ||
+      window.MozBlobBuilder ||
+      window.MSBlobBuilder);
+  };
+
+  var createBlob = function createBlob(arrayBuffer, mimeType) {
+    var BB = getBlobBuilder();
+
+    if (BB) {
+      var bb = new BB();
+      bb.append(arrayBuffer);
+      return bb.getBlob(mimeType);
+    }
+
+    return new Blob([arrayBuffer], {
+      type: mimeType
+    });
+  };
+
+  var getBlobFromByteStringWithMimeType = function getBlobFromByteStringWithMimeType(
+    byteString,
+    mimeType
+  ) {
+    var ab = new ArrayBuffer(byteString.length);
+    var ia = new Uint8Array(ab);
+
+    for (var i = 0; i < byteString.length; i++) {
+      ia[i] = byteString.charCodeAt(i);
+    }
+
+    return createBlob(ab, mimeType);
+  };
+
+  var getMimeTypeFromBase64DataURI = function getMimeTypeFromBase64DataURI(
+    dataURI
+  ) {
+    return (/^data:(.+);/.exec(dataURI) || [])[1] || null;
+  };
+
+  var getBase64DataFromBase64DataURI = function getBase64DataFromBase64DataURI(
+    dataURI
+  ) {
+    // get data part of string (remove data:image/jpeg...,)
+    var data = dataURI.split(',')[1];
+
+    // remove any whitespace as that causes InvalidCharacterError in IE
+    return data.replace(/\s/g, '');
+  };
+
+  var getByteStringFromBase64DataURI = function getByteStringFromBase64DataURI(
+    dataURI
+  ) {
+    return atob(getBase64DataFromBase64DataURI(dataURI));
+  };
+
+  var getBlobFromBase64DataURI = function getBlobFromBase64DataURI(dataURI) {
+    var mimeType = getMimeTypeFromBase64DataURI(dataURI);
+    var byteString = getByteStringFromBase64DataURI(dataURI);
+
+    return getBlobFromByteStringWithMimeType(byteString, mimeType);
+  };
+
+  var getFileFromBase64DataURI = function getFileFromBase64DataURI(
+    dataURI,
+    filename,
+    extension
+  ) {
+    return getFileFromBlob(
+      getBlobFromBase64DataURI(dataURI),
+      filename,
+      null,
+      extension
+    );
+  };
+
+  var getFilenameFromHeaders = function getFilenameFromHeaders(headers) {
+    var rows = headers.split('\n');
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (
+        var _iterator = rows[Symbol.iterator](), _step;
+        !(_iteratorNormalCompletion = (_step = _iterator.next()).done);
+        _iteratorNormalCompletion = true
+      ) {
+        var header = _step.value;
+
+        var dirtyFilename = header.split('filename=')[1];
+        if (!dirtyFilename) {
+          continue;
+        }
+        return dirtyFilename.replace(/["']+/g, '');
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return null;
+  };
+
+  var renameFile = function renameFile(file, name) {
+    var renamedFile = file.slice(0, file.size, file.type);
+    renamedFile.lastModifiedDate = file.lastModifiedDate;
+    renamedFile.name = name;
+    return renamedFile;
+  };
+
+  var createFileLoader = function createFileLoader(fetchFn) {
+    var state = {
+      source: null,
+      complete: false,
+      progress: 0,
+      size: null,
+      timestamp: null,
+      duration: 0,
+      request: null
+    };
+
+    var getProgress = function getProgress() {
+      return state.progress;
+    };
+    var abort = function abort() {
+      if (!state.request) {
+        return;
+      }
+      state.request.abort();
+    };
+
+    // load source
+    var load = function load() {
+      // get quick reference
+      var source = state.source;
+
+      api.fire('init', source);
+
+      // Load Files
+      if (source instanceof File) {
+        api.fire('load', source);
+      } else if (source instanceof Blob) {
+        // Load blobs, set default name to current date
+        api.fire('load', getFileFromBlob(source, getDateString()));
+      } else if (isBase64DataURI(source)) {
+        // Load base 64, set default name to current date
+        api.fire('load', getFileFromBase64DataURI(source, getDateString()));
+      } else {
+        // Deal as if is external URL, let's load it!
+        loadURL(source);
+      }
+    };
+
+    // loads a url
+    var loadURL = function loadURL(url) {
+      // is remote url and no fetch method supplied
+      if (!fetchFn) {
+        api.fire('error', {
+          type: 'error',
+          body: "Can't load URL",
+          code: 400
+        });
+        return;
+      }
+
+      // set request start
+      state.timestamp = Date.now();
+
+      // load file
+      state.request = fetchFn(
+        url,
+        function(response) {
+          // update duration
+          state.duration = Date.now() - state.timestamp;
+
+          // done!
+          state.complete = true;
+
+          // turn blob response into a file
+          if (response instanceof Blob) {
+            response = getFileFromBlob(
+              response,
+              getFilenameFromURL(url) || getDateString()
+            );
+          }
+
+          api.fire('load', response instanceof Blob ? response : response.body);
+        },
+        function(error) {
+          api.fire(
+            'error',
+            typeof error === 'string'
+              ? {
+                  type: 'error',
+                  code: 0,
+                  body: error
+                }
+              : error
+          );
+        },
+        function(computable, current, total) {
+          // collected some meta data already
+          if (total) {
+            state.size = total;
+          }
+
+          // update duration
+          state.duration = Date.now() - state.timestamp;
+
+          // if we can't compute progress, we're not going to fire progress events
+          if (!computable) {
+            state.progress = null;
+            return;
+          }
+
+          // update progress percentage
+          state.progress = current / total;
+
+          // expose
+          api.fire('progress', state.progress);
+        },
+        function() {
+          api.fire('abort');
+        },
+        function(response) {
+          api.fire('meta', {
+            size: state.size,
+            filename: getFilenameFromHeaders(
+              typeof response === 'string' ? response : response.headers
+            )
+          });
+        }
+      );
+    };
+
+    var api = _extends({}, on(), {
+      setSource: function setSource(source) {
+        return (state.source = source);
+      },
+      getProgress: getProgress, // file load progress
+      abort: abort, // abort file load
+      load: load // start load
+    });
+
+    return api;
+  };
+
+  var createResponse$1 = function createResponse(type, code, body, headers) {
+    return {
+      type: type,
+      code: code,
+      body: body,
+      headers: headers
+    };
+  };
+
+  var sendRequest = function sendRequest(data, url, options) {
+    var api = {
+      onheaders: function onheaders() {},
+      onprogress: function onprogress() {},
+      onload: function onload() {},
+      ontimeout: function ontimeout() {},
+      onerror: function onerror() {},
+      onabort: function onabort() {},
+      abort: function abort() {
+        aborted = true;
+        xhr.abort();
+      }
+    };
+
+    // timeout identifier, only used when timeout is defined
+    var timeoutId = null;
+    var timedOut = false;
+    var aborted = false;
+    var headersReceived = false;
+
+    // set default options
+    options = _extends(
+      {
+        method: 'POST',
+        headers: {},
+        withCredentials: false
+      },
+      options
+    );
+
+    // if method is GET, add any received data to url
+    if (/GET/i.test(options.method) && data) {
+      //url = `${ url }${ hasQueryString(url) ? '&' : '?' }data=${ encodeURIComponent(typeof data === 'string' ? data : JSON.stringify(data)) }`;
+      url =
+        '' +
+        url +
+        encodeURIComponent(
+          typeof data === 'string' ? data : JSON.stringify(data)
+        );
+    }
+
+    // create request
+    var xhr = new XMLHttpRequest();
+
+    // progress of load
+    var process = /GET/i.test(options.method) ? xhr : xhr.upload;
+    process.onprogress = function(e) {
+      // progress event received, timeout no longer needed
+      clearTimeout(timeoutId);
+
+      // no progress event when aborted ( onprogress is called once after abort() )
+      if (aborted || timedOut) {
+        return;
+      }
+
+      api.onprogress(e.lengthComputable, e.loaded, e.total);
+    };
+
+    // tries to get header info to the app as fast as possible
+    xhr.onreadystatechange = function() {
+      // not interesting in these states ('unsent' and 'openend' as they don't give us any additional info)
+      if (xhr.readyState < 2) {
+        return;
+      }
+
+      // no server response
+      if (xhr.readyState === 4 && xhr.status === 0) {
+        return;
+      }
+
+      // timeout no longer needed as connection is setup
+      clearTimeout(timeoutId);
+
+      if (headersReceived) {
+        return;
+      }
+
+      headersReceived = true;
+
+      // we've probably received some useful data in response headers
+      api.onheaders(xhr);
+    };
+
+    // load successful
+    xhr.onload = function() {
+      // is classified as valid response
+      if (xhr.status >= 200 && xhr.status < 300) {
+        api.onload(xhr);
+      } else {
+        api.onerror(xhr);
+      }
+    };
+
+    // error during load
+    xhr.onerror = function() {
+      api.onerror(xhr);
+    };
+
+    // request aborted
+    xhr.onabort = function() {
+      if (timedOut) {
+        return;
+      }
+      aborted = true;
+      api.onabort();
+    };
+
+    // set timeout if defined
+    if (isInt(options.timeout)) {
+      timeoutId = setTimeout(function() {
+        timedOut = true;
+        api.ontimeout(xhr);
+        api.abort();
+      }, options.timeout);
+    }
+
+    // add headers
+    xhr.open(options.method, url, true);
+    Object.keys(options.headers).forEach(function(key) {
+      xhr.setRequestHeader(key, options.headers[key]);
+    });
+
+    // set type of response
+    if (options.responseType) {
+      xhr.responseType = options.responseType;
+    }
+
+    // set credentials
+    if (options.withCredentials) {
+      xhr.withCredentials = true;
+    }
+
+    // let's send our data
+    xhr.send(data);
+
+    return api;
+  };
+
+  var createTimeoutResponse = function createTimeoutResponse(cb) {
+    return function(xhr) {
+      cb(createResponse('error', 0, 'Timeout', xhr.getAllResponseHeaders()));
+    };
+  };
+
+  var createFetchFunction = function createFetchFunction() {
+    var apiUrl =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var action = arguments[1];
+
+    // custom handler (should also handle file, load, error, progress and abort)
+    if (typeof action === 'function') {
+      return action;
+    }
+
+    // no action supplied
+    if (!action || !isString(action.url)) {
+      return null;
+    }
+
+    // set onload hanlder
+    var onload =
+      action.onload ||
+      function(res) {
+        return res;
+      };
+    var onerror =
+      action.onerror ||
+      function(res) {
+        return null;
+      };
+
+    // internal handler
+    return function(url, load, error, progress, abort, headers) {
+      // do local or remote request based on if the url is external
+      var request = sendRequest(
+        url,
+        apiUrl + action.url,
+        _extends({}, action, {
+          responseType: 'blob'
+        })
+      );
+
+      request.onload = function(xhr) {
+        // get headers
+        var headers = xhr.getAllResponseHeaders();
+
+        // get filename
+        var filename =
+          getFilenameFromHeaders(headers) ||
+          getFilenameFromURL(url) ||
+          getDateString();
+
+        // create response
+        load(
+          createResponse$1(
+            'load',
+            xhr.status,
+            getFileFromBlob(onload(xhr.response), filename),
+            headers
+          )
+        );
+      };
+
+      request.onerror = function(xhr) {
+        error(
+          createResponse$1(
+            'error',
+            xhr.status,
+            onerror(xhr.response) || xhr.statusText,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.onheaders = function(xhr) {
+        headers(
+          createResponse$1(
+            'headers',
+            xhr.status,
+            null,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.ontimeout = createTimeoutResponse(error);
+      request.onprogress = progress;
+      request.onabort = abort;
+
+      // should return request
+      return request;
+    };
+  };
+
+  /*
+function signature:
+  (file, metadata, load, error, progress, abort) => {
+    return {
+    abort:() => {}
+  }
+}
+*/
+  var createProcessorFunction = function createProcessorFunction() {
+    var apiUrl =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var action = arguments[1];
+    var name = arguments[2];
+
+    // custom handler (should also handle file, load, error, progress and abort)
+    if (typeof action === 'function') {
+      return function() {
+        for (
+          var _len = arguments.length, params = Array(_len), _key = 0;
+          _key < _len;
+          _key++
+        ) {
+          params[_key] = arguments[_key];
+        }
+
+        return action.apply(undefined, [name].concat(params));
+      };
+    }
+
+    // no action supplied
+    if (!action || !isString(action.url)) {
+      return null;
+    }
+
+    // internal handler
+    return function(file, metadata, load, error, progress, abort) {
+      // no file received
+      if (!file) {
+        return;
+      }
+
+      // create formdata object
+      var formData = new FormData();
+      formData.append(name, file, file.name);
+
+      // add metadata under same name
+      if (isObject(metadata)) {
+        formData.append(name, JSON.stringify(metadata));
+      }
+
+      // set onload hanlder
+      var onload =
+        action.onload ||
+        function(res) {
+          return res;
+        };
+      var onerror =
+        action.onerror ||
+        function(res) {
+          return null;
+        };
+
+      // send request object
+      var request = sendRequest(formData, apiUrl + action.url, action);
+      request.onload = function(xhr) {
+        load(
+          createResponse$1(
+            'load',
+            xhr.status,
+            onload(xhr.response),
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.onerror = function(xhr) {
+        error(
+          createResponse$1(
+            'error',
+            xhr.status,
+            onerror(xhr.response) || xhr.statusText,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.ontimeout = createTimeoutResponse(error);
+      request.onprogress = progress;
+      request.onabort = abort;
+
+      // should return request
+      return request;
+    };
+  };
+
+  /*
+ function signature:
+ (uniqueFileId, load, error) => { }
+ */
+  var createRevertFunction = function createRevertFunction() {
+    var apiUrl =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+    var action = arguments[1];
+
+    // is custom implementation
+    if (typeof action === 'function') {
+      return action;
+    }
+
+    // no action supplied, return stub function, interface will work, but file won't be removed
+    if (!action || !isString(action.url)) {
+      return function(uniqueFileId, load) {
+        return load();
+      };
+    }
+
+    // set onload hanlder
+    var onload =
+      action.onload ||
+      function(res) {
+        return res;
+      };
+    var onerror =
+      action.onerror ||
+      function(res) {
+        return null;
+      };
+
+    // internal implementation
+    return function(uniqueFileId, load, error) {
+      var request = sendRequest(
+        uniqueFileId,
+        apiUrl + action.url,
+        action // contains method, headers and withCredentials properties
+      );
+      request.onload = function(xhr) {
+        load(
+          createResponse$1(
+            'load',
+            xhr.status,
+            onload(xhr.response),
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.onerror = function(xhr) {
+        error(
+          createResponse$1(
+            'error',
+            xhr.status,
+            onerror(xhr.response) || xhr.statusText,
+            xhr.getAllResponseHeaders()
+          )
+        );
+      };
+
+      request.ontimeout = createTimeoutResponse(error);
+
+      return request;
+    };
+  };
+
+  var getRandomNumber = function getRandomNumber() {
+    var min =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 0;
+    var max =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
+    return min + Math.random() * (max - min);
+  };
+
+  var createPerceivedPerformanceUpdater = function createPerceivedPerformanceUpdater(
+    cb
+  ) {
+    var duration =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1000;
+    var tickMin =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 25;
+    var tickMax =
+      arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 250;
+
+    var timeout = null;
+    var start = Date.now();
+
+    var tick = function tick() {
+      var runtime = Date.now() - start;
+      var delay = getRandomNumber(tickMin, tickMax);
+
+      if (runtime + delay > duration) {
+        delay = runtime + delay - duration;
+      }
+
+      var progress = runtime / duration;
+      if (progress >= 1) {
+        cb(1);
+        return;
+      }
+
+      cb(progress);
+
+      timeout = setTimeout(tick, delay);
+    };
+
+    tick();
+
+    return {
+      clear: function clear() {
+        clearTimeout(timeout);
+      }
+    };
+  };
+
+  var createFileProcessor = function createFileProcessor(processFn) {
+    var state = {
+      complete: false,
+      perceivedProgress: 0,
+      perceivedPerformanceUpdater: null,
+      progress: null,
+      timestamp: null,
+      perceivedDuration: 0,
+      duration: 0,
+      request: null,
+      response: null
+    };
+
+    var process = function process(file, metadata) {
+      var progressFn = function progressFn() {
+        // we've not yet started the real download, stop here
+        // the request might not go through, for instance, there might be some server trouble
+        // if state.progress is null, the server does not allow computing progress and we show the spinner instead
+        if (state.duration === 0 || state.progress === null) {
+          return;
+        }
+
+        // as we're now processing, fire the progress event
+        api.fire('progress', api.getProgress());
+      };
+
+      var completeFn = function completeFn() {
+        state.complete = true;
+
+        api.fire('load', state.response.body);
+      };
+
+      // let's start processing
+      api.fire('start');
+
+      // set request start
+      state.timestamp = Date.now();
+
+      // create perceived performance progress indicator
+      state.perceivedPerformanceUpdater = createPerceivedPerformanceUpdater(
+        function(progress) {
+          state.perceivedProgress = progress;
+          state.perceivedDuration = Date.now() - state.timestamp;
+
+          progressFn();
+
+          // if fake progress is done, and a response has been received,
+          // and we've not yet called the complete method
+          if (
+            state.response &&
+            state.perceivedProgress === 1 &&
+            !state.complete
+          ) {
+            // we done!
+            completeFn();
+          }
+        },
+        // random delay as in a list of files you start noticing
+        // files uploading at the exact same speed
+        getRandomNumber(750, 1500)
+      );
+
+      // remember request so we can abort it later
+      state.request = processFn(
+        // the file to process
+        file,
+
+        // the metadata to send along
+        metadata,
+
+        // callbacks (load, error, progress, abort)
+        // load expects the body to be a server id if
+        // you want to make use of revert
+        function(response) {
+          // we put the response in state so we can access
+          // it outside of this method
+          state.response =
+            typeof response === 'string'
+              ? {
+                  type: 'load',
+                  code: 200,
+                  body: response,
+                  headers: {}
+                }
+              : response;
+
+          // update duration
+          state.duration = Date.now() - state.timestamp;
+
+          // force progress to 1 as we're now done
+          state.progress = 1;
+
+          // we are really done
+          // if perceived progress is 1 ( wait for perceived progress to complete )
+          // or if server does not support progress ( null )
+          if (state.perceivedProgress === 1) {
+            completeFn();
+          }
+        },
+
+        // error is expected to be an object with type, code, body
+        function(error) {
+          // cancel updater
+          state.perceivedPerformanceUpdater.clear();
+
+          // update others about this error
+          api.fire(
+            'error',
+            typeof error === 'string'
+              ? {
+                  type: 'error',
+                  code: 0,
+                  body: error
+                }
+              : error
+          );
+        },
+
+        // actual processing progress
+        function(computable, current, total) {
+          // update actual duration
+          state.duration = Date.now() - state.timestamp;
+
+          // update actual progress
+          state.progress = computable ? current / total : null;
+
+          progressFn();
+        },
+
+        // abort does not expect a value
+        function() {
+          // stop updater
+          state.perceivedPerformanceUpdater.clear();
+
+          // fire the abort event so we can switch visuals
+          api.fire('abort');
+        }
+      );
+    };
+
+    var abort = function abort() {
+      // no request running, can't abort
+      if (!state.request) {
+        return;
+      }
+
+      // stop updater
+      state.perceivedPerformanceUpdater.clear();
+
+      // abort actual request
+      state.request.abort();
+
+      // if has response object, we've completed the request
+      state.complete = true;
+
+      // now aborted, if server returned a response, let's pass it along
+      api.fire('abort', state.response ? state.response.body : null);
+    };
+
+    var reset = function reset() {
+      abort();
+      state.complete = false;
+      state.perceivedProgress = 0;
+      state.progress = 0;
+      state.timestamp = null;
+      state.perceivedDuration = 0;
+      state.duration = 0;
+      state.request = null;
+      state.response = null;
+    };
+
+    var getProgress = function getProgress() {
+      return state.progress
+        ? Math.min(state.progress, state.perceivedProgress)
+        : null;
+    };
+    var getDuration = function getDuration() {
+      return Math.min(state.duration, state.perceivedDuration);
+    };
+
+    var api = _extends({}, on(), {
+      process: process, // start processing file
+      abort: abort, // abort active process request
+      getProgress: getProgress,
+      getDuration: getDuration,
+      reset: reset
+    });
+
+    return api;
+  };
+
+  var getFilenameWithoutExtension = function getFilenameWithoutExtension(name) {
+    return name.substr(0, name.lastIndexOf('.')) || name;
+  };
+
+  var ItemStatus = {
+    INIT: 1,
+    IDLE: 2,
+    PROCESSING: 3,
+    PROCESSING_PAUSED: 4,
+    PROCESSING_COMPLETE: 5,
+    PROCESSING_ERROR: 6,
+    LOADING: 7,
+    LOAD_ERROR: 8
+  };
+
+  var createFileStub = function createFileStub(source) {
+    var data = [source.name, source.size, source.type];
+
+    // is blob or base64, then we need to set the name
+    if (source instanceof Blob || isBase64DataURI(source)) {
+      data[0] = getDateString();
+    } else if (isBase64DataURI(source)) {
+      // if is base64 data uri we need to determine the average size and type
+      data[1] = source.length;
+      data[2] = getMimeTypeFromBase64DataURI(source);
+    } else if (!(source instanceof File)) {
+      // url
+      data[0] = getFilenameFromURL(source);
+      data[1] = 0;
+      data[2] = 'application/octet-stream';
+    }
+
+    return {
+      name: data[0],
+      size: data[1],
+      type: data[2]
+    };
+  };
+
+  var FileOrigin = {
+    INPUT: 1,
+    LIMBO: 2,
+    LOCAL: 3
+  };
+
+  var createItem = function createItem() {
+    var origin =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
+    var serverFileReference =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : null;
+
+    // unique id for this item, is used to identify the item across views
+    var id = getUniqueId();
+
+    /**
+     * Internal item state
+     */
+    var state = {
+      // original source
+      source: null,
+
+      // file model reference
+      file: null,
+
+      // id of file on server
+      serverFileReference: serverFileReference,
+
+      // current item status
+      status: serverFileReference
+        ? ItemStatus.PROCESSING_COMPLETE
+        : ItemStatus.INIT,
+
+      // active processes
+      activeLoader: null,
+      activeProcessor: null
+    };
+
+    /**
+     * Externally added item metadata
+     */
+    var metadata = {};
+
+    // item data
+    var setStatus = function setStatus(status) {
+      return (state.status = status);
+    };
+
+    // file data
+    var getFileExtension = function getFileExtension() {
+      return getExtensionFromFilename(state.file.name);
+    };
+    var getFileType = function getFileType() {
+      return state.file.type;
+    };
+    var getFileSize = function getFileSize() {
+      return state.file.size;
+    };
+    var getFile = function getFile() {
+      return state.file;
+    };
+
+    // loads files
+    var load = function load(source, loader, onload) {
+      // remember the original item source
+      state.source = source;
+
+      // set a stub file object while loading the actual data
+      state.file = createFileStub(source);
+
+      // starts loading
+      loader.on('init', function() {
+        api.fire('load-init');
+      });
+
+      // we'eve received a size indication, let's update the stub
+      loader.on('meta', function(meta) {
+        // set size of file stub
+        state.file.size = meta.size;
+
+        // set name of file stub
+        state.file.filename = meta.filename;
+
+        // size has been updated
+        api.fire('load-meta');
+      });
+
+      // the file is now loading we need to update the progress indicators
+      loader.on('progress', function(progress) {
+        setStatus(ItemStatus.LOADING);
+
+        api.fire('load-progress', progress);
+      });
+
+      // an error was thrown while loading the file, we need to switch to error state
+      loader.on('error', function(error) {
+        setStatus(ItemStatus.LOAD_ERROR);
+
+        api.fire('load-request-error', error);
+      });
+
+      // user or another process aborted the file load (cannot retry)
+      loader.on('abort', function() {
+        setStatus(ItemStatus.INIT);
+
+        api.fire('load-abort');
+      });
+
+      // done loading
+      loader.on('load', function(file) {
+        // as we've now loaded the file the loader is no longer required
+        state.activeLoader = null;
+
+        // called when file has loaded succesfully
+        var success = function success(result) {
+          // set (possibly) transformed file
+          state.file = result;
+
+          // file received
+          if (origin === FileOrigin.LIMBO && state.serverFileReference) {
+            setStatus(ItemStatus.PROCESSING_COMPLETE);
+          } else {
+            setStatus(ItemStatus.IDLE);
+          }
+
+          api.fire('load');
+        };
+
+        var error = function error(result) {
+          // set original file
+          state.file = file;
+          api.fire('load-meta');
+
+          setStatus(ItemStatus.LOAD_ERROR);
+          api.fire('load-file-error', result);
+        };
+
+        // if we already have a server file reference, we don't need to call the onload method
+        if (state.serverFileReference) {
+          success(file);
+          return;
+        }
+
+        // no server id, let's give this file the full treatment
+        onload(file, success, error);
+      });
+
+      // set loader source data
+      loader.setSource(source);
+
+      // set as active loader
+      state.activeLoader = loader;
+
+      // load the source data
+      loader.load();
+    };
+
+    // file processor
+    var process = function process(processor, onprocess) {
+      // if no file loaded we'll wait for the load event
+      if (!(state.file instanceof Blob)) {
+        api.on('load', function() {
+          process(processor, onprocess);
+        });
+        return;
+      }
+
+      // setup processor
+
+      processor.on('load', function(serverFileReference) {
+        // no longer required
+        state.activeProcessor = null;
+
+        // need this id to be able to rever the upload
+        state.serverFileReference = serverFileReference;
+
+        setStatus(ItemStatus.PROCESSING_COMPLETE);
+        api.fire('process-complete', serverFileReference);
+      });
+
+      processor.on('start', function() {
+        api.fire('process-start');
+      });
+
+      processor.on('error', function(error) {
+        state.activeProcessor = null;
+        setStatus(ItemStatus.PROCESSING_ERROR);
+        api.fire('process-error', error);
+      });
+
+      processor.on('abort', function(serverFileReference) {
+        state.activeProcessor = null;
+
+        // if file was uploaded but processing was cancelled during perceived processor time store file reference
+        state.serverFileReference = serverFileReference;
+
+        setStatus(ItemStatus.IDLE);
+        api.fire('process-abort');
+      });
+
+      processor.on('progress', function(progress) {
+        setStatus(ItemStatus.PROCESSING);
+        api.fire('process-progress', progress);
+      });
+
+      // when successfully transformed
+      var success = function success(file) {
+        processor.process(file, _extends({}, metadata));
+      };
+
+      // something went wrong during transform phase
+      var error = function error(result) {};
+
+      // start processing the file
+      onprocess(state.file, success, error);
+
+      // set as active processor
+      state.activeProcessor = processor;
+    };
+
+    var revert = function revert(revertFileUpload) {
+      // cannot revert without a server id for this process
+      if (state.serverFileReference === null) {
+        return;
+      }
+
+      // revert the upload (fire and forget)
+      revertFileUpload(
+        state.serverFileReference,
+        function() {
+          // reset file server id as now it's no available on the server
+          state.serverFileReference = null;
+        },
+        function(error) {
+          // TODO: handle revert error
+        }
+      );
+
+      // fire event
+      setStatus(ItemStatus.IDLE);
+      api.fire('process-revert');
+    };
+
+    var abortLoad = function abortLoad() {
+      if (!state.activeLoader) {
+        return;
+      }
+      state.activeLoader.abort();
+    };
+
+    var retryLoad = function retryLoad() {
+      if (!state.activeLoader) {
+        return;
+      }
+      state.activeLoader.load();
+    };
+
+    var abortProcessing = function abortProcessing() {
+      if (!state.activeProcessor) {
+        return;
+      }
+      state.activeProcessor.abort();
+    };
+
+    // exposed methods
+
+    var api = _extends(
+      {
+        id: {
+          get: function get$$1() {
+            return id;
+          }
+        },
+        origin: {
+          get: function get$$1() {
+            return origin;
+          }
+        },
+        serverId: {
+          get: function get$$1() {
+            return state.serverFileReference;
+          }
+        },
+        status: {
+          get: function get$$1() {
+            return state.status;
+          }
+        },
+        filename: {
+          get: function get$$1() {
+            return state.file.name;
+          }
+        },
+        filenameWithoutExtension: {
+          get: function get$$1() {
+            return getFilenameWithoutExtension(state.file.name);
+          }
+        },
+        fileExtension: { get: getFileExtension },
+        fileType: { get: getFileType },
+        fileSize: { get: getFileSize },
+        file: { get: getFile },
+
+        source: {
+          get: function get$$1() {
+            return state.source;
+          }
+        },
+
+        getMetadata: function getMetadata(name) {
+          return name ? metadata[name] : _extends({}, metadata);
+        },
+        setMetadata: function setMetadata(name, value) {
+          return (metadata[name] = value);
+        },
+
+        abortLoad: abortLoad,
+        retryLoad: retryLoad,
+        abortProcessing: abortProcessing,
+
+        load: load,
+        process: process,
+        revert: revert
+      },
+      on()
+    );
+
+    return createObject(api);
+  };
+
+  var getItemById = function getItemById(items, itemId) {
+    var index = getItemIndexByQuery(items, itemId);
+    if (index < 0) {
+      return;
+    }
+    return items[index] || null;
+  };
+
+  var removeItem = function removeItem(items, needle) {
+    // get index of item
+    var index = items.findIndex(function(item) {
+      return item === needle;
+    });
+
+    // remove it from array
+    removeIndex(items, index);
+
+    // return removed item
+    return needle;
+  };
+
+  var fetchLocal = function fetchLocal(
+    url,
+    load,
+    error,
+    progress,
+    abort,
+    headers
+  ) {
+    var request = sendRequest(null, url, {
+      method: 'GET',
+      responseType: 'blob'
+    });
+
+    request.onload = function(xhr) {
+      // get headers
+      var headers = xhr.getAllResponseHeaders();
+
+      // get filename
+      var filename =
+        getFilenameFromHeaders(headers) ||
+        getFilenameFromURL(url) ||
+        getDateString();
+
+      // create response
+      load(
+        createResponse$1(
+          'load',
+          xhr.status,
+          getFileFromBlob(xhr.response, filename),
+          headers
+        )
+      );
+    };
+
+    request.onerror = function(xhr) {
+      error(
+        createResponse$1(
+          'error',
+          xhr.status,
+          xhr.statusText,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.onheaders = function(xhr) {
+      headers(
+        createResponse$1(
+          'headers',
+          xhr.status,
+          null,
+          xhr.getAllResponseHeaders()
+        )
+      );
+    };
+
+    request.ontimeout = createTimeoutResponse(error);
+    request.onprogress = progress;
+    request.onabort = abort;
+
+    // should return request
+    return request;
+  };
+
+  var getDomainFromURL = function getDomainFromURL(url) {
+    if (url.indexOf('//') === 0) {
+      url = location.protocol + url;
+    }
+    return url
+      .toLowerCase()
+      .replace(/([a-z])?:\/\//, '$1')
+      .split('/')[0];
+  };
+
+  var isExternalURL = function isExternalURL(url) {
+    return (
+      (url.indexOf(':') > -1 || url.indexOf('//') > -1) &&
+      getDomainFromURL(location.href) !== getDomainFromURL(url)
+    );
+  };
+
+  // returns item based on state
+  var getItemByQueryFromState = function getItemByQueryFromState(
+    state,
+    itemHandler
+  ) {
+    return function() {
+      var _ref =
+          arguments.length > 0 && arguments[0] !== undefined
+            ? arguments[0]
+            : {},
+        query = _ref.query,
+        _ref$success = _ref.success,
+        success = _ref$success === undefined ? function() {} : _ref$success,
+        _ref$failure = _ref.failure,
+        failure = _ref$failure === undefined ? function() {} : _ref$failure;
+
+      var item = getItemByQuery(state.items, query);
+      if (!item) {
+        failure({
+          error: createResponse$1('error', 0, 'Item not found'),
+          file: null
+        });
+        return;
+      }
+      itemHandler(item, success, failure);
+    };
+  };
+
+  var actions = function actions(dispatch, query, state) {
+    return {
+      /**
+       * Aborts all ongoing processes
+       */
+      ABORT_ALL: function ABORT_ALL() {
+        query('GET_ITEMS').forEach(function(item) {
+          item.abortLoad();
+          item.abortProcessing();
+        });
+      },
+
+      /**
+       * Sets initial files
+       */
+      DID_SET_FILES: function DID_SET_FILES(_ref2) {
+        var _ref2$value = _ref2.value,
+          value = _ref2$value === undefined ? [] : _ref2$value;
+
+        // map values to file objects
+        var files = value.map(function(file) {
+          return {
+            source: file.source ? file.source : file,
+            options: file.options
+          };
+        });
+
+        // loop over files, if file is in list, leave it be, if not, remove
+
+        // test if items should be moved
+        [].concat(toConsumableArray(state.items)).forEach(function(item) {
+          // if item not is in new value, remove
+          if (
+            !files.find(function(file) {
+              return file.source === item.source;
+            })
+          ) {
+            dispatch('REMOVE_ITEM', { query: item });
+          }
+        });
+
+        // add new files
+        files.forEach(function(file, index) {
+          // if file is already in list
+          if (
+            [].concat(toConsumableArray(state.items)).find(function(item) {
+              return item.source === file.source;
+            })
+          ) {
+            return;
+          }
+
+          // not in list, add
+          dispatch(
+            'ADD_ITEM',
+            _extends({}, file, {
+              interactionMethod: InteractionMethod.NONE,
+              index: index
+            })
+          );
+        });
+      },
+
+      /**
+       * @param source
+       * @param index
+       * @param interactionMethod
+       */
+      ADD_ITEM: function ADD_ITEM(_ref3) {
+        var source = _ref3.source,
+          index = _ref3.index,
+          interactionMethod = _ref3.interactionMethod,
+          _ref3$success = _ref3.success,
+          success = _ref3$success === undefined ? function() {} : _ref3$success,
+          _ref3$failure = _ref3.failure,
+          failure = _ref3$failure === undefined ? function() {} : _ref3$failure,
+          _ref3$options = _ref3.options,
+          options = _ref3$options === undefined ? {} : _ref3$options;
+
+        // if no source supplied
+        if (isEmpty(source)) {
+          failure({
+            error: createResponse$1('error', 0, 'No source'),
+            file: null
+          });
+          return;
+        }
+
+        // filter out invalid file items, used to filter dropped directory contents
+        if (source instanceof Blob) {
+          if (state.options.ignoredFiles.includes(source.name.toLowerCase())) {
+            // fail silently
+            return;
+          }
+        }
+
+        // test if there's still room in the list of files
+        if (!hasRoomForItem(state)) {
+          // if multiple allowed, we can't replace
+          // or if only a single item is allowed but we're not allowed to replace it we exit
+          if (
+            state.options.allowMultiple ||
+            (!state.options.allowMultiple && !state.options.allowReplace)
+          ) {
+            var error = createResponse$1('warning', 0, 'Max files');
+
+            dispatch('DID_THROW_MAX_FILES', {
+              source: source,
+              error: error
+            });
+
+            failure({ error: error, file: null });
+            return;
+          }
+
+          // id of first item we're about to remove
+          var _item = state.items[0];
+
+          // if has been processed remove it from the server as well
+          if (_item.status === ItemStatus.PROCESSING_COMPLETE) {
+            dispatch('REVERT_ITEM_PROCESSING', { query: _item.id });
+          }
+
+          // remove first item as it will be replaced by this item
+          dispatch('REMOVE_ITEM', { query: _item.id });
+        }
+
+        // where did the file originate
+        var origin =
+          options.type === 'local'
+            ? FileOrigin.LOCAL
+            : options.type === 'limbo' ? FileOrigin.LIMBO : FileOrigin.INPUT;
+
+        // create a new blank item
+        var item = createItem(
+          origin,
+          origin === FileOrigin.INPUT ? null : source
+        );
+
+        // add item to list
+        insertItem(state.items, item, index);
+
+        // get a quick reference to the item id
+        var id = item.id;
+
+        // observe item events
+        item.on('load-init', function() {
+          dispatch('DID_START_ITEM_LOAD', { id: id });
+        });
+
+        item.on('load-meta', function() {
+          dispatch('DID_UPDATE_ITEM_META', { id: id });
+        });
+
+        item.on('load-progress', function(progress) {
+          dispatch('DID_UPDATE_ITEM_LOAD_PROGRESS', {
+            id: id,
+            progress: progress
+          });
+        });
+
+        item.on('load-request-error', function(error) {
+          // is client error, no way to recover
+          if (error.code >= 400 && error.code < 500) {
+            dispatch('DID_THROW_ITEM_INVALID', {
+              id: id,
+              error: error,
+              status: {
+                main: state.options.labelFileLoadError,
+                sub: error.code + ' (' + error.body + ')'
+              }
+            });
+
+            // reject the file so can be dealt with through API
+            failure({ error: error, file: createItemAPI(item) });
+            return;
+          }
+
+          // is possible server error, so might be possible to retry
+          dispatch('DID_THROW_ITEM_LOAD_ERROR', {
+            id: id,
+            error: error,
+            status: {
+              main: state.options.labelFileLoadError,
+              sub: state.options.labelTapToRetry
+            }
+          });
+        });
+
+        item.on('load-file-error', function(error) {
+          dispatch('DID_THROW_ITEM_INVALID', _extends({}, error, { id: id }));
+        });
+
+        item.on('load-abort', function() {
+          dispatch('REMOVE_ITEM', { query: id });
+        });
+
+        item.on('load', function() {
+          // item loaded, allow plugins to
+          // - read data (quickly)
+          // - add metadata
+          applyFilterChain('DID_LOAD_ITEM', item, { query: query }).then(
+            function() {
+              // let plugins decide if the output data should be prepared at this point
+              // means we'll do this and wait for idle state
+              applyFilterChain('SHOULD_PREPARE_OUTPUT', false, {
+                item: item,
+                query: query
+              }).then(function(shouldPrepareOutput) {
+                var data = {
+                  source: source,
+                  success: success
+
+                  // exit
+                };
+                if (shouldPrepareOutput) {
+                  // wait for idle state and then run PREPARE_OUTPUT
+                  dispatch(
+                    'REQUEST_PREPARE_LOAD_ITEM',
+                    {
+                      query: id,
+                      item: item,
+                      data: data
+                    },
+                    true
+                  );
+
+                  return;
+                }
+
+                dispatch('COMPLETE_LOAD_ITEM', {
+                  query: id,
+                  item: item,
+                  data: data
+                });
+              });
+            }
+          );
+        });
+
+        item.on('process-start', function() {
+          dispatch('DID_START_ITEM_PROCESSING', { id: id });
+        });
+
+        item.on('process-progress', function(progress) {
+          dispatch('DID_UPDATE_ITEM_PROCESS_PROGRESS', {
+            id: id,
+            progress: progress
+          });
+        });
+
+        item.on('process-error', function(error) {
+          dispatch('DID_THROW_ITEM_PROCESSING_ERROR', {
+            id: id,
+            error: error,
+            status: {
+              main: state.options.labelFileProcessingError,
+              sub: state.options.labelTapToRetry
+            }
+          });
+        });
+
+        item.on('process-abort', function(serverFileReference) {
+          // we'll revert any processed items
+          dispatch('REVERT_ITEM_PROCESSING', { query: id });
+
+          // if we're instant uploading, the item is removed
+          if (state.options.instantUpload) {
+            dispatch('REMOVE_ITEM', { query: id });
+          } else {
+            // we stopped processing
+            dispatch('DID_ABORT_ITEM_PROCESSING', { id: id });
+          }
+        });
+
+        item.on('process-complete', function(serverFileReference) {
+          dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+            id: id,
+            error: null,
+            serverFileReference: serverFileReference
+          });
+        });
+
+        item.on('process-revert', function() {
+          // if is instant upload remove the item
+          if (state.options.instantUpload) {
+            dispatch('REMOVE_ITEM', { query: id });
+          } else {
+            dispatch('DID_REVERT_ITEM_PROCESSING', { id: id });
+          }
+        });
+
+        // let view know the item has been inserted
+        dispatch('DID_ADD_ITEM', {
+          id: id,
+          index: index,
+          interactionMethod: interactionMethod
+        });
+
+        // start loading the source
+
+        var _ref4 = state.options.server || {},
+          url = _ref4.url,
+          load = _ref4.load,
+          restore = _ref4.restore,
+          fetch = _ref4.fetch;
+
+        item.load(
+          source,
+
+          // this creates a function that loads the file based on the type of file (string, base64, blob, file) and location of file (local, remote, limbo)
+          createFileLoader(
+            origin === FileOrigin.INPUT
+              ? // input
+                isString(source) && isExternalURL(source)
+                ? createFetchFunction(url, fetch) // remote url
+                : fetchLocal // local url
+              : // limbo or local
+                origin === FileOrigin.LIMBO
+                ? createFetchFunction(url, restore) // limbo
+                : createFetchFunction(url, load) // local
+          ),
+
+          // called when the file is loaded so it can be piped through the filters
+          function(file, success, error) {
+            // let's process the file
+            applyFilterChain('LOAD_FILE', file, { query: query })
+              .then(success)
+              .catch(error);
+          }
+        );
+      },
+
+      REQUEST_PREPARE_LOAD_ITEM: function REQUEST_PREPARE_LOAD_ITEM(_ref5) {
+        var item = _ref5.item,
+          data = _ref5.data;
+
+        // allow plugins to alter the file data
+        applyFilterChain('PREPARE_OUTPUT', item.file, {
+          query: query,
+          item: item
+        }).then(function(result) {
+          applyFilterChain('COMPLETE_PREPARE_OUTPUT', result, {
+            query: query,
+            item: item
+          }).then(function(result) {
+            dispatch('COMPLETE_LOAD_ITEM', {
+              item: item,
+              data: data
+            });
+          });
+        });
+      },
+
+      COMPLETE_LOAD_ITEM: function COMPLETE_LOAD_ITEM(_ref6) {
+        var item = _ref6.item,
+          data = _ref6.data;
+        var success = data.success,
+          source = data.source;
+
+        // let interface know the item has loaded
+
+        dispatch('DID_LOAD_ITEM', {
+          id: item.id,
+          error: null,
+          serverFileReference: item.origin === FileOrigin.INPUT ? null : source
+        });
+
+        // item has been successfully loaded and added to the
+        // list of items so can now be safely returned for use
+        success(createItemAPI(item));
+
+        // if this is a local server file we need to show a different state
+        if (item.origin === FileOrigin.LOCAL) {
+          dispatch('DID_LOAD_LOCAL_ITEM', { id: item.id });
+          return;
+        }
+
+        // if is a temp server file we prevent async upload call here (as the file is already on the server)
+        if (item.origin === FileOrigin.LIMBO) {
+          dispatch('DID_COMPLETE_ITEM_PROCESSING', {
+            id: item.id,
+            error: null,
+            serverFileReference: source
+          });
+          return;
+        }
+
+        // id we are allowed to upload the file immidiately, lets do it
+        if (query('IS_ASYNC') && state.options.instantUpload) {
+          dispatch('REQUEST_ITEM_PROCESSING', { query: item.id });
+        }
+      },
+
+      RETRY_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
+        // try loading the source one more time
+        item.retryLoad();
+      }),
+
+      REQUEST_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        var id = item.id;
+
+        dispatch('DID_REQUEST_ITEM_PROCESSING', { id: id });
+
+        dispatch('PROCESS_ITEM', { query: item }, true);
+      }),
+
+      PROCESS_ITEM: getItemByQueryFromState(state, function(
+        item,
+        success,
+        failure
+      ) {
+        // we done function
+        item.onOnce('process-complete', function() {
+          success(createItemAPI(item));
+        });
+
+        // we error function
+        item.onOnce('process-error', function(error) {
+          failure({ error: error, file: createItemAPI(item) });
+        });
+
+        // start file processing
+        item.process(
+          createFileProcessor(
+            createProcessorFunction(
+              state.options.server.url,
+              state.options.server.process,
+              state.options.name
+            )
+          ),
+          // called when the file is about to be processed so it can be piped through the transform filters
+          function(file, success, error) {
+            // allow plugins to alter the file data
+            applyFilterChain('PREPARE_OUTPUT', file, {
+              query: query,
+              item: item
+            })
+              .then(success)
+              .catch(error);
+          }
+        );
+      }),
+
+      RETRY_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        dispatch('REQUEST_ITEM_PROCESSING', { query: item });
+      }),
+
+      REMOVE_ITEM: getItemByQueryFromState(state, function(item, success) {
+        // get id reference
+        var id = item.id;
+
+        // tell the view the item has been removed
+        dispatch('DID_REMOVE_ITEM', { id: id, item: item });
+
+        // now remove it from the item list,
+        // we remove it from the list after the view has been updated
+        // to make sure the item is available for view rendering till removed
+        dispatch('SPLICE_ITEM', { id: id, item: item });
+
+        // correctly removed
+        success(createItemAPI(item));
+      }),
+
+      // private action for timing the removal of an item from the items list
+      SPLICE_ITEM: function SPLICE_ITEM(_ref7) {
+        var id = _ref7.id;
+        return removeItem(state.items, getItemById(state.items, id));
+      },
+
+      ABORT_ITEM_LOAD: getItemByQueryFromState(state, function(item) {
+        // stop loading this file
+        item.abortLoad();
+
+        // the file will throw an event and that will take
+        // care of removing the item from the list
+      }),
+
+      ABORT_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        // stop processing this file
+        item.abortProcessing();
+
+        // the file will throw an event and that will take
+        // care of removing the item from the list
+      }),
+
+      REVERT_ITEM_PROCESSING: getItemByQueryFromState(state, function(item) {
+        // remove from server
+        item.revert(
+          createRevertFunction(
+            state.options.server.url,
+            state.options.server.revert
+          )
+        );
+      }),
+
+      SET_OPTIONS: function SET_OPTIONS(_ref8) {
+        var options = _ref8.options;
+
+        forin(options, function(key, value) {
+          dispatch('SET_' + fromCamels(key, '_').toUpperCase(), {
+            value: value
+          });
+        });
+      }
+    };
+  };
+
+  var createElement$1 = function createElement(tagName) {
+    return document.createElement(tagName);
+  };
+
+  var formatFilename = function formatFilename(name) {
+    return decodeURI(name);
+  };
+
+  var text = function text(node, value) {
+    var textNode = node.childNodes[0];
+    if (!textNode) {
+      textNode = document.createTextNode(value);
+      node.appendChild(textNode);
+    } else if (value !== textNode.nodeValue) {
+      textNode.nodeValue = value;
+    }
+  };
+
+  var polarToCartesian = function polarToCartesian(
+    centerX,
+    centerY,
+    radius,
+    angleInDegrees
+  ) {
+    var angleInRadians = (angleInDegrees % 360 - 90) * Math.PI / 180.0;
+    return {
+      x: centerX + radius * Math.cos(angleInRadians),
+      y: centerY + radius * Math.sin(angleInRadians)
+    };
+  };
+
+  var describeArc = function describeArc(
+    x,
+    y,
+    radius,
+    startAngle,
+    endAngle,
+    arcSweep
+  ) {
+    var start = polarToCartesian(x, y, radius, endAngle);
+    var end = polarToCartesian(x, y, radius, startAngle);
+    return [
+      'M',
+      start.x,
+      start.y,
+      'A',
+      radius,
+      radius,
+      0,
+      arcSweep,
+      0,
+      end.x,
+      end.y
+    ].join(' ');
+  };
+
+  var percentageArc = function percentageArc(x, y, radius, from, to) {
+    var arcSweep = 1;
+    if (to > from && to - from <= 0.5) {
+      arcSweep = 0;
+    }
+    if (from > to && from - to >= 0.5) {
+      arcSweep = 0;
+    }
+    return describeArc(
+      x,
+      y,
+      radius,
+      Math.min(0.9999, from) * 360,
+      Math.min(0.9999, to) * 360,
+      arcSweep
+    );
+  };
+
+  var create$7 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // start at 0
+    props.spin = false;
+    props.progress = 0;
+    props.opacity = 0;
+
+    // svg
+    var svg = createElement('svg');
+    root.ref.path = createElement('path', {
+      'stroke-width': 2,
+      'stroke-linecap': 'round'
+    });
+    svg.appendChild(root.ref.path);
+
+    root.ref.svg = svg;
+
+    root.appendChild(svg);
+  };
+
+  var write$5 = function write(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    if (props.opacity === 0) {
+      return;
+    }
+
+    // get width of stroke
+    var ringStrokeWidth = parseInt(attr(root.ref.path, 'stroke-width'), 10);
+
+    // calculate size of ring
+    var size = root.rect.element.width * 0.5;
+
+    // ring state
+    var ringFrom = 0;
+    var ringTo = 0;
+
+    // now in busy mode
+    if (props.spin) {
+      ringFrom = 0;
+      ringTo = 0.5;
+    } else {
+      ringFrom = 0;
+      ringTo = props.progress;
+    }
+
+    // get arc path
+    var coordinates = percentageArc(
+      size,
+      size,
+      size - ringStrokeWidth,
+      ringFrom,
+      ringTo
+    );
+
+    // update progress bar
+    attr(root.ref.path, 'd', coordinates);
+
+    // hide while contains 0 value
+    attr(
+      root.ref.path,
+      'stroke-opacity',
+      props.spin || props.progress > 0 ? 1 : 0
+    );
+  };
+
+  var progressIndicator = createView({
+    tag: 'div',
+    name: 'progress-indicator',
+    ignoreRect: true,
+    create: create$7,
+    write: write$5,
+    mixins: {
+      apis: ['progress', 'spin'],
+      styles: ['opacity'],
+      animations: {
+        opacity: { type: 'tween', duration: 500 },
+        progress: {
+          type: 'spring',
+          stiffness: 0.95,
+          damping: 0.65,
+          mass: 10
+        }
+      }
+    }
+  });
+
+  var create$8 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    root.element.title = props.label;
+    root.element.innerHTML = props.icon || '';
+    props.disabled = false;
+  };
+
+  var write$6 = function write(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    if (props.opacity === 0 && !props.disabled) {
+      props.disabled = true;
+      attr(root.element, 'disabled', 'disabled');
+    } else if (props.opacity > 0 && props.disabled) {
+      props.disabled = false;
+      root.element.removeAttribute('disabled');
+    }
+  };
+
+  var fileActionButton = createView({
+    tag: 'button',
+    attributes: {
+      type: 'button'
+    },
+    ignoreRect: true,
+    name: 'file-action-button',
+    mixins: {
+      apis: ['label'],
+      styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
+      animations: {
+        scaleX: 'spring',
+        scaleY: 'spring',
+        translateX: 'spring',
+        translateY: 'spring',
+        opacity: { type: 'tween', duration: 250 }
+      },
+      listeners: true
+    },
+    create: create$8,
+    write: write$6
+  });
+
+  var toNaturalFileSize = function toNaturalFileSize(bytes) {
+    var decimalSeparator =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '.';
+
+    // nope, no negative byte sizes
+    bytes = Math.round(Math.abs(bytes));
+
+    // just bytes
+    if (bytes < 1000) {
+      return bytes + ' bytes';
+    }
+
+    // kilobytes
+    if (bytes < MB) {
+      return Math.floor(bytes / KB) + ' KB';
+    }
+
+    // megabytes
+    if (bytes < GB) {
+      return removeDecimalsWhenZero(bytes / MB, 1, decimalSeparator) + ' MB';
+    }
+
+    // gigabytes
+    return removeDecimalsWhenZero(bytes / GB, 2, decimalSeparator) + ' GB';
+  };
+
+  var KB = 1000;
+  var MB = 1000000;
+  var GB = 1000000000;
+
+  var removeDecimalsWhenZero = function removeDecimalsWhenZero(
+    value,
+    decimalCount,
+    separator
+  ) {
+    return value
+      .toFixed(decimalCount)
+      .split('.')
+      .filter(function(part) {
+        return part !== '0';
+      })
+      .join(separator);
+  };
+
+  var create$9 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // filename
+    var fileName = createElement$1('span');
+    fileName.className = 'filepond--file-info-main';
+    // hide for screenreaders
+    // the file is contained in a fieldset with legend that contains the filename
+    // no need to read it twice
+    attr(fileName, 'aria-hidden', 'true');
+    root.appendChild(fileName);
+    root.ref.fileName = fileName;
+
+    // filesize
+    var fileSize = createElement$1('span');
+    fileSize.className = 'filepond--file-info-sub';
+    root.appendChild(fileSize);
+    root.ref.fileSize = fileSize;
+
+    // set initial values
+    text(fileSize, root.query('GET_LABEL_FILE_WAITING_FOR_SIZE'));
+    text(fileName, formatFilename(root.query('GET_ITEM_NAME', props.id)));
+  };
+
+  var updateFile = function updateFile(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    text(
+      root.ref.fileSize,
+      toNaturalFileSize(root.query('GET_ITEM_SIZE', props.id))
+    );
+    text(
+      root.ref.fileName,
+      formatFilename(root.query('GET_ITEM_NAME', props.id))
+    );
+  };
+
+  var updateFileSizeOnError = function updateFileSizeOnError(_ref3) {
+    var root = _ref3.root,
+      props = _ref3.props;
+
+    // if size is available don't fallback to unknown size message
+    if (isInt(root.query('GET_ITEM_SIZE', props.id))) {
+      return;
+    }
+
+    text(root.ref.fileSize, root.query('GET_LABEL_FILE_SIZE_NOT_AVAILABLE'));
+  };
+
+  var fileInfo = createView({
+    name: 'file-info',
+    ignoreRect: true,
+    write: createRoute({
+      DID_LOAD_ITEM: updateFile,
+      DID_UPDATE_ITEM_META: updateFile,
+      DID_THROW_ITEM_LOAD_ERROR: updateFileSizeOnError,
+      DID_THROW_ITEM_INVALID: updateFileSizeOnError
+    }),
+    create: create$9,
+    mixins: {
+      styles: ['translateX', 'translateY'],
+      animations: {
+        translateX: 'spring',
+        translateY: 'spring'
+      }
+    }
+  });
+
+  var toPercentage = function toPercentage(value) {
+    return Math.round(value * 100);
+  };
+
+  var create$10 = function create(_ref) {
+    var root = _ref.root;
+
+    // main status
+    var main = createElement$1('span');
+    main.className = 'filepond--file-status-main';
+    root.appendChild(main);
+    root.ref.main = main;
+
+    // sub status
+    var sub = createElement$1('span');
+    sub.className = 'filepond--file-status-sub';
+    root.appendChild(sub);
+    root.ref.sub = sub;
+
+    didSetItemLoadProgress({ root: root, action: { progress: null } });
+  };
+
+  var didSetItemLoadProgress = function didSetItemLoadProgress(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action;
+
+    var title =
+      action.progress === null
+        ? root.query('GET_LABEL_FILE_LOADING')
+        : root.query('GET_LABEL_FILE_LOADING') +
+          ' ' +
+          toPercentage(action.progress) +
+          '%';
+    text(root.ref.main, title);
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
+  };
+
+  var didSetItemProcessProgress = function didSetItemProcessProgress(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action;
+
+    var title =
+      action.progress === null
+        ? root.query('GET_LABEL_FILE_PROCESSING')
+        : root.query('GET_LABEL_FILE_PROCESSING') +
+          ' ' +
+          toPercentage(action.progress) +
+          '%';
+    text(root.ref.main, title);
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
+  };
+
+  var didRequestItemProcessing = function didRequestItemProcessing(_ref4) {
+    var root = _ref4.root;
+
+    text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING'));
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_CANCEL'));
+  };
+
+  var didAbortItemProcessing = function didAbortItemProcessing(_ref5) {
+    var root = _ref5.root;
+
+    text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_ABORTED'));
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_RETRY'));
+  };
+
+  var didCompleteItemProcessing$1 = function didCompleteItemProcessing(_ref6) {
+    var root = _ref6.root;
+
+    text(root.ref.main, root.query('GET_LABEL_FILE_PROCESSING_COMPLETE'));
+    text(root.ref.sub, root.query('GET_LABEL_TAP_TO_UNDO'));
+  };
+
+  var clear = function clear(_ref7) {
+    var root = _ref7.root;
+
+    text(root.ref.main, '');
+    text(root.ref.sub, '');
+  };
+
+  var error = function error(_ref8) {
+    var root = _ref8.root,
+      action = _ref8.action;
+
+    text(root.ref.main, action.status.main);
+    text(root.ref.sub, action.status.sub);
+  };
+
+  var fileStatus = createView({
+    name: 'file-status',
+    ignoreRect: true,
+    write: createRoute({
+      DID_LOAD_ITEM: clear,
+      DID_REVERT_ITEM_PROCESSING: clear,
+      DID_REQUEST_ITEM_PROCESSING: didRequestItemProcessing,
+      DID_ABORT_ITEM_PROCESSING: didAbortItemProcessing,
+      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing$1,
+      DID_UPDATE_ITEM_PROCESS_PROGRESS: didSetItemProcessProgress,
+      DID_UPDATE_ITEM_LOAD_PROGRESS: didSetItemLoadProgress,
+      DID_THROW_ITEM_LOAD_ERROR: error,
+      DID_THROW_ITEM_INVALID: error,
+      DID_THROW_ITEM_PROCESSING_ERROR: error
+    }),
+    create: create$10,
+    mixins: {
+      styles: ['translateX', 'translateY', 'opacity'],
+      animations: {
+        opacity: { type: 'tween', duration: 250 },
+        translateX: 'spring',
+        translateY: 'spring'
+      }
+    }
+  });
+
+  /**
+   * Button definitions for the file view
+   */
+  var Buttons = {
+    AbortItemLoad: {
+      label: 'GET_LABEL_BUTTON_ABORT_ITEM_LOAD',
+      action: 'ABORT_ITEM_LOAD',
+      className: 'filepond--action-abort-item-load'
+    },
+    RetryItemLoad: {
+      label: 'GET_LABEL_BUTTON_RETRY_ITEM_LOAD',
+      action: 'RETRY_ITEM_LOAD',
+      icon: 'GET_ICON_RETRY',
+      className: 'filepond--action-retry-item-load'
+    },
+    RemoveItem: {
+      label: 'GET_LABEL_BUTTON_REMOVE_ITEM',
+      action: 'REMOVE_ITEM',
+      icon: 'GET_ICON_REMOVE',
+      className: 'filepond--action-remove-item'
+    },
+    ProcessItem: {
+      label: 'GET_LABEL_BUTTON_PROCESS_ITEM',
+      action: 'REQUEST_ITEM_PROCESSING',
+      icon: 'GET_ICON_PROCESS',
+      className: 'filepond--action-process-item'
+    },
+    AbortItemProcessing: {
+      label: 'GET_LABEL_BUTTON_ABORT_ITEM_PROCESSING',
+      action: 'ABORT_ITEM_PROCESSING',
+      className: 'filepond--action-abort-item-processing'
+    },
+    RetryItemProcessing: {
+      label: 'GET_LABEL_BUTTON_RETRY_ITEM_PROCESSING',
+      action: 'RETRY_ITEM_PROCESSING',
+      icon: 'GET_ICON_RETRY',
+      className: 'filepond--action-retry-item-processing'
+    },
+    RevertItemProcessing: {
+      label: 'GET_LABEL_BUTTON_UNDO_ITEM_PROCESSING',
+      action: 'REVERT_ITEM_PROCESSING',
+      icon: 'GET_ICON_UNDO',
+      className: 'filepond--action-revert-item-processing'
+    }
+  };
+
+  // make a list of buttons, we can then remove buttons from this list if they're disabled
+  var ButtonKeys = [];
+  forin(Buttons, function(key) {
+    ButtonKeys.push(key);
+  });
+
+  var calculateFileInfoOffset = function calculateFileInfoOffset(root) {
+    return (
+      root.ref.buttonRemoveItem.rect.element.width +
+      root.ref.buttonRemoveItem.rect.element.left
+    );
+  };
+
+  // Force on full pixels so text stays crips
+  var calculateFileVerticalCenterOffset = function calculateFileVerticalCenterOffset(
+    root
+  ) {
+    return Math.floor(root.ref.buttonRemoveItem.rect.element.height / 4);
+  };
+  var calculateFileHorizontalCenterOffset = function calculateFileHorizontalCenterOffset(
+    root
+  ) {
+    return Math.floor(root.ref.buttonRemoveItem.rect.element.left / 2);
+  };
+
+  var DefaultStyle = {
+    buttonAbortItemLoad: { opacity: 0 },
+    buttonRetryItemLoad: { opacity: 0 },
+    buttonRemoveItem: { opacity: 0 },
+    buttonProcessItem: { opacity: 0 },
+    buttonAbortItemProcessing: { opacity: 0 },
+    buttonRetryItemProcessing: { opacity: 0 },
+    buttonRevertItemProcessing: { opacity: 0 },
+    loadProgressIndicator: { opacity: 0 },
+    processProgressIndicator: { opacity: 0 },
+    processingCompleteIndicator: { opacity: 0, scaleX: 0.75, scaleY: 0.75 },
+    info: { translateX: 0, translateY: 0, opacity: 0 },
+    status: { translateX: 0, translateY: 0, opacity: 0 }
+  };
+
+  var IdleStyle = {
+    buttonRemoveItem: { opacity: 1 },
+    buttonProcessItem: { opacity: 1 },
+    info: { translateX: calculateFileInfoOffset },
+    status: { translateX: calculateFileInfoOffset }
+  };
+
+  var ProcessingStyle = {
+    buttonAbortItemProcessing: { opacity: 1 },
+    processProgressIndicator: { opacity: 1 },
+    status: { opacity: 1 }
+  };
+
+  var StyleMap = {
+    DID_THROW_ITEM_INVALID: {
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset, opacity: 1 }
+    },
+    DID_START_ITEM_LOAD: {
+      buttonAbortItemLoad: { opacity: 1 },
+      loadProgressIndicator: { opacity: 1 },
+      status: { opacity: 1 }
+    },
+    DID_THROW_ITEM_LOAD_ERROR: {
+      buttonRetryItemLoad: { opacity: 1 },
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1 }
+    },
+    DID_LOAD_ITEM: IdleStyle,
+    DID_LOAD_LOCAL_ITEM: {
+      buttonRemoveItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { translateX: calculateFileInfoOffset }
+    },
+    DID_START_ITEM_PROCESSING: ProcessingStyle,
+    DID_REQUEST_ITEM_PROCESSING: ProcessingStyle,
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: ProcessingStyle,
+    DID_COMPLETE_ITEM_PROCESSING: {
+      buttonRevertItemProcessing: { opacity: 1 },
+      info: { opacity: 1 },
+      status: { opacity: 1 }
+    },
+    DID_THROW_ITEM_PROCESSING_ERROR: {
+      buttonRemoveItem: { opacity: 1 },
+      buttonRetryItemProcessing: { opacity: 1 },
+      status: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset }
+    },
+    DID_ABORT_ITEM_PROCESSING: {
+      buttonRemoveItem: { opacity: 1 },
+      buttonProcessItem: { opacity: 1 },
+      info: { translateX: calculateFileInfoOffset },
+      status: { opacity: 1 }
+    },
+    DID_REVERT_ITEM_PROCESSING: IdleStyle
+  };
+
+  // complete indicator view
+  var processingCompleteIndicatorView = createView({
+    create: function create(_ref) {
+      var root = _ref.root;
+
+      root.element.innerHTML = root.query('GET_ICON_DONE');
+    },
+    name: 'processing-complete-indicator',
+    ignoreRect: true,
+    mixins: {
+      styles: ['scaleX', 'scaleY', 'opacity'],
+      animations: {
+        scaleX: 'spring',
+        scaleY: 'spring',
+        opacity: { type: 'tween', duration: 250 }
+      }
+    }
+  });
+
+  /**
+   * Creates the file view
+   */
+  var create$6 = function create(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    // allow reverting upload
+    var allowRevert = root.query('GET_ALLOW_REVERT');
+
+    // enabled buttons array
+    var enabledButtons = root.query('IS_ASYNC')
+      ? ButtonKeys.concat()
+      : ButtonKeys.filter(function(key) {
+          return !/Process/.test(key);
+        });
+
+    // remove last button (revert) if not allowed
+    if (!allowRevert) {
+      enabledButtons.splice(-1, 1);
+      var map = StyleMap['DID_COMPLETE_ITEM_PROCESSING'];
+      map.info.translateX = calculateFileHorizontalCenterOffset;
+      map.info.translateY = calculateFileVerticalCenterOffset;
+      map.status.translateY = calculateFileVerticalCenterOffset;
+      map.processingCompleteIndicator = { opacity: 1, scaleX: 1, scaleY: 1 };
+    }
+
+    // create the button views
+    forin(Buttons, function(key, definition) {
+      // create button
+      var buttonView = root.createChildView(fileActionButton, {
+        label: root.query(definition.label),
+        icon: root.query(definition.icon),
+        opacity: 0
+      });
+
+      // should be appended?
+      if (enabledButtons.includes(key)) {
+        root.appendChildView(buttonView);
+      }
+
+      // add class
+      buttonView.element.classList.add(definition.className);
+
+      // handle interactions
+      buttonView.on('click', function() {
+        root.dispatch(definition.action, { query: props.id });
+      });
+
+      // set reference
+      root.ref['button' + key] = buttonView;
+    });
+
+    // create file info view
+    root.ref.info = root.appendChildView(
+      root.createChildView(fileInfo, { id: props.id })
+    );
+
+    // create file status view
+    root.ref.status = root.appendChildView(
+      root.createChildView(fileStatus, { id: props.id })
+    );
+
+    // checkmark
+    root.ref.processingCompleteIndicator = root.appendChildView(
+      root.createChildView(processingCompleteIndicatorView)
+    );
+
+    // add progress indicators
+    root.ref.loadProgressIndicator = root.appendChildView(
+      root.createChildView(progressIndicator, { opacity: 0 })
+    );
+    root.ref.loadProgressIndicator.element.classList.add(
+      'filepond--load-indicator'
+    );
+
+    root.ref.processProgressIndicator = root.appendChildView(
+      root.createChildView(progressIndicator, { opacity: 0 })
+    );
+
+    root.ref.processProgressIndicator.element.classList.add(
+      'filepond--process-indicator'
+    );
+  };
+
+  var write$4 = function write(_ref3) {
+    var root = _ref3.root,
+      actions = _ref3.actions,
+      props = _ref3.props;
+
+    // route actions
+    route$3({ root: root, actions: actions, props: props });
+
+    // select last state change action
+    var action = []
+      .concat(toConsumableArray(actions))
+      .filter(function(action) {
+        return /^DID_/.test(action.type);
+      })
+      .reverse()
+      .find(function(action) {
+        return StyleMap[action.type];
+      });
+
+    // no need to set same state twice
+    if (!action || (action && action.type === props.currentStyle)) {
+      return;
+    }
+
+    // set current state
+    props.currentStyle = action.type;
+    var newStyles = StyleMap[props.currentStyle];
+
+    forin(DefaultStyle, function(name, defaultStyles) {
+      // get reference to control
+      var control = root.ref[name];
+
+      // loop over all styles for this control
+      forin(defaultStyles, function(key, defaultValue) {
+        var value =
+          newStyles[name] && typeof newStyles[name][key] !== 'undefined'
+            ? newStyles[name][key]
+            : defaultValue;
+        control[key] = typeof value === 'function' ? value(root) : value;
+      });
+    });
+  };
+
+  var route$3 = createRoute({
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING: function DID_SET_LABEL_BUTTON_ABORT_ITEM_PROCESSING(
+      _ref4
+    ) {
+      var root = _ref4.root,
+        action = _ref4.action;
+
+      root.ref.buttonAbortItemProcessing.label = action.value;
+    },
+    DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD: function DID_SET_LABEL_BUTTON_ABORT_ITEM_LOAD(
+      _ref5
+    ) {
+      var root = _ref5.root,
+        action = _ref5.action;
+
+      root.ref.buttonAbortItemLoad.label = action.value;
+    },
+    DID_REQUEST_ITEM_PROCESSING: function DID_REQUEST_ITEM_PROCESSING(_ref6) {
+      var root = _ref6.root;
+
+      root.ref.processProgressIndicator.spin = true;
+      root.ref.processProgressIndicator.progress = 0;
+    },
+    DID_START_ITEM_LOAD: function DID_START_ITEM_LOAD(_ref7) {
+      var root = _ref7.root;
+
+      root.ref.loadProgressIndicator.spin = true;
+      root.ref.loadProgressIndicator.progress = 0;
+    },
+    DID_UPDATE_ITEM_LOAD_PROGRESS: function DID_UPDATE_ITEM_LOAD_PROGRESS(
+      _ref8
+    ) {
+      var root = _ref8.root,
+        action = _ref8.action;
+
+      root.ref.loadProgressIndicator.spin = false;
+      root.ref.loadProgressIndicator.progress = action.progress;
+    },
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: function DID_UPDATE_ITEM_PROCESS_PROGRESS(
+      _ref9
+    ) {
+      var root = _ref9.root,
+        action = _ref9.action;
+
+      root.ref.processProgressIndicator.spin = false;
+      root.ref.processProgressIndicator.progress = action.progress;
+    }
+  });
+
+  var file = createView({
+    create: create$6,
+    write: write$4,
+    didCreateView: function didCreateView(root) {
+      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+    },
+    name: 'file'
+  });
+
+  /**
+   * Creates the file view
+   */
+  var create$5 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // filename
+    root.ref.fileName = createElement$1('legend');
+    root.appendChild(root.ref.fileName);
+
+    // file view
+    root.ref.file = root.appendChildView(
+      root.createChildView(file, { id: props.id })
+    );
+
+    // create data container
+    var dataContainer = createElement$1('input');
+    dataContainer.type = 'hidden';
+    dataContainer.name = root.query('GET_NAME');
+    root.ref.data = dataContainer;
+    root.appendChild(dataContainer);
+  };
+
+  /**
+   * Data storage
+   */
+  var didLoadItem = function didLoadItem(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action,
+      props = _ref2.props;
+
+    root.ref.data.value = action.serverFileReference;
+
+    // updates the legend of the fieldset so screenreaders can better group buttons
+    text(
+      root.ref.fileName,
+      formatFilename(root.query('GET_ITEM_NAME', props.id))
+    );
+  };
+
+  var didRemoveItem = function didRemoveItem(_ref3) {
+    var root = _ref3.root;
+
+    root.ref.data.removeAttribute('value');
+  };
+
+  var didCompleteItemProcessing = function didCompleteItemProcessing(_ref4) {
+    var root = _ref4.root,
+      action = _ref4.action;
+
+    root.ref.data.value = action.serverFileReference;
+  };
+
+  var didRevertItemProcessing = function didRevertItemProcessing(_ref5) {
+    var root = _ref5.root;
+
+    root.ref.data.removeAttribute('value');
+  };
+
+  var fileWrapper = createView({
+    create: create$5,
+    write: createRoute({
+      DID_LOAD_ITEM: didLoadItem,
+      DID_REMOVE_ITEM: didRemoveItem,
+      DID_COMPLETE_ITEM_PROCESSING: didCompleteItemProcessing,
+      DID_REVERT_ITEM_PROCESSING: didRevertItemProcessing
+    }),
+    didCreateView: function didCreateView(root) {
+      applyFilters('CREATE_VIEW', _extends({}, root, { view: root }));
+    },
+    tag: 'fieldset',
+    name: 'file-wrapper'
+  });
+
+  var PANEL_SPRING_PROPS = { type: 'spring', damping: 0.6, mass: 7 };
+
+  var create$11 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    [
+      {
+        name: 'top'
+      },
+      {
+        name: 'center',
+        props: {
+          translateY: null,
+          scaleY: null
+        },
+        mixins: {
+          animations: {
+            scaleY: PANEL_SPRING_PROPS
+          },
+          styles: ['translateY', 'scaleY']
+        }
+      },
+      {
+        name: 'bottom',
+        props: {
+          translateY: null
+        },
+        mixins: {
+          animations: {
+            translateY: PANEL_SPRING_PROPS
+          },
+          styles: ['translateY']
+        }
+      }
+    ].forEach(function(section) {
+      createSection(root, section, props.name);
+    });
+
+    root.element.classList.add('filepond--' + props.name);
+  };
+
+  var createSection = function createSection(root, section, className) {
+    var viewConstructor = createView({
+      name: 'panel-' + section.name + ' filepond--' + className,
+      mixins: section.mixins
+    });
+
+    var view = root.createChildView(viewConstructor, section.props);
+
+    root.ref[section.name] = root.appendChildView(view);
+  };
+
+  var write$7 = function write(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props;
+
+    if (!props.height) {
+      return;
+    }
+
+    // can it scale?
+    root.element.dataset.scalable = isBoolean(props.scalable)
+      ? props.scalable
+      : true;
+
+    // get child rects
+    var topRect = root.ref.top.rect.element;
+    var bottomRect = root.ref.bottom.rect.element;
+
+    // make sure height never is smaller than bottom and top seciton heights combined (will probably never happen, but who knows)
+    var height = Math.max(topRect.height + bottomRect.height, props.height);
+
+    // offset center part
+    root.ref.center.translateY = topRect.height;
+
+    // scale center part
+    // use math ceil to prevent transparent lines because of rounding errors
+    root.ref.center.scaleY =
+      (height - topRect.height - bottomRect.height) / 100;
+
+    // offset bottom part
+    root.ref.bottom.translateY = height - bottomRect.height;
+  };
+
+  var panel = createView({
+    name: 'panel',
+    write: write$7,
+    create: create$11,
+    ignoreRect: true,
+    mixins: {
+      apis: ['height', 'scalable']
+    }
+  });
+
+  /**
+   * Creates the file view
+   */
+  var create$4 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // file view
+    root.ref.controls = root.appendChildView(
+      root.createChildView(fileWrapper, { id: props.id })
+    );
+
+    // file panel
+    root.ref.panel = root.appendChildView(
+      root.createChildView(panel, { name: 'item-panel' })
+    );
+
+    // default start height
+    root.ref.panel.height = 0;
+
+    // by default not marked for removal
+    props.markedForRemoval = false;
+  };
+
+  var StateMap = {
+    DID_START_ITEM_LOAD: 'busy',
+    DID_UPDATE_ITEM_LOAD_PROGRESS: 'loading',
+    DID_THROW_ITEM_INVALID: 'load-invalid',
+    DID_THROW_ITEM_LOAD_ERROR: 'load-error',
+    DID_LOAD_ITEM: 'idle',
+    DID_START_ITEM_PROCESSING: 'busy',
+    DID_REQUEST_ITEM_PROCESSING: 'busy',
+    DID_UPDATE_ITEM_PROCESS_PROGRESS: 'processing',
+    DID_COMPLETE_ITEM_PROCESSING: 'processing-complete',
+    DID_THROW_ITEM_PROCESSING_ERROR: 'processing-error',
+    DID_ABORT_ITEM_PROCESSING: 'cancelled',
+    DID_REVERT_ITEM_PROCESSING: 'idle'
+  };
+
+  var write$3 = function write(_ref2) {
+    var root = _ref2.root,
+      actions = _ref2.actions,
+      props = _ref2.props;
+
+    // update panel height
+    root.ref.panel.height = root.ref.controls.rect.inner.height;
+
+    // set panel height
+    root.height = root.ref.controls.rect.inner.height;
+
+    // select last state change action
+    var action = []
+      .concat(toConsumableArray(actions))
+      .filter(function(action) {
+        return /^DID_/.test(action.type);
+      })
+      .reverse()
+      .find(function(action) {
+        return StateMap[action.type];
+      });
+
+    // no need to set same state twice
+    if (!action || (action && action.type === props.currentState)) {
+      return;
+    }
+
+    // set current state
+    props.currentState = action.type;
+
+    // set state
+    root.element.dataset.filepondItemState = StateMap[props.currentState] || '';
+  };
+
+  var item = createView({
+    create: create$4,
+    write: write$3,
+    tag: 'li',
+    name: 'item',
+    mixins: {
+      apis: ['id', 'markedForRemoval'],
+      styles: [
+        'translateX',
+        'translateY',
+        'scaleX',
+        'scaleY',
+        'opacity',
+        'height'
+      ],
+      animations: {
+        scaleX: 'spring',
+        scaleY: 'spring',
+        translateX: 'spring',
+        translateY: 'spring',
+        opacity: { type: 'tween', duration: 250 }
+      }
+    }
+  });
+
+  var create$3 = function create(_ref) {
+    var root = _ref.root;
+
+    // need to set role to list as otherwise it won't be read as a list by VoiceOver
+    attr(root.element, 'role', 'list');
+  };
+
+  /**
+   * Inserts a new item
+   * @param root
+   * @param action
+   */
+  var addItemView = function addItemView(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action;
+    var id = action.id,
+      index = action.index,
+      interactionMethod = action.interactionMethod;
+
+    var animation = {
+      opacity: 0
+    };
+
+    if (interactionMethod === InteractionMethod.NONE) {
+      animation.translateY = null;
+    }
+
+    if (interactionMethod === InteractionMethod.DROP) {
+      animation.scaleX = 0.8;
+      animation.scaleY = 0.8;
+      animation.translateY = null;
+    }
+
+    if (interactionMethod === InteractionMethod.BROWSE) {
+      animation.translateY = -30;
+    }
+
+    if (interactionMethod === InteractionMethod.API) {
+      animation.translateX = -100;
+      animation.translateY = null;
+    }
+
+    root.appendChildView(
+      root.createChildView(
+        // view type
+        item,
+
+        // props
+        _extends(
+          {
+            id: id
+          },
+          animation
+        )
+      ),
+      index
+    );
+  };
+
+  /**
+   * Removes an existing item
+   * @param root
+   * @param action
+   */
+  var removeItemView = function removeItemView(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action;
+    var id = action.id;
+
+    // get the view matching the given id
+
+    var view = root.childViews.find(function(child) {
+      return child.id === id;
+    });
+
+    // if no view found, exit
+    if (!view) {
+      return;
+    }
+
+    // animate view out of view
+    view.scaleX = 0.9;
+    view.scaleY = 0.9;
+    view.opacity = 0;
+
+    // mark for removal
+    view.markedForRemoval = true;
+  };
+
+  /**
+   * Setup action routes
+   */
+  var route$2 = createRoute({
+    DID_ADD_ITEM: addItemView,
+    DID_REMOVE_ITEM: removeItemView
+  });
+
+  var dragTranslation = function dragTranslation(
+    childIndex,
+    dragIndex,
+    itemMargin
+  ) {
+    if (childIndex - 1 === dragIndex) {
+      return itemMargin / 6;
+    }
+
+    if (childIndex === dragIndex) {
+      return itemMargin / 2;
+    }
+
+    if (childIndex + 1 === dragIndex) {
+      return -itemMargin / 2;
+    }
+
+    if (childIndex + 2 === dragIndex) {
+      return -itemMargin / 6;
+    }
+
+    return 0;
+  };
+
+  /**
+   * Write to view
+   * @param root
+   * @param actions
+   * @param props
+   */
+  var write$2 = function write(_ref4) {
+    var root = _ref4.root,
+      props = _ref4.props,
+      actions = _ref4.actions;
+
+    // route actions
+    route$2({ root: root, props: props, actions: actions });
+
+    var resting = true;
+
+    // update item positions
+    var offset = 0;
+    root.childViews
+      .filter(function(child) {
+        return child.rect.outer.height;
+      })
+      .forEach(function(child, childIndex) {
+        var childRect = child.rect;
+
+        // set this child offset
+        child.translateX = 0;
+        child.translateY =
+          offset +
+          (props.dragIndex > -1
+            ? dragTranslation(childIndex, props.dragIndex, 10)
+            : 0);
+
+        // show child if it's not marked for removal
+        if (!child.markedForRemoval) {
+          child.scaleX = 1;
+          child.scaleY = 1;
+          child.opacity = 1;
+        }
+
+        // calculate next child offset (reduce height by y scale for views that are being removed)
+        offset += childRect.outer.height;
+      });
+
+    // remove marked views
+    root.childViews
+      .filter(function(view) {
+        return view.markedForRemoval && view.opacity === 0;
+      })
+      .forEach(function(view) {
+        root.removeChildView(view);
+        resting = false;
+      });
+
+    return resting;
+  };
+
+  /**
+   * Filters actions that are meant specifically for a certain child of the list
+   * @param child
+   * @param actions
+   */
+  var filterSetItemActions = function filterSetItemActions(child, actions) {
+    return actions.filter(function(action) {
+      // if action has an id, filter out actions that don't have this child id
+      if (action.data && action.data.id) {
+        return child.id === action.data.id;
+      }
+
+      // allow all other actions
+      return true;
+    });
+  };
+
+  var list = createView({
+    create: create$3,
+    write: write$2,
+    tag: 'ul',
+    name: 'list',
+    filterFrameActionsForChild: filterSetItemActions,
+    mixins: {
+      apis: ['dragIndex']
+    }
+  });
+
+  var getItemIndexByPosition = function getItemIndexByPosition(
+    view,
+    positionInView
+  ) {
+    var i = 0;
+    var childViews = view.childViews;
+    var l = childViews.length;
+    for (; i < l; i++) {
+      var item = childViews[i];
+      var itemRect = item.rect.outer;
+      var itemRectMid = itemRect.top + itemRect.height * 0.5;
+
+      if (positionInView.top < itemRectMid) {
+        return i;
+      }
+    }
+
+    return l;
+  };
+
+  var create$2 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    root.ref.list = root.appendChildView(root.createChildView(list));
+
+    props.dragCoordinates = null;
+    props.overflowing = false;
+  };
+
+  var storeDragCoordinates = function storeDragCoordinates(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props,
+      action = _ref2.action;
+
+    props.dragCoordinates = {
+      left: action.position.scopeLeft,
+      top:
+        action.position.scopeTop -
+        root.rect.outer.top +
+        root.rect.element.scrollTop
+    };
+  };
+
+  var clearDragCoordinates = function clearDragCoordinates(_ref3) {
+    var props = _ref3.props;
+
+    props.dragCoordinates = null;
+  };
+
+  var route$1 = createRoute({
+    DID_DRAG: storeDragCoordinates,
+    DID_END_DRAG: clearDragCoordinates
+  });
+
+  var write$1 = function write(_ref4) {
+    var root = _ref4.root,
+      props = _ref4.props,
+      actions = _ref4.actions;
+
+    // route actions
+    route$1({ root: root, props: props, actions: actions });
+
+    // current drag position
+    root.ref.list.dragIndex = props.dragCoordinates
+      ? getItemIndexByPosition(root.ref.list, props.dragCoordinates)
+      : -1;
+
+    // if currently overflowing but no longer received overflow
+    if (props.overflowing && !props.overflow) {
+      props.overflowing = false;
+
+      // reset overflow state
+      root.element.dataset.state = '';
+      root.height = null;
+    }
+
+    // if is not overflowing currently but does receive overflow value
+    if (!props.overflowing && props.overflow) {
+      props.overflowing = true;
+      root.element.dataset.state = 'overflow';
+      root.height = props.overflow - root.translateY;
+    }
+  };
+
+  var listScroller = createView({
+    create: create$2,
+    write: write$1,
+    name: 'list-scroller',
+    mixins: {
+      apis: ['overflow'],
+      styles: ['height', 'translateY']
+    }
+  });
+
+  var attrToggle = function attrToggle(element, name, state) {
+    var enabledValue =
+      arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : '';
+
+    if (state) {
+      attr(element, name, enabledValue);
+    } else {
+      element.removeAttribute(name);
+    }
+  };
+
+  var resetFileInput = function resetFileInput(input) {
+    // no value, no need to reset
+    if (!input || input.value === '') {
+      return;
+    }
+
+    try {
+      // for modern browsers
+      input.value = '';
+    } catch (err) {}
+
+    // for IE10
+    if (input.value) {
+      // quickly append input to temp form and reset form
+      var form = createElement$1('form');
+      var parentNode = input.parentNode;
+      var ref = input.nextSibling;
+      form.appendChild(input);
+      form.reset();
+
+      // re-inject input where it originally was
+      if (ref) {
+        parentNode.insertBefore(input, ref);
+      } else {
+        parentNode.appendChild(input);
+      }
+    }
+  };
+
+  var create$12 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // set id so can be referenced from outside labels
+    root.element.id = 'filepond--browser-' + props.id;
+
+    // we have to link this element to the status element
+    attr(root.element, 'aria-controls', 'filepond--assistant-' + props.id);
+
+    // set label, we use labelled by as otherwise the screenreader does not read the "browse" text in the label (as it has tabindex: 0)
+    attr(root.element, 'aria-labelledby', 'filepond--drop-label-' + props.id);
+
+    // handle changes to the input field
+    root.element.addEventListener('change', function() {
+      if (!root.element.value) {
+        return;
+      }
+
+      // extract files
+      var files = [].concat(toConsumableArray(root.element.files));
+
+      // we add a little delay so the OS file select window can move out of the way before we add our file
+      setTimeout(function() {
+        // load files
+        props.onload(files);
+
+        // reset input, it's just for exposing a method to drop files, should not retain any state
+        resetFileInput(root.element);
+      }, 250);
+    });
+  };
+
+  var setAcceptedFileTypes = function setAcceptedFileTypes(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action;
+
+    attrToggle(
+      root.element,
+      'accept',
+      !!action.value,
+      action.value ? action.value.join(',') : ''
+    );
+  };
+
+  var toggleAllowMultiple = function toggleAllowMultiple(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action;
+
+    attrToggle(root.element, 'multiple', action.value);
+  };
+
+  var toggleAllowBrowse$1 = function toggleAllowBrowse(_ref4) {
+    var root = _ref4.root,
+      action = _ref4.action;
+
+    attrToggle(root.element, 'disabled', !action.value);
+  };
+
+  var toggleRequired = function toggleRequired(_ref5) {
+    var root = _ref5.root,
+      action = _ref5.action;
+
+    // want to remove required, always possible
+    if (!action.value) {
+      attrToggle(root.element, 'required', false);
+    } else if (root.query('GET_TOTAL_ITEMS') === 0) {
+      // if want to make required, only possible when zero items
+      attrToggle(root.element, 'required', true);
+    }
+  };
+
+  var setCaptureMethod = function setCaptureMethod(_ref6) {
+    var root = _ref6.root,
+      action = _ref6.action;
+
+    attrToggle(
+      root.element,
+      'capture',
+      !!action.value,
+      action.value === true ? '' : action.value
+    );
+  };
+
+  var updateRequiredStatus = function updateRequiredStatus(_ref8) {
+    var root = _ref8.root;
+
+    // always remove the required attribute when more than zero items
+    if (root.query('GET_TOTAL_ITEMS') > 0) {
+      attrToggle(root.element, 'required', false);
+    } else if (root.query('GET_REQUIRED')) {
+      // if zero items, we only add it if the field is required
+      attrToggle(root.element, 'required', true);
+    }
+  };
+
+  var browser = createView({
+    tag: 'input',
+    name: 'browser',
+    ignoreRect: true,
+    attributes: {
+      type: 'file'
+    },
+    create: create$12,
+    write: createRoute({
+      DID_ADD_ITEM: updateRequiredStatus,
+      DID_REMOVE_ITEM: updateRequiredStatus,
+      DID_SET_ALLOW_BROWSE: toggleAllowBrowse$1,
+      DID_SET_ALLOW_MULTIPLE: toggleAllowMultiple,
+      DID_SET_ACCEPTED_FILE_TYPES: setAcceptedFileTypes,
+      DID_SET_CAPTURE_METHOD: setCaptureMethod,
+      DID_SET_REQUIRED: toggleRequired
+    })
+  });
+
+  var Key = {
+    ENTER: 13,
+    SPACE: 32
+  };
+
+  var create$13 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // create the label and link it to the file browser
+    var label = createElement$1('label');
+    attr(label, 'for', 'filepond--browser-' + props.id);
+
+    // use for labeling file input (aria-labelledby on file input)
+    attr(label, 'id', 'filepond--drop-label-' + props.id);
+
+    // hide the label from screenreaders, the input element has an aria-label
+    attr(label, 'aria-hidden', 'true');
+
+    // handle keys
+    label.addEventListener('keydown', function(e) {
+      if (e.keyCode === Key.ENTER || e.keyCode === Key.SPACE) {
+        // stops from triggering the element a second time
+        e.preventDefault();
+
+        // click link (will then in turn activate file input)
+        root.ref.label.click();
+      }
+    });
+
+    // add!
+    root.appendChild(label);
+    root.ref.label = label;
+  };
+
+  var updateLabelValue = function updateLabelValue(label, value) {
+    label.innerHTML = value;
+    var clickable = label.querySelector('.filepond--label-action');
+    if (clickable) {
+      attr(clickable, 'tabindex', '0');
+    }
+    return value;
+  };
+
+  var dropLabel = createView({
+    name: 'drop-label',
+    create: create$13,
+    write: createRoute({
+      DID_SET_LABEL_IDLE: function DID_SET_LABEL_IDLE(_ref2) {
+        var root = _ref2.root,
+          action = _ref2.action,
+          props = _ref2.props;
+
+        props.caption = updateLabelValue(root.ref.label, action.value);
+      }
+    }),
+    mixins: {
+      apis: ['caption'],
+      styles: ['opacity', 'translateX', 'translateY'],
+      animations: {
+        opacity: { type: 'tween', duration: 150 },
+        translateX: 'spring',
+        translateY: 'spring'
+      }
+    }
+  });
+
+  var blob = createView({
+    name: 'drip-blob',
+    ignoreRect: true,
+    mixins: {
+      styles: ['translateX', 'translateY', 'scaleX', 'scaleY', 'opacity'],
+      animations: {
+        scaleX: 'spring',
+        scaleY: 'spring',
+        translateX: 'spring',
+        translateY: 'spring',
+        opacity: { type: 'tween', duration: 250 }
+      }
+    }
+  });
+
+  var addBlob = function addBlob(_ref) {
+    var root = _ref.root;
+
+    var centerX = root.rect.element.width * 0.5;
+    var centerY = root.rect.element.height * 0.5;
+
+    root.ref.blob = root.appendChildView(
+      root.createChildView(blob, {
+        opacity: 0,
+        scaleX: 2.5,
+        scaleY: 2.5,
+        translateX: centerX,
+        translateY: centerY
+      })
+    );
+  };
+
+  var moveBlob = function moveBlob(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action;
+
+    if (!root.ref.blob) {
+      addBlob({ root: root });
+      return;
+    }
+
+    root.ref.blob.translateX = action.position.scopeLeft;
+    root.ref.blob.translateY = action.position.scopeTop;
+    root.ref.blob.scaleX = 1;
+    root.ref.blob.scaleY = 1;
+    root.ref.blob.opacity = 1;
+  };
+
+  var hideBlob = function hideBlob(_ref3) {
+    var root = _ref3.root;
+
+    if (!root.ref.blob) {
+      return;
+    }
+    root.ref.blob.opacity = 0;
+  };
+
+  var explodeBlob = function explodeBlob(_ref4) {
+    var root = _ref4.root;
+
+    if (!root.ref.blob) {
+      return;
+    }
+    root.ref.blob.scaleX = 2.5;
+    root.ref.blob.scaleY = 2.5;
+    root.ref.blob.opacity = 0;
+  };
+
+  var write$8 = function write(_ref5) {
+    var root = _ref5.root,
+      props = _ref5.props,
+      actions = _ref5.actions;
+
+    route$4({ root: root, props: props, actions: actions });
+
+    var blob$$1 = root.ref.blob;
+
+    if (actions.length === 0 && blob$$1 && blob$$1.opacity === 0) {
+      root.removeChildView(blob$$1);
+      root.ref.blob = null;
+    }
+  };
+
+  var route$4 = createRoute({
+    DID_DRAG: moveBlob,
+    DID_DROP: explodeBlob,
+    DID_END_DRAG: hideBlob
+  });
+
+  var drip = createView({
+    ignoreRect: true,
+    name: 'drip',
+    write: write$8
+  });
+
+  var getRootNode = function getRootNode(element) {
+    return 'getRootNode' in element ? element.getRootNode() : document;
+  };
+
+  var requestDataTransferItems = function requestDataTransferItems(
+    dataTransfer
+  ) {
+    return new Promise(function(resolve, reject) {
+      // try to get links from transfer, if found, we'll exit immidiately
+      // as only one link can be dragged at once
+      var links = getLinks(dataTransfer);
+      if (links.length) {
+        resolve(links);
+        return;
+      }
+
+      // try to get files from the transfer
+      getFiles(dataTransfer).then(resolve);
+    });
+  };
+
+  /**
+   * Extracts files from a DataTransfer object
+   */
+  var getFiles = function getFiles(dataTransfer) {
+    return new Promise(function(resolve, reject) {
+      // get the transfer items as promises
+      var promisedFiles = (dataTransfer.items
+        ? [].concat(toConsumableArray(dataTransfer.items))
+        : []
+      )
+        // only keep file system items (files and directories)
+        .filter(function(item) {
+          return isFileSystemItem(item);
+        })
+
+        // map each item to promise
+        .map(function(item) {
+          return getFilesFromItem(item);
+        });
+
+      // if is empty, see if we can extract some info from the files property as a fallback
+      if (!promisedFiles.length) {
+        // TODO: test for directories (should not be allowed)
+        // Use FileReader, problem is that the files property gets lost in the process
+
+        resolve(
+          dataTransfer.files
+            ? [].concat(toConsumableArray(dataTransfer.files))
+            : []
+        );
+        return;
+      }
+
+      // done!
+      Promise.all(promisedFiles).then(function(returendFileGroups) {
+        // flatten groups
+        var files = [];
+        returendFileGroups.forEach(function(group) {
+          files.push.apply(files, toConsumableArray(group));
+        });
+
+        // done (filter out empty files)!
+        resolve(
+          files.filter(function(file) {
+            return file;
+          })
+        );
+      });
+    });
+  };
+
+  var isFileSystemItem = function isFileSystemItem(item) {
+    if (isEntry(item)) {
+      var entry = getAsEntry(item);
+      if (entry) {
+        return entry.isFile || entry.isDirectory;
+      }
+    }
+    return item.kind === 'file';
+  };
+
+  var getFilesFromItem = function getFilesFromItem(item) {
+    return new Promise(function(resolve, reject) {
+      if (isDirectoryEntry(item)) {
+        getFilesInDirectory(getAsEntry(item)).then(resolve);
+        return;
+      }
+
+      resolve([item.getAsFile()]);
+    });
+  };
+
+  var getFilesInDirectory = function getFilesInDirectory(entry) {
+    return new Promise(function(resolve, reject) {
+      var files = [];
+
+      // the total entries to read
+      var totalFilesFound = 0;
+
+      // the recursive function
+      var readEntries = function readEntries(dirEntry) {
+        var directoryReader = dirEntry.createReader();
+        directoryReader.readEntries(function(entries) {
+          entries.forEach(function(entry) {
+            // recursively read more directories
+            if (entry.isDirectory) {
+              readEntries(entry);
+            } else {
+              // read as file
+              totalFilesFound++;
+              entry.file(function(file) {
+                files.push(file);
+
+                if (totalFilesFound === files.length) {
+                  resolve(files);
+                }
+              });
+            }
+          });
+        });
+      };
+
+      // go!
+      readEntries(entry);
+    });
+  };
+
+  var isDirectoryEntry = function isDirectoryEntry(item) {
+    return isEntry(item) && (getAsEntry(item) || {}).isDirectory;
+  };
+
+  var isEntry = function isEntry(item) {
+    return 'webkitGetAsEntry' in item;
+  };
+
+  var getAsEntry = function getAsEntry(item) {
+    return item.webkitGetAsEntry();
+  };
+
+  /**
+   * Extracts links from a DataTransfer object
+   */
+  var getLinks = function getLinks(dataTransfer) {
+    var links = [];
+    try {
+      // look in meta data property
+      links = getLinksFromTransferMetaData(dataTransfer);
+      if (links.length) {
+        return links;
+      }
+      links = getLinksFromTransferURLData(dataTransfer);
+    } catch (e) {
+      // nope nope nope (probably IE trouble)
+    }
+    return links;
+  };
+
+  var getLinksFromTransferURLData = function getLinksFromTransferURLData(
+    dataTransfer
+  ) {
+    var data = dataTransfer.getData('url');
+    if (typeof data === 'string' && data.length) {
+      return [data];
+    }
+    return [];
+  };
+
+  var getLinksFromTransferMetaData = function getLinksFromTransferMetaData(
+    dataTransfer
+  ) {
+    var data = dataTransfer.getData('text/html');
+    if (typeof data === 'string' && data.length) {
+      var matches = data.match(/src\s*=\s*"(.+?)"/);
+      if (matches) {
+        return [matches[1]];
+      }
+    }
+    return [];
+  };
+
+  var dragNDropObservers = [];
+
+  var eventPosition = function eventPosition(e) {
+    return {
+      pageLeft: e.pageX,
+      pageTop: e.pageY,
+      scopeLeft: e.layerX || e.offsetX,
+      scopeTop: e.layerY || e.offsetY
+    };
+  };
+
+  var createDragNDropClient = function createDragNDropClient(
+    element,
+    scopeToObserve,
+    filterElement
+  ) {
+    var observer = getDragNDropObserver(scopeToObserve);
+
+    var client = {
+      element: element,
+      filterElement: filterElement,
+      state: null,
+      ondrop: function ondrop() {},
+      onenter: function onenter() {},
+      ondrag: function ondrag() {},
+      onexit: function onexit() {},
+      onload: function onload() {},
+      allowdrop: function allowdrop() {}
+    };
+
+    client.destroy = observer.addListener(client);
+
+    return client;
+  };
+
+  var getDragNDropObserver = function getDragNDropObserver(element) {
+    // see if already exists, if so, return
+    var observer = dragNDropObservers.find(function(item) {
+      return item.element === element;
+    });
+    if (observer) {
+      return observer;
+    }
+
+    // create new observer, does not yet exist for this element
+    var newObserver = createDragNDropObserver(element);
+    dragNDropObservers.push(newObserver);
+    return newObserver;
+  };
+
+  var createDragNDropObserver = function createDragNDropObserver(element) {
+    var clients = [];
+
+    var routes = {
+      dragenter: dragenter,
+      dragover: dragover,
+      dragleave: dragleave,
+      drop: drop
+    };
+
+    var handlers = {};
+
+    forin(routes, function(event, createHandler) {
+      handlers[event] = createHandler(element, clients);
+      element.addEventListener(event, handlers[event], false);
+    });
+
+    var observer = {
+      element: element,
+      addListener: function addListener(client) {
+        // add as client
+        clients.push(client);
+
+        // return removeListener function
+        return function() {
+          // remove client
+          clients.splice(clients.indexOf(client), 1);
+
+          // if no more clients, clean up observer
+          if (clients.length === 0) {
+            dragNDropObservers.splice(dragNDropObservers.indexOf(observer), 1);
+
+            forin(routes, function(event) {
+              element.removeEventListener(event, handlers[event], false);
+            });
+          }
+        };
+      }
+    };
+
+    return observer;
+  };
+
+  var isEventTarget = function isEventTarget(e, target) {
+    // get root
+    var root = getRootNode(target);
+
+    // get element at position
+    var elementAtPosition = root.elementFromPoint(
+      e.pageX - window.pageXOffset,
+      e.pageY - window.pageYOffset
+    );
+
+    // test if target is the element or if one of its children is
+    return elementAtPosition === target || target.contains(elementAtPosition);
+  };
+
+  var initialTarget = null;
+
+  var setDropEffect = function setDropEffect(dataTransfer, effect) {
+    // is in try catch as IE11 will throw error if not
+    try {
+      dataTransfer.dropEffect = effect;
+    } catch (e) {}
+  };
+
+  var dragenter = function dragenter(root, clients) {
+    return function(e) {
+      e.preventDefault();
+
+      initialTarget = e.target;
+
+      clients.forEach(function(client) {
+        var element = client.element,
+          onenter = client.onenter;
+
+        if (isEventTarget(e, element)) {
+          client.state = 'enter';
+
+          // fire enter event
+          onenter(eventPosition(e));
+        }
+      });
+    };
+  };
+
+  var dragover = function dragover(root, clients) {
+    return function(e) {
+      e.preventDefault();
+
+      var dataTransfer = e.dataTransfer;
+
+      requestDataTransferItems(dataTransfer).then(function(items) {
+        var overDropTarget = false;
+
+        clients.some(function(client) {
+          var filterElement = client.filterElement,
+            element = client.element,
+            onenter = client.onenter,
+            onexit = client.onexit,
+            ondrag = client.ondrag,
+            allowdrop = client.allowdrop;
+
+          // by default we can drop
+
+          setDropEffect(dataTransfer, 'copy');
+
+          // allow transfer of these items
+          var allowsTransfer = allowdrop(items);
+
+          // only used when can be dropped on page
+          if (!allowsTransfer) {
+            setDropEffect(dataTransfer, 'none');
+            return;
+          }
+
+          // targetting this client
+          if (isEventTarget(e, element)) {
+            overDropTarget = true;
+
+            // had no previous state, means we are entering this client
+            if (client.state === null) {
+              client.state = 'enter';
+              onenter(eventPosition(e));
+              return;
+            }
+
+            // now over element (no matter if it allows the drop or not)
+            client.state = 'over';
+
+            // needs to allow transfer
+            if (filterElement && !allowsTransfer) {
+              setDropEffect(dataTransfer, 'none');
+              return;
+            }
+
+            // dragging
+            ondrag(eventPosition(e));
+          } else {
+            // should be over an element to drop
+            if (filterElement && !overDropTarget) {
+              setDropEffect(dataTransfer, 'none');
+            }
+
+            // might have just left this client?
+            if (client.state) {
+              client.state = null;
+              onexit(eventPosition(e));
+            }
+          }
+        });
+      });
+    };
+  };
+
+  var drop = function drop(root, clients) {
+    return function(e) {
+      e.preventDefault();
+
+      var dataTransfer = e.dataTransfer;
+      requestDataTransferItems(dataTransfer).then(function(items) {
+        clients.forEach(function(client) {
+          var filterElement = client.filterElement,
+            element = client.element,
+            ondrop = client.ondrop,
+            onexit = client.onexit,
+            allowdrop = client.allowdrop;
+
+          client.state = null;
+
+          var allowsTransfer = allowdrop(items);
+
+          // no transfer for this client
+          if (!allowsTransfer) {
+            onexit(eventPosition(e));
+            return;
+          }
+
+          // if we're filtering on element we need to be over the element to drop
+          if (filterElement && !isEventTarget(e, element)) {
+            return;
+          }
+
+          ondrop(eventPosition(e), items);
+        });
+      });
+    };
+  };
+
+  var dragleave = function dragleave(root, clients) {
+    return function(e) {
+      if (initialTarget !== e.target) {
+        return;
+      }
+
+      clients.forEach(function(client) {
+        var onexit = client.onexit;
+
+        client.state = null;
+
+        onexit(eventPosition(e));
+      });
+    };
+  };
+
+  var createHopper = function createHopper(scope, validateItems, options) {
+    // is now hopper scope
+    scope.classList.add('filepond--hopper');
+
+    // shortcuts
+    var catchesDropsOnPage = options.catchesDropsOnPage,
+      requiresDropOnElement = options.requiresDropOnElement;
+
+    // create a dnd client
+
+    var client = createDragNDropClient(
+      scope,
+      catchesDropsOnPage ? document.documentElement : scope,
+      requiresDropOnElement
+    );
+
+    // current client state
+    var lastState = '';
+    var currentState = '';
+
+    // determines if a file may be dropped
+    client.allowdrop = function(items) {
+      // TODO: if we can, throw error to indicate the items cannot by dropped
+
+      return validateItems(items);
+    };
+
+    client.ondrop = function(position, items) {
+      if (!validateItems(items)) {
+        api.ondragend(position);
+        return;
+      }
+
+      currentState = 'drag-drop';
+
+      api.onload(items, position);
+    };
+
+    client.ondrag = function(position) {
+      api.ondrag(position);
+    };
+
+    client.onenter = function(position) {
+      currentState = 'drag-over';
+
+      api.ondragstart(position);
+    };
+
+    client.onexit = function(position) {
+      currentState = 'drag-exit';
+
+      api.ondragend(position);
+    };
+
+    var api = {
+      updateHopperState: function updateHopperState() {
+        if (lastState !== currentState) {
+          scope.dataset.hopperState = currentState;
+          lastState = currentState;
+        }
+      },
+      onload: function onload() {},
+      ondragstart: function ondragstart() {},
+      ondrag: function ondrag() {},
+      ondragend: function ondragend() {},
+      destroy: function destroy() {
+        // destroy client
+        client.destroy();
+      }
+    };
+
+    return api;
+  };
+
+  var listening = false;
+  var listeners$1 = [];
+
+  var handlePaste = function handlePaste(e) {
+    requestDataTransferItems(e.clipboardData).then(function(files) {
+      // no files received
+      if (!files.length) {
+        return;
+      }
+
+      // notify listeners of received files
+      listeners$1.forEach(function(listener) {
+        return listener(files);
+      });
+    });
+  };
+
+  var listen = function listen(cb) {
+    // can't add twice
+    if (listeners$1.includes(cb)) {
+      return;
+    }
+
+    // add initial listener
+    listeners$1.push(cb);
+
+    // setup paste listener for entire page
+    if (listening) {
+      return;
+    }
+
+    listening = true;
+    document.addEventListener('paste', handlePaste);
+  };
+
+  var unlisten = function unlisten(listener) {
+    arrayRemove(listeners$1, listeners$1.indexOf(listener));
+
+    // clean up
+    if (listeners$1.length === 0) {
+      document.removeEventListener('paste', handlePaste);
+      listening = false;
+    }
+  };
+
+  var createPaster = function createPaster() {
+    var cb = function cb(files) {
+      api.onload(files);
+    };
+
+    var api = {
+      destroy: function destroy() {
+        unlisten(cb);
+      },
+      onload: function onload() {}
+    };
+
+    listen(cb);
+
+    return api;
+  };
+
+  var debounce = function debounce(func) {
+    var interval =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 16;
+    var immidiateOnly =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : true;
+
+    var last = Date.now();
+    var timeout = null;
+
+    return function() {
+      for (
+        var _len = arguments.length, args = Array(_len), _key = 0;
+        _key < _len;
+        _key++
+      ) {
+        args[_key] = arguments[_key];
+      }
+
+      clearTimeout(timeout);
+
+      var dist = Date.now() - last;
+
+      var fn = function fn() {
+        last = Date.now();
+        func.apply(undefined, args);
+      };
+
+      if (dist < interval) {
+        // we need to delay by the difference between interval and dist
+        // for example: if distance is 10 ms and interval is 16 ms,
+        // we need to wait an additional 6ms before calling the function)
+        if (!immidiateOnly) {
+          timeout = setTimeout(fn, interval - dist);
+        }
+      } else {
+        // go!
+        fn();
+      }
+    };
+  };
+
+  /**
+   * Creates the file view
+   */
+  var create$14 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    root.element.id = 'filepond--assistant-' + props.id;
+    attr(root.element, 'role', 'status');
+    attr(root.element, 'aria-live', 'polite');
+    attr(root.element, 'aria-relevant', 'additions');
+  };
+
+  var addFilesNotificationTimeout = null;
+  var notificationClearTimeout = null;
+
+  var filenames = [];
+
+  var assist = function assist(root, message) {
+    root.element.textContent = message;
+  };
+
+  var clear$1 = function clear(root) {
+    root.element.textContent = '';
+  };
+
+  var listModified = function listModified(root, filename, label) {
+    var total = root.query('GET_TOTAL_ITEMS');
+    assist(
+      root,
+      label +
+        ' ' +
+        filename +
+        ', ' +
+        total +
+        ' ' +
+        (total === 1
+          ? root.query('GET_LABEL_FILE_COUNT_SINGULAR')
+          : root.query('GET_LABEL_FILE_COUNT_PLURAL'))
+    );
+
+    // clear group after set amount of time so the status is not read twice
+    clearTimeout(notificationClearTimeout);
+    notificationClearTimeout = setTimeout(function() {
+      clear$1(root);
+    }, 1500);
+  };
+
+  var isUsingFilePond = function isUsingFilePond(root) {
+    return root.element.parentNode.contains(document.activeElement);
+  };
+
+  var itemAdded = function itemAdded(_ref2) {
+    var root = _ref2.root,
+      action = _ref2.action;
+
+    if (!isUsingFilePond(root)) {
+      return;
+    }
+
+    root.element.textContent = '';
+    var item = root.query('GET_ITEM', action.id);
+    filenames.push(item.filename);
+
+    clearTimeout(addFilesNotificationTimeout);
+    addFilesNotificationTimeout = setTimeout(function() {
+      listModified(
+        root,
+        filenames.join(', '),
+        root.query('GET_LABEL_FILE_ADDED')
+      );
+      filenames.length = 0;
+    }, 750);
+  };
+
+  var itemRemoved = function itemRemoved(_ref3) {
+    var root = _ref3.root,
+      action = _ref3.action;
+
+    if (!isUsingFilePond(root)) {
+      return;
+    }
+
+    var item = action.item;
+    listModified(root, item.filename, root.query('GET_LABEL_FILE_REMOVED'));
+  };
+
+  var itemProcessed = function itemProcessed(_ref4) {
+    var root = _ref4.root,
+      action = _ref4.action;
+
+    // will also notify the user when FilePond is not being used, as the user might be occupied with other activities while uploading a file
+
+    var item = root.query('GET_ITEM', action.id);
+    var filename = item.filename;
+    var label = root.query('GET_LABEL_FILE_PROCESSING_COMPLETE');
+
+    assist(root, filename + ' ' + label);
+  };
+
+  var itemProcessedUndo = function itemProcessedUndo(_ref5) {
+    var root = _ref5.root,
+      action = _ref5.action;
+
+    var item = root.query('GET_ITEM', action.id);
+    var filename = item.filename;
+    var label = root.query('GET_LABEL_FILE_PROCESSING_ABORTED');
+
+    assist(root, filename + ' ' + label);
+  };
+
+  var itemError = function itemError(_ref6) {
+    var root = _ref6.root,
+      action = _ref6.action;
+
+    var item = root.query('GET_ITEM', action.id);
+    var filename = item.filename;
+
+    // will also notify the user when FilePond is not being used, as the user might be occupied with other activities while uploading a file
+
+    assist(root, action.status.main + ' ' + filename + ' ' + action.status.sub);
+  };
+
+  var assistant = createView({
+    create: create$14,
+    ignoreRect: true,
+    write: createRoute({
+      DID_LOAD_ITEM: itemAdded,
+      DID_REMOVE_ITEM: itemRemoved,
+      DID_COMPLETE_ITEM_PROCESSING: itemProcessed,
+
+      DID_ABORT_ITEM_PROCESSING: itemProcessedUndo,
+      DID_REVERT_ITEM_PROCESSING: itemProcessedUndo,
+
+      DID_THROW_ITEM_LOAD_ERROR: itemError,
+      DID_THROW_ITEM_INVALID: itemError,
+      DID_THROW_ITEM_PROCESSING_ERROR: itemError
+    }),
+    tag: 'span',
+    name: 'assistant'
+  });
+
+  var create$1 = function create(_ref) {
+    var root = _ref.root,
+      props = _ref.props;
+
+    // Add id
+    var id = root.query('GET_ID');
+    if (id) {
+      root.element.id = id;
+    }
+
+    // Add className
+    var className = root.query('GET_CLASS_NAME');
+    if (className) {
+      className.split(' ').forEach(function(name) {
+        root.element.classList.add(name);
+      });
+    }
+
+    // Field label
+    root.ref.label = root.appendChildView(
+      root.createChildView(dropLabel, _extends({}, props, { translateY: null }))
+    );
+
+    // List of items
+    root.ref.list = root.appendChildView(
+      root.createChildView(listScroller, { translateY: null })
+    );
+
+    // Background panel
+    root.ref.panel = root.appendChildView(
+      root.createChildView(panel, { name: 'panel-root' })
+    );
+
+    // Assistant notifies assistive tech when content changes
+    root.ref.assistant = root.appendChildView(
+      root.createChildView(assistant, _extends({}, props))
+    );
+
+    // Measure (tests if fixed height was set)
+    // DOCTYPE needs to be set for this to work
+    root.ref.measure = createElement$1('div');
+    root.ref.measure.style.height = '100%';
+    root.element.appendChild(root.ref.measure);
+  };
+
+  var write = function write(_ref2) {
+    var root = _ref2.root,
+      props = _ref2.props,
+      actions = _ref2.actions;
+
+    // route actions
+    route({ root: root, props: props, actions: actions });
+
+    // get quick references to various high level parts of the upload tool
+    var _root$ref = root.ref,
+      hopper = _root$ref.hopper,
+      label = _root$ref.label,
+      list = _root$ref.list,
+      panel$$1 = _root$ref.panel;
+
+    // bool to indicate if we're full or not
+
+    var isMultiItem = root.query('GET_ALLOW_MULTIPLE');
+    var totalItems = root.query('GET_TOTAL_ITEMS');
+    var maxItems = root.query('GET_MAX_FILES');
+    var atMaxCapacity = isMultiItem
+      ? totalItems === maxItems
+      : totalItems === 1;
+
+    // views not used in height calculation
+    var childrenUsedForBoundingCalculation = [].concat(
+      toConsumableArray(list.childViews[0].childViews)
+    );
+
+    // views used to calculate the visual height of the container (which is passed to panel)
+    var childrenUsedForVisualHeightCalculation = [list];
+
+    // action used to add item
+    var addAction = actions.find(function(action) {
+      return action.type === 'DID_ADD_ITEM';
+    });
+
+    // if at max capacity hide the label
+    if (atMaxCapacity && addAction) {
+      // get interaction type
+      var interactionMethod = addAction.data.interactionMethod;
+
+      // hide label
+      label.opacity = 0;
+
+      // if is multi-item, the label is always moved upwards
+      if (isMultiItem) {
+        label.translateY = -label.rect.element.height;
+      } else {
+        // based on interaction method we move label in different directions
+        if (interactionMethod === InteractionMethod.API) {
+          label.translateX = 40;
+        } else if (interactionMethod === InteractionMethod.BROWSE) {
+          label.translateY = 40;
+        } else {
+          label.translateY = -40;
+        }
+      }
+    } else if (!atMaxCapacity) {
+      // reveal label
+      label.opacity = 1;
+      label.translateY = root.rect.element.paddingTop;
+      label.translateX = 0;
+
+      // we use label for bounding box
+      childrenUsedForVisualHeightCalculation.push(label);
+      childrenUsedForBoundingCalculation.push(label);
+    }
+
+    // sets correct state to hopper scope
+    if (hopper) {
+      hopper.updateHopperState();
+    }
+
+    // need a label to do anything
+    if (!label.caption) {
+      return;
+    }
+
+    // link list to label bottom position (including bottom margin)
+    list.translateY = isMultiItem
+      ? label.rect.outer.bottom
+      : root.rect.element.paddingTop;
+
+    // update bounding box if has changed
+    var boxBounding = calculateRootBoundingBoxHeight(root, props);
+    var childrenBoundingHeight = calculateChildrenBoundingBoxHeight(
+      childrenUsedForBoundingCalculation
+    );
+    var visualHeight = calculateChildrenVisualHeight(
+      childrenUsedForVisualHeightCalculation
+    );
+    var bottomPadding = totalItems > 0 ? root.rect.element.paddingTop * 0.5 : 0;
+
+    if (boxBounding.fixedHeight) {
+      // fixed height
+
+      // fixed height panel
+      panel$$1.scalable = false;
+
+      // link panel height to box bounding
+      panel$$1.height = boxBounding.fixedHeight + root.rect.element.paddingTop;
+
+      // set overflow
+      list.overflow =
+        childrenBoundingHeight > panel$$1.height && isMultiItem
+          ? panel$$1.height
+          : null;
+    } else if (boxBounding.cappedHeight) {
+      // max-height
+
+      // not a fixed height panel
+      panel$$1.scalable = true;
+
+      // limit children bounding height to the set capped height
+      var cappedChildrenBoundingHeight = Math.min(
+        boxBounding.cappedHeight,
+        childrenBoundingHeight
+      );
+
+      // update root height
+      root.height = cappedChildrenBoundingHeight + bottomPadding;
+
+      // set visual height
+      panel$$1.height = Math.min(
+        boxBounding.cappedHeight + root.rect.element.paddingTop,
+        visualHeight + bottomPadding
+      );
+
+      // if can overflow, test if is currently overflowing
+      list.overflow =
+        childrenBoundingHeight > panel$$1.height && isMultiItem
+          ? panel$$1.height
+          : null;
+    } else {
+      // flexible height
+
+      // not a fixed height panel
+      panel$$1.scalable = true;
+
+      // set to new bounding
+      root.height =
+        childrenBoundingHeight + bottomPadding + root.rect.element.paddingTop;
+
+      // set height to new visual height
+      panel$$1.height = visualHeight + bottomPadding;
+    }
+  };
+
+  var calculateChildrenVisualHeight = function calculateChildrenVisualHeight(
+    children
+  ) {
+    return (
+      children
+
+        // calculate the total height occupied by all children
+        .reduce(function(max, child) {
+          var bottom = child.rect.outer.bottom;
+
+          if (bottom > max) {
+            max = bottom;
+          }
+
+          return max;
+        }, 0)
+    );
+  };
+
+  var calculateRootBoundingBoxHeight = function calculateRootBoundingBoxHeight(
+    root,
+    props
+  ) {
+    // only calculate first time
+    if (props.boxBounding) {
+      return props.boxBounding;
+    }
+
+    var height = root.ref.measureHeight || null;
+    var cappedHeight = parseInt(root.style.maxHeight, 10) || null;
+    var fixedHeight = height === 0 ? null : height;
+
+    props.boxBounding = {
+      cappedHeight: cappedHeight,
+      fixedHeight: fixedHeight
+    };
+
+    // destroy measure element
+    root.element.removeChild(root.ref.measure);
+    root.ref.measure = null;
+
+    // done!
+    return props.boxBounding;
+  };
+
+  var calculateChildrenBoundingBoxHeight = function calculateChildrenBoundingBoxHeight(
+    children
+  ) {
+    return (
+      children
+
+        // no use of outer and inner as that includes translations
+        .reduce(function(height, child) {
+          return (
+            height + child.rect.inner.bottom + child.rect.element.marginBottom
+          );
+        }, 0)
+    );
+  };
+
+  var toggleAllowDrop = function toggleAllowDrop(_ref3) {
+    var root = _ref3.root,
+      props = _ref3.props,
+      action = _ref3.action;
+
+    if (action.value && !root.ref.hopper) {
+      var hopper = createHopper(
+        root.element,
+        function(items) {
+          var allowReplace = root.query('GET_ALLOW_REPLACE');
+          var allowMultiple = root.query('GET_ALLOW_MULTIPLE');
+          var totalItems = root.query('GET_TOTAL_ITEMS');
+          var dropValidation = root.query('GET_DROP_VALIDATION');
+          var maxItems = root.query('GET_MAX_TOTAL_ITEMS');
+
+          // total amount of items being dragged
+          var totalDragItems = items.length;
+
+          // if does not allow multiple items and dragging more than one item
+          if (!allowMultiple && totalDragItems > 1) {
+            return false;
+          }
+
+          // limit max items to one if not allowed to drop multiple items
+          maxItems = allowMultiple ? maxItems : allowReplace ? maxItems : 1;
+
+          // no more room?
+          var hasMaxItems = isInt(maxItems);
+          if (hasMaxItems && totalItems + totalDragItems > maxItems) {
+            return false;
+          }
+
+          // all items should be validated by all filters as valid
+          return dropValidation
+            ? items.every(function(item) {
+                return applyFilters('ALLOW_HOPPER_ITEM', item, {
+                  query: root.query
+                }).every(function(result) {
+                  return result === true;
+                });
+              })
+            : true;
+        },
+        {
+          catchesDropsOnPage: root.query('GET_DROP_ON_PAGE'),
+          requiresDropOnElement: root.query('GET_DROP_ON_ELEMENT')
+        }
+      );
+
+      hopper.onload = function(items, position) {
+        var itemList = root.ref.list.childViews[0];
+        var index = getItemIndexByPosition(itemList, {
+          left: position.scopeLeft,
+          top:
+            position.scopeTop -
+            root.ref.list.rect.outer.top +
+            root.ref.list.element.scrollTop
+        });
+
+        forEachDelayed(items, function(source) {
+          root.dispatch('ADD_ITEM', {
+            interactionMethod: InteractionMethod.DROP,
+            source: source,
+            index: index
+          });
+        });
+
+        root.dispatch('DID_DROP', { position: position });
+
+        root.dispatch('DID_END_DRAG', { position: position });
+      };
+
+      hopper.ondragstart = function(position) {
+        root.dispatch('DID_START_DRAG', { position: position });
+      };
+
+      hopper.ondrag = debounce(function(position) {
+        root.dispatch('DID_DRAG', { position: position });
+      });
+
+      hopper.ondragend = function(position) {
+        root.dispatch('DID_END_DRAG', { position: position });
+      };
+
+      root.ref.hopper = hopper;
+
+      root.ref.drip = root.appendChildView(root.createChildView(drip));
+    } else if (!action.value && root.ref.hopper) {
+      root.ref.hopper.destroy();
+      root.ref.hopper = null;
+      root.removeChildView(root.ref.drip);
+    }
+  };
+
+  /**
+   * Enable or disable browse functionality
+   */
+  var toggleAllowBrowse = function toggleAllowBrowse(_ref4) {
+    var root = _ref4.root,
+      props = _ref4.props,
+      action = _ref4.action;
+
+    if (action.value) {
+      root.ref.browser = root.appendChildView(
+        root.createChildView(
+          browser,
+          _extends({}, props, {
+            onload: function onload(items) {
+              forEachDelayed(items, function(source) {
+                root.dispatch('ADD_ITEM', {
+                  interactionMethod: InteractionMethod.BROWSE,
+                  source: source,
+                  index: 0
+                });
+              });
+            }
+          })
+        ),
+        0
+      );
+    } else if (root.ref.browser) {
+      root.removeChildView(root.ref.browser);
+    }
+  };
+
+  /**
+   * Enable or disable paste functionality
+   */
+  var toggleAllowPaste = function toggleAllowPaste(_ref5) {
+    var root = _ref5.root,
+      action = _ref5.action;
+
+    if (action.value) {
+      root.ref.paster = createPaster();
+      root.ref.paster.onload = function(items) {
+        forEachDelayed(items, function(source) {
+          root.dispatch('ADD_ITEM', {
+            interactionMethod: InteractionMethod.PASTE,
+            source: source,
+            index: 0
+          });
+        });
+      };
+    } else if (root.ref.paster) {
+      root.ref.paster.destroy();
+      root.ref.paster = null;
+    }
+  };
+
+  /**
+   * Route actions
+   */
+  var route = createRoute({
+    DID_SET_ALLOW_BROWSE: toggleAllowBrowse,
+    DID_SET_ALLOW_DROP: toggleAllowDrop,
+    DID_SET_ALLOW_PASTE: toggleAllowPaste
+  });
+
+  var root = createView({
+    name: 'root',
+    read: function read(_ref6) {
+      var root = _ref6.root;
+
+      if (root.ref.measure) {
+        root.ref.measureHeight = root.ref.measure.offsetHeight;
+      }
+    },
+    create: create$1,
+    write: write,
+    destroy: function destroy(_ref7) {
+      var root = _ref7.root;
+
+      if (root.ref.paster) {
+        root.ref.paster.destroy();
+      }
+      if (root.ref.hopper) {
+        root.ref.hopper.destroy();
+      }
+    },
+    mixins: {
+      styles: ['height']
+    }
+  });
+
+  // defaults
+  // view
+  // creates the app
+  var createApp$1 = function createApp() {
+    var initialOptions =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    // let element
+    var originalElement = null;
+
+    // get default options
+    var defaultOptions$$1 = getOptions$1();
+
+    // create the data store, this will contain all our app info
+    var store = createStore(
+      // initial state (should be serializable)
+      createInitialState(defaultOptions$$1),
+
+      // queries
+      [queries, createOptionQueries(defaultOptions$$1)],
+
+      // action handlers
+      [actions, createOptionActions(defaultOptions$$1)]
+    );
+
+    // set initial options
+    store.dispatch('SET_OPTIONS', { options: initialOptions });
+
+    // render initial view
+    var view = root(store, { id: getUniqueId() });
+
+    //
+    // PRIVATE API -------------------------------------------------------------------------------------
+    //
+    var resting = false;
+    var hidden = false;
+    var readWriteApi = {
+      // necessary for update loop
+
+      /**
+       * Reads from dom (never call manually)
+       * @private
+       */
+      _read: function _read() {
+        // if resting, no need to read as numbers will still all be correct
+        if (resting) {
+          return;
+        }
+
+        // read view data
+        view._read();
+
+        // if root is hidden
+        hidden = view.rect.element.hidden;
+      },
+
+      /**
+       * Writes to dom (never call manually)
+       * @private
+       */
+      _write: function _write(ts) {
+        // don't do anything while hidden
+        if (hidden) {
+          return;
+        }
+
+        // get all actions from store
+        var actions$$1 = store
+          .processActionQueue()
+
+          // filter out set actions (will trigger DID_SET)
+          .filter(function(action) {
+            return !/^SET_/.test(action.type);
+          });
+
+        // if was idling and no actions stop here
+        if (resting && !actions$$1.length) {
+          return;
+        }
+
+        // some actions might trigger events
+        routeActionsToEvents(actions$$1);
+
+        // update the view
+        resting = view._write(ts, actions$$1);
+
+        // now idling
+        if (resting) {
+          store.processDispatchQueue();
+        }
+      }
+    };
+
+    //
+    // EXPOSE EVENTS -------------------------------------------------------------------------------------
+    //
+    var createEvent = function createEvent(name) {
+      return function(data) {
+        // create default event
+        var event = {
+          type: name
+        };
+
+        // no data to add
+        if (!data) {
+          return event;
+        }
+
+        // copy relevant props
+        if (data.hasOwnProperty('error')) {
+          event.error = data.error ? _extends({}, data.error) : null;
+        }
+
+        if (data.status) {
+          event.status = _extends({}, data.status);
+        }
+
+        // only source is available, else add item if possible
+        if (data.source) {
+          event.file = data.source;
+        } else if (data.item || data.id) {
+          var item = data.item ? data.item : store.query('GET_ITEM', data.id);
+          event.file = item ? createItemAPI(item) : null;
+        }
+
+        // if this is a progress event add the progress amount
+        if (/progress/.test(name)) {
+          event.progress = data.progress;
+        }
+
+        return event;
+      };
+    };
+
+    var eventRoutes = {
+      DID_DESTROY: createEvent('destroy'),
+
+      DID_INIT: createEvent('init'),
+
+      DID_THROW_MAX_FILES: createEvent('warning'),
+
+      DID_START_ITEM_LOAD: createEvent('addfilestart'),
+      DID_UPDATE_ITEM_LOAD_PROGRESS: createEvent('addfileprogress'),
+      DID_LOAD_ITEM: createEvent('addfile'),
+
+      DID_THROW_ITEM_INVALID: [createEvent('error'), createEvent('addfile')],
+
+      DID_THROW_ITEM_LOAD_ERROR: [createEvent('error'), createEvent('addfile')],
+
+      DID_START_ITEM_PROCESSING: createEvent('processfilestart'),
+      DID_UPDATE_ITEM_PROCESS_PROGRESS: createEvent('processfileprogress'),
+      DID_ABORT_ITEM_PROCESSING: createEvent('processfileabort'),
+      DID_COMPLETE_ITEM_PROCESSING: createEvent('processfile'),
+      DID_REVERT_ITEM_PROCESSING: createEvent('processfilerevert'),
+
+      DID_THROW_ITEM_PROCESSING_ERROR: [
+        createEvent('error'),
+        createEvent('processfile')
+      ],
+
+      SPLICE_ITEM: createEvent('removefile')
+    };
+
+    var exposeEvent = function exposeEvent(event) {
+      // create event object to be dispatched
+      var detail = _extends({ pond: exports }, event);
+      delete detail.type;
+      view.element.dispatchEvent(
+        new CustomEvent('FilePond:' + event.type, {
+          // event info
+          detail: detail,
+
+          // event behaviour
+          bubbles: true,
+          cancelable: true,
+          composed: true // triggers listeners outside of shadow root
+        })
+      );
+
+      // event object to params used for `on()` event handlers and callbacks `oninit()`
+      var params = [];
+
+      // if is possible error event, make it the first param
+      if (event.hasOwnProperty('error')) {
+        params.push(event.error);
+      }
+      // file is always section
+      if (event.hasOwnProperty('file')) {
+        params.push(event.file);
+      }
+
+      // append otherp props
+      var filtered = ['type', 'error', 'file'];
+      Object.keys(event)
+        .filter(function(key) {
+          return !filtered.includes(key);
+        })
+        .forEach(function(key) {
+          return params.push(event[key]);
+        });
+
+      // on(type, () => { })
+      exports.fire.apply(exports, [event.type].concat(params));
+
+      // oninit = () => {}
+      var handler = store.query('GET_ON' + event.type.toUpperCase());
+      if (handler) {
+        handler.apply(undefined, params);
+      }
+    };
+
+    var routeActionsToEvents = function routeActionsToEvents(actions$$1) {
+      if (!actions$$1.length) {
+        return;
+      }
+
+      actions$$1.forEach(function(action) {
+        if (!eventRoutes[action.type]) {
+          return;
+        }
+        var routes = eventRoutes[action.type];
+        (Array.isArray(routes) ? routes : [routes]).forEach(function(route) {
+          exposeEvent(route(action.data));
+        });
+      });
+    };
+
+    //
+    // PUBLIC API -------------------------------------------------------------------------------------
+    //
+    var setOptions = function setOptions(options) {
+      return store.dispatch('SET_OPTIONS', { options: options });
+    };
+
+    var getFile = function getFile(query) {
+      return store.query('GET_ITEM', query);
+    };
+
+    var addFile = function addFile(source) {
+      var options =
+        arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+      return new Promise(function(resolve, reject) {
+        store.dispatch('ADD_ITEM', {
+          interactionMethod: InteractionMethod.API,
+          source: source,
+          index: options.index,
+          success: resolve,
+          failure: reject
+        });
+      });
+    };
+
+    var removeFile = function removeFile(query) {
+      // request item removal
+      store.dispatch('REMOVE_ITEM', { query: query });
+
+      // see if item has been removed
+      return store.query('GET_ITEM', query) === null;
+    };
+
+    var addFiles = function addFiles() {
+      for (
+        var _len = arguments.length, args = Array(_len), _key = 0;
+        _key < _len;
+        _key++
+      ) {
+        args[_key] = arguments[_key];
+      }
+
+      return new Promise(function(resolve, reject) {
+        var sources = [];
+        var options = {};
+
+        // user passed a sources array
+        if (isArray(args[0])) {
+          sources.push.apply(sources, toConsumableArray(args[0]));
+          Object.assign(options, args[1] || {});
+        } else {
+          // user passed sources as arguments, last one might be options object
+          var lastArgument = args[args.length - 1];
+          if (
+            (typeof lastArgument === 'undefined'
+              ? 'undefined'
+              : _typeof(lastArgument)) === 'object' &&
+            !(lastArgument instanceof Blob)
+          ) {
+            Object.assign(options, args.pop());
+          }
+
+          // add rest to sources
+          sources.push.apply(sources, args);
+        }
+
+        var sourcePromises = [];
+        var delayPromises = forEachDelayed(sources, function(source) {
+          sourcePromises.push(addFile(source, options));
+        });
+
+        Promise.all(delayPromises).then(function() {
+          Promise.all(sourcePromises).then(function(results) {
+            resolve(results);
+          });
+        });
+      });
+    };
+
+    var getFiles = function getFiles() {
+      return store.query('GET_ITEMS');
+    };
+
+    var processFile = function processFile(query) {
+      return new Promise(function(resolve, reject) {
+        store.dispatch('PROCESS_ITEM', {
+          query: query,
+          success: resolve,
+          failure: reject
+        });
+      });
+    };
+
+    var processFiles = function processFiles() {
+      for (
+        var _len2 = arguments.length, args = Array(_len2), _key2 = 0;
+        _key2 < _len2;
+        _key2++
+      ) {
+        args[_key2] = arguments[_key2];
+      }
+
+      var queries$$1 = Array.isArray(args[0]) ? args[0] : args;
+      if (!queries$$1.length) {
+        return Promise.all(getFiles().map(processFile));
+      }
+      return Promise.all(queries$$1.map(processFile));
+    };
+
+    var removeFiles = function removeFiles() {
+      for (
+        var _len3 = arguments.length, args = Array(_len3), _key3 = 0;
+        _key3 < _len3;
+        _key3++
+      ) {
+        args[_key3] = arguments[_key3];
+      }
+
+      var queries$$1 = Array.isArray(args[0]) ? args[0] : args;
+      var files = getFiles();
+
+      if (!queries$$1.length) {
+        return Promise.all(files.map(removeFile));
+      }
+
+      // when removing by index the indexes shift after each file removal so we need to convert indexes to ids
+      var mappedQueries = queries$$1
+        .map(function(query) {
+          return isNumber(query)
+            ? files[query] ? files[query].id : null
+            : query;
+        })
+        .filter(function(query) {
+          return query;
+        });
+
+      return mappedQueries.map(removeFile);
+    };
+
+    var exports = _extends(
+      {},
+      on(),
+      readWriteApi,
+      createOptionAPI(store, defaultOptions$$1),
+      {
+        /**
+         * Override options defined in options object
+         * @param options
+         */
+        setOptions: setOptions,
+
+        /**
+         * Load the given file
+         * @param source - the source of the file (either a File, base64 data uri or url)
+         * @param options - object, { index: 0 }
+         */
+        addFile: addFile,
+
+        /**
+         * Load the given files
+         * @param sources - the sources of the files to load
+         * @param options - object, { index: 0 }
+         */
+        addFiles: addFiles,
+
+        /**
+         * Returns the file objects matching the given query
+         * @param query { string, number, null }
+         */
+        getFile: getFile,
+
+        /**
+         * Upload file with given name
+         * @param query { string, number, null  }
+         */
+        processFile: processFile,
+
+        /**
+         * Removes a file by its name
+         * @param query { string, number, null  }
+         */
+        removeFile: removeFile,
+
+        /**
+         * Returns all files (wrapped in public api)
+         */
+        getFiles: getFiles,
+
+        /**
+         * Starts uploading all files
+         */
+        processFiles: processFiles,
+
+        /**
+         * Clears all files from the files list
+         */
+        removeFiles: removeFiles,
+
+        /**
+         * Browse the file system for a file
+         */
+        browse: function browse() {
+          // needs to be trigger directly as user action needs to be traceable (is not traceable in requestAnimationFrame)
+          var input = view.element.querySelector('input[type=file]');
+          if (input) {
+            input.click();
+          }
+        },
+
+        /**
+         * Destroys the app
+         */
+        destroy: function destroy() {
+          // request destruction
+          exports.fire('destroy', view.element);
+
+          // stop active processes (file uploads, fetches, stuff like that)
+          // loop over items and depending on states call abort for ongoing processes
+          store.dispatch('ABORT_ALL');
+
+          // destroy view
+          view._destroy();
+
+          // dispatch destroy
+          store.dispatch('DID_DESTROY');
+        },
+
+        /**
+         * Inserts the plugin before the target element
+         */
+        insertBefore: function insertBefore$$1(element) {
+          return insertBefore(view.element, element);
+        },
+
+        /**
+         * Inserts the plugin after the target element
+         */
+        insertAfter: function insertAfter$$1(element) {
+          return insertAfter(view.element, element);
+        },
+
+        /**
+         * Appends the plugin to the target element
+         */
+        appendTo: function appendTo(element) {
+          return element.appendChild(view.element);
+        },
+
+        /**
+         * Replaces an element with the app
+         */
+        replaceElement: function replaceElement(element) {
+          // insert the app before the element
+          insertBefore(view.element, element);
+
+          // remove the original element
+          element.parentNode.removeChild(element);
+
+          // remember original element
+          originalElement = element;
+        },
+
+        /**
+         * Restores the original element
+         */
+        restoreElement: function restoreElement() {
+          if (!originalElement) {
+            return; // no element to restore
+          }
+
+          // restore original element
+          insertAfter(originalElement, view.element);
+
+          // remove our element
+          view.element.parentNode.removeChild(view.element);
+
+          // remove reference
+          originalElement = null;
+        },
+
+        /**
+         * Returns true if the app root is attached to given element
+         * @param element
+         */
+        isAttachedTo: function isAttachedTo(element) {
+          return view.element === element || originalElement === element;
+        },
+
+        /**
+         * Returns the root element
+         */
+        element: {
+          get: function get$$1() {
+            return view.element;
+          }
+        }
+      }
+    );
+
+    // Done!
+    store.dispatch('DID_INIT');
+
+    // create actual api object
+    return createObject(exports);
+  };
+
+  var createAppObject = function createAppObject() {
+    var customOptions =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+    // default options
+    var defaultOptions$$1 = {};
+    forin(getOptions$1(), function(key, value) {
+      defaultOptions$$1[key] = value[0];
+    });
+
+    // set app options
+    var app = createApp$1(_extends({}, defaultOptions$$1, customOptions));
+
+    // return the plugin instance
+    return app;
+  };
+
+  var toCamels = function toCamels(string) {
+    var separator =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '-';
+    return string.replace(new RegExp(separator + '.', 'g'), function(sub) {
+      return sub.charAt(1).toUpperCase();
+    });
+  };
+
+  var lowerCaseFirstLetter = function lowerCaseFirstLetter(string) {
+    return string.charAt(0).toLowerCase() + string.slice(1);
+  };
+
+  var attributeNameToPropertyName = function attributeNameToPropertyName(
+    attributeName
+  ) {
+    return toCamels(attributeName.replace(/^data-/, ''));
+  };
+
+  var mapObject = function mapObject(object, propertyMap) {
+    // remove unwanted
+    forin(propertyMap, function(selector, mapping) {
+      forin(object, function(property, value) {
+        // create regexp shortcut
+        var selectorRegExp = new RegExp(selector);
+
+        // tests if
+        var matches = selectorRegExp.test(property);
+
+        // no match, skip
+        if (!matches) {
+          return;
+        }
+
+        // if there's a mapping, the original property is always removed
+        delete object[property];
+
+        // should only remove, we done!
+        if (mapping === false) {
+          return;
+        }
+
+        // move value to new property
+        if (isString(mapping)) {
+          object[mapping] = value;
+          return;
+        }
+
+        // move to group
+        var group = mapping.group;
+        if (isObject(mapping) && !object[group]) {
+          object[group] = {};
+        }
+
+        object[group][
+          lowerCaseFirstLetter(property.replace(selectorRegExp, ''))
+        ] = value;
+      });
+
+      // do submapping
+      if (mapping.mapping) {
+        mapObject(object[mapping.group], mapping.mapping);
+      }
+    });
+  };
+
+  var getAttributesAsObject = function getAttributesAsObject(node) {
+    var attributeMapping =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    // turn attributes into object
+    var output = []
+      .concat(toConsumableArray(node.attributes))
+      .reduce(function(obj, attribute) {
+        obj[attributeNameToPropertyName(attribute.name)] = attr(
+          node,
+          attribute.name
+        );
+        return obj;
+      }, {});
+
+    // do mapping of object properties
+    mapObject(output, attributeMapping);
+
+    return output;
+  };
+
+  var createAppAtElement = function createAppAtElement(element) {
+    var options =
+      arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+    // how attributes of the input element are mapped to the options for the plugin
+    var attributeMapping = {
+      // translate to other name
+      '^class$': 'className',
+      '^multiple$': 'allowMultiple',
+      '^capture$': 'captureMethod',
+
+      // group under single property
+      '^server': {
+        group: 'server',
+        mapping: {
+          '^process': {
+            group: 'process'
+          },
+          '^revert': {
+            group: 'revert'
+          },
+          '^fetch': {
+            group: 'fetch'
+          },
+          '^restore': {
+            group: 'restore'
+          },
+          '^load': {
+            group: 'load'
+          }
+        }
+      },
+
+      // don't include in object
+      '^type$': false,
+      '^files$': false
+    };
+
+    // add additional option translators
+    applyFilters('SET_ATTRIBUTE_TO_OPTION_MAP', attributeMapping);
+
+    // create final options object by extracting options from element
+    // and then overriding with options object
+    var mergedOptions = _extends(
+      {},
+      getAttributesAsObject(
+        element.nodeName === 'FIELDSET'
+          ? element.querySelector('input[type=file]')
+          : element,
+        attributeMapping
+      ),
+      options
+    );
+
+    // if parent is a fieldset, get files from parent by selecting all input fields that are not file upload fields
+    // these will then be automatically set to the initial files
+    mergedOptions.files = (options.files || []).concat(
+      []
+        .concat(
+          toConsumableArray(element.querySelectorAll('input:not([type=file])'))
+        )
+        .map(function(input) {
+          return {
+            source: input.value,
+            options: {
+              type: input.dataset.type
+            }
+          };
+        })
+    );
+
+    // build plugin
+    var app = createAppObject(mergedOptions);
+
+    // add already selected files
+    if (element.files) {
+      [].concat(toConsumableArray(element.files)).forEach(function(file) {
+        app.addFile(file);
+      });
+    }
+
+    // replace the target element
+    app.replaceElement(element);
+
+    // expose
+    return app;
+  };
+
+  // if an element is passed, we create the instance at that element, if not, we just create an up object
+  var createApp = function createApp() {
+    return isNode(arguments.length <= 0 ? undefined : arguments[0])
+      ? createAppAtElement.apply(undefined, arguments)
+      : createAppObject.apply(undefined, arguments);
+  };
+
+  var PRIVATE_METHODS$1 = ['fire', '_read', '_write'];
+
+  var createAppAPI = function createAppAPI(app) {
+    var api = {};
+
+    copyObjectPropertiesToObject(app, api, PRIVATE_METHODS$1);
+
+    return api;
+  };
+
+  /**
+   * Replaces placeholders in given string with replacements
+   * @param string - "Foo {bar}""
+   * @param replacements - { "bar": 10 }
+   */
+  var replaceInString = function replaceInString(string, replacements) {
+    return string.replace(/(?:{([a-zA-Z]+)})/g, function(match, group) {
+      return replacements[group];
+    });
+  };
+
+  var images = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'tiff'];
+  var text$1 = ['css', 'csv', 'html', 'txt'];
+  var map = {
+    zip: 'zip|compressed',
+    epub: 'application/epub+zip'
+  };
+
+  var guesstimateMimeType = function guesstimateMimeType() {
+    var extension =
+      arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : '';
+
+    extension = extension.toLowerCase();
+    if (images.includes(extension)) {
+      return (
+        'image/' +
+        (extension === 'jpg'
+          ? 'jpeg'
+          : extension === 'svg' ? 'svg+xml' : extension)
+      );
+    }
+    if (text$1.includes(extension)) {
+      return 'text/' + extension;
+    }
+    return map[extension] || null;
+  };
+
+  var createWorker = function createWorker(fn) {
+    var workerBlob = new Blob(['(', fn.toString(), ')()'], {
+      type: 'application/javascript'
+    });
+    var workerURL = URL.createObjectURL(workerBlob);
+    var worker = new Worker(workerURL);
+
+    return {
+      transfer: function transfer(message, cb) {},
+      post: function post(message, cb, transferList) {
+        var id = getUniqueId();
+
+        worker.onmessage = function(e) {
+          if (e.data.id === id) {
+            cb(e.data.message);
+          }
+        };
+
+        worker.postMessage(
+          {
+            id: id,
+            message: message
+          },
+          transferList
+        );
+      },
+      terminate: function terminate() {
+        worker.terminate();
+        URL.revokeObjectURL(workerURL);
+      }
+    };
+  };
+
+  var loadImage = function loadImage(url, cb) {
+    return new Promise(function(resolve, reject) {
+      var img = new Image();
+      img.onload = function() {
+        resolve(img);
+      };
+      img.onerror = function(e) {
+        reject(e);
+      };
+      img.src = url;
+    });
+  };
+
+  var copyFile = function copyFile(file) {
+    return renameFile(file, file.name);
+  };
+
+  // utilities exposed to plugins
+  // already registered plugins (can't register twice)
+  var registeredPlugins = [];
+
+  // pass utils to plugin
+  var createAppPlugin = function createAppPlugin(plugin) {
+    // already registered
+    if (registeredPlugins.includes(plugin)) {
+      return;
+    }
+
+    // remember this plugin
+    registeredPlugins.push(plugin);
+
+    // setup!
+    var pluginOutline = plugin({
+      addFilter: addFilter,
+      utils: {
+        Type: Type,
+        forin: forin,
+        isString: isString,
+        toNaturalFileSize: toNaturalFileSize,
+        replaceInString: replaceInString,
+        getExtensionFromFilename: getExtensionFromFilename,
+        getFilenameWithoutExtension: getFilenameWithoutExtension,
+        guesstimateMimeType: guesstimateMimeType,
+        getFileFromBlob: getFileFromBlob,
+        getFilenameFromURL: getFilenameFromURL,
+        createRoute: createRoute,
+        createWorker: createWorker,
+        createView: createView,
+        loadImage: loadImage,
+        copyFile: copyFile,
+        renameFile: renameFile,
+        applyFilterChain: applyFilterChain
+      }
+    });
+
+    // add plugin options to default options
+    extendDefaultOptions(pluginOutline.options);
+  };
+
+  /**
+   * Plugin internal state (over all instances)
+   */
+  var state = {
+    // active app instances, used to redraw the apps and to find the later
+    apps: []
+  };
+
+  // plugin name
+  var name = 'filepond';
+
+  // is in browser
+  var hasNavigator = typeof navigator !== 'undefined';
+
+  // app painter, cannot be paused or stopped at the moment
+  var painter =
+    hasNavigator &&
+    createPainter(createUpdater(state.apps, '_read', '_write'), 60);
+
+  // fire load event
+  if (hasNavigator) {
+    // fire loaded event so we know when FilePond is available
+    var dispatch = function dispatch() {
+      // let others know we have area ready
+      document.dispatchEvent(
+        new CustomEvent('FilePond:loaded', {
+          detail: {
+            supported: supported,
+            create: create,
+            destroy: destroy,
+            parse: parse,
+            find: find,
+            registerPlugin: registerPlugin,
+            setOptions: setOptions$$1
+          }
+        })
+      );
+
+      // clean up event
+      document.removeEventListener('DOMContentLoaded', dispatch);
+    };
+
+    if (document.readyState !== 'loading') {
+      // move to back of execution queue, FilePond should have been exported by then
+      setTimeout(function() {
+        return dispatch();
+      }, 0);
+    } else {
+      document.addEventListener('DOMContentLoaded', dispatch);
+    }
+  }
+
+  // updates the OptionTypes object based on the current options
+  var updateOptionTypes = function updateOptionTypes() {
+    return forin(getOptions$1(), function(key, value) {
+      OptionTypes[key] = value[1];
+    });
+  };
+
+  /**
+   * Public Plugin methods
+   */
+  var FileStatus = _extends({}, ItemStatus);
+
+  var OptionTypes = {};
+  updateOptionTypes();
+
+  // create method, creates apps and adds them to the app array
+  var create = function create() {
+    var app = createApp.apply(undefined, arguments);
+    app.on('destroy', destroy);
+    state.apps.push(app);
+    return createAppAPI(app);
+  };
+
+  // destroys apps and removes them from the app array
+  var destroy = function destroy(hook) {
+    // returns true if the app was destroyed successfully
+    var indexToRemove = state.apps.findIndex(function(app) {
+      return app.isAttachedTo(hook);
+    });
+    if (indexToRemove >= 0) {
+      // remove from apps
+      var app = state.apps.splice(indexToRemove, 1)[0];
+
+      // restore original dom element
+      app.restoreElement();
+
+      return true;
+    }
+
+    return false;
+  };
+
+  // parses the given context for plugins (does not include the context element itself)
+  var parse = function parse(context) {
+    // get all possible hooks
+    var matchedHooks = [].concat(
+      toConsumableArray(context.querySelectorAll('.' + name))
+    );
+
+    // filter out already active hooks
+    var newHooks = matchedHooks.filter(function(newHook) {
+      return !state.apps.find(function(app) {
+        return app.isAttachedTo(newHook);
+      });
+    });
+
+    // create new instance for each hook
+    return newHooks.map(function(hook) {
+      return create(hook);
+    });
+  };
+
+  // returns an app based on the given element hook
+  var find = function find(hook) {
+    var app = state.apps.find(function(app) {
+      return app.isAttachedTo(hook);
+    });
+    if (!app) {
+      return null;
+    }
+    return createAppAPI(app);
+  };
+
+  // returns true if plugin is supported
+  var isOperaMini = function isOperaMini() {
+    return (
+      Object.prototype.toString.call(window.operamini) === '[object OperaMini]'
+    );
+  };
+  var hasPromises = function hasPromises() {
+    return 'Promise' in window;
+  };
+  var hasBlobSlice = function hasBlobSlice() {
+    return 'slice' in Blob.prototype;
+  };
+  var hasCreateObjectURL = function hasCreateObjectURL() {
+    return 'URL' in window && 'createObjectURL' in window.URL;
+  };
+  var hasVisibility = function hasVisibility() {
+    return 'visibilityState' in document;
+  };
+  var hasTiming = function hasTiming() {
+    return 'performance' in window;
+  }; // iOS 8.x
+
+  var supported = function supported() {
+    if (!hasNavigator) {
+      return false;
+    }
+    return !(
+      isOperaMini() ||
+      !hasVisibility() ||
+      !hasPromises() ||
+      !hasBlobSlice() ||
+      !hasCreateObjectURL() ||
+      !hasTiming()
+    );
+  };
+
+  // adds a plugin extension
+  var registerPlugin = function registerPlugin() {
+    for (
+      var _len = arguments.length, plugins = Array(_len), _key = 0;
+      _key < _len;
+      _key++
+    ) {
+      plugins[_key] = arguments[_key];
+    }
+
+    // register plugins
+    plugins.forEach(createAppPlugin);
+
+    // update OptionTypes, each plugin might have extended the default options
+    updateOptionTypes();
+  };
+
+  var getOptions$$1 = function getOptions$$1() {
+    var opts = {};
+    forin(getOptions$1(), function(key, value) {
+      opts[key] = value[0];
+    });
+    return opts;
+  };
+
+  var setOptions$$1 = function setOptions$$1(opts) {
+    if (isObject(opts)) {
+      // update existing plugins
+      state.apps.forEach(function(app) {
+        app.setOptions(opts);
+      });
+
+      // override defaults
+      setOptions$1(opts);
+    }
+
+    // return new options
+    return getOptions$$1();
+  };
+
+  exports.FileStatus = FileStatus;
+  exports.OptionTypes = OptionTypes;
+  exports.create = create;
+  exports.destroy = destroy;
+  exports.parse = parse;
+  exports.find = find;
+  exports.supported = supported;
+  exports.registerPlugin = registerPlugin;
+  exports.getOptions = getOptions$$1;
+  exports.setOptions = setOptions$$1;
+  exports.FileOrigin = FileOrigin;
+
+  Object.defineProperty(exports, '__esModule', { value: true });
+});
+
+
+/***/ }),
+/* 119 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(120);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(43)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../css-loader/index.js!./filepond.min.css", function() {
+			var newContent = require("!!../../css-loader/index.js!./filepond.min.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 120 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(21)(false);
+// imports
+
+
+// module
+exports.push([module.i, "/*\n * FilePond 1.7.1\n * Licensed under MIT, https://opensource.org/licenses/MIT\n * Please visit https://pqina.nl/filepond for details.\n */\n.filepond--assistant{position:absolute;overflow:hidden;height:1px;width:1px;padding:0;border:0;clip:rect(1px,1px,1px,1px);-webkit-clip-path:inset(50%);clip-path:inset(50%);white-space:nowrap}.filepond--browser{position:absolute;margin:0;padding:0;left:1em;top:1.75em;width:calc(100% - 2em);opacity:0;font-size:0}.filepond--drip{position:absolute;top:0;left:0;right:0;bottom:0;overflow:hidden;opacity:.1;pointer-events:none;border-radius:.5em;background:rgba(0,0,0,.01)}.filepond--drip-blob{-webkit-transform-origin:center center;transform-origin:center center;left:0;width:8em;height:8em;margin-left:-4em;margin-top:-4em;background:#292625;border-radius:50%}.filepond--drip-blob,.filepond--drop-label{position:absolute;top:0;will-change:transform,opacity}.filepond--drop-label{left:1em;right:1em;margin:0 0 1em;color:#4f4f4f}.filepond--drop-label label{display:block;padding:1em 0;margin:0;cursor:default;font-size:.875em;font-weight:400;text-align:center;line-height:1.5}.filepond--label-action{text-decoration:underline;-webkit-text-decoration-skip:ink;text-decoration-skip:ink;-webkit-text-decoration-color:#a7a4a4;text-decoration-color:#a7a4a4;cursor:pointer}.filepond--file-action-button{font-size:1em;width:1.625em;height:1.625em;cursor:auto;font-family:inherit;line-height:inherit;margin:0;padding:0;border:none;color:#fff;outline:none;border-radius:50%;background-color:rgba(0,0,0,.5);background-image:none;will-change:transform,opacity;box-shadow:0 0 0 0 hsla(0,0%,100%,0);transition:box-shadow .25s ease-in}.filepond--file-action-button svg{width:100%;height:100%}.filepond--file-action-button:focus,.filepond--file-action-button:hover{box-shadow:0 0 0 .125em hsla(0,0%,100%,.9)}.filepond--file-info{position:static;display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-align:start;align-items:flex-start;-ms-flex:1;flex:1;margin:0 .5em 0 0;min-width:0;will-change:transform,opacity;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.filepond--file-info *{margin:0}.filepond--file-info .filepond--file-info-main{font-size:.75em;line-height:1.2;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;width:100%}.filepond--file-info .filepond--file-info-sub{font-size:.625em;opacity:.5;transition:opacity .25s ease-in-out;white-space:nowrap}.filepond--file-info .filepond--file-info-sub:empty{display:none}.filepond--file-status{position:static;display:-ms-flexbox;display:flex;-ms-flex-direction:column;flex-direction:column;-ms-flex-align:end;align-items:flex-end;-ms-flex-positive:0;flex-grow:0;-ms-flex-negative:0;flex-shrink:0;margin:0;min-width:2.25em;text-align:right;will-change:transform,opacity;pointer-events:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.filepond--file-status *{margin:0;white-space:nowrap}.filepond--file-status .filepond--file-status-main{font-size:.75em;line-height:1.2}.filepond--file-status .filepond--file-status-sub{font-size:.625em;opacity:.5;transition:opacity .25s ease-in-out}.filepond--file-wrapper{border:none;margin:0;padding:0;min-width:0;height:100%}.filepond--file-wrapper>legend{position:absolute;overflow:hidden;height:1px;width:1px;padding:0;border:0;clip:rect(1px,1px,1px,1px);-webkit-clip-path:inset(50%);clip-path:inset(50%);white-space:nowrap}.filepond--file{position:static;display:-ms-flexbox;display:flex;height:100%;-ms-flex-align:start;align-items:flex-start;padding:.5625em;color:#fff;border-radius:.5em}.filepond--file .filepond--file-status{margin-left:auto;margin-right:2.25em}.filepond--file .filepond--processing-complete-indicator{pointer-events:none;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;z-index:2}.filepond--file .filepond--file-action-button,.filepond--file .filepond--processing-complete-indicator{position:absolute}.filepond--file .filepond--progress-indicator{position:absolute;top:.75em;right:.75em}.filepond--file .filepond--action-remove-item{left:.5625em}.filepond--file .filepond--file-action-button:not(.filepond--action-remove-item),.filepond--file .filepond--processing-complete-indicator{right:.5625em}[data-filepond-item-state*=error] .filepond--file-info,[data-filepond-item-state*=invalid] .filepond--file-info,[data-filepond-item-state=cancelled] .filepond--file-info{margin-right:2.25em}[data-filepond-item-state=processing-complete] .filepond--action-revert-item-processing svg{-webkit-animation:fall .5s .125s linear both;animation:fall .5s .125s linear both}[data-filepond-item-state=processing-complete] .filepond--file-info-sub,[data-filepond-item-state=processing-complete] .filepond--file-status-sub{opacity:0}[data-filepond-item-state=processing-complete] .filepond--action-revert-item-processing~.filepond--file-info .filepond--file-info-sub,[data-filepond-item-state=processing-complete] .filepond--action-revert-item-processing~.filepond--file-status .filepond--file-status-sub{opacity:.5}[data-filepond-item-state*=error] .filepond--file-wrapper,[data-filepond-item-state*=error] .filepond--panel,[data-filepond-item-state*=invalid] .filepond--file-wrapper,[data-filepond-item-state*=invalid] .filepond--panel{-webkit-animation:shake .65s linear both;animation:shake .65s linear both}[data-filepond-item-state*=busy] .filepond--progress-indicator svg{-webkit-animation:spin 1s linear infinite;animation:spin 1s linear infinite}@-webkit-keyframes spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(1turn);transform:rotate(1turn)}}@keyframes spin{0%{-webkit-transform:rotate(0deg);transform:rotate(0deg)}to{-webkit-transform:rotate(1turn);transform:rotate(1turn)}}@-webkit-keyframes shake{10%,90%{-webkit-transform:translateX(-.0625em);transform:translateX(-.0625em)}20%,80%{-webkit-transform:translateX(.125em);transform:translateX(.125em)}30%,50%,70%{-webkit-transform:translateX(-.25em);transform:translateX(-.25em)}40%,60%{-webkit-transform:translateX(.25em);transform:translateX(.25em)}}@keyframes shake{10%,90%{-webkit-transform:translateX(-.0625em);transform:translateX(-.0625em)}20%,80%{-webkit-transform:translateX(.125em);transform:translateX(.125em)}30%,50%,70%{-webkit-transform:translateX(-.25em);transform:translateX(-.25em)}40%,60%{-webkit-transform:translateX(.25em);transform:translateX(.25em)}}@-webkit-keyframes fall{0%{opacity:0;-webkit-transform:scale(.5);transform:scale(.5);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}70%{opacity:1;-webkit-transform:scale(1.1);transform:scale(1.1);-webkit-animation-timing-function:ease-in-out;animation-timing-function:ease-in-out}to{-webkit-transform:scale(1);transform:scale(1);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}}@keyframes fall{0%{opacity:0;-webkit-transform:scale(.5);transform:scale(.5);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}70%{opacity:1;-webkit-transform:scale(1.1);transform:scale(1.1);-webkit-animation-timing-function:ease-in-out;animation-timing-function:ease-in-out}to{-webkit-transform:scale(1);transform:scale(1);-webkit-animation-timing-function:ease-out;animation-timing-function:ease-out}}.filepond--hopper[data-hopper-state=drag-over]>*{pointer-events:none}.filepond--progress-indicator{z-index:103}.filepond--file-action-button{z-index:102}.filepond--file-status{z-index:101}.filepond--file-info{z-index:100}.filepond--item{position:absolute;top:0;left:0;right:0;padding:0;margin:0 0 .5em;will-change:transform,opacity}.filepond--item>.filepond--panel{z-index:1}.filepond--item>.filepond--panel .filepond--panel-bottom{box-shadow:0 .0625em .125em -.0625em rgba(0,0,0,.25)}.filepond--item>.filepond--file-wrapper{position:relative;z-index:2}.filepond--item-panel{background-color:#64605e}[data-filepond-item-state=processing-complete] .filepond--item-panel{background-color:#369763}[data-filepond-item-state*=error] .filepond--item-panel,[data-filepond-item-state*=invalid] .filepond--item-panel{background-color:#c44e47}.filepond--item-panel{border-radius:.5em;transition:background-color .25s}.filepond--list-scroller{position:absolute;top:0;left:0;right:0;margin:0;will-change:transform}.filepond--list-scroller[data-state=overflow]{overflow-y:scroll;overflow-x:visible;-webkit-overflow-scrolling:touch}.filepond--list-scroller[data-state=overflow] .filepond--list{bottom:0;right:0}.filepond--list-scroller::-webkit-scrollbar{background:transparent}.filepond--list-scroller::-webkit-scrollbar:vertical{width:1em}.filepond--list-scroller::-webkit-scrollbar:horizontal{height:0}.filepond--list-scroller::-webkit-scrollbar-thumb{background-color:rgba(0,0,0,.3);border-radius:99999px;border:.3125em solid transparent;background-clip:content-box}.filepond--list{position:absolute;top:0;left:1em;right:1em;margin:0;padding:0;list-style-type:none;will-change:transform}.filepond--panel-root{border-radius:.5em;background-color:#f1f0ef}.filepond--panel{position:absolute;left:0;top:0;right:0;margin:0;height:auto!important;pointer-events:none}.filepond--panel[data-scalable=true]{-webkit-transform-style:preserve-3d;transform-style:preserve-3d;background-color:transparent!important;border:none!important}.filepond--panel[data-scalable=false]{bottom:0}.filepond--panel[data-scalable=false]>div{display:none}.filepond--panel-bottom,.filepond--panel-center,.filepond--panel-top{position:absolute;left:0;top:0;right:0;margin:0;padding:0}.filepond--panel-bottom,.filepond--panel-top{height:.5em}.filepond--panel-top{border-bottom-left-radius:0!important;border-bottom-right-radius:0!important;border-bottom:none!important}.filepond--panel-top:after{content:\"\";position:absolute;height:2px;left:0;right:0;bottom:-1px;background-color:inherit}.filepond--panel-bottom,.filepond--panel-center{will-change:transform;-webkit-backface-visibility:hidden;backface-visibility:hidden;-webkit-transform-origin:left top;transform-origin:left top;-webkit-transform:translate3d(0,.5em,0);transform:translate3d(0,.5em,0)}.filepond--panel-bottom{border-top-left-radius:0!important;border-top-right-radius:0!important;border-top:none!important}.filepond--panel-bottom:before{content:\"\";position:absolute;height:2px;left:0;right:0;top:-1px;background-color:inherit}.filepond--panel-center{height:100px!important;border-top:none!important;border-bottom:none!important;border-radius:0!important}.filepond--panel-center:not([style]){visibility:hidden}.filepond--progress-indicator{position:static;width:1.25em;height:1.25em;color:#fff;margin:0;pointer-events:none;will-change:transform,opacity}.filepond--progress-indicator svg{width:100%;height:100%}.filepond--progress-indicator path{fill:none;stroke:currentColor}.filepond--list-scroller{z-index:6}.filepond--drop-label{z-index:5}.filepond--drip{z-index:3}.filepond--root>.filepond--panel{z-index:2}.filepond--browser{z-index:1}.filepond--root{box-sizing:border-box;position:relative;margin-bottom:1em;padding-top:1em;font-size:1rem;line-height:normal;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;font-weight:450;text-align:left;text-rendering:optimizeLegibility;direction:ltr;contain:layout style size}.filepond--root *{font-size:inherit;box-sizing:inherit;line-height:inherit}", ""]);
+
+// exports
+
+
+/***/ }),
+/* 121 */
+/***/ (function(module, exports) {
+
+
+/**
+ * When source maps are enabled, `style-loader` uses a link element with a data-uri to
+ * embed the css on the page. This breaks all relative urls because now they are relative to a
+ * bundle instead of the current page.
+ *
+ * One solution is to only use full urls, but that may be impossible.
+ *
+ * Instead, this function "fixes" the relative urls to be absolute according to the current page location.
+ *
+ * A rudimentary test suite is located at `test/fixUrls.js` and can be run via the `npm test` command.
+ *
+ */
+
+module.exports = function (css) {
+  // get current location
+  var location = typeof window !== "undefined" && window.location;
+
+  if (!location) {
+    throw new Error("fixUrls requires window.location");
+  }
+
+	// blank or null?
+	if (!css || typeof css !== "string") {
+	  return css;
+  }
+
+  var baseUrl = location.protocol + "//" + location.host;
+  var currentDir = baseUrl + location.pathname.replace(/\/[^\/]*$/, "/");
+
+	// convert each url(...)
+	/*
+	This regular expression is just a way to recursively match brackets within
+	a string.
+
+	 /url\s*\(  = Match on the word "url" with any whitespace after it and then a parens
+	   (  = Start a capturing group
+	     (?:  = Start a non-capturing group
+	         [^)(]  = Match anything that isn't a parentheses
+	         |  = OR
+	         \(  = Match a start parentheses
+	             (?:  = Start another non-capturing groups
+	                 [^)(]+  = Match anything that isn't a parentheses
+	                 |  = OR
+	                 \(  = Match a start parentheses
+	                     [^)(]*  = Match anything that isn't a parentheses
+	                 \)  = Match a end parentheses
+	             )  = End Group
+              *\) = Match anything and then a close parens
+          )  = Close non-capturing group
+          *  = Match anything
+       )  = Close capturing group
+	 \)  = Match a close parens
+
+	 /gi  = Get all matches, not the first.  Be case insensitive.
+	 */
+	var fixedCss = css.replace(/url\s*\(((?:[^)(]|\((?:[^)(]+|\([^)(]*\))*\))*)\)/gi, function(fullMatch, origUrl) {
+		// strip quotes (if they exist)
+		var unquotedOrigUrl = origUrl
+			.trim()
+			.replace(/^"(.*)"$/, function(o, $1){ return $1; })
+			.replace(/^'(.*)'$/, function(o, $1){ return $1; });
+
+		// already a full url? no change
+		if (/^(#|data:|http:\/\/|https:\/\/|file:\/\/\/)/i.test(unquotedOrigUrl)) {
+		  return fullMatch;
+		}
+
+		// convert the url to a full url
+		var newUrl;
+
+		if (unquotedOrigUrl.indexOf("//") === 0) {
+		  	//TODO: should we add protocol?
+			newUrl = unquotedOrigUrl;
+		} else if (unquotedOrigUrl.indexOf("/") === 0) {
+			// path should be relative to the base url
+			newUrl = baseUrl + unquotedOrigUrl; // already starts with '/'
+		} else {
+			// path should be relative to current directory
+			newUrl = currentDir + unquotedOrigUrl.replace(/^\.\//, ""); // Strip leading './'
+		}
+
+		// send back the fixed url(...)
+		return "url(" + JSON.stringify(newUrl) + ")";
+	});
+
+	// send back the fixed css
+	return fixedCss;
+};
+
+
+/***/ }),
+/* 122 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+ * FilePondPluginFileValidateType 1.1.0
+ * Licensed under MIT, https://opensource.org/licenses/MIT
+ * Please visit https://pqina.nl/filepond for details.
+ */
+(function(global, factory) {
+   true
+    ? (module.exports = factory())
+    : typeof define === 'function' && define.amd
+      ? define(factory)
+      : (global.FilePondPluginFileValidateType = factory());
+})(this, function() {
+  'use strict';
+
+  var plugin$1 = function(_ref) {
+    var addFilter = _ref.addFilter,
+      utils = _ref.utils;
+
+    // get quick reference to Type utils
+    var Type = utils.Type,
+      isString = utils.isString,
+      replaceInString = utils.replaceInString,
+      guesstimateMimeType = utils.guesstimateMimeType,
+      getExtensionFromFilename = utils.getExtensionFromFilename,
+      getFilenameFromURL = utils.getFilenameFromURL;
+
+    var mimeTypeMatchesWildCard = function mimeTypeMatchesWildCard(
+      mimeType,
+      wildcard
+    ) {
+      var mimeTypeGroup = (/^[^/]+/.exec(mimeType) || []).pop(); // image/png -> image
+      var wildcardGroup = wildcard.slice(0, -2); // image/* -> image
+      return mimeTypeGroup === wildcardGroup;
+    };
+
+    var isValidMIMEType = function isValidMIMEType(
+      acceptedTypes,
+      userInputType
+    ) {
+      return acceptedTypes.some(function(acceptedType) {
+        // accepted is wildcard mime type
+        if (/\*$/.test(acceptedType)) {
+          return mimeTypeMatchesWildCard(userInputType, acceptedType);
+        }
+
+        // is normal mime type
+        return acceptedType === userInputType;
+      });
+    };
+
+    var validateFile = function validateFile(item, acceptedFileTypes) {
+      // no types defined, everything is allowed \o/
+      if (acceptedFileTypes.length === 0) {
+        return true;
+      }
+
+      // if the item is a url we guess the mime type by the extension
+      var type = '';
+      if (isString(item)) {
+        var filename = getFilenameFromURL(item);
+        var extension = getExtensionFromFilename(filename);
+        if (extension) {
+          type = guesstimateMimeType(extension);
+        } else {
+          return true;
+        }
+      } else {
+        type = item.type;
+      }
+
+      // validate file type
+      return isValidMIMEType(acceptedFileTypes, type);
+    };
+
+    var applyMimeTypeMap = function applyMimeTypeMap(map) {
+      return function(acceptedFileType) {
+        return map[acceptedFileType] === null
+          ? false
+          : map[acceptedFileType] || acceptedFileType;
+      };
+    };
+
+    // setup attribute mapping for accept
+    addFilter('SET_ATTRIBUTE_TO_OPTION_MAP', function(map) {
+      return Object.assign(map, {
+        accept: 'acceptedFileTypes'
+      });
+    });
+
+    // filtering if an item is allowed in hopper
+    addFilter('ALLOW_HOPPER_ITEM', function(file, _ref2) {
+      var query = _ref2.query;
+
+      // if we are not doing file type validation exit
+      if (!query('GET_ALLOW_FILE_TYPE_VALIDATION')) {
+        return true;
+      }
+
+      // we validate the file against the accepted file types
+      return validateFile(file, query('GET_ACCEPTED_FILE_TYPES'));
+    });
+
+    // called for each file that is loaded
+    // right before it is set to the item state
+    // should return a promise
+    addFilter('LOAD_FILE', function(file, _ref3) {
+      var query = _ref3.query;
+      return new Promise(function(resolve, reject) {
+        var allowFileTypeValidation = query('GET_ALLOW_FILE_TYPE_VALIDATION');
+        if (!allowFileTypeValidation) {
+          resolve(file);
+          return;
+        }
+
+        var acceptedFileTypes = query('GET_ACCEPTED_FILE_TYPES');
+
+        // if invalid, exit here
+        if (!validateFile(file, acceptedFileTypes)) {
+          var acceptedFileTypesMapped = acceptedFileTypes
+            .map(
+              applyMimeTypeMap(
+                query('GET_FILE_VALIDATE_TYPE_LABEL_EXPECTED_TYPES_MAP')
+              )
+            )
+            .filter(function(label) {
+              return label !== false;
+            });
+
+          reject({
+            status: {
+              main: query('GET_LABEL_FILE_TYPE_NOT_ALLOWED'),
+              sub: replaceInString(
+                query('GET_FILE_VALIDATE_TYPE_LABEL_EXPECTED_TYPES'),
+                {
+                  allTypes: acceptedFileTypesMapped.join(', '),
+                  allButLastType: acceptedFileTypesMapped
+                    .slice(0, -1)
+                    .join(', '),
+                  lastType:
+                    acceptedFileTypesMapped[acceptedFileTypesMapped.length - 1]
+                }
+              )
+            }
+          });
+          return;
+        }
+
+        // all fine
+        resolve(file);
+      });
+    });
+
+    // expose plugin
+    return {
+      // default options
+      options: {
+        // Enable or disable file type validation
+        allowFileTypeValidation: [true, Type.BOOLEAN],
+
+        // What file types to accept
+        acceptedFileTypes: [[], Type.ARRAY],
+        // - must be comma separated
+        // - mime types: image/png, image/jpeg, image/gif
+        // - extensions: .png, .jpg, .jpeg ( not enabled yet )
+        // - wildcards: image/*
+
+        // label to show when a type is not allowed
+        labelFileTypeNotAllowed: ['File is of invalid type', Type.STRING],
+
+        // nicer label
+        fileValidateTypeLabelExpectedTypes: [
+          'Expects {allButLastType} or {lastType}',
+          Type.STRING
+        ],
+
+        // map mime types to extensions
+        fileValidateTypeLabelExpectedTypesMap: [{}, Type.OBJECT]
+      }
+    };
+  };
+
+  if (typeof navigator !== 'undefined' && document) {
+    // plugin has loaded
+    document.dispatchEvent(
+      new CustomEvent('FilePond:pluginloaded', { detail: plugin$1 })
+    );
+  }
+
+  return plugin$1;
+});
+
+
+/***/ }),
+/* 123 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+ * FilePondPluginImagePreview 1.0.9
+ * Licensed under MIT, https://opensource.org/licenses/MIT
+ * Please visit https://pqina.nl/filepond for details.
+ */
+(function(global, factory) {
+   true
+    ? (module.exports = factory())
+    : typeof define === 'function' && define.amd
+      ? define(factory)
+      : (global.FilePondPluginImagePreview = factory());
+})(this, function() {
+  'use strict';
+
+  // test if file is of type image and can be viewed in canvas
+  var isPreviewableImage = function isPreviewableImage(file) {
+    return /^image/.test(file.type) && !/svg/.test(file.type);
+  };
+
+  var asyncGenerator = (function() {
+    function AwaitValue(value) {
+      this.value = value;
+    }
+
+    function AsyncGenerator(gen) {
+      var front, back;
+
+      function send(key, arg) {
+        return new Promise(function(resolve, reject) {
+          var request = {
+            key: key,
+            arg: arg,
+            resolve: resolve,
+            reject: reject,
+            next: null
+          };
+
+          if (back) {
+            back = back.next = request;
+          } else {
+            front = back = request;
+            resume(key, arg);
+          }
+        });
+      }
+
+      function resume(key, arg) {
+        try {
+          var result = gen[key](arg);
+          var value = result.value;
+
+          if (value instanceof AwaitValue) {
+            Promise.resolve(value.value).then(
+              function(arg) {
+                resume('next', arg);
+              },
+              function(arg) {
+                resume('throw', arg);
+              }
+            );
+          } else {
+            settle(result.done ? 'return' : 'normal', result.value);
+          }
+        } catch (err) {
+          settle('throw', err);
+        }
+      }
+
+      function settle(type, value) {
+        switch (type) {
+          case 'return':
+            front.resolve({
+              value: value,
+              done: true
+            });
+            break;
+
+          case 'throw':
+            front.reject(value);
+            break;
+
+          default:
+            front.resolve({
+              value: value,
+              done: false
+            });
+            break;
+        }
+
+        front = front.next;
+
+        if (front) {
+          resume(front.key, front.arg);
+        } else {
+          back = null;
+        }
+      }
+
+      this._invoke = send;
+
+      if (typeof gen.return !== 'function') {
+        this.return = undefined;
+      }
+    }
+
+    if (typeof Symbol === 'function' && Symbol.asyncIterator) {
+      AsyncGenerator.prototype[Symbol.asyncIterator] = function() {
+        return this;
+      };
+    }
+
+    AsyncGenerator.prototype.next = function(arg) {
+      return this._invoke('next', arg);
+    };
+
+    AsyncGenerator.prototype.throw = function(arg) {
+      return this._invoke('throw', arg);
+    };
+
+    AsyncGenerator.prototype.return = function(arg) {
+      return this._invoke('return', arg);
+    };
+
+    return {
+      wrap: function(fn) {
+        return function() {
+          return new AsyncGenerator(fn.apply(this, arguments));
+        };
+      },
+      await: function(value) {
+        return new AwaitValue(value);
+      }
+    };
+  })();
+
+  var toConsumableArray = function(arr) {
+    if (Array.isArray(arr)) {
+      for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++)
+        arr2[i] = arr[i];
+
+      return arr2;
+    } else {
+      return Array.from(arr);
+    }
+  };
+
+  var transforms = {
+    1: function _() {
+      return [1, 0, 0, 1, 0, 0];
+    },
+    2: function _(width) {
+      return [-1, 0, 0, 1, width, 0];
+    },
+    3: function _(width, height) {
+      return [-1, 0, 0, -1, width, height];
+    },
+    4: function _(width, height) {
+      return [1, 0, 0, -1, 0, height];
+    },
+    5: function _() {
+      return [0, 1, 1, 0, 0, 0];
+    },
+    6: function _(width, height) {
+      return [0, 1, -1, 0, height, 0];
+    },
+    7: function _(width, height) {
+      return [0, -1, -1, 0, height, width];
+    },
+    8: function _(width) {
+      return [0, -1, 1, 0, 0, width];
+    }
+  };
+
+  var fixImageOrientation = function fixImageOrientation(
+    ctx,
+    width,
+    height,
+    orientation
+  ) {
+    // no orientation supplied
+    if (orientation === -1) {
+      return;
+    }
+
+    ctx.transform.apply(
+      ctx,
+      toConsumableArray(transforms[orientation](width, height))
+    );
+  };
+
+  // draws the preview image
+  var createPreviewImage = function createPreviewImage(
+    data,
+    width,
+    height,
+    orientation
+  ) {
+    // round
+    width = Math.round(width);
+    height = Math.round(height);
+
+    // width and height have already been swapped earlier
+    // if orientation was in range below, let's swap back to make
+    // this code a bit more readable
+    if (orientation >= 5 && orientation <= 8) {
+      var _ref = [height, width];
+      width = _ref[0];
+      height = _ref[1];
+    }
+
+    // draw image
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext('2d');
+
+    // if is rotated incorrectly swap width and height
+    if (orientation >= 5 && orientation <= 8) {
+      canvas.width = height;
+      canvas.height = width;
+    } else {
+      canvas.width = width;
+      canvas.height = height;
+    }
+
+    // correct image orientation
+    ctx.save();
+    fixImageOrientation(ctx, width, height, orientation);
+
+    // draw the image
+    ctx.drawImage(data, 0, 0, width, height);
+
+    // end draw image
+    ctx.restore();
+
+    // data has been transferred to canvas ( if was ImageBitmap )
+    if ('close' in data) {
+      data.close();
+    }
+
+    return canvas;
+  };
+
+  var IMAGE_SCALE_SPRING_PROPS = {
+    type: 'spring',
+    stiffness: 0.5,
+    damping: 0.45,
+    mass: 10
+  };
+
+  var createImageView = function createImageView(fpAPI) {
+    return fpAPI.utils.createView({
+      name: 'image-preview',
+      tag: 'div',
+      ignoreRect: true,
+      create: function create(_ref) {
+        var root = _ref.root;
+
+        root.ref.clip = document.createElement('div');
+        root.element.appendChild(root.ref.clip);
+      },
+      write: fpAPI.utils.createRoute({
+        DID_IMAGE_PREVIEW_LOAD: function DID_IMAGE_PREVIEW_LOAD(_ref2) {
+          var root = _ref2.root,
+            props = _ref2.props,
+            action = _ref2.action;
+          var id = props.id;
+
+          // get item
+
+          var item = root.query('GET_ITEM', { id: props.id });
+
+          // orientation info
+          var exif = item.getMetadata('exif') || {};
+          var orientation = exif.orientation || -1;
+
+          // get width and height from action, and swap of orientation is incorrect
+          var _action$data = action.data,
+            width = _action$data.width,
+            height = _action$data.height;
+
+          if (orientation >= 5 && orientation <= 8) {
+            var _ref3 = [height, width];
+            width = _ref3[0];
+            height = _ref3[1];
+          }
+
+          // get item props
+          var crop = item.getMetadata('crop') || {
+            rect: {
+              x: 0,
+              y: 0,
+              width: 1,
+              height: 1
+            },
+            aspectRatio: height / width
+          };
+
+          // scale canvas based on pixel density
+          var pixelDensityFactor = window.devicePixelRatio;
+
+          // the max height of the preview container
+          var fixedPreviewHeight = root.query('GET_IMAGE_PREVIEW_HEIGHT');
+          var minPreviewHeight = root.query('GET_IMAGE_PREVIEW_MIN_HEIGHT');
+          var maxPreviewHeight = root.query('GET_IMAGE_PREVIEW_MAX_HEIGHT');
+
+          // calculate scaled preview image size
+          var containerWidth = root.rect.inner.width;
+          var previewImageRatio = height / width;
+          var previewWidth = containerWidth;
+          var previewHeight = containerWidth * previewImageRatio;
+
+          // calculate image preview height and width
+          var imageHeight =
+            fixedPreviewHeight !== null
+              ? fixedPreviewHeight
+              : Math.max(minPreviewHeight, Math.min(height, maxPreviewHeight));
+          var imageWidth = imageHeight / previewImageRatio;
+
+          // render scaled preview image
+          var previewImage = createPreviewImage(
+            action.data,
+            imageWidth * pixelDensityFactor,
+            imageHeight * pixelDensityFactor,
+            orientation
+          );
+
+          // calculate crop container size
+          var clipHeight =
+            fixedPreviewHeight !== null
+              ? fixedPreviewHeight
+              : Math.max(
+                  minPreviewHeight,
+                  Math.min(containerWidth * crop.aspectRatio, maxPreviewHeight)
+                );
+
+          var clipWidth = clipHeight / crop.aspectRatio;
+          if (clipWidth > previewWidth) {
+            clipWidth = previewWidth;
+            clipHeight = clipWidth * crop.aspectRatio;
+          }
+
+          // calculate scalar based on if the clip rectangle has been scaled down
+          var previewScalar = clipHeight / (previewHeight * crop.rect.height);
+
+          width = previewWidth * previewScalar;
+          height = previewHeight * previewScalar;
+          var x = -crop.rect.x * previewWidth * previewScalar;
+          var y = -crop.rect.y * previewHeight * previewScalar;
+
+          // apply styles
+          root.ref.clip.style.cssText =
+            '\n                    width: ' +
+            Math.round(clipWidth) +
+            'px;\n                    height: ' +
+            Math.round(clipHeight) +
+            'px;\n                ';
+
+          // position image
+          previewImage.style.cssText =
+            '\n                    width: ' +
+            Math.round(width) +
+            'px;\n                    height: ' +
+            Math.round(height) +
+            'px;\n                    transform: translate(' +
+            Math.round(x) +
+            'px, ' +
+            Math.round(y) +
+            'px) rotateZ(0.00001deg);\n                ';
+          root.ref.clip.appendChild(previewImage);
+
+          // let others know of our fabulous achievement (so the image can be faded in)
+          root.dispatch('DID_IMAGE_PREVIEW_DRAW', { id: id });
+        }
+      }),
+      mixins: {
+        styles: ['scaleX', 'scaleY', 'opacity'],
+        animations: {
+          scaleX: IMAGE_SCALE_SPRING_PROPS,
+          scaleY: IMAGE_SCALE_SPRING_PROPS,
+          opacity: { type: 'tween', duration: 750 }
+        }
+      }
+    });
+  };
+
+  var applyTemplate = function applyTemplate(source, target) {
+    // copy width and height
+    target.width = source.width;
+    target.height = source.height;
+
+    // draw the template
+    var ctx = target.getContext('2d');
+    ctx.drawImage(source, 0, 0);
+  };
+
+  var createImageOverlayView = function createImageOverlayView(fpAPI) {
+    return fpAPI.utils.createView({
+      name: 'image-preview-overlay',
+      tag: 'canvas',
+      ignoreRect: true,
+      create: function create(_ref) {
+        var root = _ref.root,
+          props = _ref.props;
+
+        applyTemplate(props.template, root.element);
+      },
+      mixins: {
+        styles: ['opacity'],
+        animations: {
+          opacity: { type: 'spring', mass: 25 }
+        }
+      }
+    });
+  };
+
+  /**
+   * Bitmap Worker
+   */
+  var BitmapWorker = function BitmapWorker() {
+    // route messages
+    self.onmessage = function(e) {
+      toBitmap(e.data.message, function(response) {
+        // imageBitmap is sent back as transferable
+        self.postMessage({ id: e.data.id, message: response }, [response]);
+      });
+    };
+
+    // resize image data
+    var toBitmap = function toBitmap(options, cb) {
+      fetch(options.file)
+        .then(function(response) {
+          return response.blob();
+        })
+        .then(function(blob) {
+          return createImageBitmap(blob);
+        })
+        .then(function(imageBitmap) {
+          return cb(imageBitmap);
+        });
+    };
+  };
+
+  var getImageSize = function getImageSize(url, cb) {
+    var image = new Image();
+    image.onload = function() {
+      var width = image.naturalWidth;
+      var height = image.naturalHeight;
+      image = null;
+      cb(width, height);
+    };
+    image.src = url;
+  };
+
+  var easeInOutSine = function easeInOutSine(t) {
+    return -0.5 * (Math.cos(Math.PI * t) - 1);
+  };
+
+  var addGradientSteps = function addGradientSteps(gradient, color) {
+    var alpha =
+      arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 1;
+    var easeFn =
+      arguments.length > 3 && arguments[3] !== undefined
+        ? arguments[3]
+        : easeInOutSine;
+    var steps =
+      arguments.length > 4 && arguments[4] !== undefined ? arguments[4] : 10;
+    var offset =
+      arguments.length > 5 && arguments[5] !== undefined ? arguments[5] : 0;
+
+    var range = 1 - offset;
+    var rgb = color.join(',');
+    for (var i = 0; i <= steps; i++) {
+      var p = i / steps;
+      var stop = offset + range * p;
+      gradient.addColorStop(
+        stop,
+        'rgba(' + rgb + ', ' + easeFn(p) * alpha + ')'
+      );
+    }
+  };
+
+  var drawTemplate = function drawTemplate(
+    canvas,
+    width,
+    height,
+    color,
+    alphaTarget
+  ) {
+    canvas.width = width;
+    canvas.height = height;
+    var ctx = canvas.getContext('2d');
+
+    var horizontalCenter = width * 0.5;
+
+    var grad = ctx.createRadialGradient(
+      horizontalCenter,
+      height + 110,
+      height - 100,
+      horizontalCenter,
+      height + 110,
+      height + 100
+    );
+
+    addGradientSteps(grad, color, alphaTarget, undefined, 8, 0.4);
+
+    ctx.save();
+    ctx.translate(-width * 0.5, 0);
+    ctx.scale(2, 1);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, width, height);
+    ctx.restore();
+  };
+
+  var hasNavigator = typeof navigator !== 'undefined';
+
+  var width = 500;
+  var height = 200;
+
+  var overlayTemplateShadow = hasNavigator && document.createElement('canvas');
+  var overlayTemplateError = hasNavigator && document.createElement('canvas');
+  var overlayTemplateSuccess = hasNavigator && document.createElement('canvas');
+
+  if (hasNavigator) {
+    drawTemplate(overlayTemplateShadow, width, height, [40, 40, 40], 0.85);
+    drawTemplate(overlayTemplateError, width, height, [196, 78, 71], 1);
+    drawTemplate(overlayTemplateSuccess, width, height, [54, 151, 99], 1);
+  }
+
+  var createImageWrapperView = function createImageWrapperView(fpAPI) {
+    // create overlay view
+    var overlay = createImageOverlayView(fpAPI);
+
+    /**
+     * Write handler for when preview container has been created
+     */
+    var didCreatePreviewContainer = function didCreatePreviewContainer(_ref) {
+      var root = _ref.root,
+        props = _ref.props;
+      var utils = fpAPI.utils;
+      var createView = utils.createView,
+        createWorker = utils.createWorker,
+        loadImage = utils.loadImage;
+      var id = props.id;
+
+      // we need to get the file data to determine the eventual image size
+
+      var item = root.query('GET_ITEM', id);
+
+      // get url to file (we'll revoke it later on when done)
+      var fileURL = URL.createObjectURL(item.file);
+
+      // fallback
+      var loadPreviewFallback = function loadPreviewFallback(
+        item,
+        width,
+        height,
+        orientation
+      ) {
+        // let's scale the image in the main thread :(
+        loadImage(fileURL).then(previewImageLoaded);
+      };
+
+      // image is now ready
+      var previewImageLoaded = function previewImageLoaded(data) {
+        // the file url is no longer needed
+        URL.revokeObjectURL(fileURL);
+
+        // the preview is now ready to be drawn
+        root.dispatch('DID_IMAGE_PREVIEW_LOAD', {
+          id: id,
+          data: data
+        });
+      };
+
+      // determine image size of this item
+      getImageSize(fileURL, function(width, height) {
+        // we can now scale the panel to the final size
+        root.dispatch('DID_IMAGE_PREVIEW_CALCULATE_SIZE', {
+          id: id,
+          width: width,
+          height: height
+        });
+
+        // if we support scaling using createImageBitmap we use a worker
+        if ('createImageBitmap' in window) {
+          // let's scale the image in a worker
+          var worker = createWorker(BitmapWorker);
+          worker.post(
+            {
+              file: fileURL
+            },
+            function(imageBitmap) {
+              // destroy worker
+              worker.terminate();
+
+              // no bitmap returned, must be something wrong,
+              // try the oldschool way
+              if (!imageBitmap) {
+                loadPreviewFallback(item);
+                return;
+              }
+
+              // yay we got our bitmap, let's continue showing the preview
+              previewImageLoaded(imageBitmap);
+            }
+          );
+        } else {
+          // create fallback preview
+          loadPreviewFallback(item);
+        }
+      });
+    };
+
+    /**
+     * Write handler for when the preview has been loaded
+     */
+    var didLoadPreview = function didLoadPreview(_ref2) {
+      var root = _ref2.root;
+
+      root.ref.overlayShadow.opacity = 1;
+    };
+
+    /**
+     * Write handler for when the preview image is ready to be animated
+     */
+    var didDrawPreview = function didDrawPreview(_ref3) {
+      var root = _ref3.root;
+      var image = root.ref.image;
+
+      // reveal image
+
+      image.scaleX = 1.0;
+      image.scaleY = 1.0;
+      image.opacity = 1;
+    };
+
+    /**
+     * Write handler for when the preview has been loaded
+     */
+    var restoreOverlay = function restoreOverlay(_ref4) {
+      var root = _ref4.root;
+
+      root.ref.overlayShadow.opacity = 1;
+      root.ref.overlayError.opacity = 0;
+      root.ref.overlaySuccess.opacity = 0;
+    };
+
+    var didThrowError = function didThrowError(_ref5) {
+      var root = _ref5.root;
+
+      root.ref.overlayShadow.opacity = 0.25;
+      root.ref.overlayError.opacity = 1;
+    };
+
+    var didCompleteProcessing = function didCompleteProcessing(_ref6) {
+      var root = _ref6.root;
+
+      root.ref.overlayShadow.opacity = 0.25;
+      root.ref.overlaySuccess.opacity = 1;
+    };
+
+    /**
+     * Constructor
+     */
+    var create = function create(_ref7) {
+      var root = _ref7.root,
+        props = _ref7.props;
+      var image = createImageView(fpAPI);
+
+      // append image presenter
+      root.ref.image = root.appendChildView(
+        root.createChildView(image, {
+          id: props.id,
+          scaleX: 1.25,
+          scaleY: 1.25,
+          opacity: 0
+        })
+      );
+
+      // image overlays
+      root.ref.overlayShadow = root.appendChildView(
+        root.createChildView(overlay, {
+          template: overlayTemplateShadow,
+          opacity: 0
+        })
+      );
+
+      root.ref.overlaySuccess = root.appendChildView(
+        root.createChildView(overlay, {
+          template: overlayTemplateSuccess,
+          opacity: 0
+        })
+      );
+
+      root.ref.overlayError = root.appendChildView(
+        root.createChildView(overlay, {
+          template: overlayTemplateError,
+          opacity: 0
+        })
+      );
+    };
+
+    return fpAPI.utils.createView({
+      name: 'image-preview-wrapper',
+      create: create,
+      write: fpAPI.utils.createRoute({
+        // image preview stated
+        DID_IMAGE_PREVIEW_LOAD: didLoadPreview,
+        DID_IMAGE_PREVIEW_DRAW: didDrawPreview,
+        DID_IMAGE_PREVIEW_CONTAINER_CREATE: didCreatePreviewContainer,
+
+        // file states
+        DID_THROW_ITEM_LOAD_ERROR: didThrowError,
+        DID_THROW_ITEM_PROCESSING_ERROR: didThrowError,
+        DID_THROW_ITEM_INVALID: didThrowError,
+        DID_COMPLETE_ITEM_PROCESSING: didCompleteProcessing,
+        DID_START_ITEM_PROCESSING: restoreOverlay,
+        DID_REVERT_ITEM_PROCESSING: restoreOverlay
+      })
+    });
+  };
+
+  /**
+   * Image Preview Plugin
+   */
+  var plugin$1 = function(fpAPI) {
+    var addFilter = fpAPI.addFilter,
+      utils = fpAPI.utils;
+    var Type = utils.Type,
+      createRoute = utils.createRoute;
+
+    // imagePreviewView
+
+    var imagePreviewView = createImageWrapperView(fpAPI);
+
+    // called for each view that is created right after the 'create' method
+    addFilter('CREATE_VIEW', function(viewAPI) {
+      // get reference to created view
+      var is = viewAPI.is,
+        view = viewAPI.view,
+        query = viewAPI.query;
+
+      // only hook up to item view and only if is enabled for this cropper
+
+      if (!is('file') || !query('GET_ALLOW_IMAGE_PREVIEW')) {
+        return;
+      }
+
+      // create the image preview plugin, but only do so if the item is an image
+      var didLoadItem = function didLoadItem(_ref) {
+        var root = _ref.root,
+          props = _ref.props;
+        var id = props.id;
+
+        var item = query('GET_ITEM', id);
+
+        // item could theoretically have been removed in the mean time
+        if (!item) {
+          return;
+        }
+
+        // get the file object
+        var file = item.file;
+
+        // exit if this is not an image
+        if (!isPreviewableImage(file)) {
+          return;
+        }
+
+        // exit if image size is too high and no createImageBitmap support
+        // this would simply bring the browser to its knees and that is not what we want
+        var supportsCreateImageBitmap = 'createImageBitmap' in (window || {});
+        var maxPreviewFileSize = query('GET_IMAGE_PREVIEW_MAX_FILE_SIZE');
+        if (
+          !supportsCreateImageBitmap &&
+          maxPreviewFileSize &&
+          file.size > maxPreviewFileSize
+        ) {
+          return;
+        }
+
+        // set preview view
+        root.ref.imagePreview = view.appendChildView(
+          view.createChildView(imagePreviewView, { id: id })
+        );
+
+        // now ready
+        root.dispatch('DID_IMAGE_PREVIEW_CONTAINER_CREATE', { id: id });
+      };
+
+      var didCalculatePreviewSize = function didCalculatePreviewSize(_ref2) {
+        var root = _ref2.root,
+          props = _ref2.props,
+          action = _ref2.action;
+
+        // get item
+        var item = root.query('GET_ITEM', { id: props.id });
+
+        // orientation info
+        var exif = item.getMetadata('exif') || {};
+        var orientation = exif.orientation || -1;
+
+        // get width and height from action, and swap of orientation is incorrect
+        var width = action.width,
+          height = action.height;
+
+        if (orientation >= 5 && orientation <= 8) {
+          var _ref3 = [height, width];
+          width = _ref3[0];
+          height = _ref3[1];
+        }
+
+        // we need the item to get to the crop size
+        var crop = item.getMetadata('crop') || {
+          rect: {
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 1
+          },
+          aspectRatio: height / width
+        };
+
+        // get height min and max
+        var fixedPreviewHeight = root.query('GET_IMAGE_PREVIEW_HEIGHT');
+        var minPreviewHeight = root.query('GET_IMAGE_PREVIEW_MIN_HEIGHT');
+        var maxPreviewHeight = root.query('GET_IMAGE_PREVIEW_MAX_HEIGHT');
+
+        // const crop width
+        height =
+          fixedPreviewHeight !== null
+            ? fixedPreviewHeight
+            : Math.max(minPreviewHeight, Math.min(height, maxPreviewHeight));
+
+        width = height / crop.aspectRatio;
+        if (width > root.rect.element.width) {
+          width = root.rect.element.width;
+          height = width * crop.aspectRatio;
+        }
+
+        // set height
+        root.ref.imagePreview.element.style.cssText =
+          'height:' + Math.round(height) + 'px';
+      };
+
+      // start writing
+      view.registerWriter(
+        createRoute({
+          DID_LOAD_ITEM: didLoadItem,
+          DID_IMAGE_PREVIEW_CALCULATE_SIZE: didCalculatePreviewSize
+        })
+      );
+    });
+
+    // expose plugin
+    return {
+      options: {
+        // Enable or disable image preview
+        allowImagePreview: [true, Type.BOOLEAN],
+
+        // Fixed preview height
+        imagePreviewHeight: [null, Type.INT],
+
+        // Min image height
+        imagePreviewMinHeight: [44, Type.INT],
+
+        // Max image height
+        imagePreviewMaxHeight: [256, Type.INT],
+
+        // Max size of preview file for when createImageBitmap is not supported
+        imagePreviewMaxFileSize: [null, Type.INT]
+      }
+    };
+  };
+
+  if (typeof navigator !== 'undefined' && document) {
+    // plugin has loaded
+    document.dispatchEvent(
+      new CustomEvent('FilePond:pluginloaded', { detail: plugin$1 })
+    );
+  }
+
+  return plugin$1;
+});
+
+
+/***/ }),
+/* 124 */
+/***/ (function(module, exports, __webpack_require__) {
+
+// style-loader: Adds some css to the DOM by adding a <style> tag
+
+// load the styles
+var content = __webpack_require__(125);
+if(typeof content === 'string') content = [[module.i, content, '']];
+// Prepare cssTransformation
+var transform;
+
+var options = {}
+options.transform = transform
+// add the styles to the DOM
+var update = __webpack_require__(43)(content, options);
+if(content.locals) module.exports = content.locals;
+// Hot Module Replacement
+if(false) {
+	// When the styles change, update the <style> tags
+	if(!content.locals) {
+		module.hot.accept("!!../../css-loader/index.js!./filepond-plugin-image-preview.css", function() {
+			var newContent = require("!!../../css-loader/index.js!./filepond-plugin-image-preview.css");
+			if(typeof newContent === 'string') newContent = [[module.id, newContent, '']];
+			update(newContent);
+		});
+	}
+	// When the module is disposed, remove the <style> tags
+	module.hot.dispose(function() { update(); });
+}
+
+/***/ }),
+/* 125 */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(21)(false);
+// imports
+
+
+// module
+exports.push([module.i, "/*\n * FilePondPluginImagePreview 1.0.9\n * Licensed under MIT, https://opensource.org/licenses/MIT\n * Please visit https://pqina.nl/filepond for details.\n */\n.filepond--image-preview-wrapper {\n  z-index: 2;\n}\n\n.filepond--image-preview-overlay {\n  display: block;\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  min-height: 5rem;\n  max-height: 7rem;\n  margin: 0;\n  opacity: 0;\n  z-index: 1;\n  mix-blend-mode: multiply;\n  pointer-events: none;\n  -webkit-user-select: none;\n  -moz-user-select: none;\n  -ms-user-select: none;\n  user-select: none;\n}\n\n.filepond--image-preview-overlay:nth-of-type(2) {\n  mix-blend-mode: normal;\n}\n\n.filepond--image-preview-overlay:nth-of-type(3) {\n  mix-blend-mode: normal;\n}\n\n@supports (-webkit-marquee-repetition: infinite) and (object-fit: fill) {\n  .filepond--image-preview-overlay {\n    mix-blend-mode: normal;\n  }\n}\n\n.filepond--image-preview-wrapper {\n  pointer-events: none;\n  position: absolute;\n  left: 0;\n  top: 0;\n  right: 0;\n  margin: 0;\n  border-radius: 0.45em;\n  overflow: hidden;\n  background: rgba(0, 0, 0, 0.01);\n}\n\n.filepond--image-preview {\n  position: relative;\n  z-index: 1;\n  display: block;\n  width: 100%;\n  height: auto;\n  pointer-events: none;\n  -webkit-transform-origin: center center;\n  transform-origin: center center;\n  background: #222;\n  will-change: transform, opacity;\n}\n.filepond--image-preview div {\n  position: relative;\n  overflow: hidden;\n  margin: 0 auto;\n}\n.filepond--image-preview canvas {\n  position: absolute;\n  left: 0;\n  top: 0;\n  will-change: transform;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+/* 126 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/*
+ * FilePondPluginFileValidateSize 1.0.3
+ * Licensed under MIT, https://opensource.org/licenses/MIT
+ * Please visit https://pqina.nl/filepond for details.
+ */
+(function(global, factory) {
+   true
+    ? (module.exports = factory())
+    : typeof define === 'function' && define.amd
+      ? define(factory)
+      : (global.FilePondPluginFileValidateSize = factory());
+})(this, function() {
+  'use strict';
+
+  var plugin$1 = function(_ref) {
+    var addFilter = _ref.addFilter,
+      utils = _ref.utils;
+
+    // get quick reference to Type utils
+    var Type = utils.Type,
+      replaceInString = utils.replaceInString,
+      toNaturalFileSize = utils.toNaturalFileSize;
+
+    // filtering if an item is allowed in hopper
+
+    addFilter('ALLOW_HOPPER_ITEM', function(file, _ref2) {
+      var query = _ref2.query;
+
+      if (!query('GET_ALLOW_FILE_SIZE_VALIDATION')) {
+        return true;
+      }
+
+      var sizeMax = query('GET_MAX_FILE_SIZE');
+      if (sizeMax !== null && file.size > sizeMax) {
+        return false;
+      }
+      return true;
+    });
+
+    // called for each file that is loaded
+    // right before it is set to the item state
+    // should return a promise
+    addFilter('LOAD_FILE', function(file, _ref3) {
+      var query = _ref3.query;
+      return new Promise(function(resolve, reject) {
+        // if not allowed, all fine, exit
+        if (!query('GET_ALLOW_FILE_SIZE_VALIDATION')) {
+          resolve(file);
+          return;
+        }
+
+        // reject or resolve based on file size
+        var sizeMax = query('GET_MAX_FILE_SIZE');
+        if (sizeMax !== null && file.size > sizeMax) {
+          reject({
+            status: {
+              main: query('GET_LABEL_MAX_FILE_SIZE_EXCEEDED'),
+              sub: replaceInString(query('GET_LABEL_MAX_FILE_SIZE'), {
+                filesize: toNaturalFileSize(sizeMax)
+              })
+            }
+          });
+          return;
+        }
+
+        // returns the current option value
+        var totalSizeMax = query('GET_MAX_TOTAL_FILE_SIZE');
+        if (totalSizeMax !== null) {
+          // get the current total file size
+          var currentTotalSize = query('GET_ITEMS').reduce(function(
+            total,
+            item
+          ) {
+            return total + item.fileSize;
+          },
+          0);
+
+          // get the size of the new file
+          if (currentTotalSize + file.size > totalSizeMax) {
+            reject({
+              status: {
+                main: query('GET_LABEL_MAX_TOTAL_FILE_SIZE_EXCEEDED'),
+                sub: replaceInString(query('GET_LABEL_MAX_TOTAL_FILE_SIZE'), {
+                  filesize: toNaturalFileSize(totalSizeMax)
+                })
+              }
+            });
+            return;
+          }
+        }
+
+        // file is fine, let's pass it back
+        resolve(file);
+      });
+    });
+
+    return {
+      options: {
+        // Enable or disable file type validation
+        allowFileSizeValidation: [true, Type.BOOLEAN],
+
+        // Max individual file size in bytes
+        maxFileSize: [null, Type.INT],
+
+        // Max total file size in bytes
+        maxTotalFileSize: [null, Type.INT],
+
+        // error labels
+        labelMaxFileSizeExceeded: ['File is too large', Type.STRING],
+        labelMaxFileSize: ['Maximum file size is {filesize}', Type.STRING],
+        labelMaxTotalFileSizeExceeded: [
+          'Maximum total size exceeded',
+          Type.STRING
+        ],
+        labelMaxTotalFileSize: [
+          'Maximum total file size is {filesize}',
+          Type.STRING
+        ]
+      }
+    };
+  };
+
+  if (typeof navigator !== 'undefined' && document) {
+    // plugin has loaded
+    document.dispatchEvent(
+      new CustomEvent('FilePond:pluginloaded', { detail: plugin$1 })
+    );
+  }
+
+  return plugin$1;
+});
+
+
+/***/ }),
+/* 127 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -18553,65 +28928,20 @@ var render = function() {
           [_vm._v("Product Images")]
         ),
         _vm._v(" "),
-        _c(
-          "label",
-          {
-            staticClass:
-              "border border-2 border-grey-light border-dashed hover:bg-grey-light w-full h-32 rounded relative flex items-center justify-center",
-            attrs: { for: "product_images" }
-          },
-          [
-            _c("span", { staticClass: "text-grey-darker text-lg" }, [
-              _vm._v("Drop images here or click to choose")
-            ]),
-            _vm._v(" "),
-            _c("input", {
-              staticClass:
-                "cursor-pointer absolute opacity-0 pin w-full h-full",
-              attrs: {
-                type: "file",
-                multiple: "",
-                accept: "image/*",
-                id: "product_images"
-              },
-              on: {
-                change: _vm.onImagesChange,
-                dragenter: _vm.toggleHoverStyles,
-                dragleave: _vm.toggleHoverStyles,
-                drop: _vm.toggleHoverStyles
-              }
-            })
-          ]
-        ),
-        _vm._v(" "),
-        _vm._l(_vm.product_images, function(image, index) {
-          return _c("div", { key: image.content.name, staticClass: "mt-2" }, [
-            _c("img", {
-              attrs: { src: image.preview, width: "75px", height: "75px" },
-              on: {
-                load: function($event) {
-                  _vm.removeFromMemory(image.preview)
-                }
-              }
-            }),
-            _vm._v(
-              "\n            " + _vm._s(image.content.name) + "\n            "
-            ),
-            _c(
-              "button",
-              {
-                staticClass:
-                  "border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10",
-                attrs: { type: "button" },
-                on: {
-                  click: function($event) {
-                    _vm.removeImage(index)
-                  }
-                }
-              },
-              [_vm._v("×")]
-            )
-          ])
+        _c("file-pond", {
+          ref: "pond",
+          attrs: {
+            name: "product_images",
+            "label-idle": "Drop files here or click to select...",
+            required: "true",
+            "allow-multiple": "true",
+            dropOnPage: "true",
+            dropOnElement: "false",
+            allowImagePreview: "true",
+            imagePreviewHeight: "75",
+            "accepted-file-types": "image/*",
+            maxFileSize: "10MB"
+          }
         }),
         _vm._v(" "),
         _c(
@@ -18916,15 +29246,15 @@ if (false) {
 }
 
 /***/ }),
-/* 117 */
+/* 128 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(17)
 /* script */
-var __vue_script__ = __webpack_require__(118)
+var __vue_script__ = __webpack_require__(129)
 /* template */
-var __vue_template__ = __webpack_require__(119)
+var __vue_template__ = __webpack_require__(130)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -18963,7 +29293,7 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 118 */
+/* 129 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -19033,7 +29363,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 119 */
+/* 130 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -19070,15 +29400,15 @@ if (false) {
 }
 
 /***/ }),
-/* 120 */
+/* 131 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var disposed = false
 var normalizeComponent = __webpack_require__(17)
 /* script */
-var __vue_script__ = __webpack_require__(121)
+var __vue_script__ = __webpack_require__(132)
 /* template */
-var __vue_template__ = __webpack_require__(232)
+var __vue_template__ = __webpack_require__(243)
 /* template functional */
 var __vue_template_functional__ = false
 /* styles */
@@ -19117,12 +29447,12 @@ module.exports = Component.exports
 
 
 /***/ }),
-/* 121 */
+/* 132 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__ = __webpack_require__(122);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__ = __webpack_require__(133);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_braintree_web_drop_in__);
 //
 //
@@ -19177,7 +29507,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 });
 
 /***/ }),
-/* 122 */
+/* 133 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19286,9 +29616,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
  * </form>
  */
 
-var Dropin = __webpack_require__(123);
-var client = __webpack_require__(43);
-var createFromScriptTag = __webpack_require__(229);
+var Dropin = __webpack_require__(134);
+var client = __webpack_require__(45);
+var createFromScriptTag = __webpack_require__(240);
 var constants = __webpack_require__(2);
 var analytics = __webpack_require__(14);
 var DropinError = __webpack_require__(8);
@@ -19726,7 +30056,7 @@ module.exports = {
 
 
 /***/ }),
-/* 123 */
+/* 134 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -19736,22 +30066,22 @@ var assign = __webpack_require__(10).assign;
 var analytics = __webpack_require__(14);
 var constants = __webpack_require__(2);
 var DropinError = __webpack_require__(8);
-var DropinModel = __webpack_require__(147);
-var EventEmitter = __webpack_require__(55);
-var isGuestCheckout = __webpack_require__(56);
-var assets = __webpack_require__(26);
+var DropinModel = __webpack_require__(158);
+var EventEmitter = __webpack_require__(57);
+var isGuestCheckout = __webpack_require__(58);
+var assets = __webpack_require__(27);
 
-var MainView = __webpack_require__(218);
-var paymentMethodsViewID = __webpack_require__(72).ID;
-var paymentOptionsViewID = __webpack_require__(73).ID;
+var MainView = __webpack_require__(229);
+var paymentMethodsViewID = __webpack_require__(74).ID;
+var paymentOptionsViewID = __webpack_require__(75).ID;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var translations = __webpack_require__(69).translations;
-var isUtf8 = __webpack_require__(65);
-var uuid = __webpack_require__(74);
+var translations = __webpack_require__(71).translations;
+var isUtf8 = __webpack_require__(67);
+var uuid = __webpack_require__(76);
 var Promise = __webpack_require__(5);
-var sanitizeHtml = __webpack_require__(221);
-var DataCollector = __webpack_require__(222);
-var ThreeDSecure = __webpack_require__(223);
+var sanitizeHtml = __webpack_require__(232);
+var DataCollector = __webpack_require__(233);
+var ThreeDSecure = __webpack_require__(234);
 var wrapPrototype = __webpack_require__(3).wrapPrototype;
 
 var mainHTML = "<div class=\"braintree-dropin\">\n  <div data-braintree-id=\"methods-label\" class=\"braintree-heading\">&nbsp;</div>\n  <div data-braintree-id=\"choose-a-way-to-pay\" class=\"braintree-heading\">{{chooseAWayToPay}}</div>\n  <div class=\"braintree-placeholder\">&nbsp;</div>\n\n  <div data-braintree-id=\"upper-container\" class=\"braintree-upper-container\">\n    <div data-braintree-id=\"loading-container\" class=\"braintree-loader__container\">\n      <div data-braintree-id=\"loading-indicator\" class=\"braintree-loader__indicator\">\n        <svg width=\"14\" height=\"16\" class=\"braintree-loader__lock\">\n          <use xlink:href=\"#iconLockLoader\"></use>\n        </svg>\n      </div>\n    </div>\n\n    <div data-braintree-id=\"methods\" class=\"braintree-methods braintree-methods-initial\">\n      <div data-braintree-id=\"methods-container\"></div>\n    </div>\n\n    <div data-braintree-id=\"options\" class=\"braintree-test-class braintree-options braintree-options-initial\">\n      <div data-braintree-id=\"payment-options-container\" class=\"braintree-options-list\"></div>\n    </div>\n\n    <div data-braintree-id=\"sheet-container\" class=\"braintree-sheet__container\">\n      <div data-braintree-id=\"paypal\" class=\"braintree-paypal braintree-sheet\">\n        <div data-braintree-id=\"paypal-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPal\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"paypalCredit\" class=\"braintree-paypalCredit braintree-sheet\">\n        <div data-braintree-id=\"paypal-credit-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\">\n                <use xlink:href=\"#logoPayPalCredit\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{PayPal Credit}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"paypal-credit-button\" class=\"braintree-sheet__button--paypal\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"applePay\" class=\"braintree-applePay braintree-sheet\">\n        <div data-braintree-id=\"apple-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoApplePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Apple Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <div data-braintree-id=\"apple-pay-button\" class=\"braintree-sheet__button--apple-pay apple-pay-button\"></div>\n        </div>\n      </div>\n      <div data-braintree-id=\"googlePay\" class=\"braintree-googlePay braintree-sheet\">\n        <div data-braintree-id=\"google-pay-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoGooglePay\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Google Pay}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <button type=\"button\" data-braintree-id=\"google-pay-button\" class=\"braintree-sheet__button--google-pay google-pay-button\"></button>\n        </div>\n      </div>\n      <div data-braintree-id=\"venmo\" class=\"braintree-venmo braintree-sheet\">\n        <div data-braintree-id=\"venmo-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg height=\"24\" width=\"40\">\n              <use xlink:href=\"#logoVenmo\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__label\">{{Venmo}}</div>\n          </div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--button\">\n          <svg data-braintree-id=\"venmo-button\" class=\"braintree-sheet__button--venmo\">\n            <use xlink:href=\"#buttonVenmo\"></use>\n          </svg>\n        </div>\n      </div>\n      <div data-braintree-id=\"card\" class=\"braintree-card braintree-form braintree-sheet\">\n        <div data-braintree-id=\"card-sheet-header\" class=\"braintree-sheet__header\">\n          <div class=\"braintree-sheet__header-label\">\n            <div class=\"braintree-sheet__logo--header\">\n              <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                <use xlink:href=\"#iconCardFront\"></use>\n              </svg>\n            </div>\n            <div class=\"braintree-sheet__text\">{{payWithCard}}</div>\n          </div>\n          <div data-braintree-id=\"card-view-icons\" class=\"braintree-sheet__icons\"></div>\n        </div>\n        <div class=\"braintree-sheet__content braintree-sheet__content--form\">\n          <div data-braintree-id=\"cardholder-name-field-group\" class=\"braintree-form__field-group\">\n            <label for=\"braintree__card-view-input__cardholder-name\">\n              <div class=\"braintree-form__label\">{{cardholderNameLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-cardholder-name braintree-form__hosted-field\">\n                  <input id=\"braintree__card-view-input__cardholder-name\" type=\"text\" placeholder=\"{{cardholderNamePlaceholder}}\"/>\n                </div>\n                <div class=\"braintree-form__icon-container\">\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"cardholder-name-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n          <div data-braintree-id=\"number-field-group\" class=\"braintree-form__field-group\">\n            <label>\n              <div class=\"braintree-form__label\">{{cardNumberLabel}}</div>\n              <div class=\"braintree-form__field\">\n                <div class=\"braintree-form-number braintree-form__hosted-field\"></div>\n                <div class=\"braintree-form__icon-container\">\n                  <div data-braintree-id=\"card-number-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                    <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                    <use data-braintree-id=\"card-number-icon-svg\" xlink:href=\"#iconCardFront\"></use>\n                    </svg>\n                  </div>\n                  <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                    <svg width=\"24\" height=\"24\">\n                      <use xlink:href=\"#iconError\"></use>\n                    </svg>\n                  </div>\n                </div>\n              </div>\n            </label>\n            <div data-braintree-id=\"number-field-error\" class=\"braintree-form__field-error\"></div>\n          </div>\n\n          <div class=\"braintree-form__flexible-fields\">\n            <div data-braintree-id=\"expiration-date-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{expirationDateLabel}}\n                  <span class=\"braintree-form__descriptor\">{{expirationDateLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-expiration\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n\n                <div data-braintree-id=\"expiration-date-field-error\" class=\"braintree-form__field-error\"></div>\n              </div>\n            </label>\n\n            <div data-braintree-id=\"cvv-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{cvvLabel}}\n                  <span data-braintree-id=\"cvv-label-descriptor\" class=\"braintree-form__descriptor\">{{cvvThreeDigitLabelSubheading}}</span>\n                </div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-cvv\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div data-braintree-id=\"cvv-icon\" class=\"braintree-form__icon braintree-form__field-secondary-icon\">\n                      <svg width=\"40\" height=\"24\" class=\"braintree-icon--bordered\">\n                      <use data-braintree-id=\"cvv-icon-svg\" xlink:href=\"#iconCVVBack\"></use>\n                      </svg>\n                    </div>\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"cvv-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n\n            <div data-braintree-id=\"postal-code-field-group\" class=\"braintree-form__field-group\">\n              <label>\n                <div class=\"braintree-form__label\">{{postalCodeLabel}}</div>\n                <div class=\"braintree-form__field\">\n                  <div class=\"braintree-form__hosted-field braintree-form-postal-code\"></div>\n                  <div class=\"braintree-form__icon-container\">\n                    <div class=\"braintree-form__icon braintree-form__field-error-icon\">\n                      <svg width=\"24\" height=\"24\">\n                        <use xlink:href=\"#iconError\"></use>\n                      </svg>\n                    </div>\n                  </div>\n                </div>\n              </label>\n              <div data-braintree-id=\"postal-code-field-error\" class=\"braintree-form__field-error\"></div>\n            </div>\n          </div>\n        </div>\n      </div>\n      <div data-braintree-id=\"sheet-error\" class=\"braintree-sheet__error\">\n        <div class=\"braintree-form__icon braintree-sheet__error-icon\">\n          <svg width=\"24\" height=\"24\">\n            <use xlink:href=\"#iconError\"></use>\n          </svg>\n        </div>\n        <div data-braintree-id=\"sheet-error-text\" class=\"braintree-sheet__error-text\"></div>\n      </div>\n    </div>\n  </div>\n\n  <div data-braintree-id=\"lower-container\" class=\"braintree-test-class braintree-options braintree-hidden\">\n    <div data-braintree-id=\"other-ways-to-pay\" class=\"braintree-heading\">{{otherWaysToPay}}</div>\n  </div>\n\n  <div data-braintree-id=\"toggle\" class=\"braintree-toggle braintree-hidden\" tabindex=\"0\">\n    <span>{{chooseAnotherWayToPay}}</span>\n  </div>\n</div>\n<div data-braintree-id=\"disable-wrapper\" class=\"braintree-dropin__disabled braintree-hidden\"></div>\n";
@@ -20524,26 +30854,26 @@ module.exports = wrapPrototype(Dropin);
 
 
 /***/ }),
-/* 124 */
+/* 135 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var GraphQL = __webpack_require__(44);
-var request = __webpack_require__(46);
-var isWhitelistedDomain = __webpack_require__(48);
+var GraphQL = __webpack_require__(46);
+var request = __webpack_require__(48);
+var isWhitelistedDomain = __webpack_require__(50);
 var BraintreeError = __webpack_require__(1);
-var convertToBraintreeError = __webpack_require__(49);
-var addMetadata = __webpack_require__(50);
+var convertToBraintreeError = __webpack_require__(51);
+var addMetadata = __webpack_require__(52);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var once = __webpack_require__(28);
-var deferred = __webpack_require__(53);
+var once = __webpack_require__(29);
+var deferred = __webpack_require__(55);
 var assign = __webpack_require__(11).assign;
 var analytics = __webpack_require__(7);
-var constants = __webpack_require__(30);
-var errors = __webpack_require__(54);
+var constants = __webpack_require__(31);
+var errors = __webpack_require__(56);
 var sharedErrors = __webpack_require__(19);
 var VERSION = __webpack_require__(18).VERSION;
 var methods = __webpack_require__(12);
@@ -20889,13 +31219,13 @@ module.exports = Client;
 
 
 /***/ }),
-/* 125 */
+/* 136 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var isIE11 = __webpack_require__(126);
+var isIE11 = __webpack_require__(137);
 
 module.exports = function isIE(ua) {
   ua = ua || global.navigator.userAgent;
@@ -20905,7 +31235,7 @@ module.exports = function isIE(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 126 */
+/* 137 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -20918,15 +31248,15 @@ module.exports = function isIe11(ua) {
 
 
 /***/ }),
-/* 127 */
+/* 138 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var head;
-var uuid = __webpack_require__(23);
-var querystring = __webpack_require__(29);
+var uuid = __webpack_require__(24);
+var querystring = __webpack_require__(30);
 var timeouts = {};
 
 function _removeScript(script) {
@@ -21034,21 +31364,21 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 128 */
+/* 139 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var querystring = __webpack_require__(29);
-var browserDetection = __webpack_require__(45);
+var querystring = __webpack_require__(30);
+var browserDetection = __webpack_require__(47);
 var assign = __webpack_require__(11).assign;
-var prepBody = __webpack_require__(129);
-var parseBody = __webpack_require__(130);
-var xhr = __webpack_require__(131);
+var prepBody = __webpack_require__(140);
+var parseBody = __webpack_require__(141);
+var xhr = __webpack_require__(142);
 var isXHRAvailable = xhr.isAvailable;
-var GraphQLRequest = __webpack_require__(132);
-var DefaultRequest = __webpack_require__(137);
+var GraphQLRequest = __webpack_require__(143);
+var DefaultRequest = __webpack_require__(148);
 
 var MAX_TCP_RETRYCOUNT = 1;
 var TCP_PRECONNECT_BUG_STATUS_CODE = 408;
@@ -21197,7 +31527,7 @@ module.exports = {
 
 
 /***/ }),
-/* 129 */
+/* 140 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21217,7 +31547,7 @@ module.exports = function (method, body) {
 
 
 /***/ }),
-/* 130 */
+/* 141 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21233,7 +31563,7 @@ module.exports = function (body) {
 
 
 /***/ }),
-/* 131 */
+/* 142 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21253,21 +31583,21 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 132 */
+/* 143 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var BRAINTREE_VERSION = __webpack_require__(30).BRAINTREE_VERSION;
+var BRAINTREE_VERSION = __webpack_require__(31).BRAINTREE_VERSION;
 
 var assign = __webpack_require__(11).assign;
 
-var creditCardTokenizationBodyGenerator = __webpack_require__(133);
-var creditCardTokenizationResponseAdapter = __webpack_require__(134);
+var creditCardTokenizationBodyGenerator = __webpack_require__(144);
+var creditCardTokenizationResponseAdapter = __webpack_require__(145);
 
-var configurationBodyGenerator = __webpack_require__(135);
-var configurationResponseAdapter = __webpack_require__(136);
+var configurationBodyGenerator = __webpack_require__(146);
+var configurationResponseAdapter = __webpack_require__(147);
 
 var generators = {
   'payment_methods/credit_cards': creditCardTokenizationBodyGenerator,
@@ -21407,7 +31737,7 @@ module.exports = GraphQLRequest;
 
 
 /***/ }),
-/* 133 */
+/* 144 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21496,13 +31826,13 @@ module.exports = creditCardTokenization;
 
 
 /***/ }),
-/* 134 */
+/* 145 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorResponseAdapter = __webpack_require__(47);
+var errorResponseAdapter = __webpack_require__(49);
 
 var CARD_BRAND_MAP = {
   /* eslint-disable camelcase */
@@ -21582,7 +31912,7 @@ module.exports = creditCardTokenizationResponseAdapter;
 
 
 /***/ }),
-/* 135 */
+/* 146 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21674,13 +32004,13 @@ module.exports = configuration;
 
 
 /***/ }),
-/* 136 */
+/* 147 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var errorResponseAdapter = __webpack_require__(47);
+var errorResponseAdapter = __webpack_require__(49);
 var assign = __webpack_require__(11).assign;
 
 /* eslint-disable camelcase */
@@ -21877,7 +32207,7 @@ module.exports = configurationResponseAdapter;
 
 
 /***/ }),
-/* 137 */
+/* 148 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21918,7 +32248,7 @@ module.exports = DefaultRequest;
 
 
 /***/ }),
-/* 138 */
+/* 149 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21931,7 +32261,7 @@ module.exports = function getUserAgent() {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 139 */
+/* 150 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21944,7 +32274,7 @@ module.exports = function () {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 140 */
+/* 151 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -21989,7 +32319,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 141 */
+/* 152 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22001,7 +32331,7 @@ module.exports = function (value) {
 
 
 /***/ }),
-/* 142 */
+/* 153 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22022,7 +32352,7 @@ module.exports = deferred;
 
 
 /***/ }),
-/* 143 */
+/* 154 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22043,7 +32373,7 @@ module.exports = once;
 
 
 /***/ }),
-/* 144 */
+/* 155 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22067,7 +32397,7 @@ module.exports = promiseOrCallback;
 
 
 /***/ }),
-/* 145 */
+/* 156 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22076,15 +32406,15 @@ module.exports = promiseOrCallback;
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var request = __webpack_require__(46);
-var uuid = __webpack_require__(23);
+var request = __webpack_require__(48);
+var uuid = __webpack_require__(24);
 var constants = __webpack_require__(18);
-var createAuthorizationData = __webpack_require__(51);
-var errors = __webpack_require__(54);
-var GraphQL = __webpack_require__(44);
-var isDateStringBeforeOrOn = __webpack_require__(146);
+var createAuthorizationData = __webpack_require__(53);
+var errors = __webpack_require__(56);
+var GraphQL = __webpack_require__(46);
+var isDateStringBeforeOrOn = __webpack_require__(157);
 
-var BRAINTREE_VERSION = __webpack_require__(30).BRAINTREE_VERSION;
+var BRAINTREE_VERSION = __webpack_require__(31).BRAINTREE_VERSION;
 
 function getConfiguration(options) {
   return new Promise(function (resolve, reject) {
@@ -22174,7 +32504,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 146 */
+/* 157 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22194,20 +32524,20 @@ module.exports = isDateStringBeforeOrOn;
 
 
 /***/ }),
-/* 147 */
+/* 158 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var DropinError = __webpack_require__(8);
-var EventEmitter = __webpack_require__(55);
+var EventEmitter = __webpack_require__(57);
 var constants = __webpack_require__(2);
 var paymentMethodTypes = constants.paymentMethodTypes;
 var paymentOptionIDs = constants.paymentOptionIDs;
-var isGuestCheckout = __webpack_require__(56);
+var isGuestCheckout = __webpack_require__(58);
 var Promise = __webpack_require__(5);
-var paymentSheetViews = __webpack_require__(57);
+var paymentSheetViews = __webpack_require__(59);
 
 var VAULTED_PAYMENT_METHOD_TYPES_THAT_SHOULD_BE_HIDDEN = [
   paymentMethodTypes.applePay,
@@ -22482,7 +32812,7 @@ module.exports = DropinModel;
 
 
 /***/ }),
-/* 148 */
+/* 159 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22490,9 +32820,9 @@ module.exports = DropinModel;
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btApplePay = __webpack_require__(149);
+var btApplePay = __webpack_require__(160);
 var DropinError = __webpack_require__(8);
-var isHTTPS = __webpack_require__(151);
+var isHTTPS = __webpack_require__(162);
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
 
@@ -22602,7 +32932,7 @@ module.exports = ApplePayView;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 149 */
+/* 160 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22614,10 +32944,10 @@ module.exports = ApplePayView;
  */
 
 var BraintreeError = __webpack_require__(1);
-var ApplePay = __webpack_require__(150);
+var ApplePay = __webpack_require__(161);
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(58);
+var errors = __webpack_require__(60);
 var VERSION = "3.34.0";
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
@@ -22656,7 +32986,7 @@ module.exports = {
 
 
 /***/ }),
-/* 150 */
+/* 161 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22664,7 +32994,7 @@ module.exports = {
 
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
-var errors = __webpack_require__(58);
+var errors = __webpack_require__(60);
 var Promise = __webpack_require__(4);
 var methods = __webpack_require__(12);
 var convertMethodsToError = __webpack_require__(13);
@@ -22973,7 +33303,7 @@ module.exports = wrapPromise.wrapPrototype(ApplePay);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 151 */
+/* 162 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -22990,7 +33320,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 152 */
+/* 163 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -23002,9 +33332,9 @@ var BaseView = __webpack_require__(9);
 var classlist = __webpack_require__(15);
 var constants = __webpack_require__(2);
 var DropinError = __webpack_require__(8);
-var hostedFields = __webpack_require__(153);
-var isUtf8 = __webpack_require__(65);
-var transitionHelper = __webpack_require__(66);
+var hostedFields = __webpack_require__(164);
+var isUtf8 = __webpack_require__(67);
+var transitionHelper = __webpack_require__(68);
 var Promise = __webpack_require__(5);
 
 var cardIconHTML = "<div data-braintree-id=\"visa-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-visa\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"master-card-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-master-card\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"unionpay-card-icon\" class=\"braintree-sheet__card-icon braintree-hidden\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-unionpay\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"american-express-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-american-express\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"jcb-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-jcb\"></use>\n    </svg>\n</div>\n<!-- Remove braintree-hidden class when supportedCardType accurately indicates Diners Club support -->\n<div data-braintree-id=\"diners-club-card-icon\" class=\"braintree-sheet__card-icon braintree-hidden\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-diners-club\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"discover-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-discover\"></use>\n    </svg>\n</div>\n<div data-braintree-id=\"maestro-card-icon\" class=\"braintree-sheet__card-icon\">\n    <svg width=\"40\" height=\"24\">\n        <use xlink:href=\"#icon-maestro\"></use>\n    </svg>\n</div>\n";
@@ -23663,17 +33993,17 @@ module.exports = CardView;
 
 
 /***/ }),
-/* 153 */
+/* 164 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /** @module braintree-web/hosted-fields */
 
-var HostedFields = __webpack_require__(154);
+var HostedFields = __webpack_require__(165);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(25);
-var supportsInputFormatting = __webpack_require__(174);
+var errors = __webpack_require__(26);
+var supportsInputFormatting = __webpack_require__(185);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
 var Promise = __webpack_require__(4);
@@ -23968,36 +34298,36 @@ module.exports = {
 
 
 /***/ }),
-/* 154 */
+/* 165 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var assign = __webpack_require__(11).assign;
-var Destructor = __webpack_require__(155);
-var classlist = __webpack_require__(157);
-var iFramer = __webpack_require__(59);
-var Bus = __webpack_require__(60);
+var Destructor = __webpack_require__(166);
+var classlist = __webpack_require__(168);
+var iFramer = __webpack_require__(61);
+var Bus = __webpack_require__(62);
 var BraintreeError = __webpack_require__(1);
-var composeUrl = __webpack_require__(164);
-var getStylesFromClass = __webpack_require__(165);
-var constants = __webpack_require__(24);
-var errors = __webpack_require__(25);
+var composeUrl = __webpack_require__(175);
+var getStylesFromClass = __webpack_require__(176);
+var constants = __webpack_require__(25);
+var errors = __webpack_require__(26);
 var INTEGRATION_TIMEOUT_MS = __webpack_require__(18).INTEGRATION_TIMEOUT_MS;
-var uuid = __webpack_require__(23);
-var findParentTags = __webpack_require__(166);
-var browserDetection = __webpack_require__(167);
+var uuid = __webpack_require__(24);
+var findParentTags = __webpack_require__(177);
+var browserDetection = __webpack_require__(178);
 var events = constants.events;
-var EventEmitter = __webpack_require__(169);
-var injectFrame = __webpack_require__(170);
+var EventEmitter = __webpack_require__(180);
+var injectFrame = __webpack_require__(181);
 var analytics = __webpack_require__(7);
 var whitelistedFields = constants.whitelistedFields;
 var methods = __webpack_require__(12);
 var convertMethodsToError = __webpack_require__(13);
 var sharedErrors = __webpack_require__(19);
-var getCardTypes = __webpack_require__(171);
-var attributeValidationError = __webpack_require__(173);
+var getCardTypes = __webpack_require__(182);
+var attributeValidationError = __webpack_require__(184);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -25071,13 +35401,13 @@ module.exports = wrapPromise.wrapPrototype(HostedFields);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 155 */
+/* 166 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var batchExecuteFunctions = __webpack_require__(156);
+var batchExecuteFunctions = __webpack_require__(167);
 
 function Destructor() {
   this._teardownRegistry = [];
@@ -25114,13 +35444,13 @@ module.exports = Destructor;
 
 
 /***/ }),
-/* 156 */
+/* 167 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var once = __webpack_require__(28);
+var once = __webpack_require__(29);
 
 function call(fn, callback) {
   var isSync = fn.length === 0;
@@ -25165,7 +35495,7 @@ module.exports = function (functions, cb) {
 
 
 /***/ }),
-/* 157 */
+/* 168 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25209,7 +35539,7 @@ module.exports = {
 
 
 /***/ }),
-/* 158 */
+/* 169 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25233,7 +35563,7 @@ module.exports = function setAttributes(element, attributes) {
 
 
 /***/ }),
-/* 159 */
+/* 170 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25248,7 +35578,7 @@ module.exports = {
 
 
 /***/ }),
-/* 160 */
+/* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25270,7 +35600,7 @@ module.exports = function assign(target) {
 
 
 /***/ }),
-/* 161 */
+/* 172 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25584,13 +35914,13 @@ module.exports = framebus;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 162 */
+/* 173 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enumerate = __webpack_require__(21);
+var enumerate = __webpack_require__(22);
 
 module.exports = enumerate([
   'CONFIGURATION_REQUEST'
@@ -25598,13 +35928,13 @@ module.exports = enumerate([
 
 
 /***/ }),
-/* 163 */
+/* 174 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isWhitelistedDomain = __webpack_require__(48);
+var isWhitelistedDomain = __webpack_require__(50);
 
 function checkOrigin(postMessageOrigin, merchantUrl) {
   var merchantOrigin, merchantHost;
@@ -25635,14 +35965,14 @@ module.exports = {
 
 
 /***/ }),
-/* 164 */
+/* 175 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var constants = __webpack_require__(24);
-var useMin = __webpack_require__(61);
+var constants = __webpack_require__(25);
+var useMin = __webpack_require__(63);
 
 module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
   return assetsUrl +
@@ -25654,13 +35984,13 @@ module.exports = function composeUrl(assetsUrl, componentId, isDebug) {
 
 
 /***/ }),
-/* 165 */
+/* 176 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var whitelistedStyles = __webpack_require__(24).whitelistedStyles;
+var whitelistedStyles = __webpack_require__(25).whitelistedStyles;
 
 module.exports = function getStylesFromClass(cssClass) {
   var element = document.createElement('input');
@@ -25696,7 +36026,7 @@ module.exports = function getStylesFromClass(cssClass) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 166 */
+/* 177 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25721,21 +36051,21 @@ module.exports = findParentTags;
 
 
 /***/ }),
-/* 167 */
+/* 178 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 module.exports = {
-  isIe9: __webpack_require__(22),
+  isIe9: __webpack_require__(23),
   isIos: __webpack_require__(20),
-  isIosWebview: __webpack_require__(168)
+  isIosWebview: __webpack_require__(179)
 };
 
 
 /***/ }),
-/* 168 */
+/* 179 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25762,7 +36092,7 @@ module.exports = function isIosWebview(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 169 */
+/* 180 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25797,7 +36127,7 @@ module.exports = EventEmitter;
 
 
 /***/ }),
-/* 170 */
+/* 181 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -25819,13 +36149,13 @@ module.exports = function injectFrame(frame, container) {
 
 
 /***/ }),
-/* 171 */
+/* 182 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var creditCardType = __webpack_require__(172);
+var creditCardType = __webpack_require__(183);
 
 creditCardType.removeCard(creditCardType.types.MIR);
 
@@ -25833,7 +36163,7 @@ module.exports = creditCardType;
 
 
 /***/ }),
-/* 172 */
+/* 183 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26090,15 +36420,15 @@ module.exports = creditCardType;
 
 
 /***/ }),
-/* 173 */
+/* 184 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var BraintreeError = __webpack_require__(1);
-var errors = __webpack_require__(25);
-var whitelist = __webpack_require__(24).whitelistedAttributes;
+var errors = __webpack_require__(26);
+var whitelist = __webpack_require__(25).whitelistedAttributes;
 
 function attributeValidationError(attribute, value) {
   var err;
@@ -26134,13 +36464,13 @@ module.exports = attributeValidationError;
 
 
 /***/ }),
-/* 174 */
+/* 185 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var device = __webpack_require__(175);
+var device = __webpack_require__(186);
 
 module.exports = function () {
   // Digits get dropped in samsung browser
@@ -26149,7 +36479,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 175 */
+/* 186 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26157,10 +36487,10 @@ module.exports = function () {
 
 var UA = global.navigator && global.navigator.userAgent;
 
-var isAndroid = __webpack_require__(62);
-var isChrome = __webpack_require__(63);
+var isAndroid = __webpack_require__(64);
+var isChrome = __webpack_require__(65);
 var isIos = __webpack_require__(20);
-var isIE9 = __webpack_require__(22);
+var isIE9 = __webpack_require__(23);
 
 // Old Android Webviews used specific versions of Chrome with 0.0.0 as their version suffix
 // https://developer.chrome.com/multidevice/user-agent#webview_user_agent
@@ -26198,7 +36528,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 176 */
+/* 187 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26211,13 +36541,13 @@ module.exports = function isEdge(ua) {
 
 
 /***/ }),
-/* 177 */
+/* 188 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isIe9 = __webpack_require__(22);
+var isIe9 = __webpack_require__(23);
 
 module.exports = {
   isIe9: isIe9
@@ -26225,7 +36555,7 @@ module.exports = {
 
 
 /***/ }),
-/* 178 */
+/* 189 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26233,10 +36563,10 @@ module.exports = {
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btGooglePay = __webpack_require__(179);
+var btGooglePay = __webpack_require__(190);
 var DropinError = __webpack_require__(8);
 var constants = __webpack_require__(2);
-var assets = __webpack_require__(26);
+var assets = __webpack_require__(27);
 var Promise = __webpack_require__(5);
 var analytics = __webpack_require__(14);
 
@@ -26351,7 +36681,7 @@ module.exports = GooglePayView;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 179 */
+/* 190 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26363,7 +36693,7 @@ module.exports = GooglePayView;
 
 var basicComponentVerification = __webpack_require__(16);
 var BraintreeError = __webpack_require__(1);
-var GooglePayment = __webpack_require__(180);
+var GooglePayment = __webpack_require__(191);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 var VERSION = "3.34.0";
@@ -26497,7 +36827,7 @@ module.exports = {
 
 
 /***/ }),
-/* 180 */
+/* 191 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26506,7 +36836,7 @@ module.exports = {
 var analytics = __webpack_require__(7);
 var assign = __webpack_require__(11).assign;
 var convertMethodsToError = __webpack_require__(13);
-var generateGooglePayConfiguration = __webpack_require__(181);
+var generateGooglePayConfiguration = __webpack_require__(192);
 var BraintreeError = __webpack_require__(1);
 var methods = __webpack_require__(12);
 var Promise = __webpack_require__(4);
@@ -26670,7 +37000,7 @@ module.exports = wrapPromise.wrapPrototype(GooglePayment);
 
 
 /***/ }),
-/* 181 */
+/* 192 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26716,7 +37046,7 @@ module.exports = function (configuration) {
 
 
 /***/ }),
-/* 182 */
+/* 193 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26724,7 +37054,7 @@ module.exports = function (configuration) {
 
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-var BasePayPalView = __webpack_require__(67);
+var BasePayPalView = __webpack_require__(69);
 
 function PayPalView() {
   BasePayPalView.apply(this, arguments);
@@ -26746,7 +37076,7 @@ module.exports = PayPalView;
 
 
 /***/ }),
-/* 183 */
+/* 194 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26759,10 +37089,10 @@ module.exports = PayPalView;
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(68);
+var errors = __webpack_require__(70);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
-var PayPalCheckout = __webpack_require__(184);
+var PayPalCheckout = __webpack_require__(195);
 var VERSION = "3.34.0";
 
 /**
@@ -26831,7 +37161,7 @@ module.exports = {
 
 
 /***/ }),
-/* 184 */
+/* 195 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -26841,9 +37171,9 @@ var analytics = __webpack_require__(7);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
-var convertToBraintreeError = __webpack_require__(49);
-var errors = __webpack_require__(68);
-var constants = __webpack_require__(185);
+var convertToBraintreeError = __webpack_require__(51);
+var errors = __webpack_require__(70);
+var constants = __webpack_require__(196);
 var methods = __webpack_require__(12);
 var convertMethodsToError = __webpack_require__(13);
 
@@ -27286,7 +37616,7 @@ module.exports = wrapPromise.wrapPrototype(PayPalCheckout);
 
 
 /***/ }),
-/* 185 */
+/* 196 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27302,7 +37632,7 @@ module.exports = {
 
 
 /***/ }),
-/* 186 */
+/* 197 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27368,7 +37698,7 @@ module.exports = {
 
 
 /***/ }),
-/* 187 */
+/* 198 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27434,7 +37764,7 @@ module.exports = {
 
 
 /***/ }),
-/* 188 */
+/* 199 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27503,7 +37833,7 @@ module.exports = {
 
 
 /***/ }),
-/* 189 */
+/* 200 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27569,7 +37899,7 @@ module.exports = {
 
 
 /***/ }),
-/* 190 */
+/* 201 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27635,7 +37965,7 @@ module.exports = {
 
 
 /***/ }),
-/* 191 */
+/* 202 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27701,7 +38031,7 @@ module.exports = {
 
 
 /***/ }),
-/* 192 */
+/* 203 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27767,7 +38097,7 @@ module.exports = {
 
 
 /***/ }),
-/* 193 */
+/* 204 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27833,7 +38163,7 @@ module.exports = {
 
 
 /***/ }),
-/* 194 */
+/* 205 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27899,7 +38229,7 @@ module.exports = {
 
 
 /***/ }),
-/* 195 */
+/* 206 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -27965,7 +38295,7 @@ module.exports = {
 
 
 /***/ }),
-/* 196 */
+/* 207 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28031,7 +38361,7 @@ module.exports = {
 
 
 /***/ }),
-/* 197 */
+/* 208 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28097,7 +38427,7 @@ module.exports = {
 
 
 /***/ }),
-/* 198 */
+/* 209 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28163,7 +38493,7 @@ module.exports = {
 
 
 /***/ }),
-/* 199 */
+/* 210 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28229,7 +38559,7 @@ module.exports = {
 
 
 /***/ }),
-/* 200 */
+/* 211 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28295,7 +38625,7 @@ module.exports = {
 
 
 /***/ }),
-/* 201 */
+/* 212 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28361,7 +38691,7 @@ module.exports = {
 
 
 /***/ }),
-/* 202 */
+/* 213 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28427,7 +38757,7 @@ module.exports = {
 
 
 /***/ }),
-/* 203 */
+/* 214 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28493,7 +38823,7 @@ module.exports = {
 
 
 /***/ }),
-/* 204 */
+/* 215 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28559,7 +38889,7 @@ module.exports = {
 
 
 /***/ }),
-/* 205 */
+/* 216 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28625,7 +38955,7 @@ module.exports = {
 
 
 /***/ }),
-/* 206 */
+/* 217 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28691,7 +39021,7 @@ module.exports = {
 
 
 /***/ }),
-/* 207 */
+/* 218 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28757,7 +39087,7 @@ module.exports = {
 
 
 /***/ }),
-/* 208 */
+/* 219 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28823,7 +39153,7 @@ module.exports = {
 
 
 /***/ }),
-/* 209 */
+/* 220 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28831,7 +39161,7 @@ module.exports = {
 
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
-var BasePayPalView = __webpack_require__(67);
+var BasePayPalView = __webpack_require__(69);
 
 function PayPalCreditView() {
   BasePayPalView.apply(this, arguments);
@@ -28854,7 +39184,7 @@ module.exports = PayPalCreditView;
 
 
 /***/ }),
-/* 210 */
+/* 221 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28862,7 +39192,7 @@ module.exports = PayPalCreditView;
 
 var assign = __webpack_require__(10).assign;
 var BaseView = __webpack_require__(9);
-var btVenmo = __webpack_require__(211);
+var btVenmo = __webpack_require__(222);
 var DropinError = __webpack_require__(8);
 var Promise = __webpack_require__(5);
 var paymentOptionIDs = __webpack_require__(2).paymentOptionIDs;
@@ -28948,7 +39278,7 @@ module.exports = VenmoView;
 
 
 /***/ }),
-/* 211 */
+/* 222 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -28957,12 +39287,12 @@ module.exports = VenmoView;
 
 var analytics = __webpack_require__(7);
 var basicComponentVerification = __webpack_require__(16);
-var errors = __webpack_require__(70);
+var errors = __webpack_require__(72);
 var wrapPromise = __webpack_require__(3);
 var BraintreeError = __webpack_require__(1);
-var Venmo = __webpack_require__(212);
+var Venmo = __webpack_require__(223);
 var Promise = __webpack_require__(4);
-var supportsVenmo = __webpack_require__(71);
+var supportsVenmo = __webpack_require__(73);
 var VERSION = "3.34.0";
 
 /**
@@ -29036,17 +39366,17 @@ module.exports = {
 
 
 /***/ }),
-/* 212 */
+/* 223 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var analytics = __webpack_require__(7);
-var isBrowserSupported = __webpack_require__(71);
-var constants = __webpack_require__(217);
-var errors = __webpack_require__(70);
-var querystring = __webpack_require__(29);
+var isBrowserSupported = __webpack_require__(73);
+var constants = __webpack_require__(228);
+var errors = __webpack_require__(72);
+var querystring = __webpack_require__(30);
 var methods = __webpack_require__(12);
 var convertMethodsToError = __webpack_require__(13);
 var wrapPromise = __webpack_require__(3);
@@ -29321,18 +39651,18 @@ module.exports = wrapPromise.wrapPrototype(Venmo);
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 213 */
+/* 224 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var isAndroid = __webpack_require__(62);
-var isChrome = __webpack_require__(63);
+var isAndroid = __webpack_require__(64);
+var isChrome = __webpack_require__(65);
 var isIos = __webpack_require__(20);
-var isIosSafari = __webpack_require__(214);
-var isSamsungBrowser = __webpack_require__(64);
-var isMobileFirefox = __webpack_require__(215);
+var isIosSafari = __webpack_require__(225);
+var isSamsungBrowser = __webpack_require__(66);
+var isMobileFirefox = __webpack_require__(226);
 
 module.exports = {
   isAndroid: isAndroid,
@@ -29345,7 +39675,7 @@ module.exports = {
 
 
 /***/ }),
-/* 214 */
+/* 225 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29366,13 +39696,13 @@ module.exports = function isIosSafari(ua) {
 
 
 /***/ }),
-/* 215 */
+/* 226 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
-var isIosFirefox = __webpack_require__(216);
+var isIosFirefox = __webpack_require__(227);
 
 module.exports = function isMobileFirefox(ua) {
   ua = ua || global.navigator.userAgent;
@@ -29382,7 +39712,7 @@ module.exports = function isMobileFirefox(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 216 */
+/* 227 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29397,7 +39727,7 @@ module.exports = function isIosFirefox(ua) {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 217 */
+/* 228 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29411,7 +39741,7 @@ module.exports = {
 
 
 /***/ }),
-/* 218 */
+/* 229 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29421,13 +39751,13 @@ var analytics = __webpack_require__(14);
 var analyticsKinds = __webpack_require__(2).analyticsKinds;
 var BaseView = __webpack_require__(9);
 var classlist = __webpack_require__(15);
-var sheetViews = __webpack_require__(57);
-var PaymentMethodsView = __webpack_require__(72);
-var PaymentOptionsView = __webpack_require__(73);
-var addSelectionEventHandler = __webpack_require__(31);
+var sheetViews = __webpack_require__(59);
+var PaymentMethodsView = __webpack_require__(74);
+var PaymentOptionsView = __webpack_require__(75);
+var addSelectionEventHandler = __webpack_require__(32);
 var Promise = __webpack_require__(5);
-var supportsFlexbox = __webpack_require__(220);
-var transitionHelper = __webpack_require__(66);
+var supportsFlexbox = __webpack_require__(231);
+var transitionHelper = __webpack_require__(68);
 
 var CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT = __webpack_require__(2).CHANGE_ACTIVE_PAYMENT_METHOD_TIMEOUT;
 var DEVELOPER_MISCONFIGURATION_MESSAGE = __webpack_require__(2).errors.DEVELOPER_MISCONFIGURATION_MESSAGE;
@@ -29733,7 +40063,7 @@ module.exports = MainView;
 
 
 /***/ }),
-/* 219 */
+/* 230 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29743,7 +40073,7 @@ var BaseView = __webpack_require__(9);
 var classlist = __webpack_require__(15);
 var constants = __webpack_require__(2);
 
-var addSelectionEventHandler = __webpack_require__(31);
+var addSelectionEventHandler = __webpack_require__(32);
 
 var paymentMethodHTML = "<div class=\"braintree-method__logo\">\n  <svg width=\"40\" height=\"24\" class=\"@CLASSNAME\">\n    <use xlink:href=\"#@ICON\"></use>\n  </svg>\n</div>\n\n<div class=\"braintree-method__label\">@TITLE<br><div class=\"braintree-method__label--small\">@SUBTITLE</div></div>\n\n<div class=\"braintree-method__check-container\">\n  <div class=\"braintree-method__check\">\n    <svg height=\"100%\" width=\"100%\">\n      <use xlink:href=\"#iconCheck\"></use>\n    </svg>\n  </div>\n</div>\n";
 
@@ -29820,7 +40150,7 @@ module.exports = PaymentMethodView;
 
 
 /***/ }),
-/* 220 */
+/* 231 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29846,7 +40176,7 @@ module.exports = function () {
 
 
 /***/ }),
-/* 221 */
+/* 232 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29864,14 +40194,14 @@ module.exports = function (string) {
 
 
 /***/ }),
-/* 222 */
+/* 233 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 /* WEBPACK VAR INJECTION */(function(global) {
 
 var constants = __webpack_require__(2);
-var assets = __webpack_require__(26);
+var assets = __webpack_require__(27);
 var Promise = __webpack_require__(5);
 
 function DataCollector(config) {
@@ -29914,7 +40244,7 @@ module.exports = DataCollector;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 223 */
+/* 234 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -29922,7 +40252,7 @@ module.exports = DataCollector;
 
 
 var classlist = __webpack_require__(15);
-var threeDSecure = __webpack_require__(224);
+var threeDSecure = __webpack_require__(235);
 var Promise = __webpack_require__(5);
 
 function ThreeDSecure(client, merchantConfiguration, cardVerificationString) {
@@ -30064,19 +40394,19 @@ module.exports = ThreeDSecure;
 
 
 /***/ }),
-/* 224 */
+/* 235 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 /** @module braintree-web/three-d-secure */
 
-var ThreeDSecure = __webpack_require__(225);
-var isHTTPS = __webpack_require__(228).isHTTPS;
+var ThreeDSecure = __webpack_require__(236);
+var isHTTPS = __webpack_require__(239).isHTTPS;
 var basicComponentVerification = __webpack_require__(16);
 var BraintreeError = __webpack_require__(1);
 var analytics = __webpack_require__(7);
-var errors = __webpack_require__(75);
+var errors = __webpack_require__(77);
 var VERSION = "3.34.0";
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
@@ -30132,7 +40462,7 @@ module.exports = {
 
 
 /***/ }),
-/* 225 */
+/* 236 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30143,15 +40473,15 @@ var analytics = __webpack_require__(7);
 var assign = __webpack_require__(11).assign;
 var methods = __webpack_require__(12);
 var convertMethodsToError = __webpack_require__(13);
-var constants = __webpack_require__(226);
-var useMin = __webpack_require__(61);
-var Bus = __webpack_require__(60);
-var uuid = __webpack_require__(23);
-var deferred = __webpack_require__(53);
-var errors = __webpack_require__(75);
-var events = __webpack_require__(227);
+var constants = __webpack_require__(237);
+var useMin = __webpack_require__(63);
+var Bus = __webpack_require__(62);
+var uuid = __webpack_require__(24);
+var deferred = __webpack_require__(55);
+var errors = __webpack_require__(77);
+var events = __webpack_require__(238);
 var VERSION = "3.34.0";
-var iFramer = __webpack_require__(59);
+var iFramer = __webpack_require__(61);
 var Promise = __webpack_require__(4);
 var wrapPromise = __webpack_require__(3);
 
@@ -30519,7 +40849,7 @@ module.exports = wrapPromise.wrapPrototype(ThreeDSecure);
 
 
 /***/ }),
-/* 226 */
+/* 237 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30531,13 +40861,13 @@ module.exports = {
 
 
 /***/ }),
-/* 227 */
+/* 238 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enumerate = __webpack_require__(21);
+var enumerate = __webpack_require__(22);
 
 module.exports = enumerate([
   'AUTHENTICATION_COMPLETE'
@@ -30545,7 +40875,7 @@ module.exports = enumerate([
 
 
 /***/ }),
-/* 228 */
+/* 239 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30564,17 +40894,17 @@ module.exports = {
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 229 */
+/* 240 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var analytics = __webpack_require__(14);
-var find = __webpack_require__(230);
-var uuid = __webpack_require__(74);
+var find = __webpack_require__(241);
+var uuid = __webpack_require__(76);
 var DropinError = __webpack_require__(8);
-var kebabCaseToCamelCase = __webpack_require__(231);
+var kebabCaseToCamelCase = __webpack_require__(242);
 var WHITELISTED_DATA_ATTRIBUTES = [
   'locale',
   'payment-option-priority',
@@ -30701,7 +41031,7 @@ module.exports = createFromScriptTag;
 
 
 /***/ }),
-/* 230 */
+/* 241 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30723,7 +41053,7 @@ module.exports = {
 
 
 /***/ }),
-/* 231 */
+/* 242 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -30743,7 +41073,7 @@ module.exports = kebabCaseToCamelCase;
 
 
 /***/ }),
-/* 232 */
+/* 243 */
 /***/ (function(module, exports, __webpack_require__) {
 
 var render = function() {
@@ -30771,7 +41101,7 @@ if (false) {
 }
 
 /***/ }),
-/* 233 */
+/* 244 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
