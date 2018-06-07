@@ -90,13 +90,10 @@ abstract class TestCase extends BaseTestCase
 
     protected function assertCollectionsAreEqual($collectionA, $collectionB)
     {
-        $intersectionACount = $collectionA->intersect($collectionB)->count();
-        $intersectionBCount = $collectionB->intersect($collectionA)->count();
-
-        if ($intersectionACount === $intersectionBCount && $intersectionACount === $collectionA->count() && $collectionA->count() === $collectionB->count()) {
-            return true;
-        }
-
-        return false;
+        return $collectionA->count() === $collectionB->count()
+            &&
+            $collectionA->zip($collectionB)->every(function ($itemPair) {
+                return $itemPair[0]->is($itemPair[1]);
+            });
     }
 }

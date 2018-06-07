@@ -21,7 +21,9 @@ class ProductsController extends Controller
 
         $product = $model->products->firstWhere('id', $id);
 
-        return view('products.show', compact('model', 'product'));
+        $urls = $model->getMedia()->map->getUrl();
+
+        return view('products.show', compact('model', 'product', 'urls'));
     }
 
     public function destroy($id)

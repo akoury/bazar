@@ -56,7 +56,7 @@ class EditProductModelTest extends TestCase
 
     private function updateProduct($product, $overridenParams)
     {
-        return $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams($overridenParams));
+        return $this->patchJson(route('product-models.update', $product->product_model_id), $this->validParams($overridenParams));
     }
 
     /** @test */
@@ -104,7 +104,7 @@ class EditProductModelTest extends TestCase
             'brand_id'    => $brand->id
         ])->addItems(3);
 
-        $response = $this->json('PATCH', route('product-models.update', $product->product_model_id), [
+        $response = $this->patchJson(route('product-models.update', $product->product_model_id), [
             'name'        => 'New name',
             'description' => 'New description',
             'published'   => false,
@@ -273,7 +273,7 @@ class EditProductModelTest extends TestCase
         $this->signIn();
         $product = $this->createProductsForModel($this->oldAttributes());
 
-        $response = $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams());
+        $response = $this->patchJson(route('product-models.update', $product->product_model_id), $this->validParams());
 
         $response->assertStatus(404);
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
@@ -284,7 +284,7 @@ class EditProductModelTest extends TestCase
     {
         $product = $this->createProductsForModel($this->oldAttributes());
 
-        $this->json('PATCH', route('product-models.update', $product->product_model_id), $this->validParams())
+        $this->patchJson(route('product-models.update', $product->product_model_id), $this->validParams())
             ->assertStatus(401);
 
         $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));

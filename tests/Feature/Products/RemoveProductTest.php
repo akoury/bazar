@@ -15,7 +15,7 @@ class RemoveProductTest extends TestCase
     {
         $product = $this->create('Product');
 
-        $this->json('DELETE', route('products.destroy', $product->id))
+        $this->deleteJson(route('products.destroy', $product->id))
             ->assertStatus(401);
 
         $this->assertFalse($product->fresh()->trashed());
@@ -27,7 +27,7 @@ class RemoveProductTest extends TestCase
         $this->signIn();
         $product = $this->create('Product');
 
-        $this->json('DELETE', route('products.destroy', $product->id))
+        $this->deleteJson(route('products.destroy', $product->id))
             ->assertStatus(404);
 
         $this->assertFalse($product->fresh()->trashed());
@@ -41,7 +41,7 @@ class RemoveProductTest extends TestCase
             'brand_id' => $brand->id
         ])->addItems(4);
 
-        $this->json('DELETE', route('products.destroy', $product->id))
+        $this->deleteJson(route('products.destroy', $product->id))
             ->assertStatus(200);
 
         $this->assertTrue($product->fresh()->trashed());
@@ -56,7 +56,7 @@ class RemoveProductTest extends TestCase
             'brand_id' => $brand->id
         ]);
 
-        $this->json('DELETE', route('products.destroy', $product->id))
+        $this->deleteJson(route('products.destroy', $product->id))
             ->assertStatus(200);
 
         $this->assertFalse($product->model->published);

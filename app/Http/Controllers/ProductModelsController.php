@@ -41,6 +41,11 @@ class ProductModelsController extends Controller
 
         $request->addProductsToModel($model);
 
+        $model->addMultipleMediaFromRequest(['product_images'])
+            ->each(function ($file) {
+                $file->toMediaCollection();
+            });
+
         return response()->json($model->url(), 201);
     }
 

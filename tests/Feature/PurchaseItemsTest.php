@@ -27,7 +27,7 @@ class PurchaseItemsTest extends TestCase
 
     private function orderItems($product, $params)
     {
-        return $this->json('POST', route('orders.store', $product->id), $params);
+        return $this->postJson(route('orders.store', $product->id), $params);
     }
 
     /** @test */

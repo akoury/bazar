@@ -16,7 +16,7 @@ class RemoveProductModelTest extends TestCase
     {
         $model = $this->create('ProductModel');
 
-        $this->json('DELETE', route('product-models.destroy', $model->id))
+        $this->deleteJson(route('product-models.destroy', $model->id))
             ->assertStatus(401);
 
         $this->assertFalse($model->fresh()->trashed());
@@ -28,7 +28,7 @@ class RemoveProductModelTest extends TestCase
         $this->signIn();
         $model = $this->create('ProductModel');
 
-        $this->json('DELETE', route('product-models.destroy', $model->id))
+        $this->deleteJson(route('product-models.destroy', $model->id))
             ->assertStatus(404);
 
         $this->assertFalse($model->fresh()->trashed());
@@ -42,7 +42,7 @@ class RemoveProductModelTest extends TestCase
             'brand_id' => $brand->id
         ])->addItems(4);
 
-        $this->json('DELETE', route('product-models.destroy', $product->model->id))
+        $this->deleteJson(route('product-models.destroy', $product->model->id))
             ->assertStatus(200)
             ->assertJsonFragment([route('product-models.index', $product->brand_id)]);
 

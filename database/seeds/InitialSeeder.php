@@ -33,8 +33,10 @@ class InitialSeeder extends Seeder
             'brand_id' => $brand->id
         ]);
 
+        $model->addMediaFromUrl('https://ss7.vzw.com/is/image/VerizonWireless/iphone-x-kf-device-tab-d-3-retina?$pngalpha$&scl=1')->toMediaCollection();
+
         $attribute = factory(Attribute::class)->create([
-            'name' => 'Color',
+            'name' => 'color',
         ]);
 
         $valueA = factory(Value::class)->create([
@@ -48,12 +50,31 @@ class InitialSeeder extends Seeder
         ]);
 
         $attributeB = factory(Attribute::class)->create([
-            'name' => 'Capacity',
+            'name' => 'capacity',
         ]);
 
         $valueC = factory(Value::class)->create([
             'name'         => '32gb',
             'attribute_id' => $attributeB->id
+        ]);
+
+        $valueD = factory(Value::class)->create([
+            'name'         => '64gb',
+            'attribute_id' => $attributeB->id
+        ]);
+
+        $attributeC = factory(Attribute::class)->create([
+            'name' => 'gender',
+        ]);
+
+        $valueE = factory(Value::class)->create([
+            'name'         => 'male',
+            'attribute_id' => $attributeC->id
+        ]);
+
+        $valueF = factory(Value::class)->create([
+            'name'         => 'female',
+            'attribute_id' => $attributeC->id
         ]);
 
         $product = factory(Product::class)->create([
@@ -62,13 +83,31 @@ class InitialSeeder extends Seeder
 
         $product->values()->attach($valueA);
         $product->values()->attach($valueC);
+        $product->values()->attach($valueE);
 
         $product2 = factory(Product::class)->create([
             'product_model_id' => $model->id
         ])->addItems(3);
 
         $product2->values()->attach($valueB);
-        $product2->values()->attach($valueC);
+        $product2->values()->attach($valueD);
+        $product2->values()->attach($valueF);
+
+        $product3 = factory(Product::class)->create([
+            'product_model_id' => $model->id
+        ])->addItems(2);
+
+        $product3->values()->attach($valueA);
+        $product3->values()->attach($valueC);
+        $product3->values()->attach($valueF);
+
+        $product3 = factory(Product::class)->create([
+            'product_model_id' => $model->id
+        ])->addItems(1);
+
+        $product3->values()->attach($valueA);
+        $product3->values()->attach($valueD);
+        $product3->values()->attach($valueF);
 
         $model = factory(ProductModel::class)->create([
             'name'     => 'iPhone 8',

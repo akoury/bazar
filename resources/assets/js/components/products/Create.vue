@@ -106,7 +106,6 @@ export default {
             name: '',
             description: '',
             published: true,
-            product_images: [],
             numberOfAttributes: 0,
             selectedAttributes: [],
             selectedValues: [],
@@ -146,7 +145,7 @@ export default {
             if (this.combinations[0].length) {
                 products = products
                     .map((product, index) => {
-                        product.attributes = Object.assign(...this.combinations[index].map(value => (value.hasOwnProperty('attribute_id') ? { [this.attributes.find(attribute => attribute.id === value.attribute_id).name]: value.name } : { [value.attribute]: value.name })))
+                        product.attributes = Object.assign(...this.combinations[index].map(value => (value.hasOwnProperty('attribute_id') ? { [this.attributes.find(attribute => attribute.id == value.attribute_id).name]: value.name } : { [value.attribute]: value.name })))
                         return product
                     })
                     .filter(product => product.isActive)

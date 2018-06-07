@@ -15,8 +15,8 @@ class UpdateCartTest extends TestCase
     {
         $productA = $this->create('Product')->addItems(3);
         $productB = $this->create('Product')->addItems(1);
-        $this->json('POST', route('carts.store', $productA), ['quantity' => 3]);
-        $this->json('POST', route('carts.store', $productB), ['quantity' => 1]);
+        $this->postJson(route('carts.store', $productA), ['quantity' => 3]);
+        $this->postJson(route('carts.store', $productB), ['quantity' => 1]);
 
         $productA->reserveItems(1, 'other-customer@example.com');
         $this->get(route('carts.show'));
@@ -38,8 +38,8 @@ class UpdateCartTest extends TestCase
         $this->signIn($user);
         $productA = $this->create('Product')->addItems(3);
         $productB = $this->create('Product')->addItems(1);
-        $this->json('POST', route('carts.store', $productA), ['quantity' => 3]);
-        $this->actingAs($user->fresh())->json('POST', route('carts.store', $productB), ['quantity' => 1]);
+        $this->postJson(route('carts.store', $productA), ['quantity' => 3]);
+        $this->actingAs($user->fresh())->postJson(route('carts.store', $productB), ['quantity' => 1]);
         $productA->reserveItems(1, 'other-customer@example.com');
 
         $this->signIn($user->fresh());
@@ -61,7 +61,7 @@ class UpdateCartTest extends TestCase
     public function if_a_product_is_unpublished_it_is_removed_from_the_cart_when_viewed()
     {
         $product = $this->create('Product')->addItems(3);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 3]);
 
         $product->model->update(['published' => false]);
 
@@ -74,7 +74,7 @@ class UpdateCartTest extends TestCase
     public function if_a_guest_has_items_in_cart_and_logs_in_while_that_product_was_made_unpublished_those_items_are_not_added_to_his_user_cart()
     {
         $product = $this->create('Product')->addItems(3);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 3]);
 
         $product->model->update(['published' => false]);
 
@@ -92,7 +92,7 @@ class UpdateCartTest extends TestCase
     public function a_guest_can_remove_an_item_from_his_cart()
     {
         $product = $this->create('Product')->addItems(3);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 3]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 3]);
         $this->assertEquals(3, cart()->findProduct($product)['quantity']);
 
         $this->delete(route('carts.destroy', $product));
@@ -106,7 +106,7 @@ class UpdateCartTest extends TestCase
         $user = $this->create('User');
         $this->signIn($user);
         $product = $this->create('Product')->addItems(2);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 2]);
 
         $this->actingAs($user->fresh())->delete(route('carts.destroy', $product));
         $this->signIn($user->fresh());
@@ -117,7 +117,7 @@ class UpdateCartTest extends TestCase
     public function a_guest_can_edit_an_items_quantity_from_his_cart()
     {
         $product = $this->create('Product')->addItems(2);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 2]);
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
 
         $this->post(route('carts.update', $product), ['quantity' => 1]);
@@ -135,7 +135,7 @@ class UpdateCartTest extends TestCase
         $user = $this->create('User');
         $this->signIn($user);
         $product = $this->create('Product')->addItems(2);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 2]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 2]);
         $this->signIn($user->fresh());
         $this->assertEquals(2, cart()->findProduct($product)['quantity']);
 
@@ -149,7 +149,7 @@ class UpdateCartTest extends TestCase
     public function quantity_is_required_to_edit_a_product_in_the_cart()
     {
         $product = $this->create('Product')->addItems(1);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 1]);
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => '']);
 
@@ -161,7 +161,7 @@ class UpdateCartTest extends TestCase
     public function quantity_must_be_an_integer_to_edit_a_product_in_the_cart()
     {
         $product = $this->create('Product')->addItems(1);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 1]);
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => 1.3]);
 
@@ -173,7 +173,7 @@ class UpdateCartTest extends TestCase
     public function quantity_must_be_at_least_0_to_edit_a_product_in_the_cart()
     {
         $product = $this->create('Product')->addItems(1);
-        $this->json('POST', route('carts.store', $product), ['quantity' => 1]);
+        $this->postJson(route('carts.store', $product), ['quantity' => 1]);
 
         $response = $this->from(route('carts.show'))->post(route('carts.update', $product), ['quantity' => -2]);
 
