@@ -8,8 +8,6 @@ use App\Models\Product;
 use App\Models\Attribute;
 use App\Models\ProductModel;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Queue;
-use App\Jobs\ProcessProductModelImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -208,7 +206,6 @@ class CreateProductModelTest extends TestCase
     /** @test */
     public function product_images_are_uploaded_when_creating_a_product()
     {
-        Queue::fake();
         $brand = $this->brandForSignedInUser();
         $file = UploadedFile::fake()->image('product-image.png');
         $fileContents = file_get_contents($file->getPathname());
@@ -226,7 +223,6 @@ class CreateProductModelTest extends TestCase
     /** @test */
     public function a_user_can_add_a_product_with_multiple_images()
     {
-        Queue::fake();
         $brand = $this->brandForSignedInUser();
         $files = [UploadedFile::fake()->image('product-image.png'), UploadedFile::fake()->image('product-image-2.png')];
         $fileAContents = file_get_contents($files[0]);
@@ -243,21 +239,6 @@ class CreateProductModelTest extends TestCase
         Storage::disk('public')->assertExists(explode('public/', $product->model->getMedia()[1]->getPath())[1]);
         $this->assertEquals($fileAContents, file_get_contents(Storage::disk('public')->path(explode('public/', $product->model->getFirstMediaPath())[1])));
         $this->assertEquals($fileBContents, file_get_contents(Storage::disk('public')->path(explode('public/', $product->model->getMedia()[1]->getPath())[1])));
-    }
-
-    /** @test */
-    public function an_image_optimizer_job_is_queued_when_a_product_is_created()
-    {
-        Queue::fake();
-        $brand = $this->brandForSignedInUser();
-
-        $response = $this->postJson(route('product-models.store', $brand), $this->validParams());
-
-        $model = ProductModel::first();
-
-        Queue::assertPushed(ProcessProductModelImage::class, function ($job) use ($model) {
-            return $job->model->is($model);
-        });
     }
 
     /** @test */

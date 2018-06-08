@@ -7,8 +7,6 @@ use App\Models\Value;
 use App\Models\Product;
 use App\Models\Attribute;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Queue;
-use App\Jobs\ProcessProductModelImage;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -224,47 +222,23 @@ class EditProductModelTest extends TestCase
     }
 
     /** @test */
-    public function a_user_can_edit_the_image_of_a_product_while_removing_the_previous_one()
+    public function a_user_can_add_images_to_a_product_when_editing()
     {
         Storage::fake('public');
-        Queue::fake();
-
         $product = $this->productForUserBrand();
-        $oldFilePath = $product->image_path;
-        Storage::disk('public')->putFileAs('', UploadedFile::fake()->image($oldFilePath), $oldFilePath);
-
+        $oldFile = UploadedFile::fake()->image('old-product-image.png');
+        $oldFileContents = file_get_contents($oldFile);
+        $product->model->addMedia($oldFile)->toMediaCollection();
         $newFile = UploadedFile::fake()->image('new-product-image.png');
+        $newFileContents = file_get_contents($newFile);
+
         $this->updateProduct($product, ['product_images' => [$newFile]])->assertStatus(200);
 
-        $this->assertNotEquals($oldFilePath, $product->fresh()->image_path);
-        Storage::disk('public')->assertExists($product->fresh()->image_path);
-        $this->assertFileEquals($newFile->getPathname(), Storage::disk('public')->path($product->fresh()->image_path));
-        Storage::disk('public')->assertMissing($oldFilePath);
-    }
-
-    /** @test */
-    public function an_image_optimizer_job_is_queued_when_a_product_is_edited_with_a_new_image()
-    {
-        Storage::fake('public');
-        Queue::fake();
-        $product = $this->productForUserBrand();
-
-        $this->updateProduct($product, ['product_images' => [UploadedFile::fake()->image('new-product-image.png')]])->assertStatus(200);
-
-        Queue::assertPushed(ProcessProductModelImage::class, function ($job) use ($product) {
-            return $job->model->is($product->model);
-        });
-    }
-
-    /** @test */
-    public function an_image_optimizer_job_is_not_queued_when_a_product_is_edited_without_a_new_image()
-    {
-        Queue::fake();
-        $product = $this->productForUserBrand();
-
-        $this->updateProduct($product, [])->assertStatus(200);
-
-        Queue::assertNotPushed(ProcessProductModelImage::class);
+        $this->assertEquals(2, $product->model->getMedia()->count());
+        Storage::disk('public')->assertExists(explode('public/', $product->model->getFirstMediaPath())[1]);
+        Storage::disk('public')->assertExists(explode('public/', $product->model->getMedia()[1]->getPath())[1]);
+        $this->assertEquals($oldFileContents, file_get_contents(Storage::disk('public')->path(explode('public/', $product->model->getFirstMediaPath())[1])));
+        $this->assertEquals($newFileContents, file_get_contents(Storage::disk('public')->path(explode('public/', $product->model->getMedia()[1]->getPath())[1])));
     }
 
     /** @test */

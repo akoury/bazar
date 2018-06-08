@@ -6,7 +6,6 @@ use App\Models\Brand;
 use App\Models\Attribute;
 use App\Models\ProductModel;
 use App\Http\Requests\ProductRequest;
-use Illuminate\Support\Facades\Storage;
 
 class ProductModelsController extends Controller
 {
@@ -35,16 +34,10 @@ class ProductModelsController extends Controller
             'name'        => $request->name,
             'description' => $request->description,
             'published'   => $request->published,
-            'brand_id'    => $brand->id,
-            'image_path'  => $request->product_images[0]->store('products', 'public'),
+            'brand_id'    => $brand->id
         ]);
 
         $request->addProductsToModel($model);
-
-        $model->addMultipleMediaFromRequest(['product_images'])
-            ->each(function ($file) {
-                $file->toMediaCollection();
-            });
 
         return response()->json($model->url(), 201);
     }
@@ -57,7 +50,9 @@ class ProductModelsController extends Controller
 
         $attributes = Attribute::with('values')->get();
 
-        return view('product-models.edit', compact('model', 'attributes'));
+        $urls = $model->getMedia()->map->getUrl();
+
+        return view('product-models.edit', compact('model', 'attributes', 'urls'));
     }
 
     public function update($id, ProductRequest $request)
@@ -66,20 +61,13 @@ class ProductModelsController extends Controller
 
         auth()->user()->brands()->findOrFail($model->brand_id);
 
-        if ($request->has('product_images')) {
-            Storage::disk('public')->delete($model->image_path);
-        }
-
         $model->update([
             'name'        => $request->name,
             'description' => $request->description,
             'published'   => $request->published,
-            'image_path'  => $request->has('product_images') ? $request->product_images[0]->store('products', 'public') : $model->image_path,
         ]);
 
         $request->addProductsToModel($model);
-
-        debug($model->load('products.values.attribute')->toArray());
 
         return response()->json($model->url(), 200);
     }

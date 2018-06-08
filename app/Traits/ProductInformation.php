@@ -19,11 +19,6 @@ trait ProductInformation
         return $this->model->published;
     }
 
-    public function getImagePathAttribute()
-    {
-        return $this->model->image_path;
-    }
-
     public function getBrandAttribute()
     {
         return $this->model->brand;

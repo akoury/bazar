@@ -33,8 +33,6 @@ class InitialSeeder extends Seeder
             'brand_id' => $brand->id
         ]);
 
-        $model->addMediaFromUrl('https://ss7.vzw.com/is/image/VerizonWireless/iphone-x-kf-device-tab-d-3-retina?$pngalpha$&scl=1')->toMediaCollection();
-
         $attribute = factory(Attribute::class)->create([
             'name' => 'color',
         ]);

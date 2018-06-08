@@ -12,7 +12,7 @@
     "devDependencies": {
         "axios": "^0.18",
         "braintree-web-drop-in": "^1.11.0",
-        "cross-env": "^5.1.5",
+        "cross-env": "^5.1.6",
         "filepond-plugin-file-validate-size": "^1.0.3",
         "filepond-plugin-file-validate-type": "^1.1.0",
         "filepond-plugin-image-preview": "^1.0.9",
@@ -21,7 +21,7 @@
         "turbolinks": "^5.1.1",
         "vue": "^2.5.16",
         "vue-multiselect": "^2.1.0",
-        "vue-filepond": "^2.0.1",
+        "vue-filepond": "^2.1.1",
         "vue-turbolinks": "^2.0.3"
     }
 }

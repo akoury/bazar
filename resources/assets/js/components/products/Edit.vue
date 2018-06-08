@@ -3,7 +3,7 @@
         <h1 class="mb-4">Edit Product</h1>
         <form @submit.prevent="updateProduct">
             <div class="flex">
-                <div>
+                <div class="w-2/3">
                     <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Name
                         <input type="text" v-model="model.name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required autofocus>
                     </label>
@@ -16,10 +16,19 @@
                         <input type="checkbox" v-model="model.published">Publish
                     </label>
                 </div>
-                <div class="ml-4">
-                    <label for="product_images" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 block">Product Image</label>
-                    <img :src="'http://bazar.test/' + model.image_path" alt="product_images" width="100" v-show="!product_images">
-                    <input type="file" @change="onImageChange" id="product_images" class="mb-6">
+                <div class="w-1/3 ml-4">
+                    <span class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Images</span>
+                    <file-pond
+                        name="product_images"
+                        ref="pond"
+                        label-idle="Drop files here or click to select..."
+                        allow-multiple="true"
+                        dropOnPage="true"
+                        dropOnElement="false"
+                        allowImagePreview="true"
+                        imagePreviewHeight="75"
+                        accepted-file-types="image/*"
+                        maxFileSize="10MB"/>
                 </div>
             </div>
 
@@ -82,19 +91,30 @@
 <script>
 import Multiselect from 'vue-multiselect'
 
+import vueFilePond from 'vue-filepond'
+import 'filepond/dist/filepond.min.css'
+import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type'
+import FilepondPluginImagePreview from 'filepond-plugin-image-preview'
+import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css'
+import FilepondPluginFileValidateSize from 'filepond-plugin-file-validate-size'
+
+const FilePond = vueFilePond(FilePondPluginFileValidateType, FilepondPluginImagePreview, FilepondPluginFileValidateSize)
+
 export default {
-    components: { Multiselect },
-    props: ['dataModel', 'dataAttributes'],
+    components: { Multiselect, FilePond },
+    props: ['dataModel', 'dataAttributes', 'urls'],
     data() {
         return {
             model: this.dataModel,
-            attributes: [],
-            product_images: null
+            attributes: []
         }
     },
     created() {
         this.model.products.map(product => (product.price = (product.price / 100).toFixed(2)))
         this.attributes = this.dataModel.products[0].values.map(value => value.attribute)
+    },
+    mounted() {
+        this.$refs.pond.addFiles(this.urls)
     },
     methods: {
         updateProduct() {
@@ -120,9 +140,10 @@ export default {
             formData.append('description', this.model.description)
             formData.append('published', this.model.published ? 1 : 0)
 
-            if (this.product_images) {
-                formData.append('product_images', this.product_images)
-            }
+            this.$refs.pond
+                .getFiles()
+                .filter(file => file.status === 2)
+                .map((file, index) => formData.append('product_images[' + index + ']', file.file))
 
             let products = []
 
@@ -138,9 +159,6 @@ export default {
             formData.append('products', JSON.stringify(products))
             formData.append('_method', 'PATCH')
             return formData
-        },
-        onImageChange(e) {
-            this.product_images = e.target.files[0]
         },
         addAttributeSlot() {
             if (this.attributes.length < 4) {

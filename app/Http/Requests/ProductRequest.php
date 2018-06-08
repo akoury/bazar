@@ -5,7 +5,6 @@ namespace App\Http\Requests;
 use App\Models\Value;
 use App\Models\Product;
 use App\Models\Attribute;
-use App\Jobs\ProcessProductModelImage;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ProductRequest extends FormRequest
@@ -87,7 +86,10 @@ class ProductRequest extends FormRequest
         }
 
         if ($this->has('product_images')) {
-            ProcessProductModelImage::dispatch($model);
+            $model->addMultipleMediaFromRequest(['product_images'])
+                ->each(function ($file) {
+                    $file->toMediaCollection();
+                });
         }
     }
 
