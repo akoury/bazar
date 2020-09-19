@@ -72,7 +72,8 @@ class ProductTest extends TestCase
     public function items_remaining_does_not_include_items_associated_with_an_order()
     {
         $product = $this->create('Product');
-        $product->items()->saveMany($this->create('Item', 4, ['order_id' => 1]));
+        $order = $this->create('Order', 1, ['amount' => 3850]);
+        $product->items()->saveMany($this->create('Item', 4, ['order_id' => $order->id]));
         $product->items()->saveMany($this->create('Item', 2, ['order_id' => null]));
 
         $this->assertEquals(2, $product->itemsRemaining());
@@ -82,7 +83,8 @@ class ProductTest extends TestCase
     public function items_sold_only_includes_items_associated_with_an_order()
     {
         $product = $this->create('Product');
-        $product->items()->saveMany($this->create('Item', 4, ['order_id' => 1]));
+        $order = $this->create('Order', 1, ['amount' => 3850]);
+        $product->items()->saveMany($this->create('Item', 4, ['order_id' => $order->id]));
         $product->items()->saveMany($this->create('Item', 2, ['order_id' => null]));
 
         $this->assertEquals(4, $product->itemsSold());

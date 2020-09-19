@@ -35,7 +35,7 @@ class BraintreePaymentGatewayTest extends PaymentGatewayContractTest
 
     private function lastCharge()
     {
-        sleep(2);
+        sleep(40);
         return $this->getPaymentGateway()->gateway->transaction()->search([
             TransactionSearch::type()->is(Transaction::SALE),
         ])->firstItem();
@@ -43,7 +43,7 @@ class BraintreePaymentGatewayTest extends PaymentGatewayContractTest
 
     private function newChargesSince($charge)
     {
-        sleep(2);
+        sleep(40);
         $transactions = $this->getPaymentGateway()->gateway->transaction()->search([
             TransactionSearch::type()->is(Transaction::SALE)
         ]);
