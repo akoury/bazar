@@ -15,7 +15,7 @@ class CreateProductModelTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         Storage::fake('public');

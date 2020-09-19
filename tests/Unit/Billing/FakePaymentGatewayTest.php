@@ -8,7 +8,7 @@ class FakePaymentGatewayTest extends PaymentGatewayContractTest
 {
     private $paymentGateway;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->paymentGateway = new FakePaymentGateway;

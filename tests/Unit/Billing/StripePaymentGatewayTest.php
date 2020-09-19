@@ -3,6 +3,7 @@
 namespace Tests\Unit\Billing;
 
 use App\Classes\Charge;
+use Illuminate\Support\Arr;
 use App\Classes\StripePaymentGateway;
 
 /**
@@ -31,7 +32,7 @@ class StripePaymentGatewayTest extends PaymentGatewayContractTest
 
     private function lastCharge()
     {
-        return array_first(\Stripe\Charge::all([
+        return Arr::first(\Stripe\Charge::all([
             'limit' => 1
         ], ['api_key' => config('services.stripe.secret')])['data']);
     }
