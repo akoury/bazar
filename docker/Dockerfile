@@ -10,7 +10,8 @@ RUN apk add --no-cache wget \
 RUN docker-php-ext-install \
     bcmath \
     pdo_mysql \
-    gd
+    gd \
+    exif
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer

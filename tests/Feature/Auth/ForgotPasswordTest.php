@@ -43,7 +43,7 @@ class ForgotPasswordTest extends TestCase
 
     public function testUserCannotViewAnEmailPasswordFormWhenAuthenticated()
     {
-        $user = factory(User::class)->make();
+        $user = User::factory()->make();
         $response = $this->actingAs($user)->get($this->passwordRequestRoute());
         $response->assertRedirect($this->guestMiddlewareRoute());
     }
@@ -51,7 +51,7 @@ class ForgotPasswordTest extends TestCase
     public function testUserReceivesAnEmailWithAPasswordResetLink()
     {
         Notification::fake();
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'email' => 'john@example.com',
         ]);
         $response = $this->post($this->passwordEmailPostRoute(), [
@@ -71,7 +71,7 @@ class ForgotPasswordTest extends TestCase
         ]);
         $response->assertRedirect($this->passwordEmailGetRoute());
         $response->assertSessionHasErrors('email');
-        Notification::assertNotSentTo(factory(User::class)->make(['email' => 'nobody@example.com']), ResetPassword::class);
+        Notification::assertNotSentTo(User::factory()->make(['email' => 'nobody@example.com']), ResetPassword::class);
     }
 
     public function testEmailIsRequired()

@@ -15,10 +15,10 @@ abstract class TestCase extends BaseTestCase
         }
 
         if ($states) {
-            return factory('App\Models\\' . $class, $times)->states($states)->create($attributes);
+            return app("App\Models\\$class")::factory()->count($times)->$states()->create($attributes);
         }
 
-        return factory('App\Models\\' . $class, $times)->create($attributes);
+        return app("App\Models\\$class")::factory()->count($times)->create($attributes);
     }
 
     protected function make($class, $times = null, $attributes = [], $states = null)
@@ -28,10 +28,10 @@ abstract class TestCase extends BaseTestCase
         }
 
         if ($states) {
-            return factory('App\Models\\' . $class, $times)->states($states)->make($attributes);
+            return app("App\Models\\$class")::factory()->count($times)->state($states)->make($attributes);
         }
 
-        return factory('App\Models\\' . $class, $times)->make($attributes);
+        return app("App\Models\\$class")::factory()->count($times)->make($attributes);
     }
 
     protected function createProductsForModel($attributes = [], $times = 1)

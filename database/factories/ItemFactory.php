@@ -1,18 +1,43 @@
 <?php
 
+namespace Database\Factories;
+
 use Carbon\Carbon;
-use Faker\Generator as Faker;
+use App\Models\Item;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(App\Models\Item::class, function (Faker $faker) {
-    return [
-        'product_id' => function () {
-            return factory(App\Models\Product::class)->create()->id;
-        }
-    ];
-});
+class ItemFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Item::class;
 
-$factory->state(App\Models\Item::class, 'reserved', function (Faker $faker) {
-    return [
-        'reserved_at' => Carbon::now(),
-    ];
-});
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'product_id' => function () {
+                return \App\Models\Product::factory()->create()->id;
+            },
+        ];
+    }
+
+    /**
+     * Indicate that the item is reserved.
+     *
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function reserved()
+    {
+        return $this->state([
+            'reserved_at' => Carbon::now(),
+        ]);
+    }
+}

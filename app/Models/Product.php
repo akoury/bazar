@@ -10,10 +10,11 @@ use Illuminate\Database\Eloquent\Model;
 use App\Exceptions\NotEnoughItemsException;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Exceptions\UnpublishedProductException;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Product extends Model
 {
-    use ProductInformation, SoftDeletes;
+    use HasFactory, ProductInformation, SoftDeletes;
 
     protected $guarded = [];
 

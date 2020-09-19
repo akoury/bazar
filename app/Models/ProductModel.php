@@ -2,14 +2,15 @@
 
 namespace App\Models;
 
+use Spatie\MediaLibrary\HasMedia;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\MediaLibrary\HasMedia\HasMedia;
+Use Spatie\MediaLibrary\InteractsWithMedia;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Spatie\MediaLibrary\HasMedia\HasMediaTrait;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class ProductModel extends Model implements HasMedia
 {
-    use SoftDeletes, HasMediaTrait;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $guarded = [];
 

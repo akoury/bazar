@@ -6,6 +6,7 @@ use Tests\TestCase;
 use App\Models\Value;
 use App\Models\Product;
 use App\Models\Attribute;
+use Illuminate\Testing\Assert;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -250,7 +251,7 @@ class EditProductModelTest extends TestCase
         $response = $this->patchJson(route('product-models.update', $product->product_model_id), $this->validParams());
 
         $response->assertStatus(404);
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -261,7 +262,7 @@ class EditProductModelTest extends TestCase
         $this->patchJson(route('product-models.update', $product->product_model_id), $this->validParams())
             ->assertStatus(401);
 
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -274,7 +275,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'name');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -287,7 +288,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'description');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -300,7 +301,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'published');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -313,7 +314,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'published');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -326,7 +327,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -339,7 +340,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -354,7 +355,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.price');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -369,7 +370,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.price');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -384,7 +385,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.price');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -399,7 +400,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -414,7 +415,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -429,7 +430,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.item_quantity');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -444,7 +445,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -459,7 +460,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -480,7 +481,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -508,7 +509,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.1.attributes.firstAttribute');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -525,7 +526,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes.attribute');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -542,7 +543,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'products.0.attributes.attribute');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -555,7 +556,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'product_images');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -568,7 +569,7 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'product_images');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 
     /** @test */
@@ -581,6 +582,6 @@ class EditProductModelTest extends TestCase
         ]);
 
         $this->assertValidationError($response, 'product_images.0');
-        $this->assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
+        Assert::assertArraySubset($this->oldAttributes(), array_merge($product->fresh()->getAttributes(), $product->fresh()->model->getAttributes()));
     }
 }

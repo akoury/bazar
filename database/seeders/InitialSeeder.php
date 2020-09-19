@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Order;
@@ -18,7 +20,7 @@ class InitialSeeder extends Seeder
      */
     public function run()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'email'    => 'user@gmail.com',
             'password' => bcrypt('123123123')
         ]);
@@ -28,54 +30,54 @@ class InitialSeeder extends Seeder
             'slogan' => 'Think different',
         ]);
 
-        $model = factory(ProductModel::class)->create([
+        $model = ProductModel::factory()->create([
             'name'     => 'iPhone X',
             'brand_id' => $brand->id
         ]);
 
-        $attribute = factory(Attribute::class)->create([
+        $attribute = Attribute::factory()->create([
             'name' => 'color',
         ]);
 
-        $valueA = factory(Value::class)->create([
+        $valueA = Value::factory()->create([
             'name'         => 'black',
             'attribute_id' => $attribute->id
         ]);
 
-        $valueB = factory(Value::class)->create([
+        $valueB = Value::factory()->create([
             'name'         => 'gold',
             'attribute_id' => $attribute->id
         ]);
 
-        $attributeB = factory(Attribute::class)->create([
+        $attributeB = Attribute::factory()->create([
             'name' => 'capacity',
         ]);
 
-        $valueC = factory(Value::class)->create([
+        $valueC = Value::factory()->create([
             'name'         => '32gb',
             'attribute_id' => $attributeB->id
         ]);
 
-        $valueD = factory(Value::class)->create([
+        $valueD = Value::factory()->create([
             'name'         => '64gb',
             'attribute_id' => $attributeB->id
         ]);
 
-        $attributeC = factory(Attribute::class)->create([
+        $attributeC = Attribute::factory()->create([
             'name' => 'gender',
         ]);
 
-        $valueE = factory(Value::class)->create([
+        $valueE = Value::factory()->create([
             'name'         => 'male',
             'attribute_id' => $attributeC->id
         ]);
 
-        $valueF = factory(Value::class)->create([
+        $valueF = Value::factory()->create([
             'name'         => 'female',
             'attribute_id' => $attributeC->id
         ]);
 
-        $product = factory(Product::class)->create([
+        $product = Product::factory()->create([
             'product_model_id' => $model->id
         ])->addItems(5);
 
@@ -83,7 +85,7 @@ class InitialSeeder extends Seeder
         $product->values()->attach($valueC);
         $product->values()->attach($valueE);
 
-        $product2 = factory(Product::class)->create([
+        $product2 = Product::factory()->create([
             'product_model_id' => $model->id
         ])->addItems(3);
 
@@ -91,7 +93,7 @@ class InitialSeeder extends Seeder
         $product2->values()->attach($valueD);
         $product2->values()->attach($valueF);
 
-        $product3 = factory(Product::class)->create([
+        $product3 = Product::factory()->create([
             'product_model_id' => $model->id
         ])->addItems(2);
 
@@ -99,7 +101,7 @@ class InitialSeeder extends Seeder
         $product3->values()->attach($valueC);
         $product3->values()->attach($valueF);
 
-        $product3 = factory(Product::class)->create([
+        $product3 = Product::factory()->create([
             'product_model_id' => $model->id
         ])->addItems(1);
 
@@ -107,26 +109,26 @@ class InitialSeeder extends Seeder
         $product3->values()->attach($valueD);
         $product3->values()->attach($valueF);
 
-        $model = factory(ProductModel::class)->create([
+        $model = ProductModel::factory()->create([
             'name'     => 'iPhone 8',
             'brand_id' => $brand->id
         ]);
 
-        $product3 = factory(Product::class)->create([
+        $product3 = Product::factory()->create([
             'product_model_id' => $model->id
         ])->addItems(2);
 
-        $order = factory(Order::class)->create([
+        $order = Order::factory()->create([
             'confirmation_number' => '123',
             'user_id'             => $user
         ]);
 
-        $order2 = factory(Order::class)->create([
+        $order2 = Order::factory()->create([
             'confirmation_number' => '1234',
             'user_id'             => $user
         ]);
 
-        $item = factory(Item::class, 3)->create([
+        $item = Item::factory()->count(3)->create([
             'order_id'   => $order->id,
             'product_id' => $product->id,
             'price'      => $product->price

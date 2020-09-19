@@ -1,12 +1,32 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Product::class, function (Faker $faker) {
-    return [
-        'product_model_id' => function () {
-            return factory(App\Models\ProductModel::class)->create()->id;
-        },
-        'price' => $faker->numberBetween(100, 10000)
-    ];
-});
+use App\Models\Product;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
+
+class ProductFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Product::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'product_model_id' => function () {
+                return \App\Models\ProductModel::factory()->create()->id;
+            },
+            'price' => $this->faker->numberBetween(100, 10000)
+        ];
+    }
+}

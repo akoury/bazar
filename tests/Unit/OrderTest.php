@@ -78,7 +78,7 @@ class OrderTest extends TestCase
     public function confirmation_number_can_only_contain_uppercase_letters_and_numbers()
     {
         $confirmationNumber = Order::generateConfirmationNumber();
-        $this->assertRegExp('/^[A-Z0-9]+$/', $confirmationNumber);
+        $this->assertMatchesRegularExpression('/^[A-Z0-9]+$/', $confirmationNumber);
     }
 
     /** @test */

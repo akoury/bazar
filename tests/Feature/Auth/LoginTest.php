@@ -49,14 +49,14 @@ class LoginTest extends TestCase
 
     public function testUserCannotViewALoginFormWhenAuthenticated()
     {
-        $user = factory(User::class)->make();
+        $user = User::factory()->make();
         $response = $this->actingAs($user)->get($this->loginGetRoute());
         $response->assertRedirect($this->guestMiddlewareRoute());
     }
 
     public function testUserCanLoginWithCorrectCredentials()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt($password = 'my-password'),
         ]);
         $response = $this->post($this->loginPostRoute(), [
@@ -69,7 +69,7 @@ class LoginTest extends TestCase
 
     public function testUserCannotLoginWithIncorrectPassword()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt('my-password'),
         ]);
         $response = $this->from($this->loginGetRoute())->post($this->loginPostRoute(), [
@@ -98,7 +98,7 @@ class LoginTest extends TestCase
 
     public function testUserCanLogout()
     {
-        $this->be(factory(User::class)->create());
+        $this->be(User::factory()->create());
         $response = $this->post($this->logoutRoute());
         $response->assertRedirect($this->successfulLogoutRoute());
         $this->assertGuest();
@@ -113,7 +113,7 @@ class LoginTest extends TestCase
 
     public function testUserCannotMakeMoreThanFiveAttemptsInOneMinute()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt($password = 'my-password'),
         ]);
         foreach (range(0, 5) as $_) {
@@ -124,16 +124,13 @@ class LoginTest extends TestCase
         }
         $response->assertRedirect($this->loginGetRoute());
         $response->assertSessionHasErrors('email');
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Too many login attempts.',
-            collect(
-                $response
+            $response
                 ->baseResponse
                 ->getSession()
                 ->get('errors')
                 ->getBag('default')
-                ->get('email')
-            )->first()
         );
         $this->assertTrue(session()->hasOldInput('email'));
         $this->assertFalse(session()->hasOldInput('password'));

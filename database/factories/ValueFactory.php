@@ -1,12 +1,31 @@
 <?php
 
-use Faker\Generator as Faker;
+namespace Database\Factories;
 
-$factory->define(App\Models\Value::class, function (Faker $faker) {
-    return [
-        'name'         => $faker->name,
-        'attribute_id' => function () {
-            return factory(App\Models\Attribute::class)->create()->id;
-        }
-    ];
-});
+use App\Models\Value;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+class ValueFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Value::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'name'         => $this->faker->name,
+            'attribute_id' => function () {
+                return \App\Models\Attribute::factory()->create()->id;
+            }
+        ];
+    }
+}

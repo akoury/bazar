@@ -46,7 +46,7 @@ class ResetPasswordTest extends TestCase
 
     public function testUserCanViewAPasswordResetForm()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $response = $this->get($this->passwordResetGetRoute($token = $this->getValidToken($user)));
         $response->assertSuccessful();
         $response->assertViewIs('auth.passwords.reset');
@@ -55,7 +55,7 @@ class ResetPasswordTest extends TestCase
 
     public function testUserCannotViewAPasswordResetFormWhenAuthenticated()
     {
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $response = $this->actingAs($user)->get($this->passwordResetGetRoute($this->getValidToken($user)));
         $response->assertRedirect($this->guestMiddlewareRoute());
     }
@@ -63,7 +63,7 @@ class ResetPasswordTest extends TestCase
     public function testUserCanResetPasswordWithValidToken()
     {
         Event::fake();
-        $user = factory(User::class)->create();
+        $user = User::factory()->create();
         $this->withoutExceptionHandling();
         $response = $this->post($this->passwordResetPostRoute(), [
             'token'                 => $this->getValidToken($user),
@@ -82,7 +82,7 @@ class ResetPasswordTest extends TestCase
 
     public function testUserCannotResetPasswordWithInvalidToken()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt('old-password'),
         ]);
         $response = $this->from($this->passwordResetGetRoute($this->getInvalidToken()))->post($this->passwordResetPostRoute(), [
@@ -99,7 +99,7 @@ class ResetPasswordTest extends TestCase
 
     public function testUserCannotResetPasswordWithoutProvidingANewPassword()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt('old-password'),
         ]);
         $response = $this->from($this->passwordResetGetRoute($token = $this->getValidToken($user)))->post($this->passwordResetPostRoute(), [
@@ -119,7 +119,7 @@ class ResetPasswordTest extends TestCase
 
     public function testUserCannotResetPasswordWithoutProvidingAnEmail()
     {
-        $user = factory(User::class)->create([
+        $user = User::factory()->create([
             'password' => bcrypt('old-password'),
         ]);
         $response = $this->from($this->passwordResetGetRoute($token = $this->getValidToken($user)))->post($this->passwordResetPostRoute(), [
