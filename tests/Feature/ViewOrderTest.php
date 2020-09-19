@@ -29,7 +29,7 @@ class ViewOrderTest extends TestCase
             'order_id'   => $order->id
         ]);
 
-        $this->get(route('orders.show', ['confirmation_number' => 123456789]))
+        $this->get(route('orders.show', 123456789))
             ->assertStatus(200)
             ->assertViewHas('order', function ($viewOrder) use ($order) {
                 return $viewOrder->is($order);

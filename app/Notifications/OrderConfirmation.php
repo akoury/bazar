@@ -45,7 +45,7 @@ class OrderConfirmation extends Notification implements ShouldQueue
         return (new MailMessage)
                     ->subject('Your order #' . $this->order->confirmation_number . ' has been processed')
                     ->line('Congratulations, your order has been correctly processed')
-                    ->action('View Order', route('orders.show', ['confirmation_number' => $this->order->confirmation_number]))
+                    ->action('View Order', route('orders.show', $this->order->confirmation_number))
                     ->line('Thank you for shopping with us!');
     }
 

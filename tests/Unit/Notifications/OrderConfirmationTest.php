@@ -18,6 +18,6 @@ class OrderConfirmationTest extends TestCase
 
         $notification = (new OrderConfirmation($order))->toMail(new AnonymousNotifiable());
 
-        $this->assertContains(route('orders.show', ['confirmation_number' => $order->confirmation_number]), $notification->data());
+        $this->assertContains(route('orders.show', $order->confirmation_number), $notification->data());
     }
 }
