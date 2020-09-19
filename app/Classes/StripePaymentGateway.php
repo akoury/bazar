@@ -2,7 +2,7 @@
 
 namespace App\Classes;
 
-use Stripe\Error\InvalidRequest;
+use Stripe\Exception\InvalidRequestException;
 use App\Exceptions\PaymentFailedException;
 
 class StripePaymentGateway implements PaymentGateway
@@ -24,7 +24,7 @@ class StripePaymentGateway implements PaymentGateway
             ], ['api_key' => $this->apiKey]);
 
             return new Charge($charge['amount'], $charge['source']['last4']);
-        } catch (InvalidRequest $e) {
+        } catch (InvalidRequestException $e) {
             throw new PaymentFailedException;
         }
     }

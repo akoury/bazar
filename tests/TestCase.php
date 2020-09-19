@@ -36,7 +36,7 @@ abstract class TestCase extends BaseTestCase
 
     protected function createProductsForModel($attributes = [], $times = 1)
     {
-        if (array_key_exists('price', $attributes)) {
+        if (property_exists($attributes, 'price')) {
             $price = $attributes['price'];
             unset($attributes['price']);
         }

@@ -1,0 +1,72 @@
+version: '3.7'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    restart: unless-stopped
+    tty: true
+    ports:
+      - 9001:9000
+    volumes:
+      - ../:/var/www
+      - ./php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+  server:
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    tty: true
+    depends_on:
+      - app
+      - db
+    ports:
+      - 8081:80
+    volumes:
+      - ../:/var/www
+      - ./:/etc/nginx/conf.d/
+    networks:
+      - app-network
+
+  db:
+    image: mysql:5.7
+    restart: unless-stopped
+    tty: true
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+     - 3307:3306
+    volumes:
+      - db-vol:/var/lib/mysql
+      - ./db.cnf:/etc/mysql/my.cnf
+    networks:
+      - app-network
+  
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    working_dir: /var/www
+    command: sh docker/scheduler.sh
+    restart: unless-stopped
+    depends_on:
+      - app
+    volumes:
+      - ../:/var/www
+      - ./php.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-vol:
+    driver: local
