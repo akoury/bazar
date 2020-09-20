@@ -12,7 +12,7 @@
         <script src="{{ mix('/js/app.js') }}" data-turbolinks-track="reload" defer></script>
         @stack('scripts')
     </head>
-    <body class="bg-grey-lightest text-grey-darkest">
+    <body class="bg-gray-100 text-gray-700">
         <div id="app">
             @include('layouts.header')
 

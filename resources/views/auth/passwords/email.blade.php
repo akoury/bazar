@@ -4,7 +4,7 @@
 
 @section('content')
     @if (session('status'))
-        <div class="alert alert-success">
+        <div class="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded" role="alert">
             {{ session('status') }}
         </div>
     @endif

@@ -4,20 +4,20 @@
         <form @submit.prevent="updateProduct">
             <div class="flex">
                 <div class="w-2/3">
-                    <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Name
-                        <input type="text" v-model="model.name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required autofocus>
+                    <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Name
+                        <input type="text" v-model="model.name" class="appearance-none w-full bg-gray-300 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" required autofocus>
                     </label>
 
-                    <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Description
-                        <textarea v-model="model.description" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" rows="3" required></textarea>
+                    <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Description
+                        <textarea v-model="model.description" class="appearance-none w-full bg-gray-300 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" rows="3" required></textarea>
                     </label>
 
-                    <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-6">
+                    <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-6">
                         <input type="checkbox" v-model="model.published">Publish
                     </label>
                 </div>
                 <div class="w-1/3 ml-4">
-                    <span class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Images</span>
+                    <span class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Product Images</span>
                     <file-pond
                         name="product_images"
                         ref="pond"
@@ -32,13 +32,13 @@
                 </div>
             </div>
 
-            <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Products</h4>
+            <p class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Products</p>
             <table>
                 <tr>
                     <th>Price</th>
                     <th>Item Quantity</th>
                     <th v-for="(attribute, index) in attributes" :key="index">
-                        <button v-show="attributes.length > 0" type="button" @click="removeAttribute(index)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+                        <button v-show="attributes.length > 0" type="button" @click="removeAttribute(index)" class="border-red-500 border-2 hover:border-red-600 text-red-500 hover:text-red-600 ml-1 rounded-full h-10 w-10">&times;</button>
                         <multiselect
                             v-model="attribute.name"
                             :options="availableAttributes"
@@ -53,14 +53,14 @@
                             openDirection="bottom">
                         </multiselect>
                     </th>
-                    <button v-show="attributes.length < 4" type="button" @click="addAttributeSlot" class="border-blue border-2 hover:border-blue-dark text-blue hover:text-blue-dark ml-1 rounded-full h-10 w-10">&plus;</button>
+                    <button v-show="attributes.length < 4" type="button" @click="addAttributeSlot" class="border-blue-500 border-2 hover:border-blue-600 text-blue-500 hover:text-blue-600 ml-1 rounded-full h-10 w-10">&plus;</button>
                 </tr>
                 <tr v-for="(product, prodIndex) in model.products" :key="prodIndex">
                     <td>
-                        <input type="number" v-model="product.price" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" step="0.01" required>
+                        <input type="number" v-model="product.price" class="appearance-none w-full bg-gray-300 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" step="0.01" required>
                     </td>
                     <td>
-                        <input type="number" v-model="product.item_quantity" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required>
+                        <input type="number" v-model="product.item_quantity" class="appearance-none w-full bg-gray-300 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" required>
                     </td>
                     <td v-for="(value, valIndex) in product.values" :key="valIndex">
                         <multiselect
@@ -77,14 +77,14 @@
                             openDirection="bottom">
                         </multiselect>
                     </td>
-                    <button v-show="model.products.length > 1" type="button" @click="removeProduct(product.id, prodIndex)" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+                    <button v-show="model.products.length > 1" type="button" @click="removeProduct(product.id, prodIndex)" class="border-red-500 border-2 hover:border-red-600 text-red-500 hover:text-red-600 ml-1 rounded-full h-10 w-10">&times;</button>
                 </tr>
             </table>
 
-            <button type="button" @click="addProduct" class="bg-teal hover:bg-teal-dark text-white py-4 px-4 w-full rounded mb-4">Add Product</button>
-            <button type="submit" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded mb-4">Edit</button>
+            <button type="button" @click="addProduct" class="bg-teal-500 hover:bg-teal-600 text-white py-4 px-4 w-full rounded mb-4">Add Product</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-4 px-4 w-full rounded mb-4">Edit</button>
         </form>
-        <button @click="removeProductModel" type="button" class="bg-red hover:bg-red-dark text-white py-4 px-4 w-full rounded mb-4">Delete Model</button>
+        <button @click="removeProductModel" type="button" class="bg-red-500 hover:bg-red-600 text-white py-4 px-4 w-full rounded mb-4">Delete Model</button>
     </div>
 </template>
 

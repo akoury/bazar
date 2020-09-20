@@ -2,19 +2,19 @@
     <div>
         <h1 class="mb-4">Create a Product</h1>
         <form @submit.prevent="createProduct" class="flex flex-col">
-            <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Name
-                <input type="text" v-model="name" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required autofocus>
+            <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Name
+                <input type="text" v-model="name" class="appearance-none w-full bg-gray-100 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" required autofocus>
             </label>
 
-            <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Description
-                <textarea v-model="description" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" rows="3" required></textarea>
+            <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Description
+                <textarea v-model="description" class="appearance-none w-full bg-gray-100 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" rows="3" required></textarea>
             </label>
 
-            <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-6">
+            <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-6">
                 <input type="checkbox" v-model="published">Publish
             </label>
 
-            <span class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Product Images</span>
+            <span class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Product Images</span>
             <file-pond
                 name="product_images"
                 ref="pond"
@@ -29,7 +29,7 @@
                 maxFileSize="10MB"/>
 
             <div class="my-6">
-                <h4 class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Attributes</h4>
+                <p class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Attributes</p>
                 <div v-for="(n, index) in numberOfAttributes" :key="index" class="flex">
                     <multiselect
                         v-model="selectedAttributes[index]"
@@ -59,29 +59,29 @@
                         track-by="name"
                         openDirection="bottom">
                     </multiselect>
-                    <button @click="removeAttribute(index)" type="button" class="border-red border-2 hover:border-red-dark text-red hover:text-red-dark ml-1 rounded-full h-10 w-10">&times;</button>
+                    <button @click="removeAttribute(index)" type="button" class="border-red-500 border-2 hover:border-red-600 text-red-500 hover:text-red-600 ml-1 rounded-full h-10 w-10">&times;</button>
                 </div>
-                <button @click="numberOfAttributes++" type="button" class="bg-teal hover:bg-teal-dark text-white py-4 mt-4 px-4 w-full rounded">Add new Attribute</button>
+                <button @click="numberOfAttributes++" type="button" class="bg-teal-500 hover:bg-teal-600 text-white py-4 mt-4 px-4 w-full rounded">Add new Attribute</button>
             </div>
 
             <div v-for="(combination, index) in combinations" :key="index">
-                <h4>Product {{ combination.map(value => value.name).join(', ') }}</h4>
+                <p>Product {{ combination.map(value => value.name).join(', ') }}</p>
                 <div class="flex">
-                    <label v-show="products.length > 1" class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 mr-2">Enabled
+                    <label v-show="products.length > 1" class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2 mr-2">Enabled
                         <input type="checkbox" v-model="products[index].isActive">
                     </label>
 
-                    <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2 mr-2">Price
-                        <input type="number" v-model="products[index].price" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" step="0.01" required :disabled="!products[index].isActive">
+                    <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2 mr-2">Price
+                        <input type="number" v-model="products[index].price" class="appearance-none w-full bg-gray-100 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" step="0.01" required :disabled="!products[index].isActive">
                     </label>
 
-                    <label class="uppercase tracking-wide text-teal-light text-sm font-bold mb-2">Item Quantity
-                        <input type="number" v-model="products[index].item_quantity" class="appearance-none w-full bg-grey-lighter text-grey-darker border border-grey-lighter rounded py-3 px-4 mt-2 mb-6" required :disabled="!products[index].isActive">
+                    <label class="uppercase tracking-wider text-teal-300 text-sm font-bold mb-2">Item Quantity
+                        <input type="number" v-model="products[index].item_quantity" class="appearance-none w-full bg-gray-100 text-gray-700 border border-gray-300 rounded py-3 px-4 mt-2 mb-6" required :disabled="!products[index].isActive">
                     </label>
                 </div>
             </div>
 
-            <button type="submit" class="bg-blue hover:bg-blue-dark text-white py-4 px-4 w-full rounded mb-4">Create</button>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-4 px-4 w-full rounded mb-4">Create</button>
         </form>
     </div>
 </template>
