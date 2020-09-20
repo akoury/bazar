@@ -11,8 +11,8 @@ services:
     ports:
       - 9001:9000
     volumes:
-      - ../:/var/www
-      - ./php.ini:/usr/local/etc/php/conf.d/local.ini
+      - ../:/var/www:cached
+      - ./php.ini:/usr/local/etc/php/conf.d/local.ini:cached
     networks:
       - app-network
 
@@ -26,8 +26,8 @@ services:
     ports:
       - 8081:80
     volumes:
-      - ../:/var/www
-      - ./:/etc/nginx/conf.d/
+      - ../:/var/www:cached
+      - ./:/etc/nginx/conf.d/:cached
     networks:
       - app-network
 
@@ -43,8 +43,8 @@ services:
     ports:
      - 3307:3306
     volumes:
-      - db-vol:/var/lib/mysql
-      - ./db.cnf:/etc/mysql/my.cnf
+      - db-vol:/var/lib/mysql:cached
+      - ./db.cnf:/etc/mysql/my.cnf:cached
     networks:
       - app-network
   
@@ -58,8 +58,8 @@ services:
     depends_on:
       - app
     volumes:
-      - ../:/var/www
-      - ./php.ini:/usr/local/etc/php/conf.d/local.ini
+      - ../:/var/www:cached
+      - ./php.ini:/usr/local/etc/php/conf.d/local.ini:cached
     networks:
       - app-network
 

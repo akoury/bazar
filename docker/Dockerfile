@@ -11,7 +11,8 @@ RUN docker-php-ext-install \
     bcmath \
     pdo_mysql \
     gd \
-    exif
+    exif \
+    opcache
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
