@@ -10,18 +10,21 @@
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --hide-modules --config=node_modules/laravel-mix/setup/webpack.config.js"
     },
     "devDependencies": {
-        "axios": "^0.18",
-        "braintree-web-drop-in": "^1.11.0",
-        "cross-env": "^5.1.6",
-        "filepond-plugin-file-validate-size": "^1.0.3",
-        "filepond-plugin-file-validate-type": "^1.1.0",
-        "filepond-plugin-image-preview": "^1.0.9",
-        "laravel-mix": "^2.1.11",
-        "tailwindcss": "^0.5.3",
-        "turbolinks": "^5.1.1",
-        "vue": "^2.5.16",
+        "axios": "^0.19",
+        "braintree-web-drop-in": "^1.24.0",
+        "cross-env": "^7.0",
+        "filepond-plugin-file-validate-size": "^1.0.4",
+        "filepond-plugin-file-validate-type": "^1.2.5",
+        "filepond-plugin-image-preview": "^1.2.0",
+        "laravel-mix": "^5.0.5",
+        "sass": "^1.26.11",
+        "sass-loader": "^8.0.2",
+        "tailwindcss": "^1.8.7",
+        "turbolinks": "^5.2.0",
+        "vue": "^2.6.12",
+        "vue-filepond": "^2.1.6",
         "vue-multiselect": "^2.1.0",
-        "vue-filepond": "^2.1.1",
-        "vue-turbolinks": "^2.0.3"
+        "vue-template-compiler": "^2.5.16",
+        "vue-turbolinks": "^2.1.0"
     }
 }

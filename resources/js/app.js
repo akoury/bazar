@@ -12,11 +12,17 @@ require('./bootstrap')
  * or customize the JavaScript scaffolding to fit your unique needs.
  */
 
-Vue.component('product-edit', require('./components/products/Edit.vue'))
-Vue.component('product-show', require('./components/products/Show.vue'))
-Vue.component('product-create', require('./components/products/Create.vue'))
-Vue.component('cart-checkout', require('./components/billing/CartCheckout.vue'))
-Vue.component('braintree-checkout', require('./components/billing/BraintreeCheckout.vue'))
+import Edit from './components/products/Edit.vue'
+import Show from './components/products/Show.vue'
+import Create from './components/products/Create.vue'
+import CartCheckout from './components/billing/CartCheckout.vue'
+import BraintreeCheckout from './components/billing/BraintreeCheckout.vue'
+
+Vue.component('product-edit', Edit)
+Vue.component('product-show', Show)
+Vue.component('product-create', Create)
+Vue.component('cart-checkout', CartCheckout)
+Vue.component('braintree-checkout', BraintreeCheckout)
 
 document.addEventListener('turbolinks:load', () => {
     let app = new Vue({
