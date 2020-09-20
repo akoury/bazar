@@ -15,6 +15,6 @@ class SetTurbolinksHeader
      */
     public function handle($request, Closure $next)
     {
-        return $next($request)->header('Turbolinks-Location', $request->getRequestUri());
+        return $next($request)->header('Turbolinks-Location', $request->path());
     }
 }
